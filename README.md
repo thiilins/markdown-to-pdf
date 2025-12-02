@@ -1,36 +1,299 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📄 Markdown to PDF Pro
 
-## Getting Started
+Uma aplicação web moderna e completa para converter documentos Markdown em PDFs profissionais com preview em tempo real, editor avançado e configurações personalizáveis.
 
-First, run the development server:
+![Next.js](https://img.shields.io/badge/Next.js-16.0.6-black?style=flat-square&logo=next.js)
+![React](https://img.shields.io/badge/React-19.2.0-blue?style=flat-square&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38bdf8?style=flat-square&logo=tailwind-css)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## ✨ Características
+
+### 🎨 Editor Markdown Avançado
+- **Editor Monaco** com syntax highlighting
+- **Barra de ferramentas completa** com formatação rápida:
+  - Cabeçalhos (H1-H6)
+  - Formatação de texto (negrito, itálico, riscado)
+  - Links e imagens
+  - Listas (ordenadas, não ordenadas, checkboxes)
+  - Citações, blocos de código, tabelas
+  - Quebra de página
+  - Desfazer/Refazer
+- Suporte a temas (claro, escuro, automático)
+- Configurações personalizáveis (tamanho da fonte, numeração de linhas, minimap)
+
+### 📊 Preview em Tempo Real
+- **Preview com múltiplas páginas** simulando a impressão real
+- Visualização realista do documento final
+- Cálculo automático do número de páginas
+- Zoom ajustável
+- Suporte a quebras de página manuais
+
+### ⚙️ Configurações Avançadas
+
+#### 📐 Configuração de Página
+- **Tamanhos padrão**: A4, A3, Letter, Legal, Tabloid
+- Orientação (retrato/paisagem)
+- Margens personalizáveis com presets:
+  - Nenhuma margem
+  - Pequena (5mm)
+  - Média (10mm)
+  - Grande (20mm)
+  - Personalizada
+- Padding configurável
+
+#### 🎨 Tipografia e Temas
+- **Fontes personalizáveis**:
+  - Fontes para títulos
+  - Fontes para corpo do texto
+  - Fontes para código
+  - Fontes para citações
+- **Presets de tema**:
+  - Classic (clássico)
+  - Modern (moderno)
+  - Dark (escuro)
+  - Minimalist (minimalista)
+  - Warm (quente)
+  - Cold (frio)
+  - Custom (personalizado)
+- Cores personalizáveis para:
+  - Texto, fundo, títulos
+  - Blocos de código
+  - Links, citações, bordas
+
+### 📤 Exportação
+- **Imprimir**: Abre o diálogo de impressão do navegador
+- **Baixar PDF**: Gera e baixa PDF diretamente
+- Suporte a múltiplas páginas
+- Preserva formatação e cores
+- Qualidade de impressão otimizada
+
+### 🔧 Funcionalidades Técnicas
+- Suporte completo a **GitHub Flavored Markdown (GFM)**
+- Renderização de tabelas, listas de tarefas, código com syntax highlighting
+- Quebra de linha inteligente em blocos de código
+- Suporte a HTML no Markdown (para quebras de página)
+- Persistência de configurações no `localStorage`
+- Interface responsiva e moderna
+
+## 🚀 Instalação
+
+### Pré-requisitos
+- Node.js 18+ 
+- pnpm (recomendado), npm ou yarn
+
+### Passos
+
+1. **Clone o repositório**
+   ```bash
+   git clone <url-do-repositorio>
+   cd md-to-pdf-pro
+   ```
+
+2. **Instale as dependências**
+   ```bash
+   pnpm install
+   # ou
+   npm install
+   # ou
+   yarn install
+   ```
+
+3. **Execute o servidor de desenvolvimento**
+   ```bash
+   pnpm dev
+   # ou
+   npm run dev
+   # ou
+   yarn dev
+   ```
+
+4. **Acesse a aplicação**
+   Abra [http://localhost:3000](http://localhost:3000) no seu navegador.
+
+## 📖 Como Usar
+
+### 1. Escreva seu Markdown
+Use o editor à esquerda para escrever ou colar seu conteúdo Markdown. A barra de ferramentas facilita a formatação sem precisar digitar a sintaxe manualmente.
+
+### 2. Configure o Documento
+Clique no ícone de configurações (⚙️) no cabeçalho para acessar:
+- **Página**: Tamanho, orientação, margens
+- **Tipografia**: Fontes e tamanhos
+- **Editor**: Tema, tamanho da fonte, opções de visualização
+- **Tema**: Cores e estilo visual
+
+### 3. Visualize o Preview
+O painel direito mostra uma pré-visualização realista do documento com múltiplas páginas simuladas.
+
+### 4. Exporte
+- **Imprimir**: Clique em "Exportar" → "Imprimir" para abrir o diálogo de impressão
+- **Baixar PDF**: Clique em "Exportar" → "Baixar PDF" para gerar o arquivo PDF
+
+### 5. Quebra de Página
+Use o botão de quebra de página na barra de ferramentas para forçar uma nova página no documento.
+
+## 🛠️ Tecnologias Utilizadas
+
+### Core
+- **[Next.js 16](https://nextjs.org/)** - Framework React
+- **[React 19](https://react.dev/)** - Biblioteca UI
+- **[TypeScript](https://www.typescriptlang.org/)** - Tipagem estática
+
+### UI e Estilização
+- **[Tailwind CSS 4](https://tailwindcss.com/)** - Framework CSS
+- **[shadcn/ui](https://ui.shadcn.com/)** - Componentes UI
+- **[Radix UI](https://www.radix-ui.com/)** - Componentes primitivos acessíveis
+- **[Lucide React](https://lucide.dev/)** - Ícones
+
+### Editor e Markdown
+- **[Monaco Editor](https://microsoft.github.io/monaco-editor/)** - Editor de código
+- **[react-markdown](https://github.com/remarkjs/react-markdown)** - Renderização Markdown
+- **[remark-gfm](https://github.com/remarkjs/remark-gfm)** - Suporte GitHub Flavored Markdown
+- **[rehype-raw](https://github.com/rehypejs/rehype-raw)** - Suporte HTML no Markdown
+
+### PDF e Impressão
+- **[html2canvas-pro](https://github.com/yorickshan/html2canvas-pro)** - Captura de tela (suporta cores modernas)
+- **[jsPDF](https://github.com/parallax/jsPDF)** - Geração de PDF
+- **[react-to-print](https://github.com/gregnb/react-to-print)** - Impressão do navegador
+
+### Outras
+- **[react-resizable-panels](https://github.com/bvaughn/react-resizable-panels)** - Painéis redimensionáveis
+- **[zod](https://zod.dev/)** - Validação de esquemas
+
+## 📁 Estrutura do Projeto
+
+```
+md-to-pdf-pro/
+├── src/
+│   ├── app/
+│   │   ├── _components/          # Componentes da aplicação
+│   │   │   ├── app-header.tsx    # Cabeçalho com controles
+│   │   │   ├── markdown-editor.tsx  # Editor Monaco
+│   │   │   ├── markdown-toolbar.tsx # Barra de ferramentas
+│   │   │   ├── preview-panel.tsx    # Preview do documento
+│   │   │   ├── preview-style.tsx    # Estilos do preview
+│   │   │   ├── print-style.tsx      # Estilos de impressão
+│   │   │   ├── settings-dialog.tsx  # Diálogo de configurações
+│   │   │   └── view.tsx             # Componente principal
+│   │   ├── globals.css          # Estilos globais
+│   │   ├── layout.tsx           # Layout da aplicação
+│   │   └── page.tsx             # Página inicial
+│   ├── components/
+│   │   ├── ui/                  # Componentes shadcn/ui
+│   │   └── custom-ui/            # Componentes customizados
+│   ├── hooks/
+│   │   └── use-config.ts        # Hook de configuração
+│   ├── lib/
+│   │   ├── pdf-utils.ts         # Utilitários de PDF
+│   │   └── utils.ts             # Utilitários gerais
+│   └── types/
+│       └── config.ts            # Tipos TypeScript
+├── public/                      # Arquivos estáticos
+├── components.json              # Configuração shadcn/ui
+└── package.json
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ⚙️ Configurações Disponíveis
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Tamanhos de Página
+- A4 (210mm × 297mm)
+- A3 (297mm × 420mm)
+- Letter (8.5" × 11")
+- Legal (8.5" × 14")
+- Tabloid (11" × 17")
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Presets de Margem
+- **Nenhuma**: 0mm em todos os lados
+- **Pequena**: 5mm em todos os lados
+- **Média**: 10mm em todos os lados
+- **Grande**: 20mm em todos os lados
+- **Personalizada**: Configure individualmente
 
-## Learn More
+### Presets de Tema
+Cada preset inclui cores pré-configuradas para:
+- Texto e fundo
+- Títulos
+- Blocos de código
+- Links
+- Citações
+- Bordas
 
-To learn more about Next.js, take a look at the following resources:
+## 🎯 Exemplos de Uso
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Markdown Básico
+```markdown
+# Meu Documento
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Este é um parágrafo com **texto em negrito** e *texto em itálico*.
 
-## Deploy on Vercel
+## Lista
+- Item 1
+- Item 2
+- Item 3
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Tabela
+```markdown
+| Coluna 1 | Coluna 2 | Coluna 3 |
+|----------|----------|----------|
+| Dados    | Dados    | Dados    |
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Código
+````markdown
+```javascript
+function exemplo() {
+  return "Olá, mundo!";
+}
+```
+````
+
+### Quebra de Página
+```markdown
+Conteúdo da primeira página...
+
+<div class="page-break"></div>
+
+Conteúdo da segunda página...
+```
+
+## 🐛 Solução de Problemas
+
+### PDF não está gerando corretamente
+- Verifique se o conteúdo não excede muito o tamanho da página
+- Tente reduzir o zoom antes de gerar o PDF
+- Certifique-se de que as imagens estão carregadas
+
+### Preview não mostra múltiplas páginas
+- Verifique se o conteúdo é longo o suficiente
+- Ajuste as margens se necessário
+- Recarregue a página
+
+### Cores não aparecem no PDF
+- O `html2canvas-pro` suporta cores modernas (oklch/lab)
+- Se ainda houver problemas, verifique o console do navegador
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas! Sinta-se à vontade para:
+1. Fazer fork do projeto
+2. Criar uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abrir um Pull Request
+
+## 📝 Licença
+
+Este projeto é privado. Todos os direitos reservados.
+
+## 🙏 Agradecimentos
+
+- [shadcn](https://ui.shadcn.com/) pelos componentes UI
+- [Monaco Editor](https://microsoft.github.io/monaco-editor/) pelo editor
+- [html2canvas-pro](https://github.com/yorickshan/html2canvas-pro) pelo suporte a cores modernas
+- Todos os mantenedores das bibliotecas utilizadas
+
+---
+
+Desenvolvido com ❤️ usando Next.js e React
