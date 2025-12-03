@@ -79,7 +79,7 @@ Uma aplicação web moderna e completa para converter documentos Markdown em PDF
 ## 🚀 Instalação
 
 ### Pré-requisitos
-- Node.js 18+ 
+- Node.js 18+
 - pnpm (recomendado), npm ou yarn
 
 ### Passos

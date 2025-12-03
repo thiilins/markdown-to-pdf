@@ -4,7 +4,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import type { PageConfig, ThemeConfig, TypographyConfig } from "@/types/config";
 import { THEME_PRESETS } from "@/types/config";
-import { useEffect, useRef, useState } from "react";
 import ReactMarkdown, { Components } from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
@@ -31,50 +30,6 @@ export function PreviewPanel({
 }: PreviewPanelProps) {
   // Usa tema padrão se não houver tema configurado
   const theme = themeConfig || THEME_PRESETS.classic;
-  const measureRef = useRef<HTMLDivElement>(null);
-  const [pageCount, setPageCount] = useState(1);
-
-  // Calcula dimensões da página
-  const getPageDimensions = () => {
-    const { width, height, padding, margin, orientation } = pageConfig;
-    const pageWidth = orientation === "landscape" ? height : width;
-    const pageHeight = orientation === "landscape" ? width : height;
-
-    // Converte mm para pixels (assumindo 96 DPI)
-    const mmToPx = (mm: string) => {
-      const mmValue = parseFloat(mm);
-      return (mmValue * 96) / 25.4;
-    };
-
-    const widthPx = mmToPx(pageWidth);
-    const heightPx = mmToPx(pageHeight);
-    const paddingPx = mmToPx(padding);
-    const marginTopPx = mmToPx(margin.top);
-    const marginBottomPx = mmToPx(margin.bottom);
-
-    // Altura útil do conteúdo (altura da página - margens - padding)
-    const contentHeightPx = heightPx - marginTopPx - marginBottomPx - (paddingPx * 2);
-
-    return {
-      widthPx,
-      heightPx,
-      contentHeightPx,
-      paddingPx,
-      marginTopPx,
-      marginBottomPx,
-    };
-  };
-
-  const dimensions = getPageDimensions();
-
-  // Calcula número de páginas baseado no conteúdo
-  useEffect(() => {
-    if (measureRef.current) {
-      const contentHeight = measureRef.current.scrollHeight;
-      const pages = Math.max(1, Math.ceil(contentHeight / dimensions.contentHeightPx));
-      setPageCount(pages);
-    }
-  }, [markdown, dimensions.contentHeightPx]);
 
   const getPageStyle = () => {
     const { width, height, padding, orientation } = pageConfig;
@@ -83,11 +38,9 @@ export function PreviewPanel({
 
     return {
       width: pageWidth,
-      height: pageHeight,
+      minHeight: pageHeight,
       padding,
       boxSizing: "border-box" as const,
-      transform: `scale(${zoom})`,
-      transformOrigin: "top center",
     };
   };
 
@@ -145,90 +98,42 @@ export function PreviewPanel({
     },
   };
 
-  // Renderiza o conteúdo completo (oculto para medir)
-  const renderFullContent = () => (
-    <div
-      ref={measureRef}
-      className="prose prose-slate max-w-none"
-      style={{
-        ...getTypographyStyles(),
-        ...getContentStyle(),
-        position: "absolute",
-        visibility: "hidden",
-        width: `${dimensions.widthPx - (dimensions.paddingPx * 2) - (parseFloat(pageConfig.margin.left) * 96 / 25.4) - (parseFloat(pageConfig.margin.right) * 96 / 25.4)}px`,
-        top: "-9999px",
-        left: "-9999px",
-      }}
-    >
-      <PreviewStyle theme={theme} />
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw]}
-        components={markdownComponents}
-      >
-        {markdown}
-      </ReactMarkdown>
-    </div>
-  );
-
   return (
     <ScrollArea className={cn("h-full w-full print:hidden", className)}>
-      <div className="flex flex-col items-center p-8 bg-muted/30 print:p-0 print:bg-transparent relative">
-        {/* Container oculto para medir o conteúdo */}
-        {renderFullContent()}
-
-        {/* Container principal com múltiplas páginas */}
+      <div className="flex flex-col items-center p-8 bg-muted/30 print:p-0 print:bg-transparent">
+        {/* Página única que cresce conforme o conteúdo */}
         <div
           ref={contentRef}
           data-pdf-content
-          className="print-content"
+          className="bg-white shadow-xl transition-all origin-top text-left print:shadow-none print:transform-none print:scale-100 print-content"
           style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "24px",
-            alignItems: "center",
+            ...getPageStyle(),
+            backgroundColor: theme.background,
             transform: `scale(${zoom})`,
             transformOrigin: "top center",
           }}
         >
-          {/* Renderiza cada página */}
-          {Array.from({ length: pageCount }).map((_, pageIndex) => (
-            <div
-              key={pageIndex}
-              className="bg-white shadow-2xl transition-all origin-top text-left print:shadow-none print:transform-none print:scale-100"
-              style={{
-                ...getPageStyle(),
-                backgroundColor: theme.background,
-                position: "relative",
-                overflow: "hidden",
-              }}
+          <div
+            className="prose prose-slate max-w-none"
+            style={{
+              ...getTypographyStyles(),
+              ...getContentStyle(),
+            }}
+          >
+            <PreviewStyle theme={theme} />
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeRaw]}
+              components={markdownComponents}
             >
-              <div
-                className="prose prose-slate max-w-none"
-                style={{
-                  ...getTypographyStyles(),
-                  ...getContentStyle(),
-                  position: "relative",
-                  transform: `translateY(-${pageIndex * dimensions.contentHeightPx}px)`,
-                  minHeight: `${dimensions.contentHeightPx}px`,
-                }}
-              >
-                <PreviewStyle theme={theme} />
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeRaw]}
-                  components={markdownComponents}
-                >
-                  {markdown}
-                </ReactMarkdown>
-              </div>
-            </div>
-          ))}
+              {markdown}
+            </ReactMarkdown>
+          </div>
         </div>
 
         <div className="mt-6 text-xs font-medium text-muted-foreground uppercase tracking-widest print:hidden">
           {pageConfig.size.toUpperCase()} Preview • {pageConfig.width} × {pageConfig.height}
-          {pageConfig.orientation === "landscape" && " • Landscape"} • {pageCount} {pageCount === 1 ? "página" : "páginas"}
+          {pageConfig.orientation === "landscape" && " • Landscape"}
         </div>
       </div>
     </ScrollArea>

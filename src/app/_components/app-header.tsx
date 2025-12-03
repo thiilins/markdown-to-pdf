@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import type { AppConfig, MarginPreset, Orientation, PageSize, ThemePreset } from "@/types/config";
 import { Download, Printer, ZoomIn, ZoomOut } from "lucide-react";
+import { FaExpand } from "react-icons/fa6";
 import { IoLogoMarkdown } from "react-icons/io5";
 import { SettingsDialog } from "./settings-dialog";
 
@@ -49,6 +50,7 @@ export function AppHeader({
     onZoomChange(Math.max(zoom - 0.1, 0.3));
   };
 
+
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background px-4 shadow-sm z-20 relative">
       <div className="flex items-center gap-2">
@@ -57,13 +59,13 @@ export function AppHeader({
       </div>
 
       <div className="flex items-center gap-2">
-        <div className="flex items-center gap-1 border rounded-md">
+        <div className="flex items-center gap-1 border rounded-md bg-blue-500/20 p-1">
+        <div className="flex items-center gap-1 bg-white rounded-md">
           <Button
             variant="ghost"
-            size="sm"
             onClick={handleZoomOut}
             disabled={zoom <= 0.3}
-            className="h-8 w-8 p-0 cursor-pointer"
+            className="h-8 w-8 p-0 cursor-pointer bg-background rounded-md flex items-center justify-center"
           >
             <ZoomOut className="h-4 w-4" />
           </Button>
@@ -72,12 +74,20 @@ export function AppHeader({
           </span>
           <Button
             variant="ghost"
-            size="sm"
             onClick={handleZoomIn}
             disabled={zoom >= 1.5}
-            className="h-8 w-8 p-0 cursor-pointer"
+            className="h-8 w-8 p-0 cursor-pointer bg-background rounded-md flex items-center justify-center"
           >
             <ZoomIn className="h-4 w-4" />
+          </Button></div>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onZoomChange(1)}
+            className="h-8 w-8 p-0 cursor-pointer"
+          >
+            <FaExpand className="h-4 w-4" />
           </Button>
         </div>
 
