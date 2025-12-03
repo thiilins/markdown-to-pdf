@@ -161,7 +161,7 @@ export function PreviewPanel({
           <div
             ref={contentRef}
             data-pdf-content
-            className='print-content bg-white text-left shadow-2xl print:scale-100 print:transform-none print:shadow-none rounded-md'
+            className='print-content rounded-md bg-white text-left shadow-2xl print:scale-100 print:transform-none print:shadow-none'
             style={{
               ...getPageStyle,
               backgroundColor: theme.background,
@@ -186,7 +186,7 @@ export function PreviewPanel({
       </div>
 
       {/* Indicador de orientação e tamanho */}
-      <div className='bg-blue-500/20 text-blue-500 pointer-events-none absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center justify-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium shadow-sm backdrop-blur-xl print:hidden'>
+      <div className='pointer-events-none absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center justify-center gap-2 rounded-full bg-blue-500/20 px-4 py-1.5 text-xs font-medium text-blue-500 shadow-sm backdrop-blur-xl print:hidden'>
         <Ruler className='h-3.5 w-3.5' />
         <span>
           {pageConfig.size.toUpperCase()} • {pageDimensions.width} × {pageDimensions.height}

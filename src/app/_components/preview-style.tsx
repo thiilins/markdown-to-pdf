@@ -13,6 +13,12 @@ export const PreviewStyle = ({ theme }: { theme: ThemeConfig }) => {
         line-height: var(--line-height);
         color: ${theme.textColor} !important;
         background-color: ${theme.background} !important;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
       }
       .prose h1 {
         font-family: var(--font-headings), sans-serif;
@@ -47,6 +53,9 @@ export const PreviewStyle = ({ theme }: { theme: ThemeConfig }) => {
         margin-top: 0.5em;
         margin-bottom: 0.5em;
         color: ${theme.textColor} !important;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        text-align: left;
       }
       .prose ul,
       .prose ol {
@@ -78,7 +87,7 @@ export const PreviewStyle = ({ theme }: { theme: ThemeConfig }) => {
         overflow-wrap: break-word;
         word-wrap: break-word;
         white-space: pre-wrap;
-        word-break: break-all;
+        word-break: break-word;
         margin-top: 1em;
         margin-bottom: 1em;
       }
@@ -88,7 +97,7 @@ export const PreviewStyle = ({ theme }: { theme: ThemeConfig }) => {
         padding: 0;
         white-space: pre-wrap;
         word-wrap: break-word;
-        word-break: break-all;
+        word-break: break-word;
       }
       .page-break {
         page-break-after: always;

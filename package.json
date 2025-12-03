@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "prebuild": "rimraf .next",
-    "predev": "rimraf .next",
     "build": "next build",
+    "predev": "rimraf .next",
     "dev": "next dev",
     "lint": "eslint",
     "start": "next start"

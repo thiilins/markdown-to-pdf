@@ -57,7 +57,7 @@ export function AppHeader({
         <span className='text-foreground font-bold'>Markdown PDF Pro</span>
       </div>
 
-      <div className='flex items-center gap-2'>
+      <div className='flex items-center gap-2 ml-auto mr-2'>
         <div className='flex items-center gap-1 rounded-md border bg-blue-500/20 p-1'>
           <div className='flex items-center gap-1 rounded-md bg-white'>
             <Button
@@ -88,7 +88,6 @@ export function AppHeader({
           </Button>
         </div>
 
-        <Separator orientation='vertical' className='h-6' />
 
         <SettingsDialog
           config={config}
@@ -100,24 +99,16 @@ export function AppHeader({
           onApplyThemePreset={onApplyThemePreset}
         />
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button className='flex items-center gap-2'>
-              <Printer className='h-4 w-4' />
-              Exportar
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align='end'>
-            <DropdownMenuItem onClick={onPrint}>
-              <Printer className='mr-2 h-4 w-4' />
-              Imprimir
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onDownloadPDF}>
-              <Download className='mr-2 h-4 w-4' />
-              Baixar PDF
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className='flex items-center gap-2 flex-1 bg-blue-500/20 rounded-md p-1'>
+          <Button variant='outline' onClick={onPrint} className='h-8 cursor-pointer p-0'>
+            <Printer className='mr-2 h-4 w-4' />
+            Imprimir
+          </Button>
+          <Button variant='outline' onClick={onDownloadPDF} className='h-8 cursor-pointer p-0 bg-primary text-white hover:bg-primary/80 hover:text-white'>
+            <Download className='mr-2 h-4 w-4' />
+            Exportar
+          </Button>
+        </div>
       </div>
     </header>
   )
