@@ -162,6 +162,7 @@ export function useConfig() {
         ...prev,
         theme: {
           name: themePreset.name,
+          description: themePreset.description,
           background: themePreset.background,
           textColor: themePreset.textColor,
           headingColor: themePreset.headingColor,

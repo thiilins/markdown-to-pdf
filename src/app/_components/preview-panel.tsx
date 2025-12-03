@@ -1,9 +1,10 @@
 'use client'
 
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 import type { PageConfig, ThemeConfig, TypographyConfig } from '@/types/config'
 import { THEME_PRESETS } from '@/types/config'
+import { Ruler } from 'lucide-react'
+import { useMemo } from 'react'
 import ReactMarkdown, { Components } from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
@@ -31,20 +32,48 @@ export function PreviewPanel({
   // Usa tema padrão se não houver tema configurado
   const theme = themeConfig || THEME_PRESETS.modern
 
-  const getPageStyle = () => {
-    const { width, height, padding, orientation } = pageConfig
-    const pageWidth = orientation === 'landscape' ? height : width
-    const pageHeight = orientation === 'landscape' ? width : height
+  // Calcula dimensões da página baseado na orientação
+  const pageDimensions = useMemo(() => {
+    const { width, height, orientation } = pageConfig
+
+    // Extrai valores numéricos das dimensões
+    const widthValue = parseFloat(width)
+    const heightValue = parseFloat(height)
+    const widthUnit = width.replace(/[\d.]/g, '')
+    const heightUnit = height.replace(/[\d.]/g, '')
+
+    // Aplica orientação corretamente
+    if (orientation === 'landscape') {
+      const maxDim = Math.max(widthValue, heightValue)
+      const minDim = Math.min(widthValue, heightValue)
+      return {
+        width: `${maxDim}${widthUnit}`,
+        height: `${minDim}${heightUnit}`,
+        isLandscape: true,
+      }
+    } else {
+      const maxDim = Math.max(widthValue, heightValue)
+      const minDim = Math.min(widthValue, heightValue)
+      return {
+        width: `${minDim}${widthUnit}`,
+        height: `${maxDim}${heightUnit}`,
+        isLandscape: false,
+      }
+    }
+  }, [pageConfig])
+
+  const getPageStyle = useMemo(() => {
+    const { padding } = pageConfig
 
     return {
-      width: pageWidth,
-      minHeight: pageHeight,
+      width: pageDimensions.width,
+      minHeight: pageDimensions.height,
       padding,
       boxSizing: 'border-box' as const,
     }
-  }
+  }, [pageConfig, pageDimensions])
 
-  const getContentStyle = () => {
+  const getContentStyle = useMemo(() => {
     const { margin } = pageConfig
     return {
       marginTop: margin.top,
@@ -52,9 +81,9 @@ export function PreviewPanel({
       marginBottom: margin.bottom,
       marginLeft: margin.left,
     }
-  }
+  }, [pageConfig])
 
-  const getTypographyStyles = () => {
+  const getTypographyStyles = useMemo(() => {
     return {
       '--font-headings': typographyConfig.headings,
       '--font-body': typographyConfig.body,
@@ -66,84 +95,105 @@ export function PreviewPanel({
       '--h3-size': `${typographyConfig.h3Size}px`,
       '--line-height': String(typographyConfig.lineHeight),
     } as React.CSSProperties
-  }
+  }, [typographyConfig])
 
   // Componentes customizados para ReactMarkdown
-  const markdownComponents: Components = {
-    // Renderiza quebras de página
-    div: ({ node, className, children, ...props }) => {
-      if (className === 'page-break') {
-        return <div className='page-break' {...props} />
-      }
-      return (
-        <div className={className} {...props}>
-          {children}
-        </div>
-      )
-    },
-    // Melhora renderização de código
-    pre: ({ node, children, ...props }) => {
-      return (
-        <pre {...props} style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
-          {children}
-        </pre>
-      )
-    },
-    code: ({ node, className, children, ...props }: any) => {
-      const isInline = !className || !className.includes('language-')
-      if (isInline) {
+  const markdownComponents: Components = useMemo(
+    () => ({
+      div: ({ node, className, children, ...props }) => {
+        if (className === 'page-break') {
+          return <div className='page-break' {...props} />
+        }
         return (
-          <code className={className} {...props}>
+          <div className={className} {...props}>
+            {children}
+          </div>
+        )
+      },
+      pre: ({ node, children, ...props }) => {
+        return (
+          <pre {...props} style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
+            {children}
+          </pre>
+        )
+      },
+      code: ({ node, className, children, ...props }: any) => {
+        const isInline = !className || !className.includes('language-')
+        if (isInline) {
+          return (
+            <code className={className} {...props}>
+              {children}
+            </code>
+          )
+        }
+        return (
+          <code
+            className={className}
+            {...props}
+            style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
             {children}
           </code>
         )
-      }
-      return (
-        <code
-          className={className}
-          {...props}
-          style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
-          {children}
-        </code>
-      )
-    },
-  }
+      },
+    }),
+    [],
+  )
 
   return (
-    <ScrollArea className={cn('h-full w-full print:hidden', className)}>
-      <div className='bg-muted/30 flex flex-col items-center p-8 print:bg-transparent print:p-0'>
-        {/* Página única que cresce conforme o conteúdo */}
+    <div className={cn('relative h-full w-full bg-black/10', className)}>
+      {/* Container com scroll */}
+      <div
+        className='bg-muted/30 absolute inset-0 overflow-auto print:hidden'
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          padding: '2rem',
+        }}>
+        {/* Wrapper do zoom */}
         <div
-          ref={contentRef}
-          data-pdf-content
-          className='print-content origin-top bg-white text-left shadow-xl transition-all print:scale-100 print:transform-none print:shadow-none'
           style={{
-            ...getPageStyle(),
-            backgroundColor: theme.background,
             transform: `scale(${zoom})`,
             transformOrigin: 'top center',
+            flexShrink: 0,
           }}>
+          {/* Página do documento */}
           <div
-            className='prose prose-slate max-w-none'
+            ref={contentRef}
+            data-pdf-content
+            className='print-content bg-white text-left shadow-2xl print:scale-100 print:transform-none print:shadow-none rounded-md'
             style={{
-              ...getTypographyStyles(),
-              ...getContentStyle(),
+              ...getPageStyle,
+              backgroundColor: theme.background,
+              boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.25), 0 0 0 1px rgb(0 0 0 / 0.05)',
             }}>
-            <PreviewStyle theme={theme} />
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeRaw]}
-              components={markdownComponents}>
-              {markdown}
-            </ReactMarkdown>
+            <div
+              className='prose prose-slate max-w-none'
+              style={{
+                ...getTypographyStyles,
+                ...getContentStyle,
+              }}>
+              <PreviewStyle theme={theme} />
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw]}
+                components={markdownComponents}>
+                {markdown}
+              </ReactMarkdown>
+            </div>
           </div>
         </div>
-
-        <div className='text-muted-foreground mt-6 text-xs font-medium tracking-widest uppercase print:hidden'>
-          {pageConfig.size.toUpperCase()} Preview • {pageConfig.width} × {pageConfig.height}
-          {pageConfig.orientation === 'landscape' && ' • Landscape'}
-        </div>
       </div>
-    </ScrollArea>
+
+      {/* Indicador de orientação e tamanho */}
+      <div className='bg-blue-500/20 text-blue-500 pointer-events-none absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center justify-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium shadow-sm backdrop-blur-xl print:hidden'>
+        <Ruler className='h-3.5 w-3.5' />
+        <span>
+          {pageConfig.size.toUpperCase()} • {pageDimensions.width} × {pageDimensions.height}
+          {pageDimensions.isLandscape ? ' • Paisagem' : ' • Retrato'}
+          {zoom !== 1 && ` • ${Math.round(zoom * 100)}%`}
+        </span>
+      </div>
+    </div>
   )
 }

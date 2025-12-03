@@ -1,6 +1,5 @@
 'use client'
 
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
 import { useConfig } from '@/hooks/use-config'
 import { generatePDF } from '@/lib/pdf-utils'
 import { useRef, useState } from 'react'
@@ -13,7 +12,7 @@ import { PrintStyle } from './print-style'
 
 export default function HomeViewComponent() {
   const [markdown, setMarkdown] = useState<string>(DEFAULT_MARKDOWN)
-  const [zoom, setZoom] = useState(0.7)
+  const [zoom, setZoom] = useState(1)
   const contentRef = useRef<HTMLDivElement>(null)
 
   const {
@@ -74,42 +73,38 @@ export default function HomeViewComponent() {
         onZoomChange={setZoom}
       />
 
-      <ResizablePanelGroup direction='horizontal' className='flex-1'>
-        <ResizablePanel defaultSize={50} minSize={20} maxSize={80}>
-          <div className='border-border bg-background flex h-full flex-col border-r'>
-            <div className='border-border bg-muted/50 flex h-10 items-center border-b px-4'>
-              <span className='text-muted-foreground text-sm font-medium'>Editor Markdown</span>
-            </div>
-            <div className='flex-1 overflow-hidden'>
-              <MarkdownEditor
-                value={markdown}
-                onChange={(value) => setMarkdown(value || '')}
-                config={config.editor}
-              />
-            </div>
+      <div className='flex min-h-0 flex-1'>
+        {/* Editor - 40% */}
+        <div className='flex h-full w-[40%] flex-col border-r'>
+          <div className='border-border bg-muted/50 flex h-10 shrink-0 items-center border-b px-4'>
+            <span className='text-muted-foreground text-sm font-medium'>Editor Markdown</span>
           </div>
-        </ResizablePanel>
-
-        <ResizableHandle withHandle />
-
-        <ResizablePanel defaultSize={50} minSize={20} maxSize={80}>
-          <div className='bg-muted/30 flex h-full flex-col'>
-            <div className='border-border bg-muted/50 flex h-10 items-center border-b px-4'>
-              <span className='text-muted-foreground text-sm font-medium'>Preview</span>
-            </div>
-            <div className='flex-1 overflow-hidden'>
-              <PreviewPanel
-                markdown={markdown}
-                pageConfig={config.page}
-                typographyConfig={config.typography}
-                themeConfig={config.theme}
-                zoom={zoom}
-                contentRef={contentRef}
-              />
-            </div>
+          <div className='min-h-0 flex-1'>
+            <MarkdownEditor
+              value={markdown}
+              onChange={(value) => setMarkdown(value || '')}
+              config={config.editor}
+            />
           </div>
-        </ResizablePanel>
-      </ResizablePanelGroup>
+        </div>
+
+        {/* Preview - 60% */}
+        <div className='flex h-full w-[60%] flex-col'>
+          <div className='border-border bg-muted/50 flex h-10 shrink-0 items-center border-b px-4'>
+            <span className='text-muted-foreground text-sm font-medium'>Preview</span>
+          </div>
+          <div className='min-h-0 flex-1'>
+            <PreviewPanel
+              markdown={markdown}
+              pageConfig={config.page}
+              typographyConfig={config.typography}
+              themeConfig={config.theme}
+              zoom={zoom}
+              contentRef={contentRef}
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Estilos de Impressão */}
       <PrintStyle config={config} />
