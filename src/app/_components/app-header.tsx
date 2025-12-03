@@ -13,7 +13,7 @@ import type { AppConfig, MarginPreset, Orientation, PageSize, ThemePreset } from
 import { Download, Printer, ZoomIn, ZoomOut } from "lucide-react";
 import { FaExpand } from "react-icons/fa6";
 import { IoLogoMarkdown } from "react-icons/io5";
-import { SettingsDialog } from "./settings-dialog";
+import { SettingsDialog } from "./settings";
 
 interface AppHeaderProps {
   onPrint: () => void;

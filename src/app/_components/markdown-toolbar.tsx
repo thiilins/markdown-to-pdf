@@ -32,11 +32,14 @@ import {
   Minus,
   Quote,
   Redo,
+  Sparkles,
   Strikethrough,
   Table,
   Type,
   Undo
 } from "lucide-react";
+import * as prettierMarkdown from "prettier/plugins/markdown";
+import * as prettier from "prettier/standalone";
 interface MarkdownToolbarProps {
   editor: any; // Monaco editor instance
 }
@@ -203,6 +206,37 @@ código aqui
 
   const redo = () => {
     editor.trigger("keyboard", "redo", null);
+  };
+
+  const formatDocument = async () => {
+    try {
+      const model = editor.getModel();
+      if (!model) return;
+
+      const content = model.getValue();
+
+      // Formata usando Prettier
+      const formatted = await prettier.format(content, {
+        parser: "markdown",
+        plugins: [prettierMarkdown],
+        proseWrap: "preserve",
+        printWidth: 80,
+        tabWidth: 2,
+        useTabs: false,
+      });
+
+      // Aplica a formatação
+      editor.executeEdits("format-document", [
+        {
+          range: model.getFullModelRange(),
+          text: formatted,
+        },
+      ]);
+
+      editor.focus();
+    } catch (error) {
+      console.error("Erro ao formatar documento:", error);
+    }
   };
 
   return (
@@ -485,6 +519,23 @@ código aqui
             </Button>
           </TooltipTrigger>
           <TooltipContent>Refazer (Ctrl+Y)</TooltipContent>
+        </Tooltip>
+
+        <div className="w-px h-6 bg-border mx-1" />
+
+        {/* Formatar Documento */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={formatDocument}
+            >
+              <Sparkles className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Formatar com Prettier (Shift+Alt+F)</TooltipContent>
         </Tooltip>
       </div>
     </TooltipProvider>

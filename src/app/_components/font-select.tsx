@@ -13,19 +13,19 @@ export const FontSelectComponent = ({
   value: string;
   onChange: (value: string) => void;
 }) => {
-  return ( <div className="space-y-2">
-    <Label htmlFor={key}>{label}</Label>
-    <SelectWithFilterComponent
-      key={key}
-      id={key}
-      data={GOOGLE_FONTS.map((font) => ({
-        value: font.value,
-        label: font.name,
-      }))}
-      value={value}
-      onChange={(value) =>
-        onChange(value)
-      }
-    />
-  </div>)
+  return (
+    <div className={label ? "space-y-2" : ""}>
+      {label && <Label htmlFor={key}>{label}</Label>}
+      <SelectWithFilterComponent
+        key={key}
+        id={key}
+        data={GOOGLE_FONTS.map((font) => ({
+          value: font.value,
+          label: font.name,
+        }))}
+        value={value}
+        onChange={(value) => onChange(value)}
+      />
+    </div>
+  );
 };

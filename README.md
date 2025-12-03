@@ -19,26 +19,28 @@ Uma aplicação web moderna e completa para converter documentos Markdown em PDF
   - Citações, blocos de código, tabelas
   - Quebra de página
   - Desfazer/Refazer
+  - **Formatação automática com Prettier** ✨
 - Suporte a temas (claro, escuro, automático)
 - Configurações personalizáveis (tamanho da fonte, numeração de linhas, minimap)
 
 ### 📊 Preview em Tempo Real
-- **Preview com múltiplas páginas** simulando a impressão real
-- Visualização realista do documento final
-- Cálculo automático do número de páginas
-- Zoom ajustável
+- **Preview realista** do documento final
+- Visualização contínua com quebras de página respeitadas na impressão
+- Zoom ajustável (70% - 150%)
 - Suporte a quebras de página manuais
+- Espaçamento fixo entre páginas independente do zoom
 
 ### ⚙️ Configurações Avançadas
 
 #### 📐 Configuração de Página
 - **Tamanhos padrão**: A4, A3, Letter, Legal, Tabloid
 - Orientação (retrato/paisagem)
+- **Unidade de medida global** (mm/cm/px) com conversão automática
 - Margens personalizáveis com presets:
-  - Nenhuma margem
-  - Pequena (5mm)
-  - Média (10mm)
-  - Grande (20mm)
+  - Mínima (5mm) - padrão
+  - Estreita (10mm) - **padrão aplicado automaticamente**
+  - Normal (20mm)
+  - Larga (30mm)
   - Personalizada
 - Padding configurável
 
@@ -48,6 +50,10 @@ Uma aplicação web moderna e completa para converter documentos Markdown em PDF
   - Fontes para corpo do texto
   - Fontes para código
   - Fontes para citações
+- **Tamanhos configuráveis**:
+  - Tamanho base
+  - Tamanhos de H1, H2, H3
+  - Altura da linha
 - **Presets de tema**:
   - Classic (clássico)
   - Modern (moderno)
@@ -60,12 +66,20 @@ Uma aplicação web moderna e completa para converter documentos Markdown em PDF
   - Texto, fundo, títulos
   - Blocos de código
   - Links, citações, bordas
+- **Preview visual** das cores selecionadas
+
+#### 💻 Configuração do Editor
+- Tema (claro, escuro, automático)
+- Tamanho da fonte (10px - 20px)
+- Quebra de linha
+- Minimap (ativado/desativado)
+- Números de linha (on, off, relative, interval)
 
 ### 📤 Exportação
 - **Imprimir**: Abre o diálogo de impressão do navegador
 - **Baixar PDF**: Gera e baixa PDF diretamente
 - Suporte a múltiplas páginas
-- Preserva formatação e cores
+- Preserva formatação e cores (suporta cores modernas: oklch, lab)
 - Qualidade de impressão otimizada
 
 ### 🔧 Funcionalidades Técnicas
@@ -73,8 +87,9 @@ Uma aplicação web moderna e completa para converter documentos Markdown em PDF
 - Renderização de tabelas, listas de tarefas, código com syntax highlighting
 - Quebra de linha inteligente em blocos de código
 - Suporte a HTML no Markdown (para quebras de página)
+- **Formatação automática com Prettier** para Markdown
 - Persistência de configurações no `localStorage`
-- Interface responsiva e moderna
+- Interface responsiva e moderna com design system consistente
 
 ## 🚀 Instalação
 
@@ -116,21 +131,24 @@ Uma aplicação web moderna e completa para converter documentos Markdown em PDF
 ### 1. Escreva seu Markdown
 Use o editor à esquerda para escrever ou colar seu conteúdo Markdown. A barra de ferramentas facilita a formatação sem precisar digitar a sintaxe manualmente.
 
-### 2. Configure o Documento
-Clique no ícone de configurações (⚙️) no cabeçalho para acessar:
-- **Página**: Tamanho, orientação, margens
-- **Tipografia**: Fontes e tamanhos
+### 2. Formate seu Documento
+Use o botão de formatação (✨) na barra de ferramentas para formatar automaticamente o Markdown usando Prettier. Isso garante consistência e legibilidade do código.
+
+### 3. Configure o Documento
+Clique no ícone de configurações (⚙️) no cabeçalho para acessar o painel lateral de configurações:
+- **Página**: Tamanho, orientação, margens (com unidade global), padding
+- **Tipografia**: Fontes, tamanhos e altura da linha
 - **Editor**: Tema, tamanho da fonte, opções de visualização
-- **Tema**: Cores e estilo visual
+- **Tema**: Cores e estilo visual com preview
 
-### 3. Visualize o Preview
-O painel direito mostra uma pré-visualização realista do documento com múltiplas páginas simuladas.
+### 4. Visualize o Preview
+O painel direito mostra uma pré-visualização realista do documento. As quebras de página são respeitadas durante a impressão/exportação.
 
-### 4. Exporte
+### 5. Exporte
 - **Imprimir**: Clique em "Exportar" → "Imprimir" para abrir o diálogo de impressão
 - **Baixar PDF**: Clique em "Exportar" → "Baixar PDF" para gerar o arquivo PDF
 
-### 5. Quebra de Página
+### 6. Quebra de Página
 Use o botão de quebra de página na barra de ferramentas para forçar uma nova página no documento.
 
 ## 🛠️ Tecnologias Utilizadas
@@ -151,6 +169,7 @@ Use o botão de quebra de página na barra de ferramentas para forçar uma nova 
 - **[react-markdown](https://github.com/remarkjs/react-markdown)** - Renderização Markdown
 - **[remark-gfm](https://github.com/remarkjs/remark-gfm)** - Suporte GitHub Flavored Markdown
 - **[rehype-raw](https://github.com/rehypejs/rehype-raw)** - Suporte HTML no Markdown
+- **[Prettier](https://prettier.io/)** - Formatação automática de código
 
 ### PDF e Impressão
 - **[html2canvas-pro](https://github.com/yorickshan/html2canvas-pro)** - Captura de tela (suporta cores modernas)
@@ -174,7 +193,12 @@ md-to-pdf-pro/
 │   │   │   ├── preview-panel.tsx    # Preview do documento
 │   │   │   ├── preview-style.tsx    # Estilos do preview
 │   │   │   ├── print-style.tsx      # Estilos de impressão
-│   │   │   ├── settings-dialog.tsx  # Diálogo de configurações
+│   │   │   ├── settings/            # Componentes de configuração
+│   │   │   │   ├── index.tsx        # Painel lateral (Sheet)
+│   │   │   │   ├── page-size.tsx    # Configuração de página
+│   │   │   │   ├── typography.tsx   # Configuração de tipografia
+│   │   │   │   ├── theme.tsx        # Configuração de tema
+│   │   │   │   └── editor.tsx       # Configuração do editor
 │   │   │   └── view.tsx             # Componente principal
 │   │   ├── globals.css          # Estilos globais
 │   │   ├── layout.tsx           # Layout da aplicação
@@ -204,11 +228,18 @@ md-to-pdf-pro/
 - Tabloid (11" × 17")
 
 ### Presets de Margem
-- **Nenhuma**: 0mm em todos os lados
-- **Pequena**: 5mm em todos os lados
-- **Média**: 10mm em todos os lados
-- **Grande**: 20mm em todos os lados
+- **Mínima**: 5mm em todos os lados
+- **Estreita**: 10mm em todos os lados (padrão)
+- **Normal**: 20mm em todos os lados
+- **Larga**: 30mm em todos os lados
 - **Personalizada**: Configure individualmente
+
+### Unidades de Medida
+- **Milímetros (mm)** - Padrão para documentos
+- **Centímetros (cm)** - Alternativa ao mm
+- **Pixels (px)** - Para design web
+
+A unidade selecionada é aplicada globalmente a todas as margens e ao padding, com conversão automática entre unidades.
 
 ### Presets de Tema
 Cada preset inclui cores pré-configuradas para:
@@ -266,13 +297,27 @@ Conteúdo da segunda página...
 - Certifique-se de que as imagens estão carregadas
 
 ### Preview não mostra múltiplas páginas
-- Verifique se o conteúdo é longo o suficiente
+- O preview mostra uma visualização contínua
+- As quebras de página são respeitadas na impressão/PDF
 - Ajuste as margens se necessário
-- Recarregue a página
 
 ### Cores não aparecem no PDF
 - O `html2canvas-pro` suporta cores modernas (oklch/lab)
 - Se ainda houver problemas, verifique o console do navegador
+
+### Formatação Prettier não funciona
+- Certifique-se de que o Prettier está instalado (`pnpm install`)
+- Verifique o console do navegador para erros
+- O Prettier formata apenas Markdown válido
+
+## 🎨 Design System
+
+A aplicação utiliza um design system moderno e consistente:
+- **Cards coloridos** com gradientes para cada seção de configuração
+- **Badges informativos** mostrando valores atuais
+- **Ícones contextuais** para melhor identificação
+- **Layout responsivo** com painéis redimensionáveis
+- **Temas claro/escuro** com suporte automático
 
 ## 🤝 Contribuindo
 
@@ -292,6 +337,7 @@ Este projeto é privado. Todos os direitos reservados.
 - [shadcn](https://ui.shadcn.com/) pelos componentes UI
 - [Monaco Editor](https://microsoft.github.io/monaco-editor/) pelo editor
 - [html2canvas-pro](https://github.com/yorickshan/html2canvas-pro) pelo suporte a cores modernas
+- [Prettier](https://prettier.io/) pela formatação de código
 - Todos os mantenedores das bibliotecas utilizadas
 
 ---

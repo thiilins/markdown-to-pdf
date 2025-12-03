@@ -21,6 +21,7 @@ export function MarkdownEditor({
 }: MarkdownEditorProps) {
   const editorRef = useRef<Parameters<OnMount>[0] | null>(null);
   const [theme, setTheme] = useState<"light" | "vs-dark">("light");
+  const [editorReady, setEditorReady] = useState(false);
 
   useEffect(() => {
     const getTheme = () => {
@@ -57,11 +58,12 @@ export function MarkdownEditor({
 
   const handleEditorDidMount: OnMount = (editor) => {
     editorRef.current = editor;
+    setEditorReady(true);
   };
 
   return (
     <div className={cn("h-full w-full flex flex-col", className)}>
-      <MarkdownToolbar editor={editorRef.current} />
+      {editorReady && <MarkdownToolbar editor={editorRef.current} />}
       <div className="flex-1 overflow-hidden">
         <Editor
           height="100%"

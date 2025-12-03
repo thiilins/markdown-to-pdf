@@ -64,7 +64,7 @@ export function PreviewPanel({
       "--h1-size": `${typographyConfig.h1Size}px`,
       "--h2-size": `${typographyConfig.h2Size}px`,
       "--h3-size": `${typographyConfig.h3Size}px`,
-      "--line-height": typographyConfig.lineHeight,
+      "--line-height": String(typographyConfig.lineHeight),
     } as React.CSSProperties;
   };
 

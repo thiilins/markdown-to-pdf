@@ -9,12 +9,7 @@ const defaultConfig: AppConfig = {
     height: PAGE_SIZES.a4.height,
     orientation: "portrait",
     padding: "20mm",
-    margin: {
-      top: "0mm",
-      right: "0mm",
-      bottom: "0mm",
-      left: "0mm",
-    },
+    margin: { ...MARGIN_PRESETS.narrow.margin },
   },
   typography: {
     headings: "Montserrat",
@@ -47,6 +42,18 @@ export function useConfig() {
           // Garante que o tema existe, senão aplica o padrão
           if (!parsed.theme) {
             parsed.theme = THEME_PRESETS.classic;
+          }
+          // Garante que a margem existe, senão aplica o padrão "estreita"
+          if (!parsed.page?.margin ||
+              !parsed.page.margin.top ||
+              !parsed.page.margin.right ||
+              !parsed.page.margin.bottom ||
+              !parsed.page.margin.left) {
+            parsed.page = {
+              ...defaultConfig.page,
+              ...parsed.page,
+              margin: { ...MARGIN_PRESETS.narrow.margin },
+            };
           }
           return { ...defaultConfig, ...parsed };
         } catch {
