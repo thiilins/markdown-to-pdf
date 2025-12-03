@@ -27,6 +27,7 @@ export async function generatePDF(
   const originalOverflow = element.style.overflow
   const originalInlineBg = element.style.backgroundColor
   const originalPosition = element.style.position
+  const originalBoxShadow = element.style.boxShadow
 
   // Remove zoom e transformações temporariamente para captura
   if (parentElement) {
@@ -37,6 +38,7 @@ export async function generatePDF(
   element.style.scale = '1'
   element.style.overflow = 'visible'
   element.style.position = 'relative'
+  element.style.boxShadow = 'none' // Remove sombra para captura limpa
 
   // Calcula dimensões
   const pageWidthMm = parseFloat(pageConfig.width)
@@ -54,19 +56,29 @@ export async function generatePDF(
     // Aguarda múltiplos frames para garantir que o layout está estável
     await new Promise((resolve) => requestAnimationFrame(resolve))
     await new Promise((resolve) => requestAnimationFrame(resolve))
-    await new Promise((resolve) => setTimeout(resolve, 100))
+    await new Promise((resolve) => setTimeout(resolve, 150))
+
+    // Encontra o elemento .prose dentro do container
+    // Isso garante que capturamos apenas o conteúdo, sem o padding do container
+    const proseElement = element.querySelector('.prose') as HTMLElement
+    const targetElement = proseElement || element
+
+    // Calcula o padding do container para compensar na captura
+    const containerPadding = parseFloat(
+      window.getComputedStyle(element).paddingLeft || '0',
+    )
 
     // html2canvas-pro com configurações otimizadas para texto
-    const canvas = await html2canvas(element, {
+    const canvas = await html2canvas(targetElement, {
       scale: 3, // Alta qualidade para melhor renderização de texto
       useCORS: true,
       allowTaint: false,
       logging: false,
       backgroundColor: theme.background,
-      width: element.scrollWidth,
-      height: element.scrollHeight,
-      windowWidth: element.scrollWidth,
-      windowHeight: element.scrollHeight,
+      width: targetElement.scrollWidth,
+      height: targetElement.scrollHeight,
+      windowWidth: targetElement.scrollWidth,
+      windowHeight: targetElement.scrollHeight,
       x: 0,
       y: 0,
       scrollX: 0,
@@ -99,12 +111,15 @@ export async function generatePDF(
     const imgHeight = canvas.height
     const imgAspectRatio = imgWidth / imgHeight
 
-    // Calcula dimensões da imagem no PDF (em mm)
+    // Calcula dimensões da imagem no PDF (em mm) - usa toda a largura do conteúdo
     const imgWidthMm = contentWidthMm
     const imgHeightMm = imgWidthMm / imgAspectRatio
 
     // Calcula quantas páginas serão necessárias
     const pagesNeeded = Math.ceil(imgHeightMm / contentHeightMm)
+
+    // Altura por página em pixels do canvas
+    const pageHeightPx = Math.ceil(imgHeight / pagesNeeded)
 
     for (let page = 0; page < pagesNeeded; page++) {
       if (page > 0) {
@@ -112,11 +127,11 @@ export async function generatePDF(
       }
 
       // Calcula a posição Y inicial para esta página (em pixels do canvas)
-      const sourceY = Math.floor((imgHeight / pagesNeeded) * page)
+      const sourceY = page * pageHeightPx
       // Calcula a altura da fonte (em pixels do canvas)
-      const sourceHeight = Math.ceil(
-        page < pagesNeeded - 1 ? imgHeight / pagesNeeded : imgHeight - sourceY,
-      )
+      // Para a última página, usa o restante
+      const sourceHeight =
+        page < pagesNeeded - 1 ? pageHeightPx : imgHeight - sourceY
 
       // Cria um canvas temporário para esta página
       const pageCanvas = document.createElement('canvas')
@@ -151,7 +166,7 @@ export async function generatePDF(
         // Calcula altura da imagem para esta página em mm
         const pageImgHeightMm = (sourceHeight * imgWidthMm) / imgWidth
 
-        // Adiciona a imagem ao PDF com qualidade máxima
+        // Adiciona a imagem ao PDF centralizada horizontalmente
         pdf.addImage(
           imgData,
           'PNG',
@@ -177,6 +192,7 @@ export async function generatePDF(
     element.style.overflow = originalOverflow
     element.style.backgroundColor = originalInlineBg
     element.style.position = originalPosition
+    element.style.boxShadow = originalBoxShadow
 
     // Salva o PDF
     pdf.save(filename)
@@ -193,6 +209,7 @@ export async function generatePDF(
     element.style.overflow = originalOverflow
     element.style.backgroundColor = originalInlineBg
     element.style.position = originalPosition
+    element.style.boxShadow = originalBoxShadow
 
     console.error('Erro ao gerar PDF:', error)
     throw error

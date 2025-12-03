@@ -133,6 +133,8 @@ export const PreviewStyle = ({ theme }: { theme: ThemeConfig }) => {
         width: 100%;
         border-collapse: collapse;
         margin: 1em 0;
+        page-break-inside: avoid;
+        break-inside: avoid;
       }
       .prose table th,
       .prose table td {
@@ -140,6 +142,12 @@ export const PreviewStyle = ({ theme }: { theme: ThemeConfig }) => {
         padding: 0.5em;
         text-align: left;
         color: ${theme.textColor} !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      .prose table tr {
+        page-break-inside: avoid;
+        break-inside: avoid;
       }
       .prose table th {
         background-color: ${theme.codeBackground} !important;
