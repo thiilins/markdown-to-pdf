@@ -45,9 +45,9 @@ function exemplo() {
 
 Você pode adicionar [links](https://example.com) e imagens:
 
-![Alt text](https://via.placeholder.com/400x200)
+![Alt text](https://placehold.co/400x200?text=Hello+World)
 
 ---
 
 **Nota:** Este documento suporta múltiplas páginas automaticamente quando o conteúdo excede o tamanho da página configurada.
-`;
+`

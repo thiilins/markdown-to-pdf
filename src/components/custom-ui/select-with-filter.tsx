@@ -10,7 +10,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
-  CommandList
+  CommandList,
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
@@ -31,7 +31,7 @@ export function SelectWithFilterComponent({
   placeholder,
   emptyMessage,
   disabled = false,
-  id
+  id,
 }: SelectWithFilterComponentProps) {
   const t = (key: string) => key
 
@@ -44,7 +44,7 @@ export function SelectWithFilterComponent({
     if (!search || search.trim() === '') return data
 
     const normalizedSearch = normalizeText(search.trim())
-    return data.filter(item => {
+    return data.filter((item) => {
       const normalizedLabel = normalizeText(item.label)
       const normalizedValue = normalizeText(item.value)
       return (
@@ -63,7 +63,7 @@ export function SelectWithFilterComponent({
   return (
     <Popover
       open={open}
-      onOpenChange={newOpen => {
+      onOpenChange={(newOpen) => {
         setOpen(newOpen)
         if (!newOpen) {
           setSearch('')
@@ -75,13 +75,13 @@ export function SelectWithFilterComponent({
           disabled={disabled}
           role='combobox'
           className={cn(
-            'w-full justify-between rounded-lg border border-input/50 px-3 py-2 transition-all duration-200 focus-within:border-ring focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 hover:border-input',
+            'border-input/50 focus-within:border-ring focus-within:ring-ring hover:border-input w-full justify-between rounded-lg border px-3 py-2 transition-all duration-200 focus-within:ring-2 focus-within:ring-offset-2',
             className?.buttonTrigger,
             !value && 'text-muted-foreground/70',
-            disabled && 'cursor-not-allowed opacity-50'
+            disabled && 'cursor-not-allowed opacity-50',
           )}>
           <span className='flex-1 truncate text-left'>
-            {value ? data.find(item => item.value === value)?.label : placeholder}
+            {value ? data.find((item) => item.value === value)?.label : placeholder}
           </span>
           <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50 transition-transform duration-200 group-data-[state=open]:rotate-180' />
         </Button>
@@ -89,21 +89,21 @@ export function SelectWithFilterComponent({
       <PopoverContent
         align='start'
         className={cn(
-          'w-full rounded-lg border border-border/50 p-0 shadow-lg backdrop-blur-sm',
-          className?.content
+          'border-border/50 w-full rounded-lg border p-0 shadow-lg backdrop-blur-sm',
+          className?.content,
         )}>
         <Command>
           <CommandInput
             placeholder={placeholder}
             onValueChange={handleSearch}
-            className='border-0 transition-colors duration-200 placeholder:text-muted-foreground/70 focus:ring-0'
+            className='placeholder:text-muted-foreground/70 border-0 transition-colors duration-200 focus:ring-0'
           />
           <CommandList>
-            <CommandEmpty className='py-6 text-center text-sm text-muted-foreground/70'>
+            <CommandEmpty className='text-muted-foreground/70 py-6 text-center text-sm'>
               {emptyMessage}
             </CommandEmpty>
             <CommandGroup>
-              {filteredData.map(item => (
+              {filteredData.map((item) => (
                 <CommandItem
                   value={item.label}
                   key={item.value}
@@ -112,14 +112,14 @@ export function SelectWithFilterComponent({
                     setOpen(false)
                   }}
                   className={cn(
-                    'mx-1 my-0.5 cursor-pointer rounded-md px-2 py-1.5 transition-colors duration-150 hover:bg-muted/50 data-selected:bg-primary/10 data-selected:text-primary',
-                    className?.item
+                    'hover:bg-muted/50 data-selected:bg-primary/10 data-selected:text-primary mx-1 my-0.5 cursor-pointer rounded-md px-2 py-1.5 transition-colors duration-150',
+                    className?.item,
                   )}>
                   <span className='truncate'>{item.label}</span>
                   <Check
                     className={cn(
                       'ml-auto h-4 w-4 transition-opacity duration-150',
-                      item.value === value ? 'text-primary opacity-100' : 'opacity-0'
+                      item.value === value ? 'text-primary opacity-100' : 'opacity-0',
                     )}
                   />
                 </CommandItem>
@@ -150,7 +150,7 @@ export function SelectWithFilterPaginatedComponent({
   placeholder,
   emptyMessage,
   pageSize = 100,
-  itemClassName
+  itemClassName,
 }: SelectWithFilterPaginatedProps) {
   const t = (key: string) => key
   if (!placeholder) placeholder = t('Selecione')
@@ -168,7 +168,7 @@ export function SelectWithFilterPaginatedComponent({
 
     const normalizedSearch = normalizeText(searchTerm.trim())
     return data
-      .filter(item => {
+      .filter((item) => {
         const normalizedLabel = normalizeText(item.label)
         const normalizedValue = normalizeText(item.value)
         return (
@@ -185,14 +185,14 @@ export function SelectWithFilterPaginatedComponent({
 
     // Só carrega mais itens se não estiver fazendo busca
     if (isNearBottom && !searchTerm && filteredData.length < data.length) {
-      setVisibleItems(prev => prev + pageSize)
+      setVisibleItems((prev) => prev + pageSize)
     }
   }
 
   return (
     <Popover
       open={open}
-      onOpenChange={newOpen => {
+      onOpenChange={(newOpen) => {
         setOpen(newOpen)
         if (!newOpen) {
           setSearchTerm('')
@@ -204,33 +204,33 @@ export function SelectWithFilterPaginatedComponent({
           variant='outline'
           role='combobox'
           className={cn(
-            'w-[200px] justify-between rounded-lg border border-input/50 transition-all duration-200 focus-within:border-ring focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 hover:border-input',
+            'border-input/50 focus-within:border-ring focus-within:ring-ring hover:border-input w-[200px] justify-between rounded-lg border transition-all duration-200 focus-within:ring-2 focus-within:ring-offset-2',
             className,
-            !value && 'text-muted-foreground/70'
+            !value && 'text-muted-foreground/70',
           )}>
           <span className='truncate'>
-            {value ? data.find(item => item.value === value)?.label : placeholder}
+            {value ? data.find((item) => item.value === value)?.label : placeholder}
           </span>
           <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50 transition-transform duration-200 group-data-[state=open]:rotate-180' />
         </Button>
       </PopoverTrigger>
       <PopoverContent
         className={cn(
-          'w-[200px] rounded-lg border border-border/50 p-0 shadow-lg backdrop-blur-sm',
-          className
+          'border-border/50 w-[200px] rounded-lg border p-0 shadow-lg backdrop-blur-sm',
+          className,
         )}>
         <Command>
           <CommandInput
             placeholder={t('Buscar')}
             onValueChange={setSearchTerm}
-            className='border-0 transition-colors duration-200 placeholder:text-muted-foreground/70 focus:ring-0'
+            className='placeholder:text-muted-foreground/70 border-0 transition-colors duration-200 focus:ring-0'
           />
           <CommandList className='max-h-[300px]' onScroll={handleScroll}>
-            <CommandEmpty className='py-6 text-center text-sm text-muted-foreground/70'>
+            <CommandEmpty className='text-muted-foreground/70 py-6 text-center text-sm'>
               {emptyMessage}
             </CommandEmpty>
             <CommandGroup>
-              {filteredData.map(item => (
+              {filteredData.map((item) => (
                 <CommandItem
                   value={item.label}
                   key={item.value}
@@ -239,20 +239,20 @@ export function SelectWithFilterPaginatedComponent({
                     setOpen(false)
                   }}
                   className={cn(
-                    'mx-1 my-0.5 cursor-pointer rounded-md px-2 py-1.5 transition-colors duration-150 hover:bg-muted/50 data-selected:bg-primary/10 data-selected:text-primary',
-                    itemClassName
+                    'hover:bg-muted/50 data-selected:bg-primary/10 data-selected:text-primary mx-1 my-0.5 cursor-pointer rounded-md px-2 py-1.5 transition-colors duration-150',
+                    itemClassName,
                   )}>
                   <span className='truncate'>{item.label}</span>
                   <Check
                     className={cn(
                       'ml-auto h-4 w-4 transition-opacity duration-150',
-                      item.value === value ? 'text-primary opacity-100' : 'opacity-0'
+                      item.value === value ? 'text-primary opacity-100' : 'opacity-0',
                     )}
                   />
                 </CommandItem>
               ))}
               {filteredData.length < data.length && !searchTerm && (
-                <CommandLoading className='py-3 text-center text-sm text-muted-foreground/70'>
+                <CommandLoading className='text-muted-foreground/70 py-3 text-center text-sm'>
                   Carregando mais itens...
                 </CommandLoading>
               )}

@@ -1,2 +1,1 @@
-
-type Unit = "mm" | "cm" | "px";
+type Unit = 'mm' | 'cm' | 'px'

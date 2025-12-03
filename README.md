@@ -1,6 +1,7 @@
 # 📄 Markdown to PDF Pro
 
-Uma aplicação web moderna e completa para converter documentos Markdown em PDFs profissionais com preview em tempo real, editor avançado e configurações personalizáveis.
+Uma aplicação web moderna e completa para converter documentos Markdown em PDFs profissionais com
+preview em tempo real, editor avançado e configurações personalizáveis.
 
 ![Next.js](https://img.shields.io/badge/Next.js-16.0.6-black?style=flat-square&logo=next.js)
 ![React](https://img.shields.io/badge/React-19.2.0-blue?style=flat-square&logo=react)
@@ -10,6 +11,7 @@ Uma aplicação web moderna e completa para converter documentos Markdown em PDF
 ## ✨ Características
 
 ### 🎨 Editor Markdown Avançado
+
 - **Editor Monaco** com syntax highlighting
 - **Barra de ferramentas completa** com formatação rápida:
   - Cabeçalhos (H1-H6)
@@ -24,6 +26,7 @@ Uma aplicação web moderna e completa para converter documentos Markdown em PDF
 - Configurações personalizáveis (tamanho da fonte, numeração de linhas, minimap)
 
 ### 📊 Preview em Tempo Real
+
 - **Preview realista** do documento final
 - Visualização contínua com quebras de página respeitadas na impressão
 - Zoom ajustável (70% - 150%)
@@ -33,6 +36,7 @@ Uma aplicação web moderna e completa para converter documentos Markdown em PDF
 ### ⚙️ Configurações Avançadas
 
 #### 📐 Configuração de Página
+
 - **Tamanhos padrão**: A4, A3, Letter, Legal, Tabloid
 - Orientação (retrato/paisagem)
 - **Unidade de medida global** (mm/cm/px) com conversão automática
@@ -45,6 +49,7 @@ Uma aplicação web moderna e completa para converter documentos Markdown em PDF
 - Padding configurável
 
 #### 🎨 Tipografia e Temas
+
 - **Fontes personalizáveis**:
   - Fontes para títulos
   - Fontes para corpo do texto
@@ -69,6 +74,7 @@ Uma aplicação web moderna e completa para converter documentos Markdown em PDF
 - **Preview visual** das cores selecionadas
 
 #### 💻 Configuração do Editor
+
 - Tema (claro, escuro, automático)
 - Tamanho da fonte (10px - 20px)
 - Quebra de linha
@@ -76,6 +82,7 @@ Uma aplicação web moderna e completa para converter documentos Markdown em PDF
 - Números de linha (on, off, relative, interval)
 
 ### 📤 Exportação
+
 - **Imprimir**: Abre o diálogo de impressão do navegador
 - **Baixar PDF**: Gera e baixa PDF diretamente
 - Suporte a múltiplas páginas
@@ -83,6 +90,7 @@ Uma aplicação web moderna e completa para converter documentos Markdown em PDF
 - Qualidade de impressão otimizada
 
 ### 🔧 Funcionalidades Técnicas
+
 - Suporte completo a **GitHub Flavored Markdown (GFM)**
 - Renderização de tabelas, listas de tarefas, código com syntax highlighting
 - Quebra de linha inteligente em blocos de código
@@ -94,18 +102,21 @@ Uma aplicação web moderna e completa para converter documentos Markdown em PDF
 ## 🚀 Instalação
 
 ### Pré-requisitos
+
 - Node.js 18+
 - pnpm (recomendado), npm ou yarn
 
 ### Passos
 
 1. **Clone o repositório**
+
    ```bash
    git clone <url-do-repositorio>
    cd md-to-pdf-pro
    ```
 
 2. **Instale as dependências**
+
    ```bash
    pnpm install
    # ou
@@ -115,6 +126,7 @@ Uma aplicação web moderna e completa para converter documentos Markdown em PDF
    ```
 
 3. **Execute o servidor de desenvolvimento**
+
    ```bash
    pnpm dev
    # ou
@@ -123,48 +135,60 @@ Uma aplicação web moderna e completa para converter documentos Markdown em PDF
    yarn dev
    ```
 
-4. **Acesse a aplicação**
-   Abra [http://localhost:3000](http://localhost:3000) no seu navegador.
+4. **Acesse a aplicação** Abra [http://localhost:3000](http://localhost:3000) no seu navegador.
 
 ## 📖 Como Usar
 
 ### 1. Escreva seu Markdown
-Use o editor à esquerda para escrever ou colar seu conteúdo Markdown. A barra de ferramentas facilita a formatação sem precisar digitar a sintaxe manualmente.
+
+Use o editor à esquerda para escrever ou colar seu conteúdo Markdown. A barra de ferramentas
+facilita a formatação sem precisar digitar a sintaxe manualmente.
 
 ### 2. Formate seu Documento
-Use o botão de formatação (✨) na barra de ferramentas para formatar automaticamente o Markdown usando Prettier. Isso garante consistência e legibilidade do código.
+
+Use o botão de formatação (✨) na barra de ferramentas para formatar automaticamente o Markdown
+usando Prettier. Isso garante consistência e legibilidade do código.
 
 ### 3. Configure o Documento
+
 Clique no ícone de configurações (⚙️) no cabeçalho para acessar o painel lateral de configurações:
+
 - **Página**: Tamanho, orientação, margens (com unidade global), padding
 - **Tipografia**: Fontes, tamanhos e altura da linha
 - **Editor**: Tema, tamanho da fonte, opções de visualização
 - **Tema**: Cores e estilo visual com preview
 
 ### 4. Visualize o Preview
-O painel direito mostra uma pré-visualização realista do documento. As quebras de página são respeitadas durante a impressão/exportação.
+
+O painel direito mostra uma pré-visualização realista do documento. As quebras de página são
+respeitadas durante a impressão/exportação.
 
 ### 5. Exporte
+
 - **Imprimir**: Clique em "Exportar" → "Imprimir" para abrir o diálogo de impressão
 - **Baixar PDF**: Clique em "Exportar" → "Baixar PDF" para gerar o arquivo PDF
 
 ### 6. Quebra de Página
+
 Use o botão de quebra de página na barra de ferramentas para forçar uma nova página no documento.
 
 ## 🛠️ Tecnologias Utilizadas
 
 ### Core
+
 - **[Next.js 16](https://nextjs.org/)** - Framework React
 - **[React 19](https://react.dev/)** - Biblioteca UI
 - **[TypeScript](https://www.typescriptlang.org/)** - Tipagem estática
 
 ### UI e Estilização
+
 - **[Tailwind CSS 4](https://tailwindcss.com/)** - Framework CSS
 - **[shadcn/ui](https://ui.shadcn.com/)** - Componentes UI
 - **[Radix UI](https://www.radix-ui.com/)** - Componentes primitivos acessíveis
 - **[Lucide React](https://lucide.dev/)** - Ícones
 
 ### Editor e Markdown
+
 - **[Monaco Editor](https://microsoft.github.io/monaco-editor/)** - Editor de código
 - **[react-markdown](https://github.com/remarkjs/react-markdown)** - Renderização Markdown
 - **[remark-gfm](https://github.com/remarkjs/remark-gfm)** - Suporte GitHub Flavored Markdown
@@ -172,12 +196,16 @@ Use o botão de quebra de página na barra de ferramentas para forçar uma nova 
 - **[Prettier](https://prettier.io/)** - Formatação automática de código
 
 ### PDF e Impressão
-- **[html2canvas-pro](https://github.com/yorickshan/html2canvas-pro)** - Captura de tela (suporta cores modernas)
+
+- **[html2canvas-pro](https://github.com/yorickshan/html2canvas-pro)** - Captura de tela (suporta
+  cores modernas)
 - **[jsPDF](https://github.com/parallax/jsPDF)** - Geração de PDF
 - **[react-to-print](https://github.com/gregnb/react-to-print)** - Impressão do navegador
 
 ### Outras
-- **[react-resizable-panels](https://github.com/bvaughn/react-resizable-panels)** - Painéis redimensionáveis
+
+- **[react-resizable-panels](https://github.com/bvaughn/react-resizable-panels)** - Painéis
+  redimensionáveis
 - **[zod](https://zod.dev/)** - Validação de esquemas
 
 ## 📁 Estrutura do Projeto
@@ -221,6 +249,7 @@ md-to-pdf-pro/
 ## ⚙️ Configurações Disponíveis
 
 ### Tamanhos de Página
+
 - A4 (210mm × 297mm)
 - A3 (297mm × 420mm)
 - Letter (8.5" × 11")
@@ -228,6 +257,7 @@ md-to-pdf-pro/
 - Tabloid (11" × 17")
 
 ### Presets de Margem
+
 - **Mínima**: 5mm em todos os lados
 - **Estreita**: 10mm em todos os lados (padrão)
 - **Normal**: 20mm em todos os lados
@@ -235,14 +265,18 @@ md-to-pdf-pro/
 - **Personalizada**: Configure individualmente
 
 ### Unidades de Medida
+
 - **Milímetros (mm)** - Padrão para documentos
 - **Centímetros (cm)** - Alternativa ao mm
 - **Pixels (px)** - Para design web
 
-A unidade selecionada é aplicada globalmente a todas as margens e ao padding, com conversão automática entre unidades.
+A unidade selecionada é aplicada globalmente a todas as margens e ao padding, com conversão
+automática entre unidades.
 
 ### Presets de Tema
+
 Cada preset inclui cores pré-configuradas para:
+
 - Texto e fundo
 - Títulos
 - Blocos de código
@@ -253,34 +287,39 @@ Cada preset inclui cores pré-configuradas para:
 ## 🎯 Exemplos de Uso
 
 ### Markdown Básico
+
 ```markdown
 # Meu Documento
 
-Este é um parágrafo com **texto em negrito** e *texto em itálico*.
+Este é um parágrafo com **texto em negrito** e _texto em itálico_.
 
 ## Lista
+
 - Item 1
 - Item 2
 - Item 3
 ```
 
 ### Tabela
+
 ```markdown
 | Coluna 1 | Coluna 2 | Coluna 3 |
-|----------|----------|----------|
+| -------- | -------- | -------- |
 | Dados    | Dados    | Dados    |
 ```
 
 ### Código
+
 ````markdown
 ```javascript
 function exemplo() {
-  return "Olá, mundo!";
+  return 'Olá, mundo!'
 }
 ```
 ````
 
 ### Quebra de Página
+
 ```markdown
 Conteúdo da primeira página...
 
@@ -292,20 +331,24 @@ Conteúdo da segunda página...
 ## 🐛 Solução de Problemas
 
 ### PDF não está gerando corretamente
+
 - Verifique se o conteúdo não excede muito o tamanho da página
 - Tente reduzir o zoom antes de gerar o PDF
 - Certifique-se de que as imagens estão carregadas
 
 ### Preview não mostra múltiplas páginas
+
 - O preview mostra uma visualização contínua
 - As quebras de página são respeitadas na impressão/PDF
 - Ajuste as margens se necessário
 
 ### Cores não aparecem no PDF
+
 - O `html2canvas-pro` suporta cores modernas (oklch/lab)
 - Se ainda houver problemas, verifique o console do navegador
 
 ### Formatação Prettier não funciona
+
 - Certifique-se de que o Prettier está instalado (`pnpm install`)
 - Verifique o console do navegador para erros
 - O Prettier formata apenas Markdown válido
@@ -313,6 +356,7 @@ Conteúdo da segunda página...
 ## 🎨 Design System
 
 A aplicação utiliza um design system moderno e consistente:
+
 - **Cards coloridos** com gradientes para cada seção de configuração
 - **Badges informativos** mostrando valores atuais
 - **Ícones contextuais** para melhor identificação
@@ -322,6 +366,7 @@ A aplicação utiliza um design system moderno e consistente:
 ## 🤝 Contribuindo
 
 Contribuições são bem-vindas! Sinta-se à vontade para:
+
 1. Fazer fork do projeto
 2. Criar uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
 3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
