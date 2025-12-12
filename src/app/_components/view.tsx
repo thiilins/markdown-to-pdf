@@ -9,11 +9,11 @@ import { MarkdownEditor } from './markdown-editor'
 import { PreviewPanel } from './preview-panel'
 import { PrintStyle } from './print-style'
 import { useLoading } from '@/contexts/loadingContext'
-
+import moment from 'moment-timezone'
 export default function HomeViewComponent() {
   const [markdown, setMarkdown] = useState<string>(DEFAULT_MARKDOWN)
   const [zoom, setZoom] = useState(1)
-
+  const now = () => moment().format('YYYY-MM-DD HH:mm:ss')
   // Ref para o container que envolve TODAS as páginas visuais
   const contentRef = useRef<HTMLDivElement>(null)
   const { setLoading } = useLoading()
@@ -31,16 +31,22 @@ export default function HomeViewComponent() {
   // Imprime exatamente o que está na tela (as páginas fatiadas)
   const handlePrint = useReactToPrint({
     contentRef: contentRef,
-    documentTitle: 'documento-exportado',
+    documentTitle: `documento_${now()}`,
   })
+
+  // src/app/_components/view.tsx
+
   const handleDownloadPDF = async () => {
-    const ghostElement = document.getElementById('source-html-for-pdf')
-    const sourceElement = ghostElement || contentRef.current
+    // CORREÇÃO: Usamos contentRef.current diretamente.
+    // Ele contém as divs .print-page (páginas já quebradas e estilizadas visualmente).
+    const sourceElement = contentRef.current
+
     if (!sourceElement) {
       alert('Conteúdo não encontrado para exportação.')
       return
     }
-    // Pega o HTML interno
+
+    // Pega o HTML interno (que contém as <div class="print-page">...</div>)
     const htmlContent = sourceElement.innerHTML
     setLoading(true)
 
@@ -51,17 +57,16 @@ export default function HomeViewComponent() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          html: htmlContent,
-          config: config, // Envia a config atual (cores, fontes, etc)
+          html: htmlContent, // Envia o HTML já paginado
+          config: config, // Envia configs para definir tamanho da folha no @page
         }),
       })
-      console.log(JSON.stringify(config, null, 2))
+
       if (!response.ok) {
         const errorData = await response.json()
         throw new Error(errorData.details || 'Erro na geração do PDF')
       }
 
-      // 2. Extrai o nome do arquivo (com timestamp) enviado pelo servidor
       const contentDisposition = response.headers.get('Content-Disposition')
       let filename = 'documento.pdf'
       if (contentDisposition) {
@@ -71,21 +76,19 @@ export default function HomeViewComponent() {
         }
       }
 
-      // 3. Transforma a resposta em Blob e força o download
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = filename // Usa o nome correto (ex: documento_2023-10-10...)
+      a.download = filename
       document.body.appendChild(a)
       a.click()
 
-      // Limpeza da memória
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
     } catch (error) {
       console.error('Erro:', error)
-      alert('Erro ao gerar PDF. Verifique se o backend está rodando corretamente.')
+      alert('Erro ao gerar PDF. Tente novamente.')
     } finally {
       setLoading(false)
     }

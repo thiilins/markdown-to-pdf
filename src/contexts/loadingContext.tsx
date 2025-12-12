@@ -8,25 +8,22 @@ import {
   type ReactNode,
   RefObject,
   useCallback,
+  Dispatch,
+  SetStateAction,
 } from 'react'
 
 interface LoadingContextType {
   loading: boolean
-  setLoading: (loading: boolean) => void
+  setLoading: Dispatch<SetStateAction<boolean>>
 }
 
 const LoadingContext = createContext<LoadingContextType | undefined>(undefined)
 
 export function LoadingProvider({ children }: { children: ReactNode }) {
-  const loading = useRef<boolean>(false)
-  const setLoading = useCallback((value: boolean) => {
-    loading.current = value
-  }, [])
+  const [loading, setLoading] = useState(false)
 
   return (
-    <LoadingContext.Provider value={{ loading: loading.current, setLoading: setLoading }}>
-      {children}
-    </LoadingContext.Provider>
+    <LoadingContext.Provider value={{ loading, setLoading }}>{children}</LoadingContext.Provider>
   )
 }
 
