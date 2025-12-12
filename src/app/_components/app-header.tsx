@@ -10,7 +10,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import type { AppConfig, MarginPreset, Orientation, PageSize, ThemePreset } from '@/types/config'
-import { Download, Printer, ZoomIn, ZoomOut } from 'lucide-react'
+import { CloudDownload, Download, Printer, ZoomIn, ZoomOut } from 'lucide-react'
 import { FaExpand } from 'react-icons/fa6'
 import { IoLogoMarkdown } from 'react-icons/io5'
 import { SettingsDialog } from './settings'
@@ -57,7 +57,7 @@ export function AppHeader({
         <span className='text-foreground font-bold'>Markdown PDF Pro</span>
       </div>
 
-      <div className='flex items-center gap-2 ml-auto mr-2'>
+      <div className='mr-2 ml-auto flex items-center gap-2'>
         <div className='flex items-center gap-1 rounded-md border bg-blue-500/20 p-1'>
           <div className='flex items-center gap-1 rounded-md bg-white'>
             <Button
@@ -88,7 +88,6 @@ export function AppHeader({
           </Button>
         </div>
 
-
         <SettingsDialog
           config={config}
           onConfigChange={onConfigChange}
@@ -99,13 +98,13 @@ export function AppHeader({
           onApplyThemePreset={onApplyThemePreset}
         />
 
-        <div className='flex items-center gap-2 flex-1 bg-blue-500/20 rounded-md p-1'>
+        <div className='flex flex-1 items-center gap-2 rounded-md bg-blue-500/20 p-1'>
           <Button variant='outline' onClick={onPrint} className='h-8 cursor-pointer p-0'>
             <Printer className='mr-2 h-4 w-4' />
             Imprimir
           </Button>
-          <Button variant='outline' onClick={onDownloadPDF} className='h-8 cursor-pointer p-0 bg-primary text-white hover:bg-primary/80 hover:text-white'>
-            <Download className='mr-2 h-4 w-4' />
+          <Button variant='default' onClick={onDownloadPDF} className='h-8 cursor-pointer'>
+            <CloudDownload className='mr-2 h-4 w-4' />
             Exportar
           </Button>
         </div>

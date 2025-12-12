@@ -1,7 +1,6 @@
 'use client'
 
 import { useConfig } from '@/hooks/use-config'
-import { generatePDF } from '@/lib/pdf-utils'
 import { useRef, useState } from 'react'
 import { useReactToPrint } from 'react-to-print'
 import { AppHeader } from './app-header'
@@ -13,6 +12,8 @@ import { PrintStyle } from './print-style'
 export default function HomeViewComponent() {
   const [markdown, setMarkdown] = useState<string>(DEFAULT_MARKDOWN)
   const [zoom, setZoom] = useState(1)
+
+  // Ref para o container que envolve TODAS as páginas visuais
   const contentRef = useRef<HTMLDivElement>(null)
 
   const {
@@ -25,41 +26,33 @@ export default function HomeViewComponent() {
     applyThemePreset,
   } = useConfig()
 
-  // Função para abrir a caixa de impressão
+  // Função para abrir a caixa de impressão (Navegador)
+  // Imprime exatamente o que está na tela (as páginas fatiadas)
   const handlePrint = useReactToPrint({
     contentRef: contentRef,
     documentTitle: 'documento-exportado',
-    pageStyle: `@page {
-      size: ${config.page.width} ${config.page.height};
-      margin: ${config.page.margin.top} ${config.page.margin.right} ${config.page.margin.bottom} ${config.page.margin.left};
-    }
-    @media print {
-      * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-      .print-content {
-        transform: none !important;
-        scale: 1 !important;
-      }
-    }`,
   })
-
-  // Função para baixar PDF diretamente
-  // Dentro de src/app/_components/view.tsx
-
   const handleDownloadPDF = async () => {
-    if (!contentRef.current) return
+    const ghostElement = document.getElementById('source-html-for-pdf')
 
-    // Pegamos apenas o HTML interno (o conteúdo Markdown)
-    // Usamos .prose para garantir que pegamos apenas o texto, sem wrappers extras
-    const contentElement = contentRef.current.querySelector('.prose') || contentRef.current
-    const htmlContent = contentElement.innerHTML
+    const sourceElement = ghostElement || contentRef.current
 
-    // Feedback visual de carregamento
-    // const toastId =
-    //   (window as any).toast?.loading?.('Gerando PDF...', { duration: 10000 }) || 'loading-pdf'
-    // Se não tiver toast configurado na window, pode usar um alert simples ou console.log provisório
+    if (!sourceElement) {
+      alert('Conteúdo não encontrado para exportação.')
+      return
+    }
+
+    // Pega o HTML interno
+    const htmlContent = sourceElement.innerHTML
+
+    // Feedback visual simples no botão que foi clicado
+    const btn = document.activeElement as HTMLButtonElement | null
+    const originalText = btn?.innerText || ''
+    if (btn) {
+      btn.innerText = 'Gerando...'
+      btn.disabled = true
+      btn.style.cursor = 'wait'
+    }
 
     try {
       const response = await fetch('/api/generate', {
@@ -69,34 +62,47 @@ export default function HomeViewComponent() {
         },
         body: JSON.stringify({
           html: htmlContent,
-          config: config, // <--- IMPORTANTE: Enviando a configuração atual do usuário
+          config: config, // Envia a config atual (cores, fontes, etc)
         }),
       })
-
+      console.log(JSON.stringify(config, null, 2))
       if (!response.ok) {
         const errorData = await response.json()
         throw new Error(errorData.details || 'Erro na geração do PDF')
       }
 
-      // Processa o download do arquivo
+      // 2. Extrai o nome do arquivo (com timestamp) enviado pelo servidor
+      const contentDisposition = response.headers.get('Content-Disposition')
+      let filename = 'documento.pdf'
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/)
+        if (filenameMatch && filenameMatch[1]) {
+          filename = filenameMatch[1]
+        }
+      }
+
+      // 3. Transforma a resposta em Blob e força o download
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = 'documento.pdf'
+      a.download = filename // Usa o nome correto (ex: documento_2023-10-10...)
       document.body.appendChild(a)
       a.click()
 
-      // Limpeza
+      // Limpeza da memória
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
-
-      // Sucesso (se estiver usando sonner/toast)
-      // toast.success('PDF gerado com sucesso!', { id: toastId })
     } catch (error) {
       console.error('Erro:', error)
-      alert('Erro ao gerar PDF. Verifique se o servidor está rodando corretamente.')
-      // toast.error('Erro ao gerar PDF', { id: toastId })
+      alert('Erro ao gerar PDF. Verifique se o backend está rodando corretamente.')
+    } finally {
+      // Restaura o botão para o estado original
+      if (btn) {
+        btn.innerText = originalText
+        btn.disabled = false
+        btn.style.cursor = 'pointer'
+      }
     }
   }
 
