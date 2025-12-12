@@ -46,14 +46,57 @@ export default function HomeViewComponent() {
   })
 
   // Função para baixar PDF diretamente
+  // Dentro de src/app/_components/view.tsx
+
   const handleDownloadPDF = async () => {
     if (!contentRef.current) return
 
+    // Pegamos apenas o HTML interno (o conteúdo Markdown)
+    // Usamos .prose para garantir que pegamos apenas o texto, sem wrappers extras
+    const contentElement = contentRef.current.querySelector('.prose') || contentRef.current
+    const htmlContent = contentElement.innerHTML
+
+    // Feedback visual de carregamento
+    // const toastId =
+    //   (window as any).toast?.loading?.('Gerando PDF...', { duration: 10000 }) || 'loading-pdf'
+    // Se não tiver toast configurado na window, pode usar um alert simples ou console.log provisório
+
     try {
-      await generatePDF(contentRef.current, config.page, 'documento-exportado.pdf', config.theme)
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          html: htmlContent,
+          config: config, // <--- IMPORTANTE: Enviando a configuração atual do usuário
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.details || 'Erro na geração do PDF')
+      }
+
+      // Processa o download do arquivo
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'documento.pdf'
+      document.body.appendChild(a)
+      a.click()
+
+      // Limpeza
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      // Sucesso (se estiver usando sonner/toast)
+      // toast.success('PDF gerado com sucesso!', { id: toastId })
     } catch (error) {
-      console.error('Erro ao gerar PDF:', error)
-      alert('Erro ao gerar PDF. Por favor, tente novamente.')
+      console.error('Erro:', error)
+      alert('Erro ao gerar PDF. Verifique se o servidor está rodando corretamente.')
+      // toast.error('Erro ao gerar PDF', { id: toastId })
     }
   }
 
