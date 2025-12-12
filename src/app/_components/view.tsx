@@ -8,6 +8,7 @@ import { DEFAULT_MARKDOWN } from './constants'
 import { MarkdownEditor } from './markdown-editor'
 import { PreviewPanel } from './preview-panel'
 import { PrintStyle } from './print-style'
+import { useLoading } from '@/contexts/loadingContext'
 
 export default function HomeViewComponent() {
   const [markdown, setMarkdown] = useState<string>(DEFAULT_MARKDOWN)
@@ -15,7 +16,7 @@ export default function HomeViewComponent() {
 
   // Ref para o container que envolve TODAS as páginas visuais
   const contentRef = useRef<HTMLDivElement>(null)
-
+  const { setLoading } = useLoading()
   const {
     config,
     updateConfig,
@@ -34,25 +35,14 @@ export default function HomeViewComponent() {
   })
   const handleDownloadPDF = async () => {
     const ghostElement = document.getElementById('source-html-for-pdf')
-
     const sourceElement = ghostElement || contentRef.current
-
     if (!sourceElement) {
       alert('Conteúdo não encontrado para exportação.')
       return
     }
-
     // Pega o HTML interno
     const htmlContent = sourceElement.innerHTML
-
-    // Feedback visual simples no botão que foi clicado
-    const btn = document.activeElement as HTMLButtonElement | null
-    const originalText = btn?.innerText || ''
-    if (btn) {
-      btn.innerText = 'Gerando...'
-      btn.disabled = true
-      btn.style.cursor = 'wait'
-    }
+    setLoading(true)
 
     try {
       const response = await fetch('/api/generate', {
@@ -97,12 +87,7 @@ export default function HomeViewComponent() {
       console.error('Erro:', error)
       alert('Erro ao gerar PDF. Verifique se o backend está rodando corretamente.')
     } finally {
-      // Restaura o botão para o estado original
-      if (btn) {
-        btn.innerText = originalText
-        btn.disabled = false
-        btn.style.cursor = 'pointer'
-      }
+      setLoading(false)
     }
   }
 

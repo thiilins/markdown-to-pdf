@@ -12,11 +12,29 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 })
     }
 
+    // 1. Configuração do Tema
     const theme = config.theme || THEME_PRESETS.modern
-    const { width, height, orientation } = config.page
+
+    // 2. Dimensões e Orientação
+    const { width, height, orientation, size } = config.page
     const isLandscape = orientation === 'landscape'
 
-    // URLs de Fontes
+    // Cálculo do formato para o Puppeteer
+    let pdfFormat: any = undefined
+    let pdfWidth: string | number | undefined = undefined
+    let pdfHeight: string | number | undefined = undefined
+
+    if (size === 'custom') {
+      // Se for customizado, passamos as medidas exatas
+      // Puppeteer aceita strings com unidade (ex: "210mm")
+      pdfWidth = isLandscape ? height : width
+      pdfHeight = isLandscape ? width : height
+    } else {
+      // Se for padrão (A4, A3, etc), usamos o formato nomeado
+      pdfFormat = size.toUpperCase()
+    }
+
+    // 3. URLs de Fontes (para garantir que carreguem no PDF)
     const fontFamilies = [
       config.typography.headings,
       config.typography.body,
@@ -29,13 +47,16 @@ export async function POST(req: Request) {
       .join('&')
     const googleFontsUrl = `https://fonts.googleapis.com/css2?${fontQuery}&display=swap`
 
-    // CSS para o Puppeteer
+    // 4. CSS Otimizado para Impressão
+    // CORREÇÃO: Removemos o padding do body que simulava a margem.
+    // Agora o layout é "fluido" dentro da área útil definida pelo Puppeteer.
     const styles = `
       :root {
         --font-headings: '${config.typography.headings}', sans-serif;
         --font-body: '${config.typography.body}', sans-serif;
         --font-code: '${config.typography.code}', monospace;
         --font-quote: '${config.typography.quote}', serif;
+
         --base-size: ${config.typography.baseSize}px;
         --h1-size: ${config.typography.h1Size}px;
         --h2-size: ${config.typography.h2Size}px;
@@ -43,19 +64,8 @@ export async function POST(req: Request) {
         --line-height: ${config.typography.lineHeight};
       }
 
-      /* Reseta margens da página para garantir fundo total (sangria) */
-      @page {
-        margin: 0;
-        size: ${width} ${height};
-      }
-
       html {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        padding: 0;
+        -webkit-print-color-adjust: exact;
       }
 
       body {
@@ -63,30 +73,29 @@ export async function POST(req: Request) {
         font-size: var(--base-size);
         line-height: var(--line-height);
         color: ${theme.textColor};
-        background-color: ${theme.background} !important;
-        margin: 0;
-        width: 100%;
-        min-height: 100%;
+        background: ${theme.background};
 
-        /* AQUI É O SEGREDO: Margem vira Padding do Body */
-        /* Isso garante que o fundo pinte a folha toda, mas o texto respeite a margem */
-        padding-top: ${config.page.margin.top};
-        padding-right: ${config.page.margin.right};
-        padding-bottom: ${config.page.margin.bottom};
-        padding-left: ${config.page.margin.left};
+        /* Reset total de margens e paddings */
+        margin: 0;
+        padding: 0;
 
         box-sizing: border-box;
+        min-height: 100vh;
+        width: 100%;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
 
       /* Container do conteúdo */
       .prose {
         width: 100%;
         max-width: none;
-        /* Padding interno extra do usuário */
+        /* Padding interno configurado pelo usuário (além da margem do papel) */
         padding: ${config.page.padding};
+        box-sizing: border-box;
       }
 
-      /* Estilos Markdown */
+      /* Tipografia e Estilos do Tema */
       .prose h1 {
         font-family: var(--font-headings);
         font-size: var(--h1-size);
@@ -116,6 +125,12 @@ export async function POST(req: Request) {
         margin-bottom: 0.4em;
         page-break-after: avoid;
       }
+      .prose h4, .prose h5, .prose h6 {
+        font-family: var(--font-headings);
+        font-weight: 600;
+        color: ${theme.headingColor};
+      }
+
       .prose p { margin-top: 0.5em; margin-bottom: 0.5em; }
       .prose ul, .prose ol { margin-top: 0.5em; margin-bottom: 0.5em; padding-left: 1.5em; }
       .prose li { margin-top: 0.25em; margin-bottom: 0.25em; }
@@ -174,50 +189,38 @@ export async function POST(req: Request) {
         text-align: left;
       }
       .prose th { background-color: ${theme.codeBackground}; font-weight: 600; }
+
       .prose hr { border: 0; border-top: 1px solid ${theme.borderColor}; margin: 2em 0; }
 
-      .page-break { page-break-after: always; height: 1px; width: 100%; display: block; }
+      .page-break { page-break-after: always; height: 0; display: block; }
     `
 
-    // --- CORREÇÃO CRÍTICA DO CRASH ---
-    // Removemos variáveis injetadas por ferramentas de dev (Console Ninja, etc)
-    const env = { ...process.env }
-
-    // Forçamos undefined ou string vazia para garantir que o spawn não herde
-    const blockedVars = [
-      'NODE_OPTIONS',
-      'LD_PRELOAD',
-      'VSCODE_IPC_HOOK',
-      'ELECTRON_RUN_AS_NODE',
-      'VSCODE_INSPECTOR_OPTIONS',
-    ]
-
-    blockedVars.forEach((key) => {
-      delete env[key]
-      // @ts-ignore
-      env[key] = undefined
-    })
-    // ----------------------------------
+    // 5. Setup do Navegador (Clean Environment para Serverless/Docker)
+    const cleanEnv = { ...process.env }
+    const badVars = ['NODE_OPTIONS', 'LD_PRELOAD', 'VSCODE_IPC_HOOK', 'ELECTRON_RUN_AS_NODE']
+    badVars.forEach((key) => delete cleanEnv[key])
 
     const browser = await puppeteer.launch({
       headless: true,
-      env: env, // Passamos o ambiente limpo
+      env: cleanEnv,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
         '--font-render-hinting=none',
-        '--disable-extensions', // Garante que extensões não carreguem
+        '--disable-extensions',
       ],
     })
 
     const page = await browser.newPage()
 
-    await page.setContent(
-      `
+    // 6. Montagem HTML
+    const fullHtml = `
       <!DOCTYPE html>
       <html>
         <head>
           <meta charset="utf-8" />
+          <script src="https://cdn.tailwindcss.com"></script>
           <link href="${googleFontsUrl}" rel="stylesheet">
           <style>${styles}</style>
         </head>
@@ -227,27 +230,38 @@ export async function POST(req: Request) {
           </div>
         </body>
       </html>
-    `,
-      {
-        waitUntil: 'networkidle0',
-        timeout: 60000,
-      },
-    )
+    `
 
-    const pdfBuffer = await page.pdf({
-      printBackground: true,
-      displayHeaderFooter: false,
-      // Margem zero no PDF, pois a margem visual é feita pelo padding do body
-      margin: { top: 0, right: 0, bottom: 0, left: 0 },
-      width: isLandscape ? height : width,
-      height: isLandscape ? width : height,
-      preferCSSPageSize: true,
+    await page.setContent(fullHtml, {
+      waitUntil: 'networkidle0',
+      timeout: 60000,
     })
 
+    // 7. Configuração PDF com Margens Reais
+    // CORREÇÃO: Aqui aplicamos a margem real no motor do PDF
+    const pdfOptions: any = {
+      printBackground: true,
+      displayHeaderFooter: false,
+      margin: {
+        top: config.page.margin.top,
+        right: config.page.margin.right,
+        bottom: config.page.margin.bottom,
+        left: config.page.margin.left,
+      },
+    }
+
+    if (pdfFormat) {
+      pdfOptions.format = pdfFormat
+      pdfOptions.landscape = isLandscape
+    } else {
+      // Tamanho customizado
+      pdfOptions.width = pdfWidth
+      pdfOptions.height = pdfHeight
+    }
+
+    const pdfBuffer = await page.pdf(pdfOptions)
     await browser.close()
-
     const timestamp = moment().tz('America/Sao_Paulo').format('YYYY-MM-DD_HH-mm-ss')
-
     return new NextResponse(pdfBuffer, {
       headers: {
         'Content-Type': 'application/pdf',

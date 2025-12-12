@@ -29,19 +29,16 @@ export function PreviewPanel({
   typographyConfig,
   themeConfig,
   zoom = 1,
-  contentRef, // Ref vinda do pai (view.tsx) para o ReactToPrint
+  contentRef,
   className,
 }: PreviewPanelProps) {
   const theme = themeConfig || THEME_PRESETS.modern
 
-  // Ref para o container "Fantasma" (onde medimos o conteúdo)
   const ghostRef = useRef<HTMLDivElement>(null)
 
-  // Estado que armazena as páginas já fatiadas (Array de strings HTML)
   const [pagesHTML, setPagesHTML] = useState<string[]>([''])
   const [isCalculating, setIsCalculating] = useState(false)
 
-  // 1. Cálculos de Geometria da Página
   const dimensions = useMemo(() => {
     const { width, height, orientation } = pageConfig
     const widthRaw = parseFloat(width)
@@ -62,7 +59,6 @@ export function PreviewPanel({
     }
   }, [pageConfig])
 
-  // 2. Estilos CSS (Tipografia e Cores)
   const typographyStyles = useMemo(
     () =>
       ({
@@ -79,7 +75,6 @@ export function PreviewPanel({
     [typographyConfig],
   )
 
-  // 3. ENGINE DE PAGINAÇÃO
   useEffect(() => {
     const ghost = ghostRef.current
     if (!ghost) return
@@ -97,7 +92,6 @@ export function PreviewPanel({
       const marginTop = getMarginPx(pageConfig.margin.top)
       const marginBottom = getMarginPx(pageConfig.margin.bottom)
 
-      // Altura ÚTIL da página
       const contentHeightLimit = dimensions.heightPx - marginTop - marginBottom
 
       const newPages: string[] = []
@@ -140,7 +134,6 @@ export function PreviewPanel({
     return () => clearTimeout(timer)
   }, [markdown, dimensions, pageConfig.margin, typographyConfig])
 
-  // Estilo Real de CADA Página
   const getPageStyle = useMemo(
     () => ({
       width: dimensions.widthDisplay,
@@ -175,9 +168,6 @@ export function PreviewPanel({
 
   return (
     <div className={cn('relative h-full w-full bg-slate-200/90 dark:bg-slate-950', className)}>
-      {/* GHOST RENDER (HIDDEN)
-         Usamos ID 'source-html-for-pdf' para o Backend exportar o HTML limpo
-      */}
       <div
         id='source-html-for-pdf'
         aria-hidden='true'
@@ -203,9 +193,7 @@ export function PreviewPanel({
         </div>
       </div>
 
-      {/* VIEWPORT REAL (SCROLLABLE) */}
       <div className='absolute inset-0 flex flex-col items-center overflow-auto scroll-smooth px-8 py-12 print:overflow-visible'>
-        {/* Container de Zoom */}
         <div
           style={{
             transform: `scale(${zoom})`,
@@ -213,9 +201,6 @@ export function PreviewPanel({
             display: 'flex',
             flexDirection: 'column',
           }}>
-          {/* IMPORTANTE: A ref 'contentRef' vai aqui no wrapper das páginas.
-             O ReactToPrint vai pegar isso aqui tudo.
-          */}
           <div ref={contentRef}>
             {pagesHTML.map((htmlContent, index) => (
               <div
@@ -223,7 +208,7 @@ export function PreviewPanel({
                 className='print-page bg-white transition-colors duration-300'
                 style={getPageStyle}
                 data-page-number={index + 1}>
-                <div className='prose max-w-none break-words' style={typographyStyles}>
+                <div className='prose max-w-none wrap-break-word' style={typographyStyles}>
                   <PreviewStyle theme={theme} />
                   <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
                 </div>

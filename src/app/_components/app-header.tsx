@@ -10,10 +10,11 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import type { AppConfig, MarginPreset, Orientation, PageSize, ThemePreset } from '@/types/config'
-import { CloudDownload, Download, Printer, ZoomIn, ZoomOut } from 'lucide-react'
+import { CloudDownload, Download, Loader2, Printer, ZoomIn, ZoomOut } from 'lucide-react'
 import { FaExpand } from 'react-icons/fa6'
 import { IoLogoMarkdown } from 'react-icons/io5'
 import { SettingsDialog } from './settings'
+import { useLoading } from '@/contexts/loadingContext'
 
 interface AppHeaderProps {
   onPrint: () => void
@@ -42,6 +43,7 @@ export function AppHeader({
   zoom,
   onZoomChange,
 }: AppHeaderProps) {
+  const { loading } = useLoading()
   const handleZoomIn = () => {
     onZoomChange(Math.min(zoom + 0.1, 1.5))
   }
@@ -103,9 +105,22 @@ export function AppHeader({
             <Printer className='mr-2 h-4 w-4' />
             Imprimir
           </Button>
-          <Button variant='default' onClick={onDownloadPDF} className='h-8 cursor-pointer'>
-            <CloudDownload className='mr-2 h-4 w-4' />
-            Exportar
+          <Button
+            variant='default'
+            onClick={onDownloadPDF}
+            className='h-8 cursor-pointer'
+            disabled={loading}>
+            {loading ? (
+              <>
+                <Loader2 className='mr-2 h-4 w-4' />
+                Gerando PDF...
+              </>
+            ) : (
+              <>
+                <CloudDownload className='mr-2 h-4 w-4' />
+                Exportar
+              </>
+            )}
           </Button>
         </div>
       </div>
