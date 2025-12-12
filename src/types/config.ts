@@ -1,4 +1,4 @@
-export type PageSize = 'a4' | 'letter' | 'legal' | 'a3' | 'custom'
+export type PageSize = 'a4' | 'a5' | 'letter' | 'legal' | 'a3' | 'custom'
 
 export type Orientation = 'portrait' | 'landscape'
 
@@ -86,6 +86,7 @@ export type ThemePreset =
 
 export const PAGE_SIZES: Record<PageSize, { width: string; height: string; name: string }> = {
   a4: { width: '210mm', height: '297mm', name: 'A4' },
+  a5: { width: '148mm', height: '210mm', name: 'A5' },
   letter: { width: '215.9mm', height: '279.4mm', name: 'Carta (US Letter)' },
   legal: { width: '215.9mm', height: '355.6mm', name: 'Legal' },
   a3: { width: '297mm', height: '420mm', name: 'A3' },

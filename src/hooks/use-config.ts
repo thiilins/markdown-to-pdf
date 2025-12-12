@@ -1,6 +1,7 @@
 import type { AppConfig, MarginPreset, Orientation, PageSize, ThemePreset } from '@/types/config'
 import { MARGIN_PRESETS, PAGE_SIZES, THEME_PRESETS } from '@/types/config'
 import { useCallback, useEffect, useState } from 'react'
+import usePersistedState from './use-persisted-state'
 
 const defaultConfig: AppConfig = {
   page: {
@@ -33,38 +34,7 @@ const defaultConfig: AppConfig = {
 }
 
 export function useConfig() {
-  const [config, setConfig] = useState<AppConfig>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('md-to-pdf-config')
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved)
-          // Garante que o tema existe, senão aplica o padrão
-          if (!parsed.theme) {
-            parsed.theme = THEME_PRESETS.modern
-          }
-          // Garante que a margem existe, senão aplica o padrão "estreita"
-          if (
-            !parsed.page?.margin ||
-            !parsed.page.margin.top ||
-            !parsed.page.margin.right ||
-            !parsed.page.margin.bottom ||
-            !parsed.page.margin.left
-          ) {
-            parsed.page = {
-              ...defaultConfig.page,
-              ...parsed.page,
-              margin: { ...MARGIN_PRESETS.narrow.margin },
-            }
-          }
-          return { ...defaultConfig, ...parsed }
-        } catch {
-          return defaultConfig
-        }
-      }
-    }
-    return defaultConfig
-  })
+  const [config, setConfig] = usePersistedState<AppConfig>('md-to-pdf-config', defaultConfig)
 
   // Garante que o tema sempre existe
   useEffect(() => {
@@ -74,111 +44,114 @@ export function useConfig() {
         theme: THEME_PRESETS.modern,
       }))
     }
-  }, [config.theme])
+  }, [config.theme, setConfig])
 
-  const updateConfig = useCallback((updates: Partial<AppConfig>) => {
-    setConfig((prev) => {
-      const newConfig = { ...prev, ...updates }
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('md-to-pdf-config', JSON.stringify(newConfig))
-      }
-      return newConfig
-    })
-  }, [])
+  const updateConfig = useCallback(
+    (updates: Partial<AppConfig>) => {
+      setConfig((prev) => {
+        const newConfig = { ...prev, ...updates }
+        return newConfig
+      })
+    },
+    [setConfig],
+  )
 
-  const updatePageSize = useCallback((size: PageSize) => {
-    const pageSize = PAGE_SIZES[size]
-    setConfig((prev) => {
-      const newConfig = {
-        ...prev,
-        page: {
-          ...prev.page,
-          size,
-          width: pageSize.width,
-          height: pageSize.height,
-        },
-      }
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('md-to-pdf-config', JSON.stringify(newConfig))
-      }
-      return newConfig
-    })
-  }, [])
+  const updatePageSize = useCallback(
+    (size: PageSize) => {
+      const pageSize = PAGE_SIZES[size]
+      setConfig((prev) => {
+        const newConfig = {
+          ...prev,
+          page: {
+            ...prev.page,
+            size,
+            width: pageSize.width,
+            height: pageSize.height,
+          },
+        }
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('md-to-pdf-config', JSON.stringify(newConfig))
+        }
+        return newConfig
+      })
+    },
+    [setConfig],
+  )
 
-  const updateOrientation = useCallback((orientation: Orientation) => {
-    setConfig((prev) => {
-      const isLandscape = orientation === 'landscape'
-      const width = isLandscape ? prev.page.height : prev.page.width
-      const height = isLandscape ? prev.page.width : prev.page.height
+  const updateOrientation = useCallback(
+    (orientation: Orientation) => {
+      setConfig((prev) => {
+        const isLandscape = orientation === 'landscape'
+        const width = isLandscape ? prev.page.height : prev.page.width
+        const height = isLandscape ? prev.page.width : prev.page.height
 
-      const newConfig = {
-        ...prev,
-        page: {
-          ...prev.page,
-          orientation,
-          width,
-          height,
-        },
-      }
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('md-to-pdf-config', JSON.stringify(newConfig))
-      }
-      return newConfig
-    })
-  }, [])
+        const newConfig = {
+          ...prev,
+          page: {
+            ...prev.page,
+            orientation,
+            width,
+            height,
+          },
+        }
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('md-to-pdf-config', JSON.stringify(newConfig))
+        }
+        return newConfig
+      })
+    },
+    [setConfig],
+  )
 
   const resetConfig = useCallback(() => {
     setConfig(defaultConfig)
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('md-to-pdf-config')
-    }
-  }, [])
+  }, [setConfig])
 
-  const applyMarginPreset = useCallback((preset: MarginPreset) => {
-    if (preset === 'custom') return
+  const applyMarginPreset = useCallback(
+    (preset: MarginPreset) => {
+      if (preset === 'custom') return
 
-    const marginPreset = MARGIN_PRESETS[preset]
-    setConfig((prev) => {
-      const newConfig = {
-        ...prev,
-        page: {
-          ...prev.page,
-          margin: { ...marginPreset.margin },
-        },
-      }
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('md-to-pdf-config', JSON.stringify(newConfig))
-      }
-      return newConfig
-    })
-  }, [])
+      const marginPreset = MARGIN_PRESETS[preset]
+      setConfig((prev) => {
+        const newConfig = {
+          ...prev,
+          page: {
+            ...prev.page,
+            margin: { ...marginPreset.margin },
+          },
+        }
+        return newConfig
+      })
+    },
+    [setConfig],
+  )
 
-  const applyThemePreset = useCallback((preset: ThemePreset) => {
-    if (preset === 'custom') return
+  const applyThemePreset = useCallback(
+    (preset: ThemePreset) => {
+      if (preset === 'custom') return
 
-    const themePreset = THEME_PRESETS[preset]
-    setConfig((prev) => {
-      const newConfig = {
-        ...prev,
-        theme: {
-          name: themePreset.name,
-          description: themePreset.description,
-          background: themePreset.background,
-          textColor: themePreset.textColor,
-          headingColor: themePreset.headingColor,
-          codeBackground: themePreset.codeBackground,
-          codeTextColor: themePreset.codeTextColor,
-          linkColor: themePreset.linkColor,
-          borderColor: themePreset.borderColor,
-          blockquoteColor: themePreset.blockquoteColor,
-        },
-      }
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('md-to-pdf-config', JSON.stringify(newConfig))
-      }
-      return newConfig
-    })
-  }, [])
+      const themePreset = THEME_PRESETS[preset]
+      setConfig((prev) => {
+        const newConfig = {
+          ...prev,
+          theme: {
+            name: themePreset.name,
+            description: themePreset.description,
+            background: themePreset.background,
+            textColor: themePreset.textColor,
+            headingColor: themePreset.headingColor,
+            codeBackground: themePreset.codeBackground,
+            codeTextColor: themePreset.codeTextColor,
+            linkColor: themePreset.linkColor,
+            borderColor: themePreset.borderColor,
+            blockquoteColor: themePreset.blockquoteColor,
+          },
+        }
+        return newConfig
+      })
+    },
+    [setConfig],
+  )
 
   return {
     config,

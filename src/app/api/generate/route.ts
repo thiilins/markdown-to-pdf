@@ -1,7 +1,7 @@
+import { format } from 'date-fns'
 import { NextResponse } from 'next/server'
 import puppeteer from 'puppeteer'
 import { AppConfig, THEME_PRESETS } from '@/types/config'
-import moment from 'moment-timezone'
 
 export async function POST(req: Request) {
   try {
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
 
     // Cálculo para custom size
     // Se for paisagem e custom, o usuário já inverteu visualmente no front,
-    // mas aqui garantimos que width é largura e height é altura.
+    // mas aqui garantimos que width é largura e height é altura para o Puppeteer.
     let pdfWidth: string | number | undefined = undefined
     let pdfHeight: string | number | undefined = undefined
     let pdfFormat: any = undefined
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
       .join('&')
     const googleFontsUrl = `https://fonts.googleapis.com/css2?${fontQuery}&display=swap`
 
-    // 4. CSS (AQUI ESTÁ A CORREÇÃO DA MARGEM)
+    // 4. CSS (Lógica Full Bleed para evitar bordas brancas)
     const styles = `
       :root {
         --font-headings: '${config.typography.headings}', sans-serif;
@@ -198,10 +198,11 @@ export async function POST(req: Request) {
       /* Ajuste de @page para garantir que o Puppeteer não adicione margem branca extra */
       @page {
         margin: 0;
+        size: ${config.page.size === 'custom' ? `${pdfWidth} ${pdfHeight}` : config.page.size.toUpperCase()};
       }
     `
 
-    // 5. Setup do Navegador (Clean Environment)
+    // 5. Configuração do Ambiente do Browser (Anti-Crash)
     const cleanEnv = { ...process.env }
     const badVars = ['NODE_OPTIONS', 'LD_PRELOAD', 'VSCODE_IPC_HOOK', 'ELECTRON_RUN_AS_NODE']
     badVars.forEach((key) => delete cleanEnv[key])
@@ -242,9 +243,8 @@ export async function POST(req: Request) {
       waitUntil: 'networkidle0',
       timeout: 60000,
     })
-
+    // Aguarda renderização final das fontes
     await new Promise((resolve) => setTimeout(resolve, 500))
-
     // 7. Configuração PDF
     // IMPORTANTE: Definimos margin: 0 aqui porque já aplicamos a margem visual via padding no CSS body
     const pdfOptions: any = {
@@ -252,24 +252,17 @@ export async function POST(req: Request) {
       displayHeaderFooter: false,
       margin: { top: 0, right: 0, bottom: 0, left: 0 },
     }
-
     if (config.page.size === 'custom') {
-      // Converte mm para pontos se for custom
-      const unit = (width as string).replace(/[\d.]/g, '') || 'mm'
-      // O Puppeteer aceita string com unidade, então passamos direto o valor calculado
-      pdfOptions.width = isLandscape ? height : width
-      pdfOptions.height = isLandscape ? width : height
+      // O Puppeteer aceita string com unidade (ex: '210mm'), então passamos direto
+      pdfOptions.width = pdfWidth
+      pdfOptions.height = pdfHeight
     } else {
       pdfOptions.format = pdfFormat
       pdfOptions.landscape = isLandscape
     }
-
     const pdfBuffer = await page.pdf(pdfOptions)
-
     await browser.close()
-
-    const timestamp = moment().tz('America/Sao_Paulo').format('YYYY-MM-DD_HH-mm-ss')
-
+    const timestamp = format(new Date(), 'yyyy-MM-dd_HH-mm-ss')
     return new NextResponse(pdfBuffer, {
       headers: {
         'Content-Type': 'application/pdf',
