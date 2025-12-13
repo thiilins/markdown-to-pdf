@@ -1,16 +1,19 @@
-
 ### ✅ Status do Roadmap
 
 1.  **[NOVO] Backend de PDF (NestJS + Puppeteer):** Adicionado à lista.
-      * *Nota sobre cPanel:* Rodar Node.js no cPanel é super tranquilo hoje em dia (via **Setup Node.js App** no painel). A única "pegadinha" lá será garantir que as dependências do Chrome (bibliotecas Linux) estejam instaladas para o Puppeteer rodar, mas é totalmente viável.
+    - _Nota sobre cPanel:_ Rodar Node.js no cPanel é super tranquilo hoje em dia (via **Setup
+      Node.js App** no painel). A única "pegadinha" lá será garantir que as dependências do Chrome
+      (bibliotecas Linux) estejam instaladas para o Puppeteer rodar, mas é totalmente viável.
 
------
+---
 
 ### 🚀 Transformando em Multifunção (Arquitetura de Layout)
 
-Para suportar **múltiplas páginas** (Editor, Templates, Histórico) mantendo a performance, precisamos sair do layout de "página única" para um **Layout com Navegação Lateral (Sidebar)**.
+Para suportar **múltiplas páginas** (Editor, Templates, Histórico) mantendo a performance,
+precisamos sair do layout de "página única" para um **Layout com Navegação Lateral (Sidebar)**.
 
-Você já tem o componente `sidebar.tsx` do shadcn/ui instalado (eu vi nos arquivos), então vamos usá-lo para criar uma navegação profissional.
+Você já tem o componente `sidebar.tsx` do shadcn/ui instalado (eu vi nos arquivos), então vamos
+usá-lo para criar uma navegação profissional.
 
 #### Passo 1: Criar o componente `AppSidebar`
 
@@ -59,15 +62,15 @@ export function AppSidebar() {
   const pathname = usePathname()
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible='icon'>
       <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-1">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <IoLogoMarkdown className="size-5" />
+        <div className='flex items-center gap-2 px-2 py-1'>
+          <div className='bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-lg'>
+            <IoLogoMarkdown className='size-5' />
           </div>
-          <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-semibold">MD Pro</span>
-            <span className="truncate text-xs">v1.0.0</span>
+          <div className='grid flex-1 text-left text-sm leading-tight'>
+            <span className='truncate font-semibold'>MD Pro</span>
+            <span className='truncate text-xs'>v1.0.0</span>
           </div>
         </div>
       </SidebarHeader>
@@ -79,11 +82,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname === item.url}
-                    tooltip={item.title}
-                  >
+                  <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
                     <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
@@ -93,13 +92,14 @@ export function AppSidebar() {
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
+          cursor
         </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Configurações">
+            <SidebarMenuButton asChild tooltip='Configurações'>
               <button onClick={() => alert('Configurações globais')}>
                 <Settings />
                 <span>Configurações</span>
@@ -116,7 +116,8 @@ export function AppSidebar() {
 
 #### Passo 2: Criar um Layout de Dashboard
 
-Para não "sujar" o `root layout` (que deve ser limpo), vamos criar um "Route Group" para a área logada/funcional do app.
+Para não "sujar" o `root layout` (que deve ser limpo), vamos criar um "Route Group" para a área
+logada/funcional do app.
 
 1.  Crie a pasta `src/app/(main)` (os parênteses significam que isso não afeta a URL).
 2.  Mova `src/app/page.tsx` para `src/app/(main)/page.tsx`.
@@ -129,27 +130,21 @@ import { AppSidebar } from '@/app/_components/app-sidebar'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Separator } from '@/components/ui/separator'
 
-export default function MainLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
         {/* Header fixo do layout com o trigger da sidebar */}
-        <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4 bg-background">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
+        <header className='bg-background flex h-14 shrink-0 items-center gap-2 border-b px-4'>
+          <SidebarTrigger className='-ml-1' />
+          <Separator orientation='vertical' className='mr-2 h-4' />
           {/* Aqui você pode colocar breadcrumbs dinâmicos no futuro */}
-          <span className="font-medium text-sm">Markdown PDF Pro</span>
+          <span className='text-sm font-medium'>Markdown PDF Pro</span>
         </header>
 
         {/* Área de conteúdo principal (Onde o Editor vai carregar) */}
-        <div className="flex flex-1 flex-col overflow-hidden">
-          {children}
-        </div>
+        <div className='flex flex-1 flex-col overflow-hidden'>{children}</div>
       </SidebarInset>
     </SidebarProvider>
   )
@@ -158,14 +153,18 @@ export default function MainLayout({
 
 #### Passo 3: Ajustar o `view.tsx` para o novo Layout
 
-Como agora temos um Layout global (`MainLayout`) que já tem Sidebar e Header básico, precisamos ajustar o seu `view.tsx` para ele **não** renderizar o `AppHeader` antigo duplicado, ou adaptar o `AppHeader` para ser a barra de ferramentas do editor, e não o header do site.
+Como agora temos um Layout global (`MainLayout`) que já tem Sidebar e Header básico, precisamos
+ajustar o seu `view.tsx` para ele **não** renderizar o `AppHeader` antigo duplicado, ou adaptar o
+`AppHeader` para ser a barra de ferramentas do editor, e não o header do site.
 
-Minha sugestão Sênior: Transforme o `AppHeader` atual em uma **Toolbar de Ações** específica do Editor.
+Minha sugestão Sênior: Transforme o `AppHeader` atual em uma **Toolbar de Ações** específica do
+Editor.
 
 No arquivo `src/app/_components/view.tsx`:
 
-  * Remova a tag `<header>` que envolvia o `AppHeader` e deixe ele ser apenas uma `div` de controle dentro da área do editor.
-  * Isso faz com que a navegação (Sidebar) fique isolada da ferramenta (Editor).
+- Remova a tag `<header>` que envolvia o `AppHeader` e deixe ele ser apenas uma `div` de controle
+  dentro da área do editor.
+- Isso faz com que a navegação (Sidebar) fique isolada da ferramenta (Editor).
 
 #### Passo 4: Criar as Novas Páginas (Exemplos)
 
@@ -186,22 +185,26 @@ const templates = [
 
 export default function TemplatesPage() {
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Modelos</h1>
-        <Button><Plus className="mr-2 h-4 w-4" /> Criar Modelo</Button>
+    <div className='space-y-6 p-6'>
+      <div className='flex items-center justify-between'>
+        <h1 className='text-2xl font-bold'>Modelos</h1>
+        <Button>
+          <Plus className='mr-2 h-4 w-4' /> Criar Modelo
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
         {templates.map((t, i) => (
-          <Card key={i} className="hover:bg-accent/50 cursor-pointer transition-colors">
+          <Card key={i} className='hover:bg-accent/50 cursor-pointer transition-colors'>
             <CardHeader>
-              <FileText className="h-8 w-8 mb-2 text-primary" />
+              <FileText className='text-primary mb-2 h-8 w-8' />
               <CardTitle>{t.title}</CardTitle>
               <CardDescription>{t.desc}</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" className="w-full">Usar Modelo</Button>
+              <Button variant='outline' className='w-full'>
+                Usar Modelo
+              </Button>
             </CardContent>
           </Card>
         ))}

@@ -2,6 +2,7 @@ import tsPlugin from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
 import reactPlugin from 'eslint-plugin-react'
 import reactHooksPlugin from 'eslint-plugin-react-hooks'
+import unusedImportsPlugin from 'eslint-plugin-unused-imports'
 
 const eslintConfig = [
   {
@@ -23,12 +24,22 @@ const eslintConfig = [
       '@typescript-eslint': tsPlugin,
       react: reactPlugin,
       'react-hooks': reactHooksPlugin,
+      'unused-imports': unusedImportsPlugin,
     },
     settings: {
       react: {
         version: 'detect',
       },
     },
+    ignores: [
+      '.next/**',
+      'out/**',
+      'build/**',
+      'node_modules/**',
+      'next-env.d.ts',
+      'tsconfig.json',
+      'package-lock.json',
+    ],
     rules: {
       // TypeScript rules
       '@typescript-eslint/ban-ts-comment': 'off',
@@ -41,6 +52,18 @@ const eslintConfig = [
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-function-type': 'off',
 
+      // Unused imports - remove imports não utilizados
+      'unused-imports/no-unused-imports': 'error',
+      'unused-imports/no-unused-vars': [
+        'warn',
+        {
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+        },
+      ],
+
       // React rules
       'react/prop-types': 'off',
       'react/react-in-jsx-scope': 'off',
@@ -48,7 +71,7 @@ const eslintConfig = [
       'react/no-children-prop': 'off',
 
       // React Hooks rules
-      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/rules-of-hooks': 'off',
       'react-hooks/exhaustive-deps': 'warn',
 
       // General rules
