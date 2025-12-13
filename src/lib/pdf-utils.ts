@@ -1,7 +1,6 @@
+import { THEME_PRESETS } from '@/shared/constants'
 import html2canvas from 'html2canvas-pro'
 import jsPDF from 'jspdf'
-import type { PageConfig, ThemeConfig } from '@/types/config'
-import { THEME_PRESETS } from '@/types/config'
 
 /**
  * Gera PDF a partir do elemento HTML usando html2canvas e jsPDF
@@ -62,11 +61,6 @@ export async function generatePDF(
     // Isso garante que capturamos apenas o conteúdo, sem o padding do container
     const proseElement = element.querySelector('.prose') as HTMLElement
     const targetElement = proseElement || element
-
-    // Calcula o padding do container para compensar na captura
-    const containerPadding = parseFloat(
-      window.getComputedStyle(element).paddingLeft || '0',
-    )
 
     // html2canvas-pro com configurações otimizadas para texto
     const canvas = await html2canvas(targetElement, {
@@ -130,8 +124,7 @@ export async function generatePDF(
       const sourceY = page * pageHeightPx
       // Calcula a altura da fonte (em pixels do canvas)
       // Para a última página, usa o restante
-      const sourceHeight =
-        page < pagesNeeded - 1 ? pageHeightPx : imgHeight - sourceY
+      const sourceHeight = page < pagesNeeded - 1 ? pageHeightPx : imgHeight - sourceY
 
       // Cria um canvas temporário para esta página
       const pageCanvas = document.createElement('canvas')
@@ -148,17 +141,7 @@ export async function generatePDF(
         ctx.imageSmoothingQuality = 'high'
 
         // Copia a parte relevante do canvas original
-        ctx.drawImage(
-          canvas,
-          0,
-          sourceY,
-          imgWidth,
-          sourceHeight,
-          0,
-          0,
-          imgWidth,
-          sourceHeight,
-        )
+        ctx.drawImage(canvas, 0, sourceY, imgWidth, sourceHeight, 0, 0, imgWidth, sourceHeight)
 
         // Converte para imagem com qualidade máxima
         const imgData = pageCanvas.toDataURL('image/png', 1.0)

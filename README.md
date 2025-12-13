@@ -84,7 +84,10 @@ preview em tempo real, editor avançado e configurações personalizáveis.
 ### 📤 Exportação
 
 - **Imprimir**: Abre o diálogo de impressão do navegador
-- **Baixar PDF**: Gera e baixa PDF diretamente
+- **Baixar PDF**: Gera PDF via Server Action (Next.js 16+) com segurança aprimorada
+  - Execução no servidor mantém URL e token da API seguros
+  - Token enviado via header `x-api-key` (não exposto no frontend)
+  - Suporte a timeout e tratamento de erros robusto
 - Suporte a múltiplas páginas
 - Preserva formatação e cores (suporta cores modernas: oklch, lab)
 - Qualidade de impressão otimizada
@@ -96,8 +99,10 @@ preview em tempo real, editor avançado e configurações personalizáveis.
 - Quebra de linha inteligente em blocos de código
 - Suporte a HTML no Markdown (para quebras de página)
 - **Formatação automática com Prettier** para Markdown
+- **Server Actions** (Next.js 16+) para geração segura de PDF
 - Persistência de configurações no `localStorage`
 - Interface responsiva e moderna com design system consistente
+- **Segurança**: Credenciais de API mantidas no servidor, nunca expostas no frontend
 
 ## 🚀 Instalação
 
@@ -125,7 +130,24 @@ preview em tempo real, editor avançado e configurações personalizáveis.
    yarn install
    ```
 
-3. **Execute o servidor de desenvolvimento**
+3. **Configure as variáveis de ambiente**
+
+   Crie um arquivo `.env.local` na raiz do projeto `frontend/`:
+
+   ```bash
+   # Variáveis públicas (acessíveis no frontend)
+   NEXT_PUBLIC_API_URL=''
+
+   # Variáveis de servidor (NÃO usar NEXT_PUBLIC_ - mantém seguras no servidor)
+   PDF_GENERATE_URL='https://sua-api.com/gerar-pdf'
+   PDF_GENERATE_TOKEN='seu-token-secreto'
+   ```
+
+   > **⚠️ Importante**: As variáveis `PDF_GENERATE_URL` e `PDF_GENERATE_TOKEN` são variáveis de
+   > servidor e **não devem** ter o prefixo `NEXT_PUBLIC_`. Isso garante que elas permaneçam seguras
+   > e não sejam expostas no código do cliente.
+
+4. **Execute o servidor de desenvolvimento**
 
    ```bash
    pnpm dev
@@ -135,7 +157,7 @@ preview em tempo real, editor avançado e configurações personalizáveis.
    yarn dev
    ```
 
-4. **Acesse a aplicação** Abra [http://localhost:3000](http://localhost:3000) no seu navegador.
+5. **Acesse a aplicação** Abra [http://localhost:3000](http://localhost:3000) no seu navegador.
 
 ## 📖 Como Usar
 
@@ -176,9 +198,10 @@ Use o botão de quebra de página na barra de ferramentas para forçar uma nova 
 
 ### Core
 
-- **[Next.js 16](https://nextjs.org/)** - Framework React
+- **[Next.js 16](https://nextjs.org/)** - Framework React com Server Actions
 - **[React 19](https://react.dev/)** - Biblioteca UI
 - **[TypeScript](https://www.typescriptlang.org/)** - Tipagem estática
+- **Server Actions** - Execução de código no servidor com segurança
 
 ### UI e Estilização
 
@@ -199,8 +222,9 @@ Use o botão de quebra de página na barra de ferramentas para forçar uma nova 
 
 - **[html2canvas-pro](https://github.com/yorickshan/html2canvas-pro)** - Captura de tela (suporta
   cores modernas)
-- **[jsPDF](https://github.com/parallax/jsPDF)** - Geração de PDF
+- **[jsPDF](https://github.com/parallax/jsPDF)** - Geração de PDF no cliente
 - **[react-to-print](https://github.com/gregnb/react-to-print)** - Impressão do navegador
+- **Server Actions (Next.js 16+)** - Geração segura de PDF via API externa
 
 ### Outras
 
@@ -210,12 +234,16 @@ Use o botão de quebra de página na barra de ferramentas para forçar uma nova 
 
 ## 📁 Estrutura do Projeto
 
-```
+```text
 md-to-pdf-pro/
 ├── src/
 │   ├── app/
-│   │   ├── _components/          # Componentes da aplicação
-│   │   │   ├── app-header.tsx    # Cabeçalho com controles
+│   │   ├── (home)/              # Grupo de rotas home
+│   │   ├── (tools)/             # Grupo de rotas tools
+│   │   ├── actions/             # Server Actions
+│   │   │   └── pdf.ts           # Server Action para geração de PDF
+│   │   ├── _components/         # Componentes da aplicação
+│   │   │   ├── app-header.tsx   # Cabeçalho com controles
 │   │   │   ├── markdown-editor.tsx  # Editor Monaco
 │   │   │   ├── markdown-toolbar.tsx # Barra de ferramentas
 │   │   │   ├── preview-panel.tsx    # Preview do documento
@@ -231,18 +259,25 @@ md-to-pdf-pro/
 │   │   ├── globals.css          # Estilos globais
 │   │   ├── layout.tsx           # Layout da aplicação
 │   │   └── page.tsx             # Página inicial
-│   ├── components/
+│   ├── components/              # Componentes reutilizáveis
 │   │   ├── ui/                  # Componentes shadcn/ui
-│   │   └── custom-ui/            # Componentes customizados
-│   ├── hooks/
+│   │   └── custom-ui/           # Componentes customizados
+│   ├── hooks/                   # React Hooks customizados
 │   │   └── use-config.ts        # Hook de configuração
-│   ├── lib/
-│   │   ├── pdf-utils.ts         # Utilitários de PDF
+│   ├── lib/                     # Utilitários e helpers
+│   │   ├── pdf-utils.ts         # Utilitários de PDF (cliente)
 │   │   └── utils.ts             # Utilitários gerais
-│   └── types/
-│       └── config.ts            # Tipos TypeScript
+│   ├── shared/                  # Código compartilhado
+│   │   └── contexts/            # React Contexts
+│   │       ├── mdToPdfContext.tsx  # Contexto principal
+│   │       └── configContext.tsx    # Contexto de configuração
+│   ├── types/                   # Definições de tipos TypeScript
+│   │   └── global.d.ts         # Tipos globais
+│   └── env.ts                   # Configuração de variáveis de ambiente
 ├── public/                      # Arquivos estáticos
 ├── components.json              # Configuração shadcn/ui
+├── env.tpl                      # Template de variáveis de ambiente
+├── .env.local                   # Variáveis de ambiente (não versionado)
 └── package.json
 ```
 
@@ -328,6 +363,20 @@ Conteúdo da primeira página...
 Conteúdo da segunda página...
 ```
 
+## 🔐 Segurança
+
+A aplicação implementa práticas de segurança para proteger credenciais:
+
+- **Server Actions**: A geração de PDF via API externa é feita através de Server Actions do Next.js
+  16+
+- **Variáveis de Servidor**: `PDF_GENERATE_URL` e `PDF_GENERATE_TOKEN` são variáveis de servidor
+  (sem `NEXT_PUBLIC_`)
+- **Token no Header**: O token é enviado via header `x-api-key`, nunca exposto no código do cliente
+- **Validação no Servidor**: Todas as validações e chamadas à API são feitas no servidor
+
+> **⚠️ Importante**: Nunca adicione o prefixo `NEXT_PUBLIC_` às variáveis que contêm credenciais ou
+> URLs sensíveis.
+
 ## 🐛 Solução de Problemas
 
 ### PDF não está gerando corretamente
@@ -335,6 +384,9 @@ Conteúdo da segunda página...
 - Verifique se o conteúdo não excede muito o tamanho da página
 - Tente reduzir o zoom antes de gerar o PDF
 - Certifique-se de que as imagens estão carregadas
+- Verifique se as variáveis de ambiente `PDF_GENERATE_URL` e `PDF_GENERATE_TOKEN` estão configuradas
+  corretamente
+- Verifique o console do navegador e os logs do servidor para erros
 
 ### Preview não mostra múltiplas páginas
 
@@ -352,6 +404,14 @@ Conteúdo da segunda página...
 - Certifique-se de que o Prettier está instalado (`pnpm install`)
 - Verifique o console do navegador para erros
 - O Prettier formata apenas Markdown válido
+
+### Erro ao gerar PDF via Server Action
+
+- Verifique se `PDF_GENERATE_URL` está configurada no `.env.local`
+- Verifique se `PDF_GENERATE_TOKEN` está configurada corretamente (se necessário)
+- Certifique-se de que as variáveis **não** têm o prefixo `NEXT_PUBLIC_`
+- Reinicie o servidor de desenvolvimento após alterar variáveis de ambiente
+- Verifique se a API externa está acessível e retornando o formato esperado
 
 ## 🎨 Design System
 
@@ -372,6 +432,32 @@ Contribuições são bem-vindas! Sinta-se à vontade para:
 3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
 4. Push para a branch (`git push origin feature/AmazingFeature`)
 5. Abrir um Pull Request
+
+## 📝 Variáveis de Ambiente
+
+### Variáveis Públicas (Frontend)
+
+Variáveis com prefixo `NEXT_PUBLIC_` são expostas no código do cliente:
+
+- `NEXT_PUBLIC_API_URL` - URL da API (se necessário para outras funcionalidades)
+
+### Variáveis de Servidor (Backend)
+
+Variáveis **sem** o prefixo `NEXT_PUBLIC_` permanecem seguras no servidor:
+
+- `PDF_GENERATE_URL` - URL da API de geração de PDF (obrigatória)
+- `PDF_GENERATE_TOKEN` - Token de autenticação da API (opcional, enviado via header `x-api-key`)
+
+### Exemplo de `.env.local`
+
+```bash
+# Variáveis públicas
+NEXT_PUBLIC_API_URL='https://api.exemplo.com'
+
+# Variáveis de servidor (seguras)
+PDF_GENERATE_URL='https://api-pdf.exemplo.com/gerar-pdf'
+PDF_GENERATE_TOKEN='seu-token-secreto-aqui'
+```
 
 ## 📝 Licença
 
