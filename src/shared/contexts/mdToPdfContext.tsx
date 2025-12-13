@@ -1,6 +1,7 @@
 'use client'
 
 import { generatePDF } from '@/app/actions/pdf'
+import { ENVIROMENT } from '@/env'
 import {
   Dispatch,
   RefObject,
@@ -62,7 +63,7 @@ export function MDToPdfProvider({ children }: { children: ReactNode }) {
   const [disabledDownload, setDisabledDownload] = useState(false)
 
   const handleDownloadPDF = useCallback(async () => {
-    if (disabledDownload) {
+    if (disabledDownload || !ENVIROMENT.ENABLE_EXPORT) {
       return
     }
     const sourceElement = contentRef.current
@@ -150,10 +151,9 @@ export function MDToPdfProvider({ children }: { children: ReactNode }) {
   }, [config, contentRef, disabledDownload])
 
   useEffect(() => {
-    // A verificação da URL agora é feita no servidor via Server Action
-    // Mantemos esta verificação apenas para desabilitar o botão se necessário
-    // A Server Action validará se a URL está configurada
-    setDisabledDownload(false)
+    if (!ENVIROMENT.ENABLE_EXPORT) {
+      setDisabledDownload(true)
+    }
   }, [])
   return (
     <ConfigProvider>
