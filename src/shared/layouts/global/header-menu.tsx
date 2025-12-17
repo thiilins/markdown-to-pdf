@@ -13,6 +13,7 @@ import { urlIsActive, urlIsActiveWithSubmenu } from '@/shared/utils'
 import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import UserNav from '../auth/user-nav'
 
 const GlobalHeaderButton = ({ label, href, icon, submenu }: ModuleItem) => {
   const pathname = usePathname()
@@ -71,10 +72,11 @@ const GlobalHeaderButtonSubmenu = ({ label, href, icon }: Modules) => {
 }
 export function GlobalHeaderMenu() {
   return (
-    <nav className='flex items-center justify-center gap-1'>
+    <nav className='flex items-center justify-center gap-2 px-3'>
       {Modules.map((module) => {
         return <GlobalHeaderButton key={module.label} {...module} />
       })}
+      <UserNav />
     </nav>
   )
 }

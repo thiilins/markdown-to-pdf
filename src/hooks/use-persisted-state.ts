@@ -6,7 +6,7 @@ function usePersistedState<T>(
   key: string,
   initialState: T,
   isString = false,
-  prefix = '@PRIXSIABI',
+  prefix = '@MD_TOOLS_PRO',
 ): Response<T> {
   const [state, setState] = useState<T>(initialState)
   const [loaded, setLoaded] = useState(false)

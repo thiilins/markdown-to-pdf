@@ -2,6 +2,7 @@
 
 import { generatePDF } from '@/app/actions/pdf'
 import { ENVIROMENT } from '@/env'
+import usePersistedState from '@/hooks/use-persisted-state'
 import {
   Dispatch,
   RefObject,
@@ -54,7 +55,7 @@ export function MDToPdfProvider({ children }: { children: ReactNode }) {
   } = useConfig()
 
   const [isLoading, setIsLoading] = useState(false)
-  const [markdown, setMarkdown] = useState<string>(DEFAULT_MARKDOWN)
+  const [markdown, setMarkdown] = usePersistedState<string>('md-to-pdf-markdown', DEFAULT_MARKDOWN)
   const contentRef = useRef<HTMLDivElement>(null)
   const handlePrint = useReactToPrint({
     contentRef: contentRef,
