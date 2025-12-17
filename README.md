@@ -459,6 +459,11 @@ PDF_GENERATE_URL='https://api-pdf.exemplo.com/gerar-pdf'
 PDF_GENERATE_TOKEN='seu-token-secreto-aqui'
 ```
 
+## Correções Necessárias
+
+- Renderizacao imediata ao trocar tema/configs
+- Correção de Carregamento de Fontes
+
 ## 📝 Licença
 
 Este projeto é privado. Todos os direitos reservados.

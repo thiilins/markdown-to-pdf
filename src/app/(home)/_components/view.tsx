@@ -15,12 +15,11 @@ export const HomeViewComponent = () => {
           <h1 className='text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl'>
             Bem-vindo ao{' '}
             <span className='from-primary to-primary/60 bg-linear-to-r bg-clip-text text-transparent'>
-              MD to PDF Pro
+              MD Tools Pro
             </span>
           </h1>
           <p className='text-muted-foreground mx-auto max-w-2xl text-lg md:text-xl'>
-            Escolha uma ferramenta para começar. Transforme seus documentos Markdown em PDFs
-            profissionais.
+            Escolha uma ferramenta para começar.
           </p>
         </div>
 
