@@ -1,13 +1,7 @@
 'use client'
 
 import usePersistedState from '@/hooks/use-persisted-state'
-import {
-  createContext,
-  useContext,
-  type ReactNode,
-  useCallback,
-  useEffect,
-} from 'react'
+import { createContext, useContext, type ReactNode, useCallback, useEffect } from 'react'
 import { defaultConfig, THEME_PRESETS, PAGE_SIZES, MARGIN_PRESETS } from '../constants'
 
 interface ConfigContextType {

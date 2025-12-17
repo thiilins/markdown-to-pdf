@@ -1,7 +1,7 @@
 // src/shared/layouts/auth/user-nav.tsx
 'use client' // Importante: agora é Client Component
 
-import { handleSignIn, handleSignOut } from '@/app/actions/auth'
+import { handleSignInWithGitHub, handleSignOut } from '@/app/actions/auth'
 import { Dropdowncomponent } from '@/components/custom-ui/dropdown'
 import { Button } from '@/components/ui/button'
 import { DropdownMenuLabel } from '@/components/ui/dropdown-menu'
@@ -44,7 +44,7 @@ export const LoggedInUserNav = () => {
 }
 export const LoggedOutUserNav = () => {
   return (
-    <Button variant='outline' size='sm' onClick={handleSignIn}>
+    <Button variant='outline' size='sm' onClick={handleSignInWithGitHub}>
       <LogIn className='h-4 w-4' /> Entrar com GitHub
     </Button>
   )

@@ -24,7 +24,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     // Transfere do JWT para a Sessão (acessível no front/back)
     async session({ session, token }) {
-      // @ts-ignore - Estendendo a tipagem padrão do NextAuth
       session.accessToken = token.accessToken as string
       return session
     },
