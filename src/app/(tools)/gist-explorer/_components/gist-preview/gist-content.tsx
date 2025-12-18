@@ -1,3 +1,4 @@
+// src/app/(tools)/gist-explorer/_components/gist-preview/gist-content.tsx
 import { StaticStylePreview } from '@/components/preview-panel/static-style'
 import { useConfig } from '@/shared/contexts/configContext'
 import { useGist } from '@/shared/contexts/gistContext'
@@ -8,6 +9,7 @@ import SyntaxHighlighter from 'react-syntax-highlighter'
 import { darcula } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 import { LoadingPreviewComponent } from './additional-components'
 
+// Componente para quando não há conteúdo
 const NoContentComponent = () => {
   return (
     <div className='flex items-center justify-center py-12'>
@@ -19,12 +21,13 @@ const NoContentComponent = () => {
   )
 }
 
+// Componente que decide o que renderizar
 const ContentComponent = ({ filename, content, language }: FileContentDisplayProps) => {
   const { selectedFile } = useGist()
   const isMd = isMarkdownFile(filename)
   const isImage = isImageFile(selectedFile?.filename)
 
-  const ContentComponent = useMemo(() => {
+  const RenderedView = useMemo(() => {
     if (isMd) {
       return <ContentMdPreview content={content} />
     }
@@ -33,8 +36,10 @@ const ContentComponent = ({ filename, content, language }: FileContentDisplayPro
     }
     return <ContentCodePreview content={content} language={language} />
   }, [isMd, isImage, content, language, selectedFile])
-  return <div className='h-full space-y-4'>{ContentComponent}</div>
+
+  return <div className='h-full space-y-4'>{RenderedView}</div>
 }
+
 const ContentMdPreview = ({ content }: { content: string }) => {
   const { config } = useConfig()
   return (
@@ -47,6 +52,35 @@ const ContentMdPreview = ({ content }: { content: string }) => {
     </div>
   )
 }
+
+// const ContentCodePreview = ({
+//   content,
+//   language,
+// }: {
+//   content: string
+//   language?: string | null
+// }) => {
+//   return (
+//     <div className='h-full min-h-[80dvh] w-full max-w-[76dvw] font-mono text-sm'>
+//       <SyntaxHighlighter
+//         language={mapLanguage(language)}
+//         style={darcula}
+//         className='min-h-[85dvh] max-w-[76dvw] rounded-md bg-black'
+//         showLineNumbers={true}
+//         lineNumberStyle={{ minWidth: '3em', paddingRight: '1em', color: '#888' }}
+//         customStyle={{
+//           margin: 0,
+//           padding: '2rem',
+//           paddingLeft: '3rem',
+//           width: '100%',
+//           height: '100% !important',
+//           backgroundColor: '#010101',
+//         }}>
+//         {content}
+//       </SyntaxHighlighter>
+//     </div>
+//   )
+// }
 const ContentCodePreview = ({
   content,
   language,
@@ -55,19 +89,17 @@ const ContentCodePreview = ({
   language?: string | null
 }) => {
   return (
-    <div className='h-full min-h-[80dvh] w-full max-w-[76dvw] font-mono text-sm'>
+    <div className='h-full w-full overflow-hidden font-mono text-sm'>
       <SyntaxHighlighter
         language={mapLanguage(language)}
         style={darcula}
-        className='min-h-[85dvh] max-w-[76dvw] rounded-md bg-black'
+        className='rounded-md'
         showLineNumbers={true}
         lineNumberStyle={{ minWidth: '3em', paddingRight: '1em', color: '#888' }}
         customStyle={{
           margin: 0,
           padding: '2rem',
-          paddingLeft: '3rem',
-          width: '100%',
-          height: '100% !important',
+          width: '100%', // Crucial para o PDF
           backgroundColor: '#010101',
         }}>
         {content}
@@ -92,6 +124,44 @@ const ContentImagePreview = ({ selectedFile }: { selectedFile?: GistFile | null 
   )
 }
 
+// export const GistContent = ({
+//   selectedFile,
+//   fileContents,
+// }: {
+//   selectedFile: GistFile
+//   fileContents: Record<string, string>
+// }) => {
+//   const { loadingFiles } = useGist()
+
+//   const RenderComponent = useMemo(() => {
+//     if (!selectedFile) return null
+
+//     const isLoading = loadingFiles[selectedFile.filename]
+//     const content = fileContents[selectedFile.filename]
+
+//     if (isLoading) {
+//       return <LoadingPreviewComponent />
+//     } else if (!isLoading && !content) {
+//       return <NoContentComponent />
+//     }
+
+//     return (
+//       <ContentComponent
+//         filename={selectedFile.filename}
+//         content={content}
+//         language={selectedFile.language || null}
+//       />
+//     )
+//   }, [loadingFiles, selectedFile, fileContents])
+
+//   // Adicionamos o ID 'gist-render-container' para a captura do html2canvas
+//   // Adicionamos 'bg-background' para garantir que o fundo seja capturado corretamente
+//   return (
+//     <div id='gist-render-container' className='bg-background min-h-full p-6'>
+//       {RenderComponent}
+//     </div>
+//   )
+// }
 export const GistContent = ({
   selectedFile,
   fileContents,
@@ -103,15 +173,11 @@ export const GistContent = ({
 
   const RenderComponent = useMemo(() => {
     if (!selectedFile) return null
-
     const isLoading = loadingFiles[selectedFile.filename]
     const content = fileContents[selectedFile.filename]
 
-    if (isLoading) {
-      return <LoadingPreviewComponent />
-    } else if (!isLoading && !content) {
-      return <NoContentComponent />
-    }
+    if (isLoading) return <LoadingPreviewComponent />
+    if (!isLoading && !content) return <NoContentComponent />
 
     return (
       <ContentComponent
@@ -122,5 +188,15 @@ export const GistContent = ({
     )
   }, [loadingFiles, selectedFile, fileContents])
 
-  return <div className='p-6'>{RenderComponent}</div>
+  // ESTE CONTAINER É O SEGREDO DO PDF:
+  // 1. ID para captura: 'gist-render-area'
+  // 2. background fixo: 'bg-white' ou 'bg-background' para não sair transparente no PDF
+  // 3. Classe 'prose': Para sua função generatePDF encontrar o conteúdo se for Markdown
+  return (
+    <div
+      id='gist-render-area'
+      className='prose min-h-full w-full max-w-none bg-white p-8 dark:bg-slate-950'>
+      {RenderComponent}
+    </div>
+  )
 }

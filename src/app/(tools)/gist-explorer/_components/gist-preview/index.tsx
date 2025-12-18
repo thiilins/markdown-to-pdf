@@ -3,9 +3,9 @@
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useGist } from '@/shared/contexts/gistContext'
 import { useMemo } from 'react'
+import { GistPreviewHeader } from './GistPreviewHeader'
 import { LoadingPreviewComponent, NoGistSelectedComponent } from './additional-components'
 import { GistPreviewComponent } from './gist-preview-component'
-import { GistPreviewHeader } from './header'
 
 export const GistPreview = () => {
   const { selectedGist, loading } = useGist()
