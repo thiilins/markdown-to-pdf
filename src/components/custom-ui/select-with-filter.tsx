@@ -106,28 +106,28 @@ export function SelectWithFilterComponent({
               {filteredData.map((item) => {
                 const isSelected = item.value === value
                 return (
-                  <CommandItem
-                    value={item.label}
-                    key={item.value}
-                    onSelect={() => {
-                      setValue(item.value)
-                      setOpen(false)
-                    }}
-                    className={cn(
+                <CommandItem
+                  value={item.label}
+                  key={item.value}
+                  onSelect={() => {
+                    setValue(item.value)
+                    setOpen(false)
+                  }}
+                  className={cn(
                       'group relative mx-1.5 my-0.5 flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm transition-all duration-150',
                       'hover:bg-accent hover:text-accent-foreground',
                       'data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground',
                       isSelected && 'bg-primary/10 text-primary font-medium',
-                      className?.item,
-                    )}>
+                    className?.item,
+                  )}>
                     <span className='flex-1 truncate'>{item.label}</span>
-                    <Check
-                      className={cn(
+                  <Check
+                    className={cn(
                         'h-4 w-4 shrink-0 transition-opacity duration-150',
                         isSelected ? 'text-primary opacity-100' : 'opacity-0',
-                      )}
-                    />
-                  </CommandItem>
+                    )}
+                  />
+                </CommandItem>
                 )
               })}
             </CommandGroup>

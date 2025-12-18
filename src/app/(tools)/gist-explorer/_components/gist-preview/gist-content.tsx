@@ -1,4 +1,6 @@
-import { StaticStylePreview } from '@/components/preview-panel/static-style'
+'use client'
+
+import { StaticPreview } from '@/components/preview-panel/static-pages'
 import { useConfig } from '@/shared/contexts/configContext'
 import { useGist } from '@/shared/contexts/gistContext'
 import { isImageFile, isMarkdownFile, mapLanguage } from '@/shared/utils'
@@ -19,12 +21,20 @@ const NoContentComponent = () => {
   )
 }
 
-const ContentComponent = ({ filename, content, language }: FileContentDisplayProps) => {
+const ContentComponent = ({
+  filename,
+  content,
+  language,
+}: {
+  filename: string
+  content: string
+  language?: string | null
+}) => {
   const { selectedFile } = useGist()
   const isMd = isMarkdownFile(filename)
   const isImage = isImageFile(selectedFile?.filename)
 
-  const ContentComponent = useMemo(() => {
+  const RenderedView = useMemo(() => {
     if (isMd) {
       return <ContentMdPreview content={content} />
     }
@@ -33,13 +43,15 @@ const ContentComponent = ({ filename, content, language }: FileContentDisplayPro
     }
     return <ContentCodePreview content={content} language={language} />
   }, [isMd, isImage, content, language, selectedFile])
-  return <div className='h-full space-y-4'>{ContentComponent}</div>
+
+  return <div className='h-full w-full'>{RenderedView}</div>
 }
+
 const ContentMdPreview = ({ content }: { content: string }) => {
   const { config } = useConfig()
   return (
-    <div className='h-full'>
-      <StaticStylePreview
+    <div className='h-full w-full'>
+      <StaticPreview
         markdown={content}
         typographyConfig={config.typography}
         themeConfig={config.theme}
@@ -47,6 +59,7 @@ const ContentMdPreview = ({ content }: { content: string }) => {
     </div>
   )
 }
+
 const ContentCodePreview = ({
   content,
   language,
@@ -55,19 +68,17 @@ const ContentCodePreview = ({
   language?: string | null
 }) => {
   return (
-    <div className='h-full min-h-[80dvh] w-full max-w-[76dvw] font-mono text-sm'>
+    <div className='h-full w-full overflow-hidden font-mono text-sm'>
       <SyntaxHighlighter
         language={mapLanguage(language)}
         style={darcula}
-        className='min-h-[85dvh] max-w-[76dvw] rounded-md bg-black'
+        className='rounded-md'
         showLineNumbers={true}
         lineNumberStyle={{ minWidth: '3em', paddingRight: '1em', color: '#888' }}
         customStyle={{
           margin: 0,
           padding: '2rem',
-          paddingLeft: '3rem',
           width: '100%',
-          height: '100% !important',
           backgroundColor: '#010101',
         }}>
         {content}
@@ -75,7 +86,8 @@ const ContentCodePreview = ({
     </div>
   )
 }
-const ContentImagePreview = ({ selectedFile }: { selectedFile?: GistFile | null }) => {
+
+const ContentImagePreview = ({ selectedFile }: { selectedFile?: any | null }) => {
   return (
     <div className='flex min-h-full flex-col items-center justify-center bg-slate-50 p-8 dark:bg-slate-900/20'>
       <div className='relative overflow-hidden rounded-lg border bg-white shadow-2xl dark:bg-slate-950'>
@@ -91,7 +103,6 @@ const ContentImagePreview = ({ selectedFile }: { selectedFile?: GistFile | null 
     </div>
   )
 }
-
 export const GistContent = ({
   selectedFile,
   fileContents,
@@ -103,16 +114,13 @@ export const GistContent = ({
 
   const RenderComponent = useMemo(() => {
     if (!selectedFile) return null
-
     const isLoading = loadingFiles[selectedFile.filename]
     const content = fileContents[selectedFile.filename]
 
-    if (isLoading) {
-      return <LoadingPreviewComponent />
-    } else if (!isLoading && !content) {
-      return <NoContentComponent />
-    }
+    if (isLoading) return <LoadingPreviewComponent />
+    if (!isLoading && !content) return <NoContentComponent />
 
+    // Seus componentes ContentMdPreview, ContentCodePreview, etc.
     return (
       <ContentComponent
         filename={selectedFile.filename}
@@ -122,5 +130,12 @@ export const GistContent = ({
     )
   }, [loadingFiles, selectedFile, fileContents])
 
-  return <div className='p-6'>{RenderComponent}</div>
+  return (
+    // ID fixo para impressão e exportação PDF
+    <div
+      id='gist-render-area'
+      className='prose min-h-full w-full max-w-none overflow-visible bg-white p-8 dark:bg-slate-950'>
+      {RenderComponent}
+    </div>
+  )
 }
