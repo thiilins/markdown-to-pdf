@@ -1,27 +1,70 @@
 // src/lib/gist-utils.ts
 
 const languageMap: Record<string, string> = {
-  js: 'javascript',
-  jsx: 'jsx',
-  ts: 'typescript',
-  tsx: 'tsx',
-  py: 'python',
-  rb: 'ruby',
-  java: 'java',
-  c: 'c',
-  cpp: 'cpp',
-  cs: 'csharp',
-  go: 'go',
-  rs: 'rust',
-  php: 'php',
-  html: 'html',
-  css: 'css',
-  json: 'json',
-  sql: 'sql',
-  sh: 'bash',
-  yaml: 'yaml',
-  yml: 'yaml',
-  xml: 'xml',
+  // .NET & Microsoft
+  'C#': 'csharp',
+  'F#': 'fsharp',
+  'VB.NET': 'vbnet',
+  'Visual Basic .NET': 'vbnet',
+  PowerShell: 'powershell',
+
+  // C-Family
+  'C++': 'cpp',
+  'Objective-C': 'objectivec',
+  Arduino: 'arduino',
+
+  // Web (Frontend & Backend)
+  JavaScript: 'javascript',
+  TypeScript: 'typescript',
+  React: 'jsx', // Fallback comum para arquivos .jsx
+  JSX: 'jsx',
+  TSX: 'tsx',
+  Vue: 'vue',
+  Svelte: 'svelte',
+  HTML: 'markup',
+  XML: 'markup',
+  SVG: 'markup',
+  CSS: 'css',
+  SCSS: 'scss',
+  Less: 'less',
+  PHP: 'php',
+
+  // Mobile
+  Swift: 'swift',
+  Kotlin: 'kotlin',
+  Dart: 'dart',
+
+  // Data & Config
+  JSON: 'json',
+  YAML: 'yaml',
+  TOML: 'toml',
+  GraphQL: 'graphql',
+  SQL: 'sql',
+  PostgreSQL: 'sql',
+  'PL/SQL': 'plsql',
+
+  // Scripting & System
+  Python: 'python',
+  Ruby: 'ruby',
+  Go: 'go',
+  Rust: 'rust',
+  Shell: 'bash',
+  Bash: 'bash',
+  Zsh: 'bash',
+  Makefile: 'makefile',
+  Dockerfile: 'docker',
+  Nginx: 'nginx',
+  ApacheConf: 'apacheconf',
+
+  // Documentação e Outros
+  Markdown: 'markdown',
+  TeX: 'latex',
+  LaTeX: 'latex',
+  'Vim Script': 'vim',
+  'Protocol Buffers': 'protobuf',
+  Perl: 'perl',
+  Scala: 'scala',
+  Lua: 'lua',
 }
 
 /**
@@ -121,10 +164,6 @@ export const mountGistSelectedfile = (
   }
 }
 
-export const isMarkdownFile = (filename: string): boolean => {
-  return filename.endsWith('.md') || filename.endsWith('.markdown')
-}
-
 /**
  * FEATURE 3.2: Wrapping Strategy
  * Envolve arquivos que não são markdown em blocos de código para
@@ -188,4 +227,40 @@ export function extractGistTags(description: string | null): string[] {
   const matches = description.match(regex)
   if (!matches) return []
   return matches.map((tag) => tag.substring(1).toLowerCase())
+}
+export function mapLanguage(lang: string | null | undefined): string {
+  // Caso a linguagem não seja detectada ou seja nula, tratamos como texto plano
+  if (!lang) {
+    return 'text'
+  }
+
+  /**
+   * Se o nome vindo do GitHub existir no mapa acima, retornamos o valor mapeado.
+   * Caso contrário, tentamos converter para minúsculo e remover espaços,
+   * que é o padrão da maioria das linguagens no highlighter.
+   */
+  const normalizedLang = lang.trim()
+
+  if (languageMap[normalizedLang]) {
+    return languageMap[normalizedLang]
+  }
+
+  // Fallback para nomes que não estão no mapa mas seguem o padrão lowercase
+  return normalizedLang.toLowerCase().replace(/\s+/g, '')
+}
+export function isImageFile(filename: string | undefined): boolean {
+  if (!filename) return false
+
+  const imageExtensions = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'ico', 'avif', 'bmp']
+
+  const extension = filename.split('.').pop()?.toLowerCase() || ''
+  return imageExtensions.includes(extension)
+}
+export function isMarkdownFile(filename: string | undefined): boolean {
+  if (!filename) return false
+
+  const mdExtensions = ['md', 'markdown', 'mdown', 'mkdn']
+  const extension = filename.split('.').pop()?.toLowerCase() || ''
+
+  return mdExtensions.includes(extension)
 }

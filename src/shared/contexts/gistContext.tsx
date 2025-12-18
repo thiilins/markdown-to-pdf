@@ -46,6 +46,9 @@ interface GistContextType {
   selectedTags: string[]
   fileOptions: { value: string; label: string; language: string | null }[]
   toggleTag: (tag: string) => void
+  allLanguages: string[]
+  selectedLanguages: string[]
+  toggleLanguage: (lang: string) => void
 }
 
 const GistContext = createContext<GistContextType | undefined>(undefined)
@@ -68,6 +71,7 @@ export function GistProvider({ children }: { children: ReactNode }) {
   const [searchValue, setSearchValue] = useState('')
   const [searchType, setSearchType] = useState<{ description: boolean }>({ description: true })
   const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([])
 
   const OnChangeSearchType = (checked: boolean) => {
     setSearchType({ ...searchType, description: checked })
@@ -86,30 +90,50 @@ export function GistProvider({ children }: { children: ReactNode }) {
     return Array.from(tags).sort()
   }, [gists])
 
+  const allLanguages = useMemo(() => {
+    const langs = new Set<string>()
+    gists.forEach((gist) => {
+      gist.files.forEach((file) => {
+        if (file.language) langs.add(file.language)
+      })
+    })
+    return Array.from(langs).sort()
+  }, [gists])
+
+  const toggleLanguage = useCallback((lang: string) => {
+    setSelectedLanguages((prev) =>
+      prev.includes(lang) ? prev.filter((l) => l !== lang) : [...prev, lang],
+    )
+  }, [])
+
   const toggleTag = useCallback((tag: string) => {
     setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
   }, [])
 
-  // Filtragem Unificada
   const filteredGists = useMemo(() => {
     return gists.filter((gist) => {
-      // Filtro de Texto
       const descriptionMatch = searchText(gist.description, searchValue)
       const filesMatch = gist.files.some((file) => searchText(file.filename, searchValue))
       const textMatch = !searchType.description ? filesMatch : descriptionMatch || filesMatch
 
-      // Filtro de Tags
+      // 2. Filtro de Tags (#)
       let tagsMatch = true
       if (selectedTags.length > 0) {
         const gistTags = (gist.description?.match(/#[\w-]+/g) || []).map((t) => t.toLowerCase())
-        // O Gist precisa ter TODAS as tags selecionadas (AND logic)
         tagsMatch = selectedTags.every((tag) => gistTags.includes(tag))
       }
 
-      return textMatch && tagsMatch
-    })
-  }, [gists, searchValue, searchType, selectedTags])
+      // 3. Filtro de Linguagens
+      let langMatch = true
+      if (selectedLanguages.length > 0) {
+        langMatch = gist.files.some(
+          (file) => file.language && selectedLanguages.includes(file.language),
+        )
+      }
 
+      return textMatch && tagsMatch && langMatch
+    })
+  }, [gists, searchValue, searchType, selectedTags, selectedLanguages])
   const onGetGists = useCallback(
     async ({ username, type }: FetchGistsParams) => {
       setLoading(true)
@@ -242,6 +266,9 @@ export function GistProvider({ children }: { children: ReactNode }) {
     fileOptions,
     selectedTags,
     toggleTag,
+    allLanguages,
+    selectedLanguages,
+    toggleLanguage,
   }
   return <GistContext.Provider value={value}>{children}</GistContext.Provider>
 }
