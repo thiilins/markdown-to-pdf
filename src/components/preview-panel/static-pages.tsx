@@ -17,7 +17,7 @@ interface StaticStylePreviewProps {
   className?: string
 }
 
-export function StaticStylePreview({
+export function StaticPreview({
   markdown,
   typographyConfig,
   themeConfig,
@@ -65,7 +65,8 @@ export function StaticStylePreview({
           <pre {...props} style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
             <div className='flex h-5 w-full items-center justify-end'>
               <div
-                className='bg-muted cursor-pointer rounded-[5px] p-2'
+                id='copy-code-button'
+                className='bg-muted mt-2 cursor-pointer rounded-[5px] p-2'
                 onClick={() => handleCopyCode(children as string)}>
                 <Copy className='text-muted-foreground h-4 w-4' />
               </div>

@@ -46,15 +46,15 @@ export async function GET(request: Request) {
       const url = `${endpoint}?page=${page}&per_page=100` // Máximo permitido pela API
       const res = await fetch(url, { headers })
 
-      if (!res.ok) {
-        // Repassa o erro do GitHub (ex: 404 user not found)
+    if (!res.ok) {
+      // Repassa o erro do GitHub (ex: 404 user not found)
         return NextResponse.json(
           { error: `Erro GitHub: ${res.statusText}` },
           { status: res.status },
         )
-      }
+    }
 
-      const data = await res.json()
+    const data = await res.json()
 
       if (Array.isArray(data) && data.length > 0) {
         allGists.push(...data)
@@ -74,23 +74,23 @@ export async function GET(request: Request) {
 
     // Sanitização: Retornamos apenas o necessário para o front economizar banda
     let sanitizedGists = allGists.map((gist: any) => ({
-      id: gist.id,
-      description: gist.description || 'Sem descrição',
-      public: gist.public,
-      created_at: gist.created_at,
-      html_url: gist.html_url,
-      owner: {
-        login: gist.owner?.login,
-        avatar_url: gist.owner?.avatar_url,
-      },
-      files: Object.keys(gist.files).map((key) => ({
-        filename: key,
-        language: gist.files[key].language,
-        raw_url: gist.files[key].raw_url,
-        type: gist.files[key].type,
-        size: gist.files[key].size,
-      })),
-    }))
+          id: gist.id,
+          description: gist.description || 'Sem descrição',
+          public: gist.public,
+          created_at: gist.created_at,
+          html_url: gist.html_url,
+          owner: {
+            login: gist.owner?.login,
+            avatar_url: gist.owner?.avatar_url,
+          },
+          files: Object.keys(gist.files).map((key) => ({
+            filename: key,
+            language: gist.files[key].language,
+            raw_url: gist.files[key].raw_url,
+            type: gist.files[key].type,
+            size: gist.files[key].size,
+          })),
+        }))
 
     // Se all=false e não há username (busca "Meus Gists"), filtrar apenas públicos
     // Quando há username, sempre retorna apenas públicos (não temos acesso aos privados de outros)
