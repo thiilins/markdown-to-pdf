@@ -41,6 +41,7 @@ interface GistContextType {
   searchType: { description: boolean }
   OnChangeSearchType: (checked: boolean) => void
   setSearchValue: (value: string) => void
+  handleResetData: () => void
   // Novas propriedades para Tags
   allTags: string[]
   selectedTags: string[]
@@ -55,6 +56,8 @@ const GistContext = createContext<GistContextType | undefined>(undefined)
 
 export function GistProvider({ children }: { children: ReactNode }) {
   const [gists, setGists] = usePersistedStateInDB<Gist[]>('gists', [])
+
+  // GIST LIST
   const [error, setError] = useState<string | null | undefined>(null)
   const [loading, setLoading] = useState(false)
   const [typeMyGists, setTypeMyGists] = useState<GistType>('all')
@@ -67,7 +70,7 @@ export function GistProvider({ children }: { children: ReactNode }) {
   const [loadingFiles, setLoadingFiles] = useState<Record<string, boolean>>({})
   const [selectedFile, setSelectedFile] = useState<SelectedGistFileProps | null>(null)
 
-  // Search & Filters
+  // GIST SEARCH & FILTERS
   const [searchValue, setSearchValue] = useState('')
   const [searchType, setSearchType] = useState<{ description: boolean }>({ description: true })
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -236,6 +239,15 @@ export function GistProvider({ children }: { children: ReactNode }) {
     })
     return options
   }, [selectedGist?.files])
+
+  const handleResetData = useCallback(() => {
+    setGists([])
+    setError(null)
+    setSelectedGist(null)
+    setFileContents({})
+    setSelectedFile(null)
+    setLoadingFiles({})
+  }, [setGists])
   const value = {
     gists,
     setGists,
@@ -269,6 +281,7 @@ export function GistProvider({ children }: { children: ReactNode }) {
     allLanguages,
     selectedLanguages,
     toggleLanguage,
+    handleResetData,
   }
   return <GistContext.Provider value={value}>{children}</GistContext.Provider>
 }

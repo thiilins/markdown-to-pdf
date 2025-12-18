@@ -5,9 +5,11 @@ import { handleSignInWithGitHub, handleSignOut } from '@/app/actions/auth'
 import { Dropdowncomponent } from '@/components/custom-ui/dropdown'
 import { Button } from '@/components/ui/button'
 import { DropdownMenuLabel } from '@/components/ui/dropdown-menu'
+import { clearAllDatabases } from '@/shared/utils'
 import { formatDateWithTime } from '@/shared/utils/format-date'
-import { LogIn, LogOut } from 'lucide-react'
+import { BrushCleaning, LogIn, LogOut } from 'lucide-react'
 import { useSession } from 'next-auth/react' // Importa tudo do react
+import { useCallback } from 'react'
 import { INVALID_AUTH_STATUS } from './_components/constants'
 import { UserAvatar } from './_components/user-avatar'
 
@@ -29,6 +31,7 @@ export const LoggedInUserNav = () => {
   const content: DropdownContentProps[] = [
     { type: 'solo', key: 'user-details', component: <UserDetailsLabel /> },
     { type: 'separator', key: 'separator' },
+    { type: 'item', key: 'reset-data', component: <ResetDataButton /> },
     { type: 'item', key: 'logout', component: <LogoutButton /> },
   ]
 
@@ -66,7 +69,18 @@ export const UserDetailsLabel = () => {
     </DropdownMenuLabel>
   )
 }
-
+export const ResetDataButton = () => {
+  const handleResetData = useCallback(async () => {
+    await clearAllDatabases()
+    localStorage.clear()
+    window.location.reload()
+  }, [])
+  return (
+    <Button variant='ghost' size='sm' onClick={handleResetData}>
+      <BrushCleaning className='h-4 w-4' /> Limpar Cache Local
+    </Button>
+  )
+}
 export const LogoutButton = () => {
   return (
     <Button
