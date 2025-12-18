@@ -152,25 +152,20 @@ export function GistProvider({ children }: { children: ReactNode }) {
   const handleLoadFileContent = useCallback(
     async (file: GistFile) => {
       if (fileContents[file.filename] || loadingFiles[file.filename]) return
-
       setLoadingFiles((prev) => ({ ...prev, [file.filename]: true }))
-
       try {
-        const response = await fetch(file.raw_url)
-        if (!response.ok) throw new Error('Falha ao carregar arquivo')
-        const content = await response.text()
-        setFileContents((prev) => ({ ...prev, [file.filename]: content }))
-      } catch (error) {
-        console.error(`Erro ao carregar ${file.filename}:`, error)
-        setFileContents((prev) => ({
-          ...prev,
-          [file.filename]: `❌ Erro ao carregar conteúdo`,
-        }))
+        const response = await GistService.getGistContent(file.raw_url)
+        if (response.success) {
+          setFileContents((prev) => ({ ...prev, [file.filename]: response.data }))
+        } else {
+          setFileContents((prev) => ({ ...prev, [file.filename]: '' }))
+          toast.error(response.error || 'Falha ao carregar arquivo', { duration: 4000 })
+        }
       } finally {
         setLoadingFiles((prev) => ({ ...prev, [file.filename]: false }))
       }
     },
-    [fileContents, loadingFiles],
+    [fileContents, loadingFiles, setFileContents, setLoadingFiles],
   )
 
   const onSelectGist = useCallback(

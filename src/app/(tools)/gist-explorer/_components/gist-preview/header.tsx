@@ -1,132 +1,121 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useGist } from '@/shared/contexts/gistContext'
 import { useMDToPdf } from '@/shared/contexts/mdToPdfContext'
-import { processGistForImport } from '@/shared/utils'
-import { ChevronDown, FileCode2, Files, Github, MessageSquareReply } from 'lucide-react'
-import Link from 'next/link'
+import { mergeGistFiles, wrapContentInMarkdown } from '@/shared/utils/gist-tools'
+import { ExternalLink, FileEdit, Import } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { FileSelector } from './file-selector'
-import { getIcon } from './icons'
+import { useMemo } from 'react'
+import { toast } from 'sonner'
 
-export const GistPreviewHeader = () => {
-  const { selectedFile } = useGist()
-  if (!selectedFile) return null
-  const Icon = getIcon(selectedFile?.language || '')
-
-  return (
-    <div className='bg-muted/30 flex items-center justify-between border-b p-4'>
-      <div className='flex items-center gap-3 overflow-hidden'>
-        <div className='bg-background/50 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border shadow-sm'>
-          <Icon className='text-primary h-6 w-6' />
-        </div>
-        <div className='flex flex-col overflow-hidden'>
-          <h2 className='truncate text-sm leading-none font-semibold'>
-            {selectedFile?.filename || 'Sem nome'}
-          </h2>
-          {selectedFile?.description && (
-            <p className='text-muted-foreground mt-1 truncate text-xs'>
-              {selectedFile?.description}
-            </p>
-          )}
-        </div>
-      </div>
-
-      <div className='flex items-center gap-2 pl-4'>
-        <FileSelector />
-        <ViewOnGitHubButton />
-        <ActionButtons />
-      </div>
-    </div>
-  )
-}
-
-export const ViewOnGitHubButton = () => {
-  const { selectedFile } = useGist()
-  if (!selectedFile?.html_url) return null
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button variant='outline' size='icon' asChild className='h-9 w-9 shrink-0'>
-          <Link href={selectedFile.html_url} target='_blank' rel='noopener noreferrer'>
-            <Github className='h-4 w-4' />
-          </Link>
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>Ver no GitHub</TooltipContent>
-    </Tooltip>
-  )
-}
-
-export const ActionButtons = () => {
+export function GistPreviewHeader() {
   const { selectedGist, selectedFile, fileContents } = useGist()
   const { setMarkdown } = useMDToPdf()
   const router = useRouter()
 
-  // 1. Verificação se é Markdown
-  const isMarkdown = selectedFile?.filename?.toLowerCase().endsWith('.md') ?? false
+  // Deriva o conteúdo do arquivo atual baseado no dicionário do contexto
+  const currentContent = useMemo(() => {
+    if (!selectedFile) return ''
+    return fileContents[selectedFile.filename] || ''
+  }, [selectedFile, fileContents])
 
-  const handleMergeImport = () => {
+  if (!selectedGist) return null
+
+  const handleOpenInGitHub = () => {
+    window.open(selectedGist.html_url, '_blank')
+  }
+
+  // Ação 1: Importar arquivo atual para o editor
+  const handleEditFile = () => {
+    if (!selectedFile || !currentContent) return
+
+    const finalContent = wrapContentInMarkdown(selectedFile.filename, currentContent)
+
+    setMarkdown(finalContent)
+    toast.success(`Arquivo "${selectedFile.filename}" carregado no editor!`)
+    router.push('/md-to-pdf')
+  }
+
+  // Ação 2: Importar TODOS os arquivos mesclados
+  const handleImportAll = async () => {
     if (!selectedGist) return
-    const fullContent = processGistForImport(selectedGist, fileContents)
-    setMarkdown(fullContent)
-    router.push('/md-to-pdf')
+
+    const toastId = toast.loading('Baixando arquivos do Gist...')
+    const files = selectedGist.files
+    const downloadedContents: Record<string, string> = {}
+    let missingFiles = 0
+
+    try {
+      await Promise.all(
+        files.map(async (file) => {
+          // 1. Tenta pegar do cache do contexto primeiro
+          if (fileContents[file.filename]) {
+            downloadedContents[file.filename] = fileContents[file.filename]
+            return
+          }
+
+          // 2. Se não tiver, busca via Proxy (para evitar CORS)
+          try {
+            const res = await fetch(`/api/gists/content?url=${encodeURIComponent(file.raw_url)}`)
+            if (res.ok) {
+              downloadedContents[file.filename] = await res.text()
+            } else {
+              missingFiles++
+            }
+          } catch (e) {
+            missingFiles++
+          }
+        }),
+      )
+
+      if (missingFiles > 0) {
+        toast.warning(`${missingFiles} arquivos falharam ao carregar.`)
+      }
+
+      // Mescla tudo
+      const mergedMarkdown = mergeGistFiles(files, downloadedContents)
+
+      setMarkdown(mergedMarkdown)
+      toast.dismiss(toastId)
+      toast.success('Gist completo importado com sucesso!')
+      router.push('/md-to-pdf')
+    } catch (error) {
+      toast.dismiss(toastId)
+      toast.error('Erro ao importar gist.')
+      console.error(error)
+    }
   }
-
-  const handleSingleFileImport = () => {
-    if (!selectedFile) return
-    const content = fileContents[selectedFile.filename]
-    if (!content) return
-
-    setMarkdown(content)
-    router.push('/md-to-pdf')
-  }
-
-  const isMultiFile = (selectedGist?.files.length || 0) > 1
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        {/* 2. Botão desabilitado se não for Markdown */}
-        <Button
-          className='h-9 gap-2 px-3'
-          disabled={!isMarkdown}
-          title={!isMarkdown ? 'Apenas arquivos Markdown podem ser importados' : undefined}>
-          <MessageSquareReply className='h-4 w-4' />
-          <span className='hidden sm:inline'>Importar</span>
-          <ChevronDown className='h-3 w-3 opacity-50' />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align='end' className='w-56'>
-        <DropdownMenuItem onClick={handleSingleFileImport}>
-          <FileCode2 className='mr-2 h-4 w-4' />
-          <div className='flex flex-col'>
-            <span>Editar este arquivo</span>
-            <span className='text-muted-foreground text-[10px]'>Importa conteúdo cru (Raw)</span>
-          </div>
-        </DropdownMenuItem>
+    <div className='bg-muted/10 flex h-[60px] shrink-0 items-center justify-between border-b px-4 py-3'>
+      <div className='flex flex-col overflow-hidden'>
+        <h3
+          className='max-w-[200px] truncate text-sm font-medium md:max-w-[400px]'
+          title={selectedFile?.filename}>
+          {selectedFile?.filename || 'Selecione um arquivo'}
+        </h3>
+        <span className='text-muted-foreground truncate text-xs'>
+          {selectedFile?.language || 'Plain Text'} •{' '}
+          {selectedFile ? (selectedFile.size / 1024).toFixed(2) : 0} KB
+        </span>
+      </div>
 
-        {isMultiFile && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleMergeImport}>
-              <Files className='mr-2 h-4 w-4' />
-              <div className='flex flex-col'>
-                <span>Mesclar todos arquivos</span>
-                <span className='text-muted-foreground text-[10px]'>Junta tudo em um Markdown</span>
-              </div>
-            </DropdownMenuItem>
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      <div className='flex shrink-0 items-center gap-2'>
+        <Button variant='ghost' size='icon' onClick={handleOpenInGitHub} title='Ver no GitHub'>
+          <ExternalLink className='h-4 w-4' />
+        </Button>
+
+        <Button variant='secondary' size='sm' onClick={handleEditFile} disabled={!currentContent}>
+          <FileEdit className='mr-2 h-4 w-4' />
+          <span className='hidden sm:inline'>Editar</span>
+        </Button>
+
+        <Button size='sm' onClick={handleImportAll}>
+          <Import className='mr-2 h-4 w-4' />
+          <span className='hidden sm:inline'>Importar Tudo</span>
+        </Button>
+      </div>
+    </div>
   )
 }

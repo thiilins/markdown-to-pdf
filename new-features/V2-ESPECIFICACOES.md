@@ -275,11 +275,3 @@ pnpm add next-auth@beta
 
 _(Usaremos a versão Beta (v5) pois é a nativa para Next.js 14/15 com App Router, simplificando muito
 a gestão de tokens)._
-
-## 7. Próximo Passo
-
-O plano está aprovado? Se sim, a ordem de execução sugerida é:
-
-1. **Instalação e Configuração do Auth.js** (pois todo o backend depende disso).
-2. **Criação das API Routes** (para testar se conseguimos listar os Gists).
-3. **Desenvolvimento do Frontend** (Telas e Componentes).

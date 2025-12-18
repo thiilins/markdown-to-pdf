@@ -1,25 +1,55 @@
 // src/lib/gist-utils.ts
 
-// Mapeamento de extensões para linguagens do Prism/Markdown
-export const languageMap: Record<string, string> = {
+const languageMap: Record<string, string> = {
   js: 'javascript',
-  jsx: 'javascript',
+  jsx: 'jsx',
   ts: 'typescript',
-  tsx: 'typescript',
+  tsx: 'tsx',
   py: 'python',
   rb: 'ruby',
   java: 'java',
-  css: 'css',
-  html: 'html',
-  json: 'json',
+  c: 'c',
+  cpp: 'cpp',
+  cs: 'csharp',
   go: 'go',
-  rust: 'rust',
+  rs: 'rust',
+  php: 'php',
+  html: 'html',
+  css: 'css',
+  json: 'json',
   sql: 'sql',
   sh: 'bash',
   yaml: 'yaml',
   yml: 'yaml',
-  md: 'markdown',
-  // Adicione mais conforme necessidade
+  xml: 'xml',
+}
+
+/**
+ * Envolve o conteúdo em blocos de código Markdown se não for .md
+ */
+export function wrapContentInMarkdown(filename: string, content: string): string {
+  const extension = filename.split('.').pop()?.toLowerCase() || ''
+
+  if (extension === 'md' || extension === 'markdown') {
+    return content
+  }
+
+  // Mapa básico de extensões
+  const languageMap: Record<string, string> = {
+    js: 'javascript',
+    ts: 'typescript',
+    py: 'python',
+    html: 'html',
+    css: 'css',
+    json: 'json',
+    java: 'java',
+    c: 'c',
+    cpp: 'cpp',
+    sql: 'sql',
+  }
+
+  const language = languageMap[extension] || ''
+  return `\`\`\`${language}\n${content}\n\`\`\``
 }
 
 export const isValidList = (list: Gist[]) => {
@@ -46,12 +76,28 @@ export function wrapGistContent(filename: string, content: string): string {
   // Se for código, envelopamos com syntax highlighting
   return `### 💻 ${filename}\n\`\`\`${language}\n${content}\n\`\`\``
 }
-
 /**
- * Junta múltiplos arquivos de um Gist em uma única string Markdown
+ * Mescla múltiplos arquivos em um único Markdown com separadores
  */
-export function mergeGistFiles(files: { filename: string; content: string }[]): string {
-  return files.map((file) => wrapGistContent(file.filename, file.content)).join('\n\n---\n\n') // Adiciona uma linha horizontal entre arquivos
+export function mergeGistFiles(files: GistFile[], rawContents: Record<string, string>): string {
+  // Ordena README primeiro
+  const sortedFiles = [...files].sort((a, b) => {
+    if (a.filename.toLowerCase() === 'readme.md') return -1
+    if (b.filename.toLowerCase() === 'readme.md') return 1
+    return a.filename.localeCompare(b.filename)
+  })
+
+  return sortedFiles
+    .map((file) => {
+      const content = rawContents[file.filename]
+      if (!content) return ''
+
+      const separator = `\n\n---\n### 📄 ${file.filename}\n---\n\n`
+      const wrapped = wrapContentInMarkdown(file.filename, content)
+
+      return separator + wrapped
+    })
+    .join('')
 }
 
 export const mountGistSelectedfile = (
@@ -131,4 +177,15 @@ export const processGistForImport = (gist: Gist, fileContents: Record<string, st
   })
 
   return finalMarkdown
+}
+
+/**
+ * Extrai hashtags de uma string de descrição.
+ */
+export function extractGistTags(description: string | null): string[] {
+  if (!description) return []
+  const regex = /#(\w+)/g
+  const matches = description.match(regex)
+  if (!matches) return []
+  return matches.map((tag) => tag.substring(1).toLowerCase())
 }

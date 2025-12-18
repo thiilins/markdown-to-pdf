@@ -33,4 +33,27 @@ export const GistService = {
       data,
     }
   },
+
+  getGistContent: async (
+    fileRawUrl: string,
+  ): Promise<{ success: boolean; error?: string; data: string; rawData?: Response }> => {
+    const params = {
+      url: fileRawUrl,
+    }
+    const url = buildUrl('/api/gists/content', params)
+    const response = await fetch(url)
+    if (!response.ok) {
+      return {
+        success: false,
+        error: 'Falha ao carregar arquivo',
+        data: '',
+        rawData: response,
+      }
+    }
+    const content = await response.text()
+    return {
+      success: true,
+      data: content,
+    }
+  },
 }
