@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import { THEME_PRESETS } from '@/shared/constants'
+import { useConfig } from '@/shared/contexts/configContext'
 import { useMDToPdf } from '@/shared/contexts/mdToPdfContext'
 import { useZoom } from '@/shared/contexts/zoomContext'
 import { PreviewStyle } from '@/shared/styles/preview-styles'
@@ -19,7 +20,8 @@ interface PreviewPanelProps {
 }
 
 export function PreviewPanelWithPages({ className }: PreviewPanelProps) {
-  const { config, contentRef, markdown } = useMDToPdf()
+  const { contentRef, markdown } = useMDToPdf()
+  const { config } = useConfig()
   const { zoom } = useZoom()
   const pageConfig = config.page
   const typographyConfig = config.typography
@@ -223,10 +225,10 @@ export function PreviewPanelWithPages({ className }: PreviewPanelProps) {
     }, 300) // Aumentado para 300ms para garantir renderização de códigos pesados
 
     return () => clearTimeout(timer)
-  }, [markdown, dimensions, pageConfig.margin, typographyConfig])
+  }, [markdown, dimensions, pageConfig.margin, typographyConfig, theme])
 
-  const getPageStyle = useMemo(
-    () => ({
+  const getPageStyle = useMemo(() => {
+    return {
       width: dimensions.widthDisplay,
       height: dimensions.heightDisplay,
       paddingTop: pageConfig.margin.top,
@@ -241,9 +243,8 @@ export function PreviewPanelWithPages({ className }: PreviewPanelProps) {
       overflow: 'hidden',
       flexShrink: 0,
       boxSizing: 'border-box' as const,
-    }),
-    [dimensions, pageConfig.margin, theme],
-  )
+    }
+  }, [dimensions, pageConfig.margin, theme])
 
   const markdownComponents: Components = useMemo(
     () => ({

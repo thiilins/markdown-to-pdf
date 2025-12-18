@@ -1,6 +1,6 @@
 import { StaticStylePreview } from '@/components/preview-panel/static-style'
+import { useConfig } from '@/shared/contexts/configContext'
 import { useGist } from '@/shared/contexts/gistContext'
-import { useMDToPdf } from '@/shared/contexts/mdToPdfContext'
 import { isImageFile, isMarkdownFile, mapLanguage } from '@/shared/utils'
 import { AlertCircle } from 'lucide-react'
 import { useMemo } from 'react'
@@ -36,7 +36,7 @@ const ContentComponent = ({ filename, content, language }: FileContentDisplayPro
   return <div className='h-full space-y-4'>{ContentComponent}</div>
 }
 const ContentMdPreview = ({ content }: { content: string }) => {
-  const { config } = useMDToPdf()
+  const { config } = useConfig()
   return (
     <div className='h-full'>
       <StaticStylePreview
