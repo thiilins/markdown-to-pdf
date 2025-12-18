@@ -15,7 +15,6 @@ export const ThemeConfigComponent = ({ value }: { value: string }) => {
 
   return (
     <TabsContent value={value} className='mt-4 space-y-4'>
-      {/* Preset de Tema */}
       <Card>
         <CardHeader className='mb-3 flex items-center gap-2'>
           <div className='rounded-lg bg-linear-to-br from-fuchsia-500 to-purple-600 p-2 text-white'>

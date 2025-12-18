@@ -75,7 +75,7 @@ export function SelectWithFilterComponent({
           disabled={disabled}
           role='combobox'
           className={cn(
-            'border-input/50 focus-within:border-ring focus-within:ring-ring hover:border-input w-full justify-between rounded-lg border px-3 py-2 transition-all duration-200 focus-within:ring-2 focus-within:ring-offset-2',
+            'border-input/50 focus-within:border-ring focus-within:ring-ring hover:border-input w-full! justify-between rounded-lg border px-3 py-2 shadow-none transition-all duration-200 focus-within:ring-2 focus-within:ring-offset-2',
             className?.buttonTrigger,
             !value && 'text-muted-foreground/70',
             disabled && 'cursor-not-allowed opacity-50',
@@ -89,41 +89,47 @@ export function SelectWithFilterComponent({
       <PopoverContent
         align='start'
         className={cn(
-          'border-border/50 w-full rounded-lg border p-0 shadow-lg backdrop-blur-sm',
+          'bg-popover border-border w-full rounded-lg border p-0 shadow-xl',
           className?.content,
         )}>
         <Command>
           <CommandInput
             placeholder={placeholder}
             onValueChange={handleSearch}
-            className='placeholder:text-muted-foreground/70 border-0 transition-colors duration-200 focus:ring-0'
+            className='placeholder:text-muted-foreground/60 border-0 bg-transparent px-3 py-2.5 text-sm transition-colors duration-200 focus:ring-0'
           />
-          <CommandList>
-            <CommandEmpty className='text-muted-foreground/70 py-6 text-center text-sm'>
+          <CommandList className='max-h-[300px]'>
+            <CommandEmpty className='text-muted-foreground py-8 text-center text-sm'>
               {emptyMessage}
             </CommandEmpty>
             <CommandGroup>
-              {filteredData.map((item) => (
-                <CommandItem
-                  value={item.label}
-                  key={item.value}
-                  onSelect={() => {
-                    setValue(item.value)
-                    setOpen(false)
-                  }}
-                  className={cn(
-                    'hover:bg-muted/50 data-selected:bg-primary/10 data-selected:text-primary mx-1 my-0.5 cursor-pointer rounded-md px-2 py-1.5 transition-colors duration-150',
-                    className?.item,
-                  )}>
-                  <span className='truncate'>{item.label}</span>
-                  <Check
+              {filteredData.map((item) => {
+                const isSelected = item.value === value
+                return (
+                  <CommandItem
+                    value={item.label}
+                    key={item.value}
+                    onSelect={() => {
+                      setValue(item.value)
+                      setOpen(false)
+                    }}
                     className={cn(
-                      'ml-auto h-4 w-4 transition-opacity duration-150',
-                      item.value === value ? 'text-primary opacity-100' : 'opacity-0',
-                    )}
-                  />
-                </CommandItem>
-              ))}
+                      'group relative mx-1.5 my-0.5 flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm transition-all duration-150',
+                      'hover:bg-accent hover:text-accent-foreground',
+                      'data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground',
+                      isSelected && 'bg-primary/10 text-primary font-medium',
+                      className?.item,
+                    )}>
+                    <span className='flex-1 truncate'>{item.label}</span>
+                    <Check
+                      className={cn(
+                        'h-4 w-4 shrink-0 transition-opacity duration-150',
+                        isSelected ? 'text-primary opacity-100' : 'opacity-0',
+                      )}
+                    />
+                  </CommandItem>
+                )
+              })}
             </CommandGroup>
           </CommandList>
         </Command>

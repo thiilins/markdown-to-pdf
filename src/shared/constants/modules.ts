@@ -1,4 +1,4 @@
-import { RotateCw, ToolCase } from 'lucide-react'
+import { GitBranch, RotateCw, ToolCase } from 'lucide-react'
 
 export const Modules: ModuleItem[] = [
   {
@@ -10,6 +10,12 @@ export const Modules: ModuleItem[] = [
         href: '/md-to-pdf',
         icon: RotateCw,
         description: 'Converta arquivos Markdown em PDFs',
+      },
+      {
+        label: 'Gist Explorer',
+        href: '/gist-explorer',
+        icon: GitBranch,
+        description: 'Explore Gists do GitHub',
       },
     ],
   },

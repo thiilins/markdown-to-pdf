@@ -2,6 +2,7 @@
 
 import { generatePDF } from '@/app/actions/pdf'
 import { ENVIROMENT } from '@/env'
+import usePersistedState from '@/hooks/use-persisted-state'
 import {
   Dispatch,
   RefObject,
@@ -24,13 +25,6 @@ interface MDToPdfContextType {
   setIsLoading: Dispatch<SetStateAction<boolean>>
   onPrint: () => void
   onDownloadPDF: () => void
-  config: AppConfig
-  onConfigChange: (config: Partial<AppConfig>) => void
-  onPageSizeChange: (size: PageSize) => void
-  onOrientationChange: (orientation: Orientation) => void
-  onReset: () => void
-  onApplyMarginPreset: (preset: MarginPreset) => void
-  onApplyThemePreset: (preset: ThemePreset) => void
   markdown: string
   setMarkdown: React.Dispatch<React.SetStateAction<string>>
   contentRef: RefObject<HTMLDivElement | null>
@@ -43,18 +37,10 @@ const MDToPdfContext = createContext<MDToPdfContextType | undefined>(undefined)
 export { MDToPdfContext }
 
 export function MDToPdfProvider({ children }: { children: ReactNode }) {
-  const {
-    config,
-    updateConfig,
-    updatePageSize,
-    updateOrientation,
-    resetConfig,
-    applyMarginPreset,
-    applyThemePreset,
-  } = useConfig()
+  const { config } = useConfig()
 
   const [isLoading, setIsLoading] = useState(false)
-  const [markdown, setMarkdown] = useState<string>(DEFAULT_MARKDOWN)
+  const [markdown, setMarkdown] = usePersistedState<string>('md-to-pdf-markdown', DEFAULT_MARKDOWN)
   const contentRef = useRef<HTMLDivElement>(null)
   const handlePrint = useReactToPrint({
     contentRef: contentRef,
@@ -164,13 +150,6 @@ export function MDToPdfProvider({ children }: { children: ReactNode }) {
           onPrint: handlePrint,
           disabledDownload,
           onDownloadPDF: handleDownloadPDF,
-          config,
-          onConfigChange: updateConfig,
-          onPageSizeChange: updatePageSize,
-          onOrientationChange: updateOrientation,
-          onReset: resetConfig,
-          onApplyMarginPreset: applyMarginPreset,
-          onApplyThemePreset: applyThemePreset,
           markdown,
           setMarkdown,
           contentRef,

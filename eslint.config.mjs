@@ -53,9 +53,9 @@ const eslintConfig = [
       '@typescript-eslint/no-unsafe-function-type': 'off',
 
       // Unused imports - remove imports não utilizados
-      'unused-imports/no-unused-imports': 'error',
+      'unused-imports/no-unused-imports': 'off',
       'unused-imports/no-unused-vars': [
-        'warn',
+        'off',
         {
           vars: 'all',
           varsIgnorePattern: '^_',

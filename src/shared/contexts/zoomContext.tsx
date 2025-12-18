@@ -1,12 +1,6 @@
 'use client'
 
-import {
-  createContext,
-  useContext,
-  useState,
-  type ReactNode,
-  useCallback,
-} from 'react'
+import { createContext, useContext, useState, type ReactNode, useCallback } from 'react'
 
 interface ZoomContextType {
   zoom: number

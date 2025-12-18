@@ -1,14 +1,8 @@
 'use client'
 
 import usePersistedState from '@/hooks/use-persisted-state'
-import {
-  createContext,
-  useContext,
-  type ReactNode,
-  useCallback,
-  useEffect,
-} from 'react'
-import { defaultConfig, THEME_PRESETS, PAGE_SIZES, MARGIN_PRESETS } from '../constants'
+import { createContext, useCallback, useContext, useEffect, type ReactNode } from 'react'
+import { MARGIN_PRESETS, PAGE_SIZES, THEME_PRESETS, defaultConfig } from '../constants'
 
 interface ConfigContextType {
   config: AppConfig
@@ -30,6 +24,7 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
   // Garante que o tema sempre existe
   useEffect(() => {
     if (!config.theme) {
+      console.log('reset theme')
       setConfig((prev) => ({
         ...prev,
         theme: THEME_PRESETS.modern,
@@ -152,7 +147,6 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
   const applyThemePreset = useCallback(
     (preset: ThemePreset) => {
       if (preset === 'custom') return
-
       const themePreset = THEME_PRESETS[preset]
       setConfig((prev) => {
         const newConfig = {
@@ -176,18 +170,22 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
     [setConfig],
   )
 
-  const value = {
-    config,
-    updateConfig,
-    updatePageSize,
-    updateOrientation,
-    resetConfig,
-    getCurrentMargin: getCurrentMarginPreset,
-    getCurrentTheme: getCurrentThemePreset,
-    applyMarginPreset,
-    applyThemePreset,
-  }
-  return <ConfigContext.Provider value={value}>{children}</ConfigContext.Provider>
+  return (
+    <ConfigContext.Provider
+      value={{
+        config,
+        updateConfig,
+        updatePageSize,
+        updateOrientation,
+        resetConfig,
+        getCurrentMargin: getCurrentMarginPreset,
+        getCurrentTheme: getCurrentThemePreset,
+        applyMarginPreset,
+        applyThemePreset,
+      }}>
+      {children}
+    </ConfigContext.Provider>
+  )
 }
 
 export function useConfig() {

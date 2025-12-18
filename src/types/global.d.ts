@@ -1,7 +1,7 @@
 type PageSize = 'a4' | 'a5' | 'letter' | 'legal' | 'a3' | 'custom'
 type Unit = 'mm' | 'cm' | 'px'
 type Orientation = 'portrait' | 'landscape'
-
+type AuthStatus = 'authenticated' | 'unauthenticated' | 'loading'
 interface PageConfig {
   size: PageSize
   width: string

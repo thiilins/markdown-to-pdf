@@ -13,6 +13,7 @@ import { urlIsActive, urlIsActiveWithSubmenu } from '@/shared/utils'
 import { ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import UserNav from '../auth/user-nav'
 
 const GlobalHeaderButton = ({ label, href, icon, submenu }: ModuleItem) => {
   const pathname = usePathname()
@@ -41,7 +42,7 @@ const GlobalHeaderButton = ({ label, href, icon, submenu }: ModuleItem) => {
           <ChevronDown className='h-3 w-3 shrink-0 opacity-50' />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align='start' className='min-w-[200px]'>
+      <DropdownMenuContent align='start' className='flex min-w-[200px] flex-col gap-2'>
         {submenu.map((item) => (
           <GlobalHeaderButtonSubmenu key={item.href} {...item} />
         ))}
@@ -71,10 +72,11 @@ const GlobalHeaderButtonSubmenu = ({ label, href, icon }: Modules) => {
 }
 export function GlobalHeaderMenu() {
   return (
-    <nav className='flex items-center justify-center gap-1'>
+    <nav className='flex items-center justify-center gap-2 px-3'>
       {Modules.map((module) => {
         return <GlobalHeaderButton key={module.label} {...module} />
       })}
+      <UserNav />
     </nav>
   )
 }
