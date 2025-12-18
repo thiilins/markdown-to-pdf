@@ -2,28 +2,44 @@ import { Button } from '@/components/ui/button'
 import { useGist } from '@/shared/contexts/gistContext'
 import { useMDToPdf } from '@/shared/contexts/mdToPdfContext'
 import { processGistForImport } from '@/shared/utils'
+import { MessageSquareReply } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { IoLogoGithub } from 'react-icons/io5'
 import { FileSelector } from './file-selector'
+import { getIcon } from './icons'
 export const GistPreviewHeader = () => {
   const { selectedFile } = useGist()
   if (!selectedFile) return null
+  const Icon = getIcon(selectedFile?.language || '')
   return (
     <div className='bg-muted/30 flex items-center justify-between p-4'>
-      <div className='flex flex-col items-start gap-1'>
-        <h2 className='truncate text-lg font-semibold'>
-          {selectedFile?.filename || 'Gist sem nome'}
-        </h2>
-        {selectedFile?.description && (
-          <p className='text-muted-foreground px-1 text-[12px] leading-relaxed'>
-            {selectedFile?.description}
-          </p>
-        )}
+      <div className='flex items-center gap-2'>
+        <div className='bg-primary/10 border-primary flex flex-col items-center gap-2 rounded-[12px] border p-2'>
+          <Icon className='text-primary h-10 w-10' />
+        </div>
+        <div className='flex flex-col items-start'>
+          <h2 className='truncate text-lg font-semibold'>
+            {selectedFile?.filename || 'Gist sem nome'}
+          </h2>
+          {selectedFile?.description && (
+            <p className='text-muted-foreground text-[12px] leading-relaxed'>
+              {selectedFile?.description}
+            </p>
+          )}
+        </div>
       </div>
-      <div className='flex max-w-full items-center gap-2'>
-        <FileSelector /> <ViewOnGitHubButton />
-      </div>
+
+      <ButtonsContainer />
+    </div>
+  )
+}
+
+const ButtonsContainer = () => {
+  return (
+    <div className='flex items-center gap-2'>
+      <FileSelector /> <ViewOnGitHubButton />
+      <ImportButton />
     </div>
   )
 }
@@ -50,5 +66,10 @@ export const ImportButton = () => {
     router.push('/md-to-pdf')
   }
 
-  return <Button onClick={handleImport}>Importar e Converter</Button>
+  return (
+    <Button onClick={handleImport}>
+      <MessageSquareReply />
+      <span className='text-[9px]'>Importar e Converter</span>
+    </Button>
+  )
 }

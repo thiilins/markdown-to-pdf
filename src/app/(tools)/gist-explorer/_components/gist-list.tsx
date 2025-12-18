@@ -1,7 +1,6 @@
 'use client'
 
 import { Card } from '@/components/ui/card'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { useGist } from '@/shared/contexts/gistContext'
 import { AlertCircle, ArchiveX } from 'lucide-react'
 import { useMemo } from 'react'
@@ -30,14 +29,14 @@ export const GistList = () => {
     return <GitListWithContent />
   }, [loading, error, gists])
 
-  return <ScrollArea className='h-full flex-1'>{Component}</ScrollArea>
+  return <div className='h-full flex-1'>{Component}</div>
 }
 
 const GitListWithContent = () => {
   const { filteredGists, selectedGistId, onSelectGist } = useGist()
 
   return (
-    <div className='grid h-full grid-cols-1 gap-4 p-2'>
+    <div className='flex max-h-[calc(100dvh-20rem)] flex-1 flex-col items-center gap-4 overflow-y-auto p-4'>
       {filteredGists.map((gist) => (
         <GistItem
           key={gist.id}

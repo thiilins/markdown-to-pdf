@@ -1,11 +1,13 @@
 'use client'
 
+import { TooltipComponent } from '@/components/custom-ui/tooltip'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale/pt-BR'
 import { Calendar, Globe, Lock } from 'lucide-react'
+import { getIcon } from './gist-preview/icons'
 
 export const GistItem = ({ gist, isSelected = false, onClick }: GistItemProps) => {
   const firstFile = gist.files[0]
@@ -21,7 +23,7 @@ export const GistItem = ({ gist, isSelected = false, onClick }: GistItemProps) =
     <div
       onClick={onClick}
       className={cn(
-        'group bg-card hover:border-primary/50 h-full cursor-pointer rounded-lg border p-4 transition-all hover:shadow-sm',
+        'group bg-card hover:border-primary/50 w-full max-w-[95%] cursor-pointer rounded-lg border p-4 transition-all hover:shadow-sm',
         isSelected && 'border-primary bg-accent/50',
         classNames[gist.public ? 'public' : 'private'],
       )}>
@@ -30,14 +32,12 @@ export const GistItem = ({ gist, isSelected = false, onClick }: GistItemProps) =
         fileCount={fileCount}
         isPublic={gist.public}
       />
-      {/* Description */}
       {gist.description && (
         <p className='text-muted-foreground mb-3 line-clamp-2 text-xs leading-relaxed text-wrap text-ellipsis'>
           {gist.description}
         </p>
       )}
 
-      {/* Metadata */}
       <div className='text-muted-foreground mb-3 flex items-center gap-2 text-xs'>
         <Calendar className='h-3 w-3' />
         <span>{timeAgo}</span>
@@ -49,17 +49,21 @@ export const GistItem = ({ gist, isSelected = false, onClick }: GistItemProps) =
         )}
       </div>
 
-      {/* Languages */}
       <div className='flex flex-wrap gap-1.5'>
-        {gist.files.slice(0, 3).map((file) => (
-          <Badge
-            key={file.filename}
-            variant='secondary'
-            className='px-1.5 py-0.5 text-[10px] font-medium'>
-            {file.language || 'Text'}
-          </Badge>
-        ))}
-        {gist.files.length > 3 && (
+        {gist.files.slice(0, 4).map((file) => {
+          const Icon = getIcon(file.language || '')
+          return (
+            <TooltipComponent key={file.filename} content={file.language || ''}>
+              <Badge
+                key={file.filename}
+                variant='outline'
+                className='text-primary border-primary h-7 w-7 items-center justify-center bg-white px-1.5 py-0.5 text-[10px] font-medium'>
+                <Icon className='text-primary h-6 w-6' />
+              </Badge>
+            </TooltipComponent>
+          )
+        })}
+        {gist.files.length > 4 && (
           <Badge variant='secondary' className='px-1.5 py-0.5 text-[10px] font-medium'>
             +{gist.files.length - 3}
           </Badge>

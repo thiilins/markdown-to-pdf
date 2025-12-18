@@ -74,11 +74,16 @@ export function GistProvider({ children }: { children: ReactNode }) {
     })
   }, [gists, searchValue, searchType])
   const fileOptions = useMemo(() => {
-    return (selectedGist?.files ?? []).map((file) => ({
-      value: file.filename,
-      label: file.filename,
-      language: file.language,
-    }))
+    const fileTypeMap = new Set<string>()
+
+    const options = (selectedGist?.files ?? []).map((file) => {
+      return {
+        value: file.filename,
+        label: file.filename,
+        language: file.language,
+      }
+    })
+    return options
   }, [selectedGist?.files])
 
   const onGetGists = useCallback(
