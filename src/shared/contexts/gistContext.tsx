@@ -13,6 +13,7 @@ import {
 } from 'react'
 import { toast } from 'sonner'
 import { mountGistSelectedfile } from '../utils'
+import { searchText } from '../utils/search-text'
 interface GistContextType {
   gists: Gist[]
   setGists: (gists: Gist[]) => void
@@ -23,8 +24,10 @@ interface GistContextType {
   onSelectGist: (gist: Gist) => void
   selectedGist: Gist | null
   selectedGistId: string | null
-  type: GistType
-  setType: (type: GistType) => void
+  typeMyGists: GistType
+  setTypeMyGists: (type: GistType) => void
+  typeAllGists: GistType
+  setTypeAllGists: (type: GistType) => void
   searchUser: string
   setSearchUser: (searchUser: string) => void
   selectedFile: SelectedGistFileProps | null
@@ -32,6 +35,11 @@ interface GistContextType {
   handleSelectFile: (filename: string) => void
   loadingFiles: Record<string, boolean>
   fileContents: Record<string, string>
+  filteredGists: Gist[]
+  searchValue: string
+  searchType: { description: boolean }
+  OnChangeSearchType: (checked: boolean) => void
+  setSearchValue: (value: string) => void
 }
 
 const GistContext = createContext<GistContextType | undefined>(undefined)
@@ -40,7 +48,8 @@ export function GistProvider({ children }: { children: ReactNode }) {
   const [gists, setGists] = usePersistedStateInDB<Gist[]>('gists', [])
   const [error, setError] = useState<string | null | undefined>(null)
   const [loading, setLoading] = useState(false)
-  const [type, setType] = useState<GistType>('public')
+  const [typeMyGists, setTypeMyGists] = useState<GistType>('all')
+  const [typeAllGists, setTypeAllGists] = useState<GistType>('public')
   const [searchUser, setSearchUser] = useState('')
   const [selectedGist, setSelectedGist] = useState<Gist | null>(null)
 
@@ -48,6 +57,21 @@ export function GistProvider({ children }: { children: ReactNode }) {
   const [fileContents, setFileContents] = useState<Record<string, string>>({})
   const [loadingFiles, setLoadingFiles] = useState<Record<string, boolean>>({})
   const [selectedFile, setSelectedFile] = useState<SelectedGistFileProps | null>(null)
+
+  // Search
+  const [searchValue, setSearchValue] = useState('')
+  const [searchType, setSearchType] = useState<{ description: boolean }>({ description: true })
+
+  const OnChangeSearchType = (checked: boolean) => {
+    setSearchType({ ...searchType, description: checked })
+  }
+  const filteredGists = useMemo(() => {
+    return gists.filter((gist) => {
+      const description = searchText(gist.description, searchValue)
+      const files = gist.files.some((file) => searchText(file.filename, searchValue))
+      return !searchType.description ? files : description || files
+    })
+  }, [gists, searchValue, searchType])
 
   const onGetGists = useCallback(
     async ({ username, type }: FetchGistsParams) => {
@@ -58,6 +82,7 @@ export function GistProvider({ children }: { children: ReactNode }) {
       try {
         const response = await GistService.getAll({ username, type })
         const data = response.data
+        console.log('data', data)
         if (response.success) {
           setGists(data)
           if (data.length > 0) {
@@ -154,8 +179,10 @@ export function GistProvider({ children }: { children: ReactNode }) {
     onSearch,
     onSelectGist,
     selectedGistId,
-    type,
-    setType,
+    typeMyGists,
+    setTypeMyGists,
+    typeAllGists,
+    setTypeAllGists,
     searchUser,
     setSearchUser,
     selectedFile,
@@ -163,6 +190,11 @@ export function GistProvider({ children }: { children: ReactNode }) {
     handleSelectFile,
     loadingFiles,
     fileContents,
+    filteredGists,
+    searchValue,
+    searchType,
+    OnChangeSearchType,
+    setSearchValue,
   }
   return <GistContext.Provider value={value}>{children}</GistContext.Provider>
 }

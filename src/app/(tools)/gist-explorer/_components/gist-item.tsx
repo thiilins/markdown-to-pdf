@@ -17,7 +17,7 @@ export const GistItem = ({ gist, isSelected = false, onClick }: GistItemProps) =
     <div
       onClick={onClick}
       className={cn(
-        'group bg-card hover:border-primary/50 max-w-[375px] cursor-pointer rounded-lg border p-4 transition-all hover:shadow-sm',
+        'group bg-card hover:border-primary/50 h-full cursor-pointer rounded-lg border p-4 transition-all hover:shadow-sm',
         isSelected && 'border-primary bg-accent/50',
       )}>
       <GistItemCardHeader

@@ -17,11 +17,11 @@ interface GistSearchProps {
 }
 
 export const GistSearch = () => {
-  const { onSearch, onGetGists, loading, searchUser, setSearchUser, type, setType } = useGist()
+  const { onSearch, onGetGists, loading, searchUser, setSearchUser, typeAllGists } = useGist()
   const { status } = useSession()
   const handleSearch = async () => {
     if (searchUser.trim()) {
-      await onSearch({ username: searchUser.trim(), type })
+      await onSearch({ username: searchUser.trim(), type: typeAllGists })
     }
   }
 
@@ -55,9 +55,9 @@ export const GistSearch = () => {
   )
 }
 const AuthenticatedSearch = () => {
-  const { type, setType, loading, onGetGists } = useGist()
+  const { typeMyGists, setTypeMyGists, loading, onGetGists } = useGist()
   const handleGetMyGists = async () => {
-    await onGetGists({ type })
+    await onGetGists({ type: typeMyGists })
   }
   return (
     <div className='border-primary/30 bg-primary/10 grid grid-cols-2 items-center gap-2 rounded-md border-2 p-2'>
@@ -73,9 +73,9 @@ const AuthenticatedSearch = () => {
         className={{
           container: 'rounded-md bg-white/50 p-2',
         }}
-        label={type === 'all' ? 'Públicos e Privados' : 'Públicos'}
-        onChange={(checked) => setType(checked ? 'all' : 'public')}
-        checked={type === 'all'}
+        label={typeMyGists === 'all' ? 'Públicos e Privados' : 'Públicos'}
+        onChange={(checked) => setTypeMyGists(checked ? 'all' : 'public')}
+        checked={typeMyGists === 'all'}
         disabled={loading}
       />
     </div>
@@ -96,13 +96,13 @@ const UnauthenticatedSearch = () => {
 }
 
 const SearchUserComponent = () => {
-  const { type, setType, loading } = useGist()
+  const { typeAllGists, setTypeAllGists, loading } = useGist()
   return (
     <div className='flex items-center space-x-2'>
       <Checkbox
         id='include-all'
-        checked={type === 'all'}
-        onCheckedChange={(checked) => setType(checked ? 'all' : 'public')}
+        checked={typeAllGists === 'all'}
+        onCheckedChange={(checked) => setTypeAllGists(checked ? 'all' : 'public')}
         disabled={loading}
       />
       <Label
@@ -112,7 +112,4 @@ const SearchUserComponent = () => {
       </Label>
     </div>
   )
-}
-function onGetGists(arg0: { type: GistType }) {
-  throw new Error('Function not implemented.')
 }

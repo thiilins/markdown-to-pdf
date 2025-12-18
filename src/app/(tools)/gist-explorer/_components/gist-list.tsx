@@ -30,14 +30,15 @@ export const GistList = () => {
     return <GitListWithContent />
   }, [loading, error, gists])
 
-  return <ScrollArea className='h-full max-h-full flex-1 space-y-4 p-4'>{Component}</ScrollArea>
+  return <ScrollArea className='h-full flex-1'>{Component}</ScrollArea>
 }
 
 const GitListWithContent = () => {
-  const { gists, selectedGistId, onSelectGist } = useGist()
+  const { filteredGists, selectedGistId, onSelectGist } = useGist()
+
   return (
-    <div className='grid h-full grid-cols-1 gap-4'>
-      {gists.map((gist) => (
+    <div className='grid h-full grid-cols-1 gap-4 p-2'>
+      {filteredGists.map((gist) => (
         <GistItem
           key={gist.id}
           gist={gist}

@@ -7,6 +7,7 @@ export const GistService = {
       ...(username && { username }),
       ...(type === 'all' && { all: 'true' }),
     }
+    console.log('params', params)
     const url = buildUrl('/api/gists', params)
     const response = await fetch(url)
 

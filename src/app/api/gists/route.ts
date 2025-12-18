@@ -6,8 +6,7 @@ export async function GET(request: Request) {
   const session = await auth()
   const { searchParams } = new URL(request.url)
   const username = searchParams.get('username')
-  const all = searchParams.get('all') === 'true' // Buscar todos (com paginação)
-
+  const all = searchParams.get('all') === 'true' // Buscar todos (públicos + privados) ou apenas públicos
   let endpoint = ''
   const headers: HeadersInit = {
     Accept: 'application/vnd.github.v3+json',
@@ -17,6 +16,7 @@ export async function GET(request: Request) {
   // Lógica de decisão de Endpoint
   if (username) {
     // 1. Busca Pública: Gists de um usuário específico
+    // Sempre retorna apenas gists públicos (não temos acesso aos privados de outros usuários)
     endpoint = `https://api.github.com/users/${username}/gists`
     // Nota: Mesmo buscando terceiros, se tivermos token, usamos para ganhar rate-limit
     if (session?.accessToken) {
@@ -30,6 +30,8 @@ export async function GET(request: Request) {
         { status: 401 },
       )
     }
+    // Endpoint /gists retorna todos os gists do usuário autenticado (públicos + privados)
+    // Se all=false, filtraremos apenas os públicos no resultado
     endpoint = 'https://api.github.com/gists'
     headers['Authorization'] = `Bearer ${session.accessToken}`
   }
@@ -71,7 +73,7 @@ export async function GET(request: Request) {
     }
 
     // Sanitização: Retornamos apenas o necessário para o front economizar banda
-    const sanitizedGists = allGists.map((gist: any) => ({
+    let sanitizedGists = allGists.map((gist: any) => ({
       id: gist.id,
       description: gist.description || 'Sem descrição',
       public: gist.public,
@@ -89,6 +91,12 @@ export async function GET(request: Request) {
         size: gist.files[key].size,
       })),
     }))
+
+    // Se all=false e não há username (busca "Meus Gists"), filtrar apenas públicos
+    // Quando há username, sempre retorna apenas públicos (não temos acesso aos privados de outros)
+    if (!all && !username) {
+      sanitizedGists = sanitizedGists.filter((gist) => gist.public === true)
+    }
 
     return NextResponse.json(sanitizedGists)
   } catch (error) {
