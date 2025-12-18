@@ -70,7 +70,7 @@ const GistCountHeader = () => {
       variant='outline'
       className='bg-primary/10 text-primary flex items-center gap-2 rounded-md px-2 py-1 text-xs'>
       <Archive className='text-primary h-3 w-3' />
-      <span>{filteredGists?.length || 0}</span>
+      <span>{filteredGists?.length || 0} Gists</span>
     </Badge>
   )
 }
@@ -103,11 +103,6 @@ const SearchComboComponent = () => {
       </div>
     </div>
   )
-}
-
-interface GistTagsProps {
-  description: string | null
-  onTagClick?: (tag: string) => void
 }
 
 export function GistTags() {
