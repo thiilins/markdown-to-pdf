@@ -71,9 +71,11 @@ export const ActionButtons = () => {
   const { setMarkdown } = useMDToPdf()
   const router = useRouter()
 
+  // 1. Verificação se é Markdown
+  const isMarkdown = selectedFile?.filename?.toLowerCase().endsWith('.md') ?? false
+
   const handleMergeImport = () => {
     if (!selectedGist) return
-    // Feature 3.3: Merge & Import
     const fullContent = processGistForImport(selectedGist, fileContents)
     setMarkdown(fullContent)
     router.push('/md-to-pdf')
@@ -84,7 +86,6 @@ export const ActionButtons = () => {
     const content = fileContents[selectedFile.filename]
     if (!content) return
 
-    // Feature 3.4: Fork to Editor (Edição rápida sem headers extras)
     setMarkdown(content)
     router.push('/md-to-pdf')
   }
@@ -94,7 +95,11 @@ export const ActionButtons = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className='h-9 gap-2 px-3'>
+        {/* 2. Botão desabilitado se não for Markdown */}
+        <Button
+          className='h-9 gap-2 px-3'
+          disabled={!isMarkdown}
+          title={!isMarkdown ? 'Apenas arquivos Markdown podem ser importados' : undefined}>
           <MessageSquareReply className='h-4 w-4' />
           <span className='hidden sm:inline'>Importar</span>
           <ChevronDown className='h-3 w-3 opacity-50' />
