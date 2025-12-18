@@ -35,3 +35,29 @@ interface DropdownComponentProps {
   trigger: React.ReactNode
   content: DropdownContentProps[]
 }
+interface TabsComponentItem {
+  value: string
+  label: string
+  icon?: React.ElementType
+  content: React.ReactNode
+  className?: {
+    icon?: string
+    label?: string
+    content?: string
+  }
+}
+interface TabsComponentProps {
+  tabs: TabsComponentItem[]
+  className?: {
+    list?: string
+    trigger?: string
+    content?: string
+    root?: string
+  }
+  defaultValue?: string
+}
+
+interface TabsConditionalItel {
+  condition: boolean
+  config: TabsComponentItem
+}

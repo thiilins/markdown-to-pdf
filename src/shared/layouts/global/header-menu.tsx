@@ -42,7 +42,7 @@ const GlobalHeaderButton = ({ label, href, icon, submenu }: ModuleItem) => {
           <ChevronDown className='h-3 w-3 shrink-0 opacity-50' />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align='start' className='min-w-[200px]'>
+      <DropdownMenuContent align='start' className='flex min-w-[200px] flex-col gap-2'>
         {submenu.map((item) => (
           <GlobalHeaderButtonSubmenu key={item.href} {...item} />
         ))}

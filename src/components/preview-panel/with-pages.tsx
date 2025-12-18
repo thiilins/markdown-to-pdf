@@ -2,6 +2,8 @@
 
 import { cn } from '@/lib/utils'
 import { THEME_PRESETS } from '@/shared/constants'
+import { useMDToPdf } from '@/shared/contexts/mdToPdfContext'
+import { useZoom } from '@/shared/contexts/zoomContext'
 import { PreviewStyle } from '@/shared/styles/preview-styles'
 import { Loader2, Ruler } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -13,29 +15,20 @@ import remarkGfm from 'remark-gfm'
 const mmToPx = (mm: number) => mm * 3.7795275591
 
 interface PreviewPanelProps {
-  markdown: string
-  pageConfig: PageConfig
-  typographyConfig: TypographyConfig
-  themeConfig?: ThemeConfig
-  zoom?: number
-  contentRef: React.RefObject<HTMLDivElement | null>
   className?: string
 }
 
-export function PreviewPanelWithPages({
-  markdown,
-  pageConfig,
-  typographyConfig,
-  themeConfig,
-  zoom = 1,
-  contentRef,
-  className,
-}: PreviewPanelProps) {
-  const theme = themeConfig || THEME_PRESETS.modern
+export function PreviewPanelWithPages({ className }: PreviewPanelProps) {
+  const { config, contentRef, markdown } = useMDToPdf()
+  const { zoom } = useZoom()
+  const pageConfig = config.page
+  const typographyConfig = config.typography
+  const theme = config.theme || THEME_PRESETS.modern
   const ghostRef = useRef<HTMLDivElement>(null)
 
-  const [pagesHTML, setPagesHTML] = useState<string[]>([''])
-  const [isCalculating, setIsCalculating] = useState(false)
+  // Começamos com um array vazio para não renderizar páginas fantasmas no início
+  const [pagesHTML, setPagesHTML] = useState<string[]>([])
+  const [isCalculating, setIsCalculating] = useState(true)
 
   const dimensions = useMemo(() => {
     const { width, height, orientation } = pageConfig
@@ -79,6 +72,7 @@ export function PreviewPanelWithPages({
 
     setIsCalculating(true)
 
+    // O timer garante que o DOM invisível foi pintado e o Syntax Highlighting aplicado
     const timer = setTimeout(() => {
       const elements = Array.from(ghost.children) as HTMLElement[]
 
@@ -90,7 +84,8 @@ export function PreviewPanelWithPages({
       const marginTop = getMarginPx(pageConfig.margin.top)
       const marginBottom = getMarginPx(pageConfig.margin.bottom)
 
-      const contentHeightLimit = dimensions.heightPx - marginTop - marginBottom
+      // Math.floor evita sub-pixels que causam transbordos acidentais
+      const contentHeightLimit = Math.floor(dimensions.heightPx - marginTop - marginBottom)
 
       const newPages: string[] = []
       let currentPageAccumulator: string[] = []
@@ -98,20 +93,56 @@ export function PreviewPanelWithPages({
 
       for (let i = 0; i < elements.length; i++) {
         const el = elements[i]
+
+        // Ignora elementos vazios de sistema
+        if (el.offsetHeight === 0 && el.innerText.trim() === '') continue
+
         const style = window.getComputedStyle(el)
         const elHeight =
           el.offsetHeight + parseFloat(style.marginTop) + parseFloat(style.marginBottom)
-        const forceBreak = el.classList.contains('page-break') || !!el.querySelector('.page-break')
+        const isForceBreak =
+          el.classList.contains('page-break') || !!el.querySelector('.page-break')
 
-        if ((currentHeight + elHeight > contentHeightLimit && currentHeight > 0) || forceBreak) {
-          newPages.push(currentPageAccumulator.join(''))
-
-          if (!forceBreak || el.innerText.trim().length > 0) {
-            currentPageAccumulator = [el.outerHTML]
-            currentHeight = elHeight
-          } else {
+        // LÓGICA DE FATIAMENTO PARA ELEMENTOS GIGANTES (ex: Código 500 linhas)
+        if (elHeight > contentHeightLimit) {
+          // Se já temos algo na página atual, fecha ela antes de começar o fatiamento
+          if (currentPageAccumulator.length > 0) {
+            newPages.push(currentPageAccumulator.join(''))
             currentPageAccumulator = []
             currentHeight = 0
+          }
+
+          let remainingHeight = elHeight
+          let offset = 0
+
+          while (remainingHeight > 0) {
+            const sliceHTML = `
+              <div class="overflow-slice" style="height: ${contentHeightLimit}px; overflow: hidden; width: 100%;">
+                <div style="margin-top: -${offset}px;">
+                  ${el.outerHTML}
+                </div>
+              </div>
+            `
+            newPages.push(sliceHTML)
+            offset += contentHeightLimit
+            remainingHeight -= contentHeightLimit
+          }
+          continue
+        }
+
+        // LÓGICA DE QUEBRA DE PÁGINA NORMAL
+        const wouldOverflow = currentHeight + elHeight > contentHeightLimit
+
+        if ((wouldOverflow || isForceBreak) && currentHeight > 0) {
+          newPages.push(currentPageAccumulator.join(''))
+
+          // Se for quebra forçada manual, limpamos o acumulador
+          if (isForceBreak && el.innerText.trim().length === 0) {
+            currentPageAccumulator = []
+            currentHeight = 0
+          } else {
+            currentPageAccumulator = [el.outerHTML]
+            currentHeight = elHeight
           }
         } else {
           currentPageAccumulator.push(el.outerHTML)
@@ -119,15 +150,17 @@ export function PreviewPanelWithPages({
         }
       }
 
+      // Adiciona a última página se houver conteúdo residual
       if (currentPageAccumulator.length > 0) {
         newPages.push(currentPageAccumulator.join(''))
       }
 
-      if (newPages.length === 0) newPages.push('')
+      // Fallback para conteúdo vazio
+      if (newPages.length === 0) newPages.push('<p>&nbsp;</p>')
 
       setPagesHTML(newPages)
       setIsCalculating(false)
-    }, 50)
+    }, 300) // Aumentado para 300ms para garantir renderização de códigos pesados
 
     return () => clearTimeout(timer)
   }, [markdown, dimensions, pageConfig.margin, typographyConfig])
@@ -142,10 +175,12 @@ export function PreviewPanelWithPages({
       paddingLeft: pageConfig.margin.left,
       backgroundColor: theme.background,
       color: theme.textColor,
-      marginBottom: '2rem',
+      marginBottom: '3rem',
       position: 'relative' as const,
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
       overflow: 'hidden',
+      flexShrink: 0,
+      boxSizing: 'border-box' as const,
     }),
     [dimensions, pageConfig.margin, theme],
   )
@@ -157,7 +192,7 @@ export function PreviewPanelWithPages({
       ),
       div: ({ node, className, ...props }) => {
         if (className === 'page-break')
-          return <div className='page-break my-2 h-px w-full' {...props} />
+          return <div className='page-break invisible h-0 w-full' {...props} />
         return <div className={className} {...props} />
       },
     }),
@@ -166,17 +201,18 @@ export function PreviewPanelWithPages({
 
   return (
     <div className={cn('relative h-full w-full bg-slate-200/90 dark:bg-slate-950', className)}>
+      {/* Ghost Element para Medição Precisa */}
       <div
-        id='source-html-for-pdf'
+        id='measurement-ghost'
         aria-hidden='true'
         className='prose max-w-none'
         style={{
           position: 'absolute',
-          top: -9999,
-          left: -9999,
+          top: -99999,
+          left: -99999,
           visibility: 'hidden',
-          width: dimensions.widthDisplay,
-          paddingLeft: pageConfig.margin.left, // Padding afeta a quebra de linha do texto no ghost
+          width: dimensions.widthPx, // Medição em PX para evitar erros de arredondamento
+          paddingLeft: pageConfig.margin.left,
           paddingRight: pageConfig.margin.right,
           ...typographyStyles,
         }}>
@@ -191,7 +227,8 @@ export function PreviewPanelWithPages({
         </div>
       </div>
 
-      <div className='absolute inset-0 flex flex-col items-center overflow-auto scroll-smooth px-8 py-12 print:overflow-visible'>
+      {/* Viewport de Renderização das Páginas */}
+      <div className='absolute inset-0 flex flex-col items-center overflow-auto scroll-smooth px-8 py-12 print:overflow-visible print:p-0'>
         <div
           style={{
             transform: `scale(${zoom})`,
@@ -199,22 +236,25 @@ export function PreviewPanelWithPages({
             display: 'flex',
             flexDirection: 'column',
           }}>
-          <div ref={contentRef}>
+          <div ref={contentRef} className='print:block'>
             {pagesHTML.map((htmlContent, index) => (
               <div
                 key={index}
-                className='print-page bg-white transition-colors duration-300'
+                className='print-page bg-white transition-opacity duration-500'
                 style={getPageStyle}
                 data-page-number={index + 1}>
-                <div className='prose max-w-none wrap-break-word' style={typographyStyles}>
+                <div
+                  className='prose h-full w-full max-w-none wrap-break-word'
+                  style={typographyStyles}>
                   <PreviewStyle theme={theme} />
                   <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
                 </div>
 
+                {/* Marcador de Página (Invisível no Print) */}
                 <div
-                  className='pointer-events-none absolute right-4 bottom-2 font-sans text-[10px] opacity-40 print:hidden'
+                  className='pointer-events-none absolute right-8 bottom-6 font-mono text-[10px] tracking-widest uppercase opacity-20 print:hidden'
                   style={{ color: theme.textColor }}>
-                  {index + 1}
+                  Página {index + 1} / {pagesHTML.length}
                 </div>
               </div>
             ))}
@@ -222,28 +262,26 @@ export function PreviewPanelWithPages({
         </div>
       </div>
 
-      {/* Barra de Status */}
-      <div className='pointer-events-none absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center justify-center gap-3 rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-xs font-medium text-slate-600 shadow-xl backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-300 print:hidden'>
-        <div className='flex items-center gap-1.5'>
-          <Ruler className='h-3.5 w-3.5 opacity-70' />
-          <span>
-            {pageConfig.size === 'custom' ? 'Custom' : pageConfig.size.toUpperCase()}
-            <span className='mx-1 opacity-50'>•</span>
-            {dimensions.widthDisplay} × {dimensions.heightDisplay}
+      {/* Barra de Status Inferior */}
+      <div className='pointer-events-none absolute bottom-8 left-1/2 flex -translate-x-1/2 items-center justify-center gap-4 rounded-full border border-white/20 bg-black/80 px-6 py-2 text-xs font-bold tracking-tighter text-white shadow-2xl backdrop-blur-xl print:hidden'>
+        <div className='flex items-center gap-2'>
+          <Ruler className='h-3.5 w-3.5 text-blue-400' />
+          <span className='uppercase'>
+            {pageConfig.size} • {dimensions.widthDisplay} × {dimensions.heightDisplay}
           </span>
         </div>
-        <div className='h-3 w-px bg-slate-300 dark:bg-slate-700' />
-        <span>
+        <div className='h-4 w-px bg-white/20' />
+        <div className='flex items-center gap-2'>
           {isCalculating ? (
-            <span className='flex items-center gap-1'>
-              <Loader2 className='h-3 w-3 animate-spin' /> Calc...
+            <span className='flex items-center gap-2 text-blue-400'>
+              <Loader2 className='h-3 w-3 animate-spin' /> PROCESSANDO PÁGINAS...
             </span>
           ) : (
-            `${pagesHTML.length} ${pagesHTML.length === 1 ? 'Página' : 'Páginas'}`
+            <span className='text-emerald-400'>{pagesHTML.length} PÁGINAS GERADAS</span>
           )}
-        </span>
-        <div className='h-3 w-px bg-slate-300 dark:bg-slate-700' />
-        <span>{Math.round(zoom * 100)}%</span>
+        </div>
+        <div className='h-4 w-px bg-white/20' />
+        <span className='text-blue-400'>{Math.round(zoom * 100)}%</span>
       </div>
     </div>
   )

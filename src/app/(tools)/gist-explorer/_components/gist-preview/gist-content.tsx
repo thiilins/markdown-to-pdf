@@ -1,9 +1,11 @@
 import { StaticStylePreview } from '@/components/preview-panel/static-style'
 import { useGist } from '@/shared/contexts/gistContext'
 import { useMDToPdf } from '@/shared/contexts/mdToPdfContext'
-import { isMarkdownFile } from '@/shared/utils'
+import { isImageFile, isMarkdownFile, mapLanguage } from '@/shared/utils'
 import { AlertCircle } from 'lucide-react'
 import { useMemo } from 'react'
+import SyntaxHighlighter from 'react-syntax-highlighter'
+import { darcula } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 import { LoadingPreviewComponent } from './additional-components'
 
 const NoContentComponent = () => {
@@ -18,25 +20,74 @@ const NoContentComponent = () => {
 }
 
 const ContentComponent = ({ filename, content, language }: FileContentDisplayProps) => {
+  const { selectedFile } = useGist()
   const isMd = isMarkdownFile(filename)
+  const isImage = isImageFile(selectedFile?.filename)
+
+  const ContentComponent = useMemo(() => {
+    if (isMd) {
+      return <ContentMdPreview content={content} />
+    }
+    if (isImage) {
+      return <ContentImagePreview selectedFile={selectedFile} />
+    }
+    return <ContentCodePreview content={content} language={language} />
+  }, [isMd, isImage, content, language, selectedFile])
+  return <div className='h-full space-y-4'>{ContentComponent}</div>
+}
+const ContentMdPreview = ({ content }: { content: string }) => {
   const { config } = useMDToPdf()
   return (
-    <div className='h-full space-y-4'>
-      {isMd ? (
-        <div className='h-full'>
-          <StaticStylePreview
-            markdown={content}
-            typographyConfig={config.typography}
-            themeConfig={config.theme}
-          />
-        </div>
-      ) : (
-        <div className='relative'>
-          <pre className='bg-muted text-foreground border-border overflow-x-auto rounded-md border p-4 font-mono text-sm'>
-            <code>{content}</code>
-          </pre>
-        </div>
-      )}
+    <div className='h-full'>
+      <StaticStylePreview
+        markdown={content}
+        typographyConfig={config.typography}
+        themeConfig={config.theme}
+      />
+    </div>
+  )
+}
+const ContentCodePreview = ({
+  content,
+  language,
+}: {
+  content: string
+  language?: string | null
+}) => {
+  return (
+    <div className='h-full w-full font-mono text-sm'>
+      <SyntaxHighlighter
+        language={mapLanguage(language)}
+        style={darcula}
+        className='rounded-md bg-black'
+        showLineNumbers={true}
+        lineNumberStyle={{ minWidth: '3em', paddingRight: '1em', color: '#888' }}
+        customStyle={{
+          margin: 0,
+          padding: '2rem',
+          paddingLeft: '3rem',
+          width: '100%',
+          height: '100%',
+          backgroundColor: '#010101',
+        }}>
+        {content}
+      </SyntaxHighlighter>
+    </div>
+  )
+}
+const ContentImagePreview = ({ selectedFile }: { selectedFile?: GistFile | null }) => {
+  return (
+    <div className='flex min-h-full flex-col items-center justify-center bg-slate-50 p-8 dark:bg-slate-900/20'>
+      <div className='relative overflow-hidden rounded-lg border bg-white shadow-2xl dark:bg-slate-950'>
+        <img
+          src={selectedFile?.raw_url}
+          alt={selectedFile?.filename}
+          className='max-h-[75vh] max-w-full object-contain'
+        />
+      </div>
+      <div className='text-muted-foreground mt-4 font-mono text-[10px] uppercase'>
+        {selectedFile?.filename}
+      </div>
     </div>
   )
 }
