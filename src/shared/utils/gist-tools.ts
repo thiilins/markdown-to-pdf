@@ -78,3 +78,57 @@ export const mountGistSelectedfile = (
 export const isMarkdownFile = (filename: string): boolean => {
   return filename.endsWith('.md') || filename.endsWith('.markdown')
 }
+
+/**
+ * FEATURE 3.2: Wrapping Strategy
+ * Envolve arquivos que não são markdown em blocos de código para
+ * que apareçam corretamente no PDF final.
+ */
+export const wrapContentForMarkdown = (
+  filename: string,
+  content: string,
+  language?: string,
+): string => {
+  // Se já for markdown, retorna como está
+  if (filename.toLowerCase().endsWith('.md') || filename.toLowerCase().endsWith('.markdown')) {
+    return content
+  }
+
+  // Tenta inferir a linguagem pela extensão se não for fornecida
+  const lang = language || filename.split('.').pop() || ''
+
+  // Retorna o conteúdo envolvido em crases (fenced code block)
+  return `### ${filename}\n\n\`\`\`${lang}\n${content}\n\`\`\`\n`
+}
+
+/**
+ * FEATURE 3.3: Merge & Import
+ * Junta múltiplos arquivos de um Gist em um único conteúdo Markdown.
+ */
+export const processGistForImport = (gist: Gist, fileContents: Record<string, string>): string => {
+  const files = gist.files || []
+
+  // Ordena para que o README.md (ou similar) venha primeiro, se existir
+  const sortedFiles = [...files].sort((a, b) => {
+    const isReadmeA = a.filename.toLowerCase().includes('readme')
+    const isReadmeB = b.filename.toLowerCase().includes('readme')
+    if (isReadmeA && !isReadmeB) return -1
+    if (!isReadmeA && isReadmeB) return 1
+    return 0
+  })
+
+  let finalMarkdown = `# ${gist.description || 'Gist Importado'}\n\n`
+  finalMarkdown += `> Importado de: [${gist.html_url}](${gist.html_url}) - Autor: ${gist.owner?.login || 'Anônimo'}\n\n---\n\n`
+
+  sortedFiles.forEach((file) => {
+    const content = fileContents[file.filename]
+
+    if (content) {
+      // Aplica o wrapping se necessário e adiciona separadores
+      const processedContent = wrapContentForMarkdown(file.filename, content, file.language || '')
+      finalMarkdown += `${processedContent}\n\n---\n\n`
+    }
+  })
+
+  return finalMarkdown
+}

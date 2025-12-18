@@ -13,12 +13,17 @@ export const GistItem = ({ gist, isSelected = false, onClick }: GistItemProps) =
   const createdDate = new Date(gist.created_at)
   const timeAgo = formatDistanceToNow(createdDate, { addSuffix: true, locale: ptBR })
 
+  const classNames = {
+    public: 'bg-green-300/10 text-green-500 border-green-500/50',
+    private: 'bg-red-300/10 text-red-500 border-red-500/50',
+  }
   return (
     <div
       onClick={onClick}
       className={cn(
         'group bg-card hover:border-primary/50 h-full cursor-pointer rounded-lg border p-4 transition-all hover:shadow-sm',
         isSelected && 'border-primary bg-accent/50',
+        classNames[gist.public ? 'public' : 'private'],
       )}>
       <GistItemCardHeader
         filename={firstFile?.filename || 'Sem nome'}

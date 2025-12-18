@@ -38,6 +38,7 @@ interface GistContextType {
   filteredGists: Gist[]
   searchValue: string
   searchType: { description: boolean }
+  fileOptions: { value: string; label: string; language: string | null }[]
   OnChangeSearchType: (checked: boolean) => void
   setSearchValue: (value: string) => void
 }
@@ -72,6 +73,13 @@ export function GistProvider({ children }: { children: ReactNode }) {
       return !searchType.description ? files : description || files
     })
   }, [gists, searchValue, searchType])
+  const fileOptions = useMemo(() => {
+    return (selectedGist?.files ?? []).map((file) => ({
+      value: file.filename,
+      label: file.filename,
+      language: file.language,
+    }))
+  }, [selectedGist?.files])
 
   const onGetGists = useCallback(
     async ({ username, type }: FetchGistsParams) => {
@@ -82,7 +90,6 @@ export function GistProvider({ children }: { children: ReactNode }) {
       try {
         const response = await GistService.getAll({ username, type })
         const data = response.data
-        console.log('data', data)
         if (response.success) {
           setGists(data)
           if (data.length > 0) {
@@ -195,6 +202,7 @@ export function GistProvider({ children }: { children: ReactNode }) {
     searchType,
     OnChangeSearchType,
     setSearchValue,
+    fileOptions,
   }
   return <GistContext.Provider value={value}>{children}</GistContext.Provider>
 }
