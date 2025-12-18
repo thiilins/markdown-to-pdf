@@ -94,39 +94,97 @@ export function PreviewPanelWithPages({ className }: PreviewPanelProps) {
       for (let i = 0; i < elements.length; i++) {
         const el = elements[i]
 
-        // Ignora elementos vazios de sistema
-        if (el.offsetHeight === 0 && el.innerText.trim() === '') continue
+        // Ignora apenas elementos verdadeiramente vazios (sem conteúdo e sem altura)
+        // Verifica se tem conteúdo de texto OU elementos filhos (para elementos como <pre> com código)
+        const hasContent =
+          el.innerText.trim() !== '' || el.children.length > 0 || el.innerHTML.trim() !== ''
 
         const style = window.getComputedStyle(el)
-        const elHeight =
-          el.offsetHeight + parseFloat(style.marginTop) + parseFloat(style.marginBottom)
+        const marginTop = parseFloat(style.marginTop) || 0
+        const marginBottom = parseFloat(style.marginBottom) || 0
+        const elHeight = el.offsetHeight + marginTop + marginBottom
         const isForceBreak =
           el.classList.contains('page-break') || !!el.querySelector('.page-break')
 
         // LÓGICA DE FATIAMENTO PARA ELEMENTOS GIGANTES (ex: Código 500 linhas)
         if (elHeight > contentHeightLimit) {
-          // Se já temos algo na página atual, fecha ela antes de começar o fatiamento
-          if (currentPageAccumulator.length > 0) {
-            newPages.push(currentPageAccumulator.join(''))
-            currentPageAccumulator = []
-            currentHeight = 0
-          }
-
+          // Fatiamento: divide o elemento em múltiplas páginas
+          // IMPORTANTE: A primeira fatia DEVE sempre mostrar o topo do elemento
           let remainingHeight = elHeight
-          let offset = 0
+          let scrollPosition = 0
+          let isFirstSlice = true
+          let sliceCount = 0
 
           while (remainingHeight > 0) {
-            const sliceHTML = `
-              <div class="overflow-slice" style="height: ${contentHeightLimit}px; overflow: hidden; width: 100%;">
-                <div style="margin-top: -${offset}px;">
+            const sliceHeight = Math.min(contentHeightLimit, remainingHeight)
+
+            // Para a primeira fatia, não aplicamos nenhum deslocamento
+            // O elemento deve aparecer normalmente desde o topo
+            // Para fatias seguintes, deslocamos o elemento para cima
+            let sliceContent = ''
+            if (isFirstSlice) {
+              // Primeira fatia: elemento completo sem deslocamento e sem wrapper de overflow
+              // Isso garante que o elemento seja renderizado corretamente
+              sliceContent = el.outerHTML
+
+              // Se já temos conteúdo na página atual, adiciona a primeira fatia na mesma página
+              if (currentPageAccumulator.length > 0) {
+                // Tenta adicionar na página atual se couber
+                const availableSpace = contentHeightLimit - currentHeight
+                if (availableSpace > sliceHeight * 0.5) {
+                  // Se há espaço suficiente (pelo menos 50% da fatia), adiciona na mesma página
+                  const firstSliceHTML = `
+                    <div class="overflow-slice" style="height: ${sliceHeight}px; overflow: hidden; width: 100%; position: relative;">
+                      ${sliceContent}
+                    </div>
+                  `
+                  currentPageAccumulator.push(firstSliceHTML)
+                  newPages.push(currentPageAccumulator.join(''))
+                  currentPageAccumulator = []
+                  currentHeight = 0
+                } else {
+                  // Não há espaço, fecha a página atual e cria nova para a primeira fatia
+                  newPages.push(currentPageAccumulator.join(''))
+                  currentPageAccumulator = []
+                  currentHeight = 0
+                  const firstSliceHTML = `
+                    <div class="overflow-slice" style="height: ${sliceHeight}px; overflow: hidden; width: 100%; position: relative;">
+                      ${sliceContent}
+                    </div>
+                  `
+                  newPages.push(firstSliceHTML)
+                }
+              } else {
+                // Não há conteúdo anterior, cria a primeira página diretamente
+                const firstSliceHTML = `
+                  <div class="overflow-slice" style="height: ${sliceHeight}px; overflow: hidden; width: 100%; position: relative;">
+                    ${sliceContent}
+                  </div>
+                `
+                newPages.push(firstSliceHTML)
+              }
+            } else {
+              // Fatias seguintes: deslocamos usando position absolute
+              sliceContent = `
+                <div style="position: absolute; top: -${scrollPosition}px; left: 0; width: 100%;">
                   ${el.outerHTML}
                 </div>
-              </div>
-            `
-            newPages.push(sliceHTML)
-            offset += contentHeightLimit
+              `
+
+              const sliceHTML = `
+                <div class="overflow-slice" style="height: ${sliceHeight}px; overflow: hidden; width: 100%; position: relative;">
+                  ${sliceContent}
+                </div>
+              `
+              newPages.push(sliceHTML)
+            }
+
+            scrollPosition += contentHeightLimit
             remainingHeight -= contentHeightLimit
+            isFirstSlice = false
+            sliceCount++
           }
+
           continue
         }
 
@@ -156,7 +214,9 @@ export function PreviewPanelWithPages({ className }: PreviewPanelProps) {
       }
 
       // Fallback para conteúdo vazio
-      if (newPages.length === 0) newPages.push('<p>&nbsp;</p>')
+      if (newPages.length === 0) {
+        newPages.push('<p>&nbsp;</p>')
+      }
 
       setPagesHTML(newPages)
       setIsCalculating(false)
