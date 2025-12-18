@@ -55,11 +55,11 @@ const ContentCodePreview = ({
   language?: string | null
 }) => {
   return (
-    <div className='h-full w-full font-mono text-sm'>
+    <div className='h-full min-h-[80dvh] w-full max-w-[76dvw] font-mono text-sm'>
       <SyntaxHighlighter
         language={mapLanguage(language)}
         style={darcula}
-        className='rounded-md bg-black'
+        className='min-h-[85dvh] max-w-[76dvw] rounded-md bg-black'
         showLineNumbers={true}
         lineNumberStyle={{ minWidth: '3em', paddingRight: '1em', color: '#888' }}
         customStyle={{
@@ -67,7 +67,7 @@ const ContentCodePreview = ({
           padding: '2rem',
           paddingLeft: '3rem',
           width: '100%',
-          height: '100%',
+          height: '100% !important',
           backgroundColor: '#010101',
         }}>
         {content}
