@@ -1,75 +1,127 @@
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useGist } from '@/shared/contexts/gistContext'
 import { useMDToPdf } from '@/shared/contexts/mdToPdfContext'
 import { processGistForImport } from '@/shared/utils'
-import { MessageSquareReply } from 'lucide-react'
+import { ChevronDown, FileCode2, Files, Github, MessageSquareReply } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { IoLogoGithub } from 'react-icons/io5'
 import { FileSelector } from './file-selector'
 import { getIcon } from './icons'
+
 export const GistPreviewHeader = () => {
   const { selectedFile } = useGist()
   if (!selectedFile) return null
   const Icon = getIcon(selectedFile?.language || '')
+
   return (
-    <div className='bg-muted/30 flex items-center justify-between p-4'>
-      <div className='flex items-center gap-2'>
-        <div className='bg-primary/10 border-primary flex flex-col items-center gap-2 rounded-[12px] border p-2'>
-          <Icon className='text-primary h-10 w-10' />
+    <div className='bg-muted/30 flex items-center justify-between border-b p-4'>
+      <div className='flex items-center gap-3 overflow-hidden'>
+        <div className='bg-background/50 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border shadow-sm'>
+          <Icon className='text-primary h-6 w-6' />
         </div>
-        <div className='flex flex-col items-start'>
-          <h2 className='truncate text-lg font-semibold'>
-            {selectedFile?.filename || 'Gist sem nome'}
+        <div className='flex flex-col overflow-hidden'>
+          <h2 className='truncate text-sm leading-none font-semibold'>
+            {selectedFile?.filename || 'Sem nome'}
           </h2>
           {selectedFile?.description && (
-            <p className='text-muted-foreground text-[12px] leading-relaxed'>
+            <p className='text-muted-foreground mt-1 truncate text-xs'>
               {selectedFile?.description}
             </p>
           )}
         </div>
       </div>
 
-      <ButtonsContainer />
-    </div>
-  )
-}
-
-const ButtonsContainer = () => {
-  return (
-    <div className='flex items-center gap-2'>
-      <FileSelector /> <ViewOnGitHubButton />
-      <ImportButton />
+      <div className='flex items-center gap-2 pl-4'>
+        <FileSelector />
+        <ViewOnGitHubButton />
+        <ActionButtons />
+      </div>
     </div>
   )
 }
 
 export const ViewOnGitHubButton = () => {
   const { selectedFile } = useGist()
+  if (!selectedFile?.html_url) return null
+
   return (
-    <Button variant='outline' asChild className='flex items-center gap-2 shadow-none'>
-      <Link href={selectedFile?.html_url || ''} target='_blank' rel='noopener noreferrer'>
-        <IoLogoGithub className='h-8 w-8' /> <span className='text-[9px]'>Ver no GitHub</span>
-      </Link>
-    </Button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button variant='outline' size='icon' asChild className='h-9 w-9 shrink-0'>
+          <Link href={selectedFile.html_url} target='_blank' rel='noopener noreferrer'>
+            <Github className='h-4 w-4' />
+          </Link>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>Ver no GitHub</TooltipContent>
+    </Tooltip>
   )
 }
-export const ImportButton = () => {
-  const { selectedGist, fileContents } = useGist()
+
+export const ActionButtons = () => {
+  const { selectedGist, selectedFile, fileContents } = useGist()
   const { setMarkdown } = useMDToPdf()
   const router = useRouter()
 
-  const handleImport = () => {
+  const handleMergeImport = () => {
     if (!selectedGist) return
+    // Feature 3.3: Merge & Import
     const fullContent = processGistForImport(selectedGist, fileContents)
-    setMarkdown(fullContent as string)
+    setMarkdown(fullContent)
     router.push('/md-to-pdf')
   }
 
+  const handleSingleFileImport = () => {
+    if (!selectedFile) return
+    const content = fileContents[selectedFile.filename]
+    if (!content) return
+
+    // Feature 3.4: Fork to Editor (Edição rápida sem headers extras)
+    setMarkdown(content)
+    router.push('/md-to-pdf')
+  }
+
+  const isMultiFile = (selectedGist?.files.length || 0) > 1
+
   return (
-    <Button onClick={handleImport}>
-      <MessageSquareReply />
-      <span className='text-[9px]'>Importar e Converter</span>
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button className='h-9 gap-2 px-3'>
+          <MessageSquareReply className='h-4 w-4' />
+          <span className='hidden sm:inline'>Importar</span>
+          <ChevronDown className='h-3 w-3 opacity-50' />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align='end' className='w-56'>
+        <DropdownMenuItem onClick={handleSingleFileImport}>
+          <FileCode2 className='mr-2 h-4 w-4' />
+          <div className='flex flex-col'>
+            <span>Editar este arquivo</span>
+            <span className='text-muted-foreground text-[10px]'>Importa conteúdo cru (Raw)</span>
+          </div>
+        </DropdownMenuItem>
+
+        {isMultiFile && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleMergeImport}>
+              <Files className='mr-2 h-4 w-4' />
+              <div className='flex flex-col'>
+                <span>Mesclar todos arquivos</span>
+                <span className='text-muted-foreground text-[10px]'>Junta tudo em um Markdown</span>
+              </div>
+            </DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

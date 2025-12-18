@@ -14,6 +14,7 @@ import {
 import { toast } from 'sonner'
 import { mountGistSelectedfile } from '../utils'
 import { searchText } from '../utils/search-text'
+
 interface GistContextType {
   gists: Gist[]
   setGists: (gists: Gist[]) => void
@@ -38,9 +39,13 @@ interface GistContextType {
   filteredGists: Gist[]
   searchValue: string
   searchType: { description: boolean }
-  fileOptions: { value: string; label: string; language: string | null }[]
   OnChangeSearchType: (checked: boolean) => void
   setSearchValue: (value: string) => void
+  // Novas propriedades para Tags
+  allTags: string[]
+  selectedTags: string[]
+  fileOptions: { value: string; label: string; language: string | null }[]
+  toggleTag: (tag: string) => void
 }
 
 const GistContext = createContext<GistContextType | undefined>(undefined)
@@ -59,32 +64,51 @@ export function GistProvider({ children }: { children: ReactNode }) {
   const [loadingFiles, setLoadingFiles] = useState<Record<string, boolean>>({})
   const [selectedFile, setSelectedFile] = useState<SelectedGistFileProps | null>(null)
 
-  // Search
+  // Search & Filters
   const [searchValue, setSearchValue] = useState('')
   const [searchType, setSearchType] = useState<{ description: boolean }>({ description: true })
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
 
   const OnChangeSearchType = (checked: boolean) => {
     setSearchType({ ...searchType, description: checked })
   }
-  const filteredGists = useMemo(() => {
-    return gists.filter((gist) => {
-      const description = searchText(gist.description, searchValue)
-      const files = gist.files.some((file) => searchText(file.filename, searchValue))
-      return !searchType.description ? files : description || files
-    })
-  }, [gists, searchValue, searchType])
-  const fileOptions = useMemo(() => {
-    const fileTypeMap = new Set<string>()
 
-    const options = (selectedGist?.files ?? []).map((file) => {
-      return {
-        value: file.filename,
-        label: file.filename,
-        language: file.language,
+  // Lógica de Extração de Tags (Feature 3.1)
+  const allTags = useMemo(() => {
+    const tags = new Set<string>()
+    gists.forEach((gist) => {
+      // Procura por palavras começando com # na descrição
+      const matches = gist.description?.match(/#[\w-]+/g)
+      if (matches) {
+        matches.forEach((tag) => tags.add(tag.toLowerCase()))
       }
     })
-    return options
-  }, [selectedGist?.files])
+    return Array.from(tags).sort()
+  }, [gists])
+
+  const toggleTag = useCallback((tag: string) => {
+    setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
+  }, [])
+
+  // Filtragem Unificada
+  const filteredGists = useMemo(() => {
+    return gists.filter((gist) => {
+      // Filtro de Texto
+      const descriptionMatch = searchText(gist.description, searchValue)
+      const filesMatch = gist.files.some((file) => searchText(file.filename, searchValue))
+      const textMatch = !searchType.description ? filesMatch : descriptionMatch || filesMatch
+
+      // Filtro de Tags
+      let tagsMatch = true
+      if (selectedTags.length > 0) {
+        const gistTags = (gist.description?.match(/#[\w-]+/g) || []).map((t) => t.toLowerCase())
+        // O Gist precisa ter TODAS as tags selecionadas (AND logic)
+        tagsMatch = selectedTags.every((tag) => gistTags.includes(tag))
+      }
+
+      return textMatch && tagsMatch
+    })
+  }, [gists, searchValue, searchType, selectedTags])
 
   const onGetGists = useCallback(
     async ({ username, type }: FetchGistsParams) => {
@@ -100,25 +124,25 @@ export function GistProvider({ children }: { children: ReactNode }) {
           if (data.length > 0) {
             toast.success(`${data.length} Gist(s) encontrado(s)`, { duration: 2000 })
           } else {
-            toast.info('Nenhum Gist encontrado para os filtros informados.', { duration: 2000 })
+            toast.info('Nenhum Gist encontrado.', { duration: 2000 })
           }
         } else {
           setError(response.error)
           setGists([])
-          toast.error(response.error || 'Ocorreu um erro inesperado ao buscar Gists.', {
-            duration: 4000,
-          })
+          toast.error(response.error || 'Erro inesperado.', { duration: 4000 })
         }
       } finally {
         setLoading(false)
       }
     },
-    [setGists, setLoading, setError, setSelectedGist],
+    [setGists],
   )
+
   const onSearch = useCallback(
     async ({ username, type }: FetchGistsParams) => {
-      if (!username || !username?.trim()) {
+      if (!username?.trim()) {
         toast.error('Digite um nome de usuário válido')
+        return
       }
       await onGetGists({ username, type })
     },
@@ -127,9 +151,7 @@ export function GistProvider({ children }: { children: ReactNode }) {
 
   const handleLoadFileContent = useCallback(
     async (file: GistFile) => {
-      if (fileContents[file.filename] || loadingFiles[file.filename]) {
-        return
-      }
+      if (fileContents[file.filename] || loadingFiles[file.filename]) return
 
       setLoadingFiles((prev) => ({ ...prev, [file.filename]: true }))
 
@@ -142,7 +164,7 @@ export function GistProvider({ children }: { children: ReactNode }) {
         console.error(`Erro ao carregar ${file.filename}:`, error)
         setFileContents((prev) => ({
           ...prev,
-          [file.filename]: `❌ Erro ao carregar o conteúdo do arquivo`,
+          [file.filename]: `❌ Erro ao carregar conteúdo`,
         }))
       } finally {
         setLoadingFiles((prev) => ({ ...prev, [file.filename]: false }))
@@ -150,6 +172,7 @@ export function GistProvider({ children }: { children: ReactNode }) {
     },
     [fileContents, loadingFiles],
   )
+
   const onSelectGist = useCallback(
     (gist: Gist) => {
       const firstFile = gist.files[0]
@@ -160,8 +183,9 @@ export function GistProvider({ children }: { children: ReactNode }) {
         handleLoadFileContent(firstFile)
       }
     },
-    [setSelectedGist, handleLoadFileContent],
+    [handleLoadFileContent],
   )
+
   const selectedGistId = useMemo(() => selectedGist?.id || null, [selectedGist])
 
   const handleSelectFile = useCallback(
@@ -175,12 +199,24 @@ export function GistProvider({ children }: { children: ReactNode }) {
     },
     [handleLoadFileContent, selectedGist],
   )
+
   useEffect(() => {
     if (!selectedGist) {
       setFileContents({})
       setSelectedFile(null)
     }
   }, [selectedGist])
+
+  const fileOptions = useMemo(() => {
+    const options = (selectedGist?.files ?? []).map((file) => {
+      return {
+        value: file.filename,
+        label: file.filename,
+        language: file.language,
+      }
+    })
+    return options
+  }, [selectedGist?.files])
   const value = {
     gists,
     setGists,
@@ -207,7 +243,10 @@ export function GistProvider({ children }: { children: ReactNode }) {
     searchType,
     OnChangeSearchType,
     setSearchValue,
+    allTags,
     fileOptions,
+    selectedTags,
+    toggleTag,
   }
   return <GistContext.Provider value={value}>{children}</GistContext.Provider>
 }
@@ -215,7 +254,7 @@ export function GistProvider({ children }: { children: ReactNode }) {
 export function useGist() {
   const context = useContext(GistContext)
   if (context === undefined) {
-    throw new Error('useLoading deve ser usado dentro de um LoadingProvider')
+    throw new Error('useGist must be used within a GistProvider')
   }
   return context
 }
