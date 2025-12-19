@@ -2,12 +2,10 @@ export const enableTools: Record<string, EnableTools> = {
   '/': {
     zoom: false,
     printExport: false,
-    settings: false,
   },
   '/md-to-pdf': {
     zoom: true,
     printExport: true,
-    settings: true,
   },
 }
 
@@ -23,5 +21,5 @@ export const getEnableTools = (pathname: string) => {
 
 export const showToolsHeader = (pathname: string) => {
   const config = getEnableTools(pathname)
-  return config.zoom || config.printExport || config.settings
+  return config.zoom || config.printExport
 }

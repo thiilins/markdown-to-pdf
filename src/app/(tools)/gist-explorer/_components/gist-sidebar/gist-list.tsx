@@ -12,9 +12,9 @@ import { useMemo } from 'react'
 import { getIcon } from '../../../../../shared/constants/file-icons'
 
 export const GistList = () => {
-  const { filteredGists, selectedGistId, onSelectGist, loading, error, gists } = useGist()
+  const { filteredGists, selectedGistId, onSelectGist, isLoading, error, gists } = useGist()
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className='h-full flex-1'>
         {Array.from({ length: 5 }).map((_, i) => (
