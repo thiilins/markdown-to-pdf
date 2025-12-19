@@ -359,6 +359,8 @@ ainda pendente)
 
 **📄 Análise Detalhada**: Ver `analise-importacao-header-footer.md`
 
+**Status**: ✅ **IMPLEMENTADO** - Route Handler, Service, Modal e botão no ActionToolbar criados
+
 ---
 
 ## 5. Colaboração e IA
@@ -435,9 +437,9 @@ ainda pendente)
 ### 🚀 Quick Wins (Alto Impacto, Baixa/Média Complexidade)
 
 1. **KaTeX** - 1 dia, 🟢 Alto impacto
-2. **Quebras de Página** - 0.5-1 dia, 🟡 Médio impacto
-3. **Destaque de Sintaxe Avançado** - 0.5 dia, 🟡 Médio impacto
-4. **Importação de URLs** - 1-2 dias, 🟡 Médio impacto
+2. ~~**Quebras de Página** - 0.5-1 dia, 🟡 Médio impacto~~ ✅ **JÁ IMPLEMENTADO**
+3. ~~**Destaque de Sintaxe Avançado** - 0.5 dia, 🟡 Médio impacto~~ ✅ **IMPLEMENTADO**
+4. ~~**Importação de URLs** - 1-2 dias, 🟡 Médio impacto~~ ✅ **IMPLEMENTADO**
 
 ### 💎 Alto Valor (Alto Impacto, Média Complexidade)
 
@@ -465,9 +467,9 @@ ainda pendente)
 ### Fase 1 (1-2 semanas): Fundação
 
 - KaTeX
-- Quebras de Página
+- ~~Quebras de Página~~ ✅ **JÁ IMPLEMENTADO**
 - YAML Frontmatter
-- Importação de URLs
+- ~~Importação de URLs~~ ✅ **IMPLEMENTADO**
 
 ### Fase 2 (2-3 semanas): Diferenciação
 

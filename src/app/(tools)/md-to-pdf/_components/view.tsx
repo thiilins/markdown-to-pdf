@@ -4,11 +4,11 @@ import { useConfig } from '@/shared/contexts/configContext'
 import { PrintStyle } from '@/shared/styles/print-styles'
 
 import { FloatingPanel } from '@/components/custom-ui/floating-components'
-import { ActionToolbar } from '@/components/layout-components/action-toolbar'
 import { MarkdownEditor } from '@/components/markdown-editor/editor'
 import { cn } from '@/lib/utils'
 import { useMDToPdf } from '@/shared/contexts/mdToPdfContext'
 import { useRef } from 'react' // Importado useRef
+import { ActionToolbar } from './action-toolbar'
 
 export const MDToPdfViewComponent = () => {
   const { config } = useConfig()

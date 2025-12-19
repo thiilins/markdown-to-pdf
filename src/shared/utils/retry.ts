@@ -24,10 +24,7 @@ const sleep = (ms: number): Promise<void> => {
  * @param options Opções de retry
  * @returns Resultado da função ou lança o último erro
  */
-export async function withRetry<T>(
-  fn: () => Promise<T>,
-  options: RetryOptions = {},
-): Promise<T> {
+export async function withRetry<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<T> {
   const {
     maxRetries = 3,
     initialDelay = 1000, // 1s
@@ -81,29 +78,25 @@ export async function fetchWithRetry(
   init?: RequestInit,
   retryOptions?: RetryOptions,
 ): Promise<Response> {
-  return withRetry(
-    async () => {
-      const response = await fetch(url, init)
+  return withRetry(async () => {
+    const response = await fetch(url, init)
 
-      // Se for status retryable, lança erro para trigger do retry
-      if (retryOptions?.retryableStatuses?.includes(response.status)) {
-        const error: any = new Error(`HTTP ${response.status}: ${response.statusText}`)
-        error.status = response.status
-        error.response = response
-        throw error
-      }
+    // Se for status retryable, lança erro para trigger do retry
+    if (retryOptions?.retryableStatuses?.includes(response.status)) {
+      const error: any = new Error(`HTTP ${response.status}: ${response.statusText}`)
+      error.status = response.status
+      error.response = response
+      throw error
+    }
 
-      // Se não for ok e não for retryable, lança erro direto
-      if (!response.ok) {
-        const error: any = new Error(`HTTP ${response.status}: ${response.statusText}`)
-        error.status = response.status
-        error.response = response
-        throw error
-      }
+    // Se não for ok e não for retryable, lança erro direto
+    if (!response.ok) {
+      const error: any = new Error(`HTTP ${response.status}: ${response.statusText}`)
+      error.status = response.status
+      error.response = response
+      throw error
+    }
 
-      return response
-    },
-    retryOptions,
-  )
+    return response
+  }, retryOptions)
 }
-

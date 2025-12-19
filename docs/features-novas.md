@@ -40,8 +40,9 @@ profissional e transformar a ferramenta em um ecossistema completo de documenta�
 - **Exportação Direta para Cloud:** Além do download local, adicionar botões para salvar o PDF
   diretamente no **Google Drive**, **Dropbox** ou criar um novo **GitHub Gist** com o conteúdo
   gerado.
-- **Importação de URLs:** Permitir que o usuário cole a URL de um arquivo `.md` bruto (ex: do
-  GitHub) e o sistema o carregue automaticamente no editor.
+- ~~**Importação de URLs:** Permitir que o usuário cole a URL de um arquivo `.md` bruto (ex: do
+  GitHub) e o sistema o carregue automaticamente no editor.~~ ✅ **IMPLEMENTADO** - Botão no
+  ActionToolbar, modal com opção de substituir/adicionar, whitelist de domínios
 
 ### 5. Colaboração e IA
 
