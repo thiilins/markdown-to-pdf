@@ -1,5 +1,6 @@
 onlyBuiltDependencies:
   - core-js
+  - es5-ext
   - msw
   - sharp
   - unrs-resolver

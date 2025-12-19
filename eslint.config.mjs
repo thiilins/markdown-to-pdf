@@ -39,7 +39,6 @@ const eslintConfig = [
       'next-env.d.ts',
       'tsconfig.json',
       'package-lock.json',
-
       'tsconfig.json',
     ],
     rules: {
