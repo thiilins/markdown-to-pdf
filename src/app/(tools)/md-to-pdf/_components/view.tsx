@@ -8,15 +8,17 @@ import { MarkdownEditor } from '@/components/markdown-editor/editor'
 import { cn } from '@/lib/utils'
 import { useMDToPdf } from '@/shared/contexts/mdToPdfContext'
 import { useSearchParams } from 'next/navigation'
-import { useEffect, useRef } from 'react'
+import { Suspense, useEffect, useRef } from 'react'
 import { ActionToolbar } from './action-toolbar'
 
-export const MDToPdfViewComponent = () => {
-  const { config } = useConfig()
-  const { markdown, setMarkdown } = useMDToPdf()
+/**
+ * Componente que carrega conteúdo da URL (integração com Web to Markdown)
+ * Precisa estar em um componente separado para usar Suspense
+ */
+const ContentLoader = () => {
+  const { setMarkdown } = useMDToPdf()
   const searchParams = useSearchParams()
 
-  // Carrega conteúdo da URL se presente (integração com Web to Markdown)
   useEffect(() => {
     const contentParam = searchParams.get('content')
     if (contentParam) {
@@ -33,6 +35,13 @@ export const MDToPdfViewComponent = () => {
     }
   }, [searchParams, setMarkdown])
 
+  return null
+}
+
+export const MDToPdfViewComponent = () => {
+  const { config } = useConfig()
+  const { markdown, setMarkdown } = useMDToPdf()
+
   // Referência para o contêiner de scroll do preview
   const previewContainerRef = useRef<HTMLDivElement>(null)
 
@@ -47,6 +56,9 @@ export const MDToPdfViewComponent = () => {
 
   return (
     <div className='flex min-h-0 flex-1'>
+      <Suspense fallback={null}>
+        <ContentLoader />
+      </Suspense>
       <div id='md-pdf-editor' className={cn('flex h-full w-[50%] flex-col border-r')}>
         <div className='min-h-0 flex-1'>
           <MarkdownEditor
