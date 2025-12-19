@@ -1,4 +1,7 @@
+import * as prettierMarkdown from 'prettier/plugins/markdown'
+import * as prettier from 'prettier/standalone'
 import { useCallback } from 'react'
+import type { IToolbarActions } from '../../../shared/@types/markdown-toolbar'
 import {
   BLOCKQUOTE,
   BOLD,
@@ -21,9 +24,6 @@ import {
   TABLE,
   UNORDERED_LIST,
 } from './constants'
-import * as prettierMarkdown from 'prettier/plugins/markdown'
-import * as prettier from 'prettier/standalone'
-import type { IToolbarActions } from './type'
 
 interface IUseToolbarActions {
   insertText: (...props: string[]) => void

@@ -25,7 +25,7 @@ import {
   Table,
   Undo,
 } from 'lucide-react'
-import type { IToolbarActions, ToolbarOption } from './type'
+import type { IToolbarActions, ToolbarOption } from '../../../shared/@types/markdown-toolbar'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
