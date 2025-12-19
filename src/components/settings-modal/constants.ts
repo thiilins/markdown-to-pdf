@@ -5,6 +5,7 @@ export const CONFIG_MODAL_SHOW_OPTIONS: Record<string, string[]> = {
   '/': ALL_TABS,
   '/md-to-pdf': ALL_TABS,
   '/gist-explorer': ['typography', 'theme'],
+  '/web-to-markdown': [],
   '*': ALL_TABS,
 }
 
@@ -14,6 +15,7 @@ export const CONFIG_EDITOR_SHOW_OPTIONS: Record<string, string[]> = {
   '/md-to-pdf': ALL_EDITOR,
   '/gist-explorer': [],
   '*': ALL_EDITOR,
+  '/web-to-markdown': [],
 }
 export const CONFIG_MODAL_COLORS = {
   page: {

@@ -7,12 +7,31 @@ import { FloatingPanel } from '@/components/custom-ui/floating-components'
 import { MarkdownEditor } from '@/components/markdown-editor/editor'
 import { cn } from '@/lib/utils'
 import { useMDToPdf } from '@/shared/contexts/mdToPdfContext'
-import { useRef } from 'react' // Importado useRef
+import { useSearchParams } from 'next/navigation'
+import { useEffect, useRef } from 'react'
 import { ActionToolbar } from './action-toolbar'
 
 export const MDToPdfViewComponent = () => {
   const { config } = useConfig()
   const { markdown, setMarkdown } = useMDToPdf()
+  const searchParams = useSearchParams()
+
+  // Carrega conteúdo da URL se presente (integração com Web to Markdown)
+  useEffect(() => {
+    const contentParam = searchParams.get('content')
+    if (contentParam) {
+      try {
+        const decoded = decodeURIComponent(atob(contentParam))
+        setMarkdown(decoded)
+        // Remove o parâmetro da URL após carregar
+        const url = new URL(window.location.href)
+        url.searchParams.delete('content')
+        window.history.replaceState({}, '', url.toString())
+      } catch (error) {
+        console.error('Erro ao decodificar conteúdo da URL:', error)
+      }
+    }
+  }, [searchParams, setMarkdown])
 
   // Referência para o contêiner de scroll do preview
   const previewContainerRef = useRef<HTMLDivElement>(null)
