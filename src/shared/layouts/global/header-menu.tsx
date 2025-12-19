@@ -1,5 +1,6 @@
 'use client'
 
+import { IconButtonTooltip } from '@/components/custom-ui/tooltip'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -9,8 +10,9 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 import { Modules } from '@/shared/constants'
+import { useConfig } from '@/shared/contexts/configContext'
 import { urlIsActive, urlIsActiveWithSubmenu } from '@/shared/utils'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import UserNav from '../auth/user-nav'
@@ -70,12 +72,18 @@ const GlobalHeaderButtonSubmenu = ({ label, href, icon }: Modules) => {
     </DropdownMenuItem>
   )
 }
-export function GlobalHeaderMenu() {
+export const GlobalHeaderMenu = () => {
+  const { setIsConfigOpen } = useConfig()
   return (
     <nav className='flex items-center justify-center gap-2 px-3'>
       {Modules.map((module) => {
         return <GlobalHeaderButton key={module.label} {...module} />
       })}
+      <IconButtonTooltip
+        icon={Settings}
+        onClick={() => setIsConfigOpen(true)}
+        content='Configurações'
+      />
       <UserNav />
     </nav>
   )

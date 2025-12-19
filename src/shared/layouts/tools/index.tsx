@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-export const ToolsLayout = ({
+export const ToolsLayoutComponent = ({
   children,
   className,
   floatingComponent = null,

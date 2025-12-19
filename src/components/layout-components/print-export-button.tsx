@@ -2,9 +2,10 @@
 
 import { Button } from '@/components/ui/button'
 import { useMDToPdf } from '@/shared/contexts/mdToPdfContext'
-import { CloudDownload, Loader2, Printer, Settings } from 'lucide-react'
+import { CloudDownload, Loader2, Printer } from 'lucide-react'
+import { IconButtonTooltip } from '../custom-ui/tooltip'
 
-export const PrintExportButtons = ({ handleOpen }: { handleOpen: () => void }) => {
+export const PrintExportButtons = () => {
   const { onPrint, onDownloadPDF, isLoading, disabledDownload } = useMDToPdf()
   return (
     <div className='flex flex-1 items-center gap-2 rounded-md bg-blue-500/20 p-1'>
@@ -15,28 +16,17 @@ export const PrintExportButtons = ({ handleOpen }: { handleOpen: () => void }) =
         <Printer className='h-4 w-4' />
       </Button>
       {!disabledDownload && (
-        <Button
-          variant='default'
+        <IconButtonTooltip
           onClick={onDownloadPDF}
-          className='flex h-8 w-10 cursor-pointer items-center justify-center'
-          disabled={isLoading}>
-          {isLoading ? (
-            <>
-              <Loader2 className='h-4 w-4 animate-spin' />
-            </>
-          ) : (
-            <>
-              <CloudDownload className='h-4 w-4' />
-            </>
-          )}
-        </Button>
+          content='Exportar PDF'
+          className={{
+            button: 'flex h-8 w-10 cursor-pointer items-center justify-center',
+            icon: isLoading ? 'animate-spin' : '',
+          }}
+          icon={isLoading ? Loader2 : CloudDownload}
+          disabled={isLoading}
+        />
       )}
-      <Button
-        variant='outline'
-        onClick={handleOpen}
-        className='flex h-8 w-10 cursor-pointer items-center justify-center'>
-        <Settings className='h-4 w-4' />
-      </Button>
     </div>
   )
 }

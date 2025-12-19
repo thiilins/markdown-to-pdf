@@ -15,6 +15,7 @@ interface StaticStylePreviewProps {
   typographyConfig: TypographyConfig
   themeConfig?: ThemeConfig
   className?: string
+  contentRef: React.RefObject<HTMLDivElement | null>
 }
 
 export function StaticPreview({
@@ -22,6 +23,7 @@ export function StaticPreview({
   typographyConfig,
   themeConfig,
   className,
+  contentRef,
 }: StaticStylePreviewProps) {
   const theme = themeConfig || THEME_PRESETS.modern
   const [, copy] = useCopyToClipboard()
