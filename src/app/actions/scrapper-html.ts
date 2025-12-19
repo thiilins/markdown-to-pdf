@@ -34,7 +34,6 @@ export async function scrapeHtmlToMarkdown(url: string): Promise<ScrapeHtmlRespo
         },
         signal: abortController.signal,
       })
-
       clearTimeout(timeoutId)
     } catch (error) {
       clearTimeout(timeoutId)

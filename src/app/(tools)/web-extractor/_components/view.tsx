@@ -10,7 +10,7 @@ import { PreviewPanel } from './preview-panel'
 
 export const WebExtractorViewComponent = () => {
   return (
-    <main className='bg-background flex min-h-full w-full flex-1 flex-col overflow-hidden bg-[url(https://loremflickr.com/1200/800/city)] bg-cover bg-center'>
+    <main className='bg-background flex min-h-full w-full flex-1 flex-col overflow-hidden bg-[url(https://picsum.photos/1920/1080)] bg-cover bg-center'>
       <div className='flex flex-1 flex-col overflow-hidden bg-zinc-50/30 dark:bg-zinc-950/30'>
         <div className='flex-1 overflow-hidden p-2'>
           <PreviewPanel />
@@ -53,7 +53,7 @@ export const WebExtractorSearchComponent = () => {
                 button: 'h-7 w-7',
               }}
               variant='default'
-              content='Limpar'
+              content='Voltar'
               onClick={handleReset}
               icon={ArrowLeft}
             />

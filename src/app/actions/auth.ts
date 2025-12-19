@@ -7,7 +7,7 @@ export async function handleSignInWithGitHub() {
 }
 
 export async function handleSignOut() {
-  await signOut()
+  await signOut({ redirectTo: '/' })
 }
 
 export const getSession = async () => {

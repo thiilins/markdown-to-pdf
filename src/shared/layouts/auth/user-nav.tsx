@@ -1,14 +1,15 @@
 // src/shared/layouts/auth/user-nav.tsx
 'use client' // Importante: agora é Client Component
 
-import { handleSignInWithGitHub, handleSignOut } from '@/app/actions/auth'
+import { handleSignInWithGitHub } from '@/app/actions/auth'
 import { Dropdowncomponent } from '@/components/custom-ui/dropdown'
 import { Button } from '@/components/ui/button'
 import { DropdownMenuLabel } from '@/components/ui/dropdown-menu'
 import { clearAllDatabases } from '@/shared/utils'
 import { formatDateWithTime } from '@/shared/utils/format-date'
 import { BrushCleaning, LogIn, LogOut } from 'lucide-react'
-import { useSession } from 'next-auth/react' // Importa tudo do react
+import { signOut, useSession } from 'next-auth/react' // Importa tudo do react
+import { useRouter } from 'next/navigation'
 import { useCallback } from 'react'
 import { INVALID_AUTH_STATUS } from './_components/constants'
 import { UserAvatar } from './_components/user-avatar'
@@ -29,10 +30,10 @@ export const LoggedInUserNav = () => {
   if (INVALID_AUTH_STATUS.includes(status) || !session?.user) return null
 
   const content: DropdownContentProps[] = [
-    { type: 'solo', key: 'user-details', component: <UserDetailsLabel /> },
+    { type: 'solo', key: 'user-details', component: <UserDetailsLabel key='user-details' /> },
     { type: 'separator', key: 'separator' },
-    { type: 'item', key: 'reset-data', component: <ResetDataButton /> },
-    { type: 'item', key: 'logout', component: <LogoutButton /> },
+    { type: 'item', key: 'reset-data', component: <ResetDataButton key='reset-data' /> },
+    { type: 'item', key: 'logout', component: <LogoutButton key='logout' /> },
   ]
 
   const trigger = (
@@ -82,12 +83,18 @@ export const ResetDataButton = () => {
   )
 }
 export const LogoutButton = () => {
+  const router = useRouter()
+  const handleLogout = useCallback(async () => {
+    await signOut({ redirect: false, callbackUrl: '/' })
+    router.refresh()
+    router.push('/')
+  }, [router])
   return (
     <Button
       variant='ghost'
       size='sm'
       className='w-full cursor-pointer justify-start rounded-[10px] bg-red-500/20 p-2 text-red-500 hover:bg-red-500/10 hover:text-red-500'
-      onClick={handleSignOut}>
+      onClick={handleLogout}>
       <LogOut className='mr-2 h-4 w-4 text-red-500' /> Sair
     </Button>
   )
