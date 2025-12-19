@@ -3,7 +3,6 @@
 import { stripHTML } from '@/shared/utils/strip-html'
 import { isValidWebUrl } from '@/shared/utils/url-validation-web'
 import { Readability } from '@mozilla/readability'
-import { JSDOM } from 'jsdom'
 // @ts-ignore
 import { NodeHtmlMarkdown } from 'node-html-markdown'
 
@@ -51,6 +50,8 @@ export async function scrapeHtmlToMarkdown(url: string): Promise<ScrapeHtmlRespo
       .replace(/style\s*=\s*["'][^"']*["']/gi, '')
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
 
+    // Importação dinâmica de jsdom para evitar problemas ESM/CommonJS na Vercel
+    const { JSDOM } = await import('jsdom')
     const dom = new JSDOM(html, { url })
     const originalDoc = dom.window.document
 
@@ -164,7 +165,7 @@ export async function scrapeHtmlToMarkdown(url: string): Promise<ScrapeHtmlRespo
       success: true,
       markdown: `# ${article.title || 'Artigo Importado'}\n\n${markdown}`,
       title: article.title || '',
-      excerpt: stripHTML(article.excerpt || ''),
+      excerpt: await stripHTML(article.excerpt || ''),
     }
   } catch (error) {
     console.error('Erro no Scraper:', error)
