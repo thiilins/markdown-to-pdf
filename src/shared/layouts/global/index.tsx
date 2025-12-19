@@ -13,12 +13,12 @@ export const GlobalLayout = ({ children }: { children: React.ReactNode }) => {
       <ConfigProvider>
         <MDToPdfProvider>
           <ZoomProvider>
-            <div className='bg-background text-foreground flex h-screen w-screen flex-col overflow-hidden font-sans'>
+            <main className='bg-background flex h-screen w-screen flex-1 flex-col overflow-hidden bg-[url(https://loremflickr.com/1200/800/city)] bg-cover bg-center font-sans'>
               <GlobalHeaderComponent />
               <Toaster />
               <SettingsDialog />
               {children}
-            </div>
+            </main>
           </ZoomProvider>
         </MDToPdfProvider>
       </ConfigProvider>

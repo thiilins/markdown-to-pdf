@@ -2,7 +2,6 @@
 
 import { isValidWebUrl } from '@/shared/utils/url-validation-web'
 import { Readability } from '@mozilla/readability'
-import { JSDOM } from 'jsdom'
 import TurndownService from 'turndown'
 
 /**
@@ -78,6 +77,8 @@ export async function scrapeHtmlToMarkdown(url: string): Promise<ScrapeHtmlRespo
       .replace(/style\s*=\s*["'][^"']*["']/gi, '') // Remove todos os style="..."
       .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '') // Remove blocos <style>
 
+    // Importação dinâmica de jsdom para evitar problemas ESM/CommonJS na Vercel
+    const { JSDOM } = await import('jsdom')
     // Usa JSDOM e Readability para extrair apenas o conteúdo relevante
     const dom = new JSDOM(html, { url })
 

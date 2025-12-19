@@ -100,10 +100,7 @@ export function MarkdownEditor({
 
   return (
     <div
-      className={cn(
-        'bg-background flex h-full w-full flex-col overflow-hidden rounded-md border',
-        className,
-      )}>
+      className={cn('bg-background flex h-full w-full flex-col overflow-hidden border', className)}>
       {editorReady && <MarkdownToolbar editor={editorRef.current} />}
 
       <div className='flex-1 overflow-hidden'>
