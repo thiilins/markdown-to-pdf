@@ -1,6 +1,7 @@
 'use client'
 
 import { IconButtonTooltip } from '@/components/custom-ui/tooltip'
+import { CONFIG_MODAL_SHOW_OPTIONS } from '@/components/settings-modal/constants'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -73,17 +74,21 @@ const GlobalHeaderButtonSubmenu = ({ label, href, icon }: Modules) => {
   )
 }
 export const GlobalHeaderMenu = () => {
+  const pathname = usePathname()
   const { setIsConfigOpen } = useConfig()
+  const config = CONFIG_MODAL_SHOW_OPTIONS?.[pathname] ?? []
   return (
     <nav className='flex items-center justify-center gap-2 px-3'>
       {Modules.map((module) => {
         return <GlobalHeaderButton key={module.label} {...module} />
       })}
-      <IconButtonTooltip
-        icon={Settings}
-        onClick={() => setIsConfigOpen(true)}
-        content='Configurações'
-      />
+      {config.length > 0 && (
+        <IconButtonTooltip
+          icon={Settings}
+          onClick={() => setIsConfigOpen(true)}
+          content='Configurações'
+        />
+      )}
       <UserNav />
     </nav>
   )

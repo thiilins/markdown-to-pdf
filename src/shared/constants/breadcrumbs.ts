@@ -11,3 +11,12 @@ export const mdToPdfBreadcrumbs: Breadcrumbs[] = [
     order: 2,
   },
 ]
+
+export const webToMarkdownBreadcrumbs: Breadcrumbs[] = [
+  homeBreadcrumb,
+  {
+    label: 'Web Extractor',
+    href: '/web-extractor',
+    order: 2,
+  },
+]

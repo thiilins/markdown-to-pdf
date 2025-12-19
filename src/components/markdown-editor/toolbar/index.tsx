@@ -2,6 +2,7 @@
 
 import { TooltipProvider } from '@/components/ui/tooltip'
 
+import type { MarkdownToolbarProps } from '../../../shared/@types/markdown-toolbar'
 import {
   BlocksToolbar,
   FormatDocumentToolbar,
@@ -9,7 +10,6 @@ import {
   HeadingsToolbar,
   UndoRedoToolbar,
 } from './actions'
-import type { MarkdownToolbarProps } from './type'
 import { useToolbarActions } from './useToolbarActions'
 
 export function MarkdownToolbar({ editor }: MarkdownToolbarProps) {

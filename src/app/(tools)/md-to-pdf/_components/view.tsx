@@ -4,35 +4,70 @@ import { useConfig } from '@/shared/contexts/configContext'
 import { PrintStyle } from '@/shared/styles/print-styles'
 
 import { FloatingPanel } from '@/components/custom-ui/floating-components'
-import { ActionToolbar } from '@/components/layout-components/action-toolbar'
 import { MarkdownEditor } from '@/components/markdown-editor/editor'
 import { cn } from '@/lib/utils'
 import { useMDToPdf } from '@/shared/contexts/mdToPdfContext'
+import { useSearchParams } from 'next/navigation'
+import { useEffect, useRef } from 'react'
+import { ActionToolbar } from './action-toolbar'
+
 export const MDToPdfViewComponent = () => {
   const { config } = useConfig()
   const { markdown, setMarkdown } = useMDToPdf()
+  const searchParams = useSearchParams()
+
+  // Carrega conteúdo da URL se presente (integração com Web to Markdown)
+  useEffect(() => {
+    const contentParam = searchParams.get('content')
+    if (contentParam) {
+      try {
+        const decoded = decodeURIComponent(atob(contentParam))
+        setMarkdown(decoded)
+        // Remove o parâmetro da URL após carregar
+        const url = new URL(window.location.href)
+        url.searchParams.delete('content')
+        window.history.replaceState({}, '', url.toString())
+      } catch (error) {
+        console.error('Erro ao decodificar conteúdo da URL:', error)
+      }
+    }
+  }, [searchParams, setMarkdown])
+
+  // Referência para o contêiner de scroll do preview
+  const previewContainerRef = useRef<HTMLDivElement>(null)
+
+  // Função que sincroniza o scroll do preview com base na porcentagem do editor
+  const handleEditorScroll = (percentage: number) => {
+    if (previewContainerRef.current) {
+      const element = previewContainerRef.current
+      const scrollableHeight = element.scrollHeight - element.clientHeight
+      element.scrollTop = percentage * scrollableHeight
+    }
+  }
 
   return (
     <div className='flex min-h-0 flex-1'>
-      {/* Editor */}
       <div id='md-pdf-editor' className={cn('flex h-full w-[50%] flex-col border-r')}>
         <div className='min-h-0 flex-1'>
           <MarkdownEditor
             value={markdown}
             onChange={(value) => setMarkdown(value || '')}
+            onScroll={handleEditorScroll} // Passa o handler para o Monaco
             config={config.editor}
           />
         </div>
       </div>
-      {/* Preview */}
+      {/* Importante: A ref deve ser colocada no elemento que possui o 'overflow-y-auto'.
+         Se o PreviewPanelWithPages tiver o scroll interno, passamos a ref para ele.
+      */}
       <div id='md-pdf-preview' className={cn('flex h-full w-[50%] flex-col')}>
         <div className='min-h-0 flex-1'>
-          <PreviewPanelWithPages />
+          <PreviewPanelWithPages ref={previewContainerRef} />
         </div>
       </div>
-      {/* Print Style */}
+
       <PrintStyle config={config} />
-      {/* Fonts */}
+
       <link
         rel='stylesheet'
         href={`https://fonts.googleapis.com/css2?${[
@@ -46,6 +81,7 @@ export const MDToPdfViewComponent = () => {
           .map((font) => `family=${font.replace(/\s+/g, '+')}:wght@400;500;600;700`)
           .join('&')}&display=swap`}
       />
+
       <FloatingPanel width='w-auto' height='h-auto' storageKey='md-pdf-floating-bar'>
         <ActionToolbar zoom printExport />
       </FloatingPanel>

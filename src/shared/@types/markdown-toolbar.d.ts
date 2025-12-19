@@ -20,6 +20,7 @@ export interface IToolbarActions {
   undo: () => void
   redo: () => void
   formatDocument: () => Promise<void>
+  generateTOC: () => void
 }
 export type ToolbarOption = {
   type: 'action'

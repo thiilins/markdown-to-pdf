@@ -20,8 +20,8 @@ import {
   type ReactNode,
 } from 'react'
 import { toast } from 'sonner'
+import { handleDownloadPDFApi } from '../constants/download-pdf-api'
 import { mountGistSelectedfile } from '../utils'
-import { handleDownloadPDFApi } from '../utils/download-pdf-api'
 import { useConfig } from './configContext'
 
 interface GistContextType {

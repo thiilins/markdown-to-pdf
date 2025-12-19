@@ -1,7 +1,7 @@
 'use client'
 
 import { ENVIROMENT } from '@/env'
-import usePersistedState from '@/hooks/use-persisted-state'
+import usePersistedStateInDB from '@/hooks/use-persisted-in-db'
 import {
   Dispatch,
   RefObject,
@@ -10,6 +10,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -17,8 +18,8 @@ import {
 import { useReactToPrint } from 'react-to-print'
 import { toast } from 'sonner'
 import { DEFAULT_MARKDOWN } from '../constants'
+import { handleDownloadPDFApi } from '../constants/download-pdf-api'
 import { filename_now } from '../utils'
-import { handleDownloadPDFApi } from '../utils/download-pdf-api'
 import { useConfig } from './configContext'
 interface MDToPdfContextType {
   isLoading: boolean
@@ -26,7 +27,7 @@ interface MDToPdfContextType {
   onPrint: () => void
   onDownloadPDF: () => void
   markdown: string
-  setMarkdown: React.Dispatch<React.SetStateAction<string>>
+  setMarkdown: (newState: string) => Promise<void>
   contentRef: RefObject<HTMLDivElement | null>
   disabledDownload: boolean
 }
@@ -36,7 +37,10 @@ const MDToPdfContext = createContext<MDToPdfContextType | undefined>(undefined)
 export function MDToPdfProvider({ children }: { children: ReactNode }) {
   const { config } = useConfig()
   const [isLoading, setIsLoading] = useState(false)
-  const [markdown, setMarkdown] = usePersistedState<string>('md-to-pdf-markdown', DEFAULT_MARKDOWN)
+  const [markdown, setMarkdown] = usePersistedStateInDB<string>(
+    'md-to-pdf-markdown',
+    DEFAULT_MARKDOWN,
+  )
   const contentRef = useRef<HTMLDivElement>(null)
   const handlePrint = useReactToPrint({
     contentRef: contentRef,
@@ -62,21 +66,23 @@ export function MDToPdfProvider({ children }: { children: ReactNode }) {
       setDisabledDownload(true)
     }
   }, [])
-  return (
-    <MDToPdfContext.Provider
-      value={{
-        isLoading,
-        setIsLoading,
-        onPrint: handlePrint,
-        disabledDownload,
-        onDownloadPDF: handleDownloadPDF,
-        markdown,
-        setMarkdown,
-        contentRef,
-      }}>
-      {children}
-    </MDToPdfContext.Provider>
+
+  // Memoização do value do Context para evitar re-renders desnecessários
+  const contextValue = useMemo<MDToPdfContextType>(
+    () => ({
+      isLoading,
+      setIsLoading,
+      onPrint: handlePrint,
+      disabledDownload,
+      onDownloadPDF: handleDownloadPDF,
+      markdown,
+      setMarkdown,
+      contentRef,
+    }),
+    [isLoading, disabledDownload, handleDownloadPDF, handlePrint, markdown, setMarkdown],
   )
+
+  return <MDToPdfContext.Provider value={contextValue}>{children}</MDToPdfContext.Provider>
 }
 
 export function useMDToPdf() {

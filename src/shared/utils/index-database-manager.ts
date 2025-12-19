@@ -1,4 +1,5 @@
 'use client'
+
 export async function openDatabase(dbName: string, storeName: string): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(dbName, 1)
@@ -38,13 +39,17 @@ export async function saveData<T>(
   storeName: string,
   key: string,
   value: T,
+  persist: boolean = true, // Adicionado parâmetro para decidir se expira ou não
 ): Promise<void> {
   const db = await openDatabase(dbName, storeName)
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(storeName, 'readwrite')
     const store = transaction.objectStore(storeName)
     const timestamp = Date.now()
-    const expirationTime = getExpirationTime()
+
+    // Se persist for true, definimos um tempo de expiração infinito (ou nulo)
+    const expirationTime = persist ? null : getExpirationTime()
+
     store.put({ id: key, value, timestamp, expirationTime })
 
     transaction.oncomplete = () => {
@@ -72,7 +77,9 @@ export async function getData<T>(
       const result = request.result
       if (result) {
         const { value, expirationTime } = result
-        if (Date.now() < expirationTime) {
+
+        // Se não houver expirationTime, o dado é persistente
+        if (!expirationTime || Date.now() < expirationTime) {
           resolve(value)
         } else {
           resolve(null) // Data expired
@@ -87,6 +94,7 @@ export async function getData<T>(
     }
   })
 }
+
 export async function listDatabases(): Promise<string[]> {
   if (indexedDB.databases) {
     const databases = await indexedDB.databases()
@@ -128,6 +136,7 @@ async function deleteDatabase(dbName: string): Promise<void> {
     }
   })
 }
+
 export async function clearDatabase(dbName: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.deleteDatabase(dbName)
