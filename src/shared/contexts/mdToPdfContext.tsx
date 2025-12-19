@@ -1,7 +1,7 @@
 'use client'
 
 import { ENVIROMENT } from '@/env'
-import usePersistedState from '@/hooks/use-persisted-state'
+import usePersistedStateInDB from '@/hooks/use-persisted-in-db'
 import {
   Dispatch,
   RefObject,
@@ -26,7 +26,7 @@ interface MDToPdfContextType {
   onPrint: () => void
   onDownloadPDF: () => void
   markdown: string
-  setMarkdown: React.Dispatch<React.SetStateAction<string>>
+  setMarkdown: (newState: string) => Promise<void>
   contentRef: RefObject<HTMLDivElement | null>
   disabledDownload: boolean
 }
@@ -36,7 +36,10 @@ const MDToPdfContext = createContext<MDToPdfContextType | undefined>(undefined)
 export function MDToPdfProvider({ children }: { children: ReactNode }) {
   const { config } = useConfig()
   const [isLoading, setIsLoading] = useState(false)
-  const [markdown, setMarkdown] = usePersistedState<string>('md-to-pdf-markdown', DEFAULT_MARKDOWN)
+  const [markdown, setMarkdown] = usePersistedStateInDB<string>(
+    'md-to-pdf-markdown',
+    DEFAULT_MARKDOWN,
+  )
   const contentRef = useRef<HTMLDivElement>(null)
   const handlePrint = useReactToPrint({
     contentRef: contentRef,

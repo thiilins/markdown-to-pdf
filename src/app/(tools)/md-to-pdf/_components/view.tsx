@@ -33,21 +33,17 @@ export const MDToPdfViewComponent = () => {
           <MarkdownEditor
             value={markdown}
             onChange={(value) => setMarkdown(value || '')}
-            onScroll={handleEditorScroll} // Passando o handler de scroll
+            onScroll={handleEditorScroll} // Passa o handler para o Monaco
             config={config.editor}
           />
         </div>
       </div>
-
       {/* Importante: A ref deve ser colocada no elemento que possui o 'overflow-y-auto'.
          Se o PreviewPanelWithPages tiver o scroll interno, passamos a ref para ele.
       */}
-      <div
-        id='md-pdf-preview'
-        ref={previewContainerRef}
-        className={cn('bg-muted/30 flex h-full w-[50%] flex-col overflow-y-auto')}>
+      <div id='md-pdf-preview' className={cn('flex h-full w-[50%] flex-col')}>
         <div className='min-h-0 flex-1'>
-          <PreviewPanelWithPages />
+          <PreviewPanelWithPages ref={previewContainerRef} />
         </div>
       </div>
 
