@@ -15,7 +15,7 @@ export const GistPreview = () => {
     }
     if (!selectedGist) {
       return (
-        <div className='bg-muted/10 flex h-full! min-h-[calc(100vh-3rem)] flex-1 items-center justify-center'>
+        <div className='flex h-full! min-h-[calc(100vh-3rem)] flex-1 items-center justify-center bg-transparent'>
           <div className='text-muted-foreground text-center'>
             <FileCode className='mx-auto mb-4 h-16 w-16 opacity-20' />
             <p className='font-medium'>Selecione um Gist para visualizar</p>
@@ -35,7 +35,7 @@ export const GistPreview = () => {
     )
   }, [isLoading, selectedGist, selectedFile, fileContents])
   return (
-    <div className='bg-background flex flex-1 flex-col overflow-hidden'>
+    <div className='bg-background/10 flex flex-1 flex-col overflow-hidden'>
       <GistPreviewHeader />
       <div className='flex h-full flex-1 flex-col overflow-hidden'>
         <ScrollArea className='h-full w-full flex-1 overflow-y-auto'>{RenderComponent}</ScrollArea>

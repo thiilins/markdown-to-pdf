@@ -42,12 +42,12 @@ export async function GET(request: Request) {
     if (!res.ok) return NextResponse.json({ error: 'Erro GitHub' }, { status: res.status })
 
     const data = await res.json()
-
     // Sanitização mantida conforme seu código original
     const sanitizedGists = data.map((gist: any) => ({
       id: gist.id,
       description: gist.description || 'Sem descrição',
       public: gist.public,
+      created_at: gist.created_at,
       owner: { login: gist.owner?.login, avatar_url: gist.owner?.avatar_url },
       files: Object.keys(gist.files).map((key) => ({
         filename: key,

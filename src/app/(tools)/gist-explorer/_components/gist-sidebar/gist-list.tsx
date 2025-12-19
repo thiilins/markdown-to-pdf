@@ -4,12 +4,13 @@ import { GenericCard } from '@/components/custom-ui/generic-card'
 import { TooltipComponent } from '@/components/custom-ui/tooltip'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
+import { getIcon } from '@/shared/constants/file-icons'
 import { useGist } from '@/shared/contexts/gistContext'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale/pt-BR'
 import { AlertCircle, ArchiveX, Calendar, FileCode2, Globe, Lock, User } from 'lucide-react'
+import moment from 'moment'
 import { useMemo } from 'react'
-import { getIcon } from '../../../../../shared/constants/file-icons'
 
 export const GistList = () => {
   const { filteredGists, selectedGistId, onSelectGist, isLoading, error, gists } = useGist()
@@ -52,7 +53,7 @@ export const GistList = () => {
     )
   }
   return (
-    <div className='h-full flex-1'>
+    <div className='bg-background/10 h-full flex-1'>
       <div className='flex max-h-[calc(100dvh-20rem)] flex-1 flex-col items-center gap-4 overflow-y-auto p-4'>
         {filteredGists.map((gist) => (
           <GistListItem
@@ -70,8 +71,12 @@ export const GistList = () => {
 const GistListItem = ({ gist, isSelected = false, onClick }: GistItemProps) => {
   const firstFile = gist.files[0]
   const fileCount = gist.files.length
-  const createdDate = new Date(gist.created_at)
-  const timeAgo = formatDistanceToNow(createdDate, { addSuffix: true, locale: ptBR })
+  const createdDate = moment(gist.created_at)
+  console.log(gist)
+  const timeAgo = formatDistanceToNow(createdDate.toISOString(), {
+    addSuffix: true,
+    locale: ptBR,
+  })
   const MainIcon = firstFile ? getIcon(firstFile.language || '') : FileCode2
 
   const statusConfig = useMemo(() => {

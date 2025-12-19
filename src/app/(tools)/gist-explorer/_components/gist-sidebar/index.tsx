@@ -21,7 +21,7 @@ export const GistSidebar = () => {
     filteredGists,
   } = useGist()
   return (
-    <div className='bg-background flex w-[420px] flex-col border-r'>
+    <div className='bg-background/10 flex w-[420px] flex-col border-r'>
       <div className='flex items-center justify-between gap-2 border-b p-4'>
         <div className='flex items-center gap-2'>
           <IoLogoGithub className='text-primary h-5 w-5' />

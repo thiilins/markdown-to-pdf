@@ -16,7 +16,7 @@ interface GenericCardProps {
 }
 export const GenericCard = ({ icon, title, description }: GenericCardProps) => {
   return (
-    <Card className='flex h-full flex-col items-center justify-center p-8 text-center'>
+    <Card className='bg-background/10 flex h-full flex-col items-center justify-center p-8 text-center'>
       {icon}
       <h3 className={cn(title.className)}>{title.text}</h3>
       <p className={cn(description.className)}>{description.text}</p>
