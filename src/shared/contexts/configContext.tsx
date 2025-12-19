@@ -7,11 +7,12 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
+  useMemo,
   useState,
   type ReactNode,
 } from 'react'
 import { MARGIN_PRESETS, PAGE_SIZES, THEME_PRESETS, defaultConfig } from '../constants'
+import { normalizeConfig } from '../utils/normalize-config'
 
 interface ConfigContextType {
   config: AppConfig
@@ -30,17 +31,22 @@ interface ConfigContextType {
 const ConfigContext = createContext<ConfigContextType | undefined>(undefined)
 
 export function ConfigProvider({ children }: { children: ReactNode }) {
-  const [config, setConfig] = usePersistedState<AppConfig>('md-to-pdf-config', defaultConfig)
+  // Normaliza o config na inicialização para garantir que sempre tenha tema
+  // Isso evita um ciclo extra de renderização que ocorria com o useEffect
+  const [rawConfig, setRawConfig] = usePersistedState<AppConfig>('md-to-pdf-config', defaultConfig)
+  const config = useMemo(() => normalizeConfig(rawConfig), [rawConfig])
   const [isConfigOpen, setIsConfigOpen] = useState(false)
-  // Garante que o tema sempre existe
-  useEffect(() => {
-    if (!config.theme) {
-      setConfig((prev) => ({
-        ...prev,
-        theme: THEME_PRESETS.modern,
-      }))
-    }
-  }, [config.theme, setConfig])
+
+  // Wrapper para setConfig que sempre normaliza antes de salvar
+  const setConfig = useCallback<Dispatch<SetStateAction<AppConfig>>>(
+    (value) => {
+      setRawConfig((prev) => {
+        const newConfig = typeof value === 'function' ? value(prev) : value
+        return normalizeConfig(newConfig)
+      })
+    },
+    [setRawConfig],
+  )
 
   const updateConfig = useCallback(
     (updates: Partial<AppConfig>) => {
@@ -68,9 +74,9 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
   }, [config.page.margin])
 
   // Detecta qual preset de tema está ativo
+  // Nota: config.theme sempre existe devido à normalização
   const getCurrentThemePreset = useCallback((): ThemePreset => {
-    if (!config.theme) return 'modern'
-    const current = config.theme
+    const current = config.theme!
     for (const [key, preset] of Object.entries(THEME_PRESETS)) {
       if (key === 'custom') continue
       if (
@@ -178,24 +184,36 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
     [setConfig],
   )
 
-  return (
-    <ConfigContext.Provider
-      value={{
-        config,
-        isConfigOpen,
-        setIsConfigOpen,
-        updateConfig,
-        updatePageSize,
-        updateOrientation,
-        resetConfig,
-        getCurrentMargin: getCurrentMarginPreset,
-        getCurrentTheme: getCurrentThemePreset,
-        applyMarginPreset,
-        applyThemePreset,
-      }}>
-      {children}
-    </ConfigContext.Provider>
+  // Memoização do value do Context para evitar re-renders desnecessários
+  const contextValue = useMemo<ConfigContextType>(
+    () => ({
+      config,
+      isConfigOpen,
+      setIsConfigOpen,
+      updateConfig,
+      updatePageSize,
+      updateOrientation,
+      resetConfig,
+      getCurrentMargin: getCurrentMarginPreset,
+      getCurrentTheme: getCurrentThemePreset,
+      applyMarginPreset,
+      applyThemePreset,
+    }),
+    [
+      config,
+      isConfigOpen,
+      updateConfig,
+      updatePageSize,
+      updateOrientation,
+      resetConfig,
+      getCurrentMarginPreset,
+      getCurrentThemePreset,
+      applyMarginPreset,
+      applyThemePreset,
+    ],
   )
+
+  return <ConfigContext.Provider value={contextValue}>{children}</ConfigContext.Provider>
 }
 
 export function useConfig() {

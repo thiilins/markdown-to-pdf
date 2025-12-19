@@ -10,6 +10,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -17,8 +18,8 @@ import {
 import { useReactToPrint } from 'react-to-print'
 import { toast } from 'sonner'
 import { DEFAULT_MARKDOWN } from '../constants'
+import { handleDownloadPDFApi } from '../constants/download-pdf-api'
 import { filename_now } from '../utils'
-import { handleDownloadPDFApi } from '../utils/download-pdf-api'
 import { useConfig } from './configContext'
 interface MDToPdfContextType {
   isLoading: boolean
@@ -65,21 +66,23 @@ export function MDToPdfProvider({ children }: { children: ReactNode }) {
       setDisabledDownload(true)
     }
   }, [])
-  return (
-    <MDToPdfContext.Provider
-      value={{
-        isLoading,
-        setIsLoading,
-        onPrint: handlePrint,
-        disabledDownload,
-        onDownloadPDF: handleDownloadPDF,
-        markdown,
-        setMarkdown,
-        contentRef,
-      }}>
-      {children}
-    </MDToPdfContext.Provider>
+
+  // Memoização do value do Context para evitar re-renders desnecessários
+  const contextValue = useMemo<MDToPdfContextType>(
+    () => ({
+      isLoading,
+      setIsLoading,
+      onPrint: handlePrint,
+      disabledDownload,
+      onDownloadPDF: handleDownloadPDF,
+      markdown,
+      setMarkdown,
+      contentRef,
+    }),
+    [isLoading, disabledDownload, handleDownloadPDF, handlePrint, markdown, setMarkdown],
   )
+
+  return <MDToPdfContext.Provider value={contextValue}>{children}</MDToPdfContext.Provider>
 }
 
 export function useMDToPdf() {

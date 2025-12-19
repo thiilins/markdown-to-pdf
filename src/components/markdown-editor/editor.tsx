@@ -3,7 +3,7 @@
 import { cn } from '@/lib/utils'
 import { OnMount } from '@monaco-editor/react'
 import dynamic from 'next/dynamic'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { MarkdownStatusBar } from './status-bar'
 import { MarkdownToolbar } from './toolbar'
@@ -32,6 +32,15 @@ export function MarkdownEditor({
   const [theme, setTheme] = useState<'light' | 'vs-dark'>('light')
   const [editorReady, setEditorReady] = useState(false)
 
+  // Ref para controle do requestAnimationFrame (throttle do scroll sync)
+  const rafIdRef = useRef<number | null>(null)
+  const onScrollRef = useRef(onScroll)
+
+  // Mantém a ref atualizada para evitar stale closure
+  useEffect(() => {
+    onScrollRef.current = onScroll
+  }, [onScroll])
+
   useEffect(() => {
     const getTheme = () => {
       if (config.theme === 'auto') {
@@ -46,13 +55,15 @@ export function MarkdownEditor({
     setTheme(getTheme())
   }, [config.theme])
 
-  const handleEditorDidMount: OnMount = (editor) => {
-    editorRef.current = editor
-    setEditorReady(true)
+  // Função throttled com requestAnimationFrame para scroll sync
+  const handleScrollSync = useCallback((editor: any) => {
+    // Cancela frame anterior para garantir apenas 1 execução por frame
+    if (rafIdRef.current !== null) {
+      cancelAnimationFrame(rafIdRef.current)
+    }
 
-    // Lógica de Scroll Sync: calcula a porcentagem e envia para o pai
-    editor.onDidScrollChange(() => {
-      if (onScroll) {
+    rafIdRef.current = requestAnimationFrame(() => {
+      if (onScrollRef.current) {
         const visibleRanges = editor.getVisibleRanges()
         if (visibleRanges.length > 0) {
           const scrollHeight = editor.getScrollHeight()
@@ -61,9 +72,29 @@ export function MarkdownEditor({
 
           // Porcentagem de 0 a 1
           const percentage = scrollTop / (scrollHeight - clientHeight)
-          onScroll(percentage)
+          onScrollRef.current(percentage)
         }
       }
+      rafIdRef.current = null
+    })
+  }, [])
+
+  // Cleanup do requestAnimationFrame no unmount
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current)
+      }
+    }
+  }, [])
+
+  const handleEditorDidMount: OnMount = (editor) => {
+    editorRef.current = editor
+    setEditorReady(true)
+
+    // Lógica de Scroll Sync com throttle via requestAnimationFrame
+    editor.onDidScrollChange(() => {
+      handleScrollSync(editor)
     })
   }
 
