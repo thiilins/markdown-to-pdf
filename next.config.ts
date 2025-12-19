@@ -8,9 +8,6 @@ const nextConfig: NextConfig = {
   // Turbopack já é otimizado para hot reload, não precisa de configuração adicional
   turbopack: {},
   // Headers para melhorar a experiência durante hot reload
-
-  // Transpila jsdom e suas dependências para resolver conflitos ESM/CommonJS na Vercel
-  transpilePackages: ['jsdom', 'parse5', 'whatwg-url', 'whatwg-encoding', 'whatwg-mimetype', 'ws'],
 }
 
 export default nextConfig
