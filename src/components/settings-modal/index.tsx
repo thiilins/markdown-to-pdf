@@ -15,7 +15,6 @@ import { TypographyConfigComponent } from './typography'
 
 export function SettingsDialog() {
   const pathname = usePathname()
-  console.log('pathname', pathname)
   const { resetConfig, setIsConfigOpen, isConfigOpen } = useConfig()
 
   const configTabs = useMemo(() => {

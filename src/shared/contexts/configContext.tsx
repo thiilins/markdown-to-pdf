@@ -35,7 +35,6 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
   // Garante que o tema sempre existe
   useEffect(() => {
     if (!config.theme) {
-      console.log('reset theme')
       setConfig((prev) => ({
         ...prev,
         theme: THEME_PRESETS.modern,
