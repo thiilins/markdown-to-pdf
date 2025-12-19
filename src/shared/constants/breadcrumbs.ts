@@ -15,8 +15,8 @@ export const mdToPdfBreadcrumbs: Breadcrumbs[] = [
 export const webToMarkdownBreadcrumbs: Breadcrumbs[] = [
   homeBreadcrumb,
   {
-    label: 'Web to Markdown',
-    href: '/web-to-markdown',
+    label: 'Web Extractor',
+    href: '/web-extractor',
     order: 2,
   },
 ]

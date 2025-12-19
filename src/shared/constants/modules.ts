@@ -18,10 +18,10 @@ export const Modules: ModuleItem[] = [
         description: 'Explore Gists do GitHub',
       },
       {
-        label: 'Web to Markdown',
-        href: '/web-to-markdown',
+        label: 'Web Extractor',
+        href: '/web-extractor',
         icon: Globe,
-        description: 'Converta sites e blogs para Markdown',
+        description: 'Extraia conteúdo de sites e blogs para Markdown',
       },
     ],
   },

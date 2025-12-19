@@ -9,7 +9,7 @@ import { toast } from 'sonner'
 import { PreviewPanel } from './preview-panel'
 import { ResultActions } from './result-actions'
 
-export const WebToMarkdownViewComponent = () => {
+export const WebExtractorViewComponent = () => {
   const [url, setUrl] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState<ScrapeHtmlResponse | null>(null)
