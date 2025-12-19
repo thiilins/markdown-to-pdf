@@ -64,7 +64,7 @@ export const WebExtractorSearchComponent = () => {
               onChange={(e) => setUrl(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={isLoading}
-              className='bg-background border-primary/10 focus-visible:ring-primary/20 h-8 pl-10 shadow-sm transition-all'
+              className='bg-background border-primary/10 focus-visible:ring-primary/20 h-8 truncate overflow-hidden text-ellipsis shadow-sm transition-all'
             />
           </div>
           <Button

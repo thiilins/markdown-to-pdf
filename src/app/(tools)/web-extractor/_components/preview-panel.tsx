@@ -17,10 +17,11 @@ export function PreviewPanel() {
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
       className='mx-auto flex h-full w-full max-w-7xl flex-col'>
-      <Card className='border-background shadown-black flex flex-1 flex-col overflow-hidden bg-white p-0 shadow-2xl shadow-xl dark:bg-zinc-950'>
+      <Card className='border-background shadown-black flex flex-1 flex-col overflow-hidden bg-white p-0 shadow-2xl dark:bg-zinc-950'>
         <div className='bg-muted/40 flex flex-col items-center justify-between border-b px-6 py-3'>
-          {result && (
+          {result ? (
             <div className='flex w-full items-center justify-center p-0'>
+              <Globe className='mr-2 h-4 w-4 text-gray-400' />
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -28,13 +29,28 @@ export function PreviewPanel() {
                 <div className='flex flex-1 flex-col text-center'>
                   {result?.title && (
                     <h3 className='flex-1 truncate text-[13px] leading-tight font-normal text-gray-400'>
-                      {result?.title}
+                      Web Extractor - {result?.title}
                     </h3>
                   )}
                 </div>
               </motion.div>
             </div>
+          ) : (
+            <div className='flex w-full items-center justify-center p-0'>
+              <Globe className='mr-2 h-4 w-4 text-gray-400' />
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className='bg-card/30 p-0'>
+                <div className='flex flex-1 flex-col text-center'>
+                  <h3 className='flex-1 truncate text-[13px] leading-tight font-normal text-gray-400'>
+                    Web Extractor
+                  </h3>
+                </div>
+              </motion.div>
+            </div>
           )}
+
           <div className='flex w-full items-center justify-between px-6 py-3'>
             <div className='flex items-center gap-4'>
               <div className='flex gap-1.5'>
@@ -48,6 +64,7 @@ export function PreviewPanel() {
             <ResultActions />
           </div>
         </div>
+
         <PreviewResultContent />
         <PreviewResultFooter />
       </Card>
