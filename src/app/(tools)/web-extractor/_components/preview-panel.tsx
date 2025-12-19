@@ -1,99 +1,106 @@
 'use client'
 
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { cn } from '@/lib/utils'
+import { Card } from '@/components/ui/card'
+import { useWebExtractor } from '@/shared/contexts/webExtractorContext'
+import { motion } from 'framer-motion'
+import { Globe } from 'lucide-react'
+import { useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { darcula } from 'react-syntax-highlighter/dist/esm/styles/prism'
-import remarkGfm from 'remark-gfm'
+import { ResultActions } from './result-actions'
+import { WebExtractorSearchComponent } from './view'
 
-interface PreviewPanelProps {
-  markdown: string
-  className?: string
-}
-
-export function PreviewPanel({ markdown, className }: PreviewPanelProps) {
+export function PreviewPanel() {
+  const { result } = useWebExtractor()
   return (
-    <div className={cn('flex h-full flex-col overflow-hidden', className)}>
-      <ScrollArea className='h-full w-full flex-1 overflow-y-auto'>
-        <div className='p-6'>
-          <div className='prose prose-slate dark:prose-invert mx-auto max-w-4xl'>
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                img: ({ node, ...props }: any) => {
-                  return (
-                    <img
-                      {...props}
-                      className='my-4 rounded-lg border shadow-sm'
-                      style={{
-                        maxWidth: '100%',
-                        height: 'auto',
-                        display: 'block',
-                        marginLeft: 'auto',
-                        marginRight: 'auto',
-                      }}
-                      alt={props.alt || ''}
-                      loading='lazy'
-                      onError={(e: any) => {
-                        // Se a imagem falhar ao carregar, esconde ou mostra placeholder
-                        e.target.style.display = 'none'
-                      }}
-                    />
-                  )
-                },
-                code({ className, children, ...props }: any) {
-                  const match = /language-(\w+)/.exec(className || '')
-                  const isInline = !match
-                  return !isInline && match ? (
-                    <SyntaxHighlighter
-                      style={darcula as any}
-                      language={match[1]}
-                      PreTag='div'
-                      customStyle={{
-                        margin: '1rem 0',
-                        padding: '1rem',
-                        borderRadius: '0.375rem',
-                        fontSize: '0.875rem',
-                      }}>
-                      {String(children).replace(/\n$/, '')}
-                    </SyntaxHighlighter>
-                  ) : (
-                    <code
-                      className={cn('bg-muted rounded px-1.5 py-0.5 text-sm', className)}
-                      {...props}>
-                      {children}
-                    </code>
-                  )
-                },
-                p: ({ node, ...props }: any) => <p className='mb-4 leading-7' {...props} />,
-                h1: ({ node, ...props }: any) => (
-                  <h1 className='mt-6 mb-4 text-3xl leading-tight font-bold' {...props} />
-                ),
-                h2: ({ node, ...props }: any) => (
-                  <h2 className='mt-5 mb-3 text-2xl leading-tight font-semibold' {...props} />
-                ),
-                h3: ({ node, ...props }: any) => (
-                  <h3 className='mt-4 mb-2 text-xl font-semibold' {...props} />
-                ),
-                ul: ({ node, ...props }: any) => (
-                  <ul className='mb-4 ml-6 list-disc space-y-2' {...props} />
-                ),
-                ol: ({ node, ...props }: any) => (
-                  <ol className='mb-4 ml-6 list-decimal space-y-2' {...props} />
-                ),
-                blockquote: ({ node, ...props }: any) => (
-                  <blockquote
-                    className='border-primary/50 bg-muted/50 my-4 border-l-4 pl-4 italic'
-                    {...props}
-                  />
-                ),
-              }}>
-              {markdown}
-            </ReactMarkdown>
+    <motion.div
+      initial={{ opacity: 0, scale: 0.98, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+      className='mx-auto flex h-full w-full max-w-7xl flex-col'>
+      <Card className='border-background shadown-black flex flex-1 flex-col overflow-hidden bg-white p-0 shadow-2xl shadow-xl dark:bg-zinc-950'>
+        <div className='bg-muted/40 flex flex-col items-center justify-between border-b px-6 py-3'>
+          {result && (
+            <div className='flex w-full items-center justify-center p-0'>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className='bg-card/30 p-0'>
+                <div className='flex flex-1 flex-col text-center'>
+                  {result?.title && (
+                    <h3 className='flex-1 truncate text-[13px] leading-tight font-normal text-gray-400'>
+                      {result?.title}
+                    </h3>
+                  )}
+                </div>
+              </motion.div>
+            </div>
+          )}
+          <div className='flex w-full items-center justify-between px-6 py-3'>
+            <div className='flex items-center gap-4'>
+              <div className='flex gap-1.5'>
+                <div className='h-3 w-3 cursor-pointer rounded-full bg-red-400/40 transition-colors hover:bg-red-400' />
+                <div className='h-3 w-3 cursor-pointer rounded-full bg-amber-400/40 transition-colors hover:bg-amber-400' />
+                <div className='h-3 w-3 cursor-pointer rounded-full bg-emerald-400/40 transition-colors hover:bg-emerald-400' />
+              </div>
+              <div className='bg-border mx-1 h-5 w-px' />
+            </div>
+            <WebExtractorSearchComponent />
+            <ResultActions />
           </div>
         </div>
-      </ScrollArea>
+        <PreviewResultContent />
+        <PreviewResultFooter />
+      </Card>
+    </motion.div>
+  )
+}
+
+export const PreviewResultContent = () => {
+  const { result, isLoading } = useWebExtractor()
+  const content = useMemo(() => {
+    if (isLoading || !result) {
+      return (
+        <div className='flex h-full flex-col items-center justify-center p-8 text-center'>
+          <div className='relative mb-6'>
+            <div className='bg-primary/5 absolute -inset-4 animate-pulse rounded-full blur-2xl' />
+            <Globe className='text-primary relative h-20 w-20 opacity-20' />
+          </div>
+          <div className='max-w-sm space-y-2'>
+            <h3 className='text-lg font-bold'>
+              {isLoading ? 'Extraindo Conteúdo...' : 'Pronto para converter'}
+            </h3>
+            <p className='text-muted-foreground text-sm'>
+              {isLoading
+                ? 'Nossa IA está limpando o HTML e gerando o seu Markdown em alta definição.'
+                : 'Insira um link acima para remover anúncios, trackers e paywalls de qualquer site.'}
+            </p>
+          </div>
+        </div>
+      )
+    }
+
+    return <ReactMarkdown>{result.markdown}</ReactMarkdown>
+  }, [result, isLoading])
+  return (
+    <div className='flex-1 overflow-y-auto bg-zinc-50/20 dark:bg-zinc-950/20 print:hidden'>
+      <div className='max-[1920px] mx-auto h-full p-8 lg:p-16'>
+        <article className='prose prose-zinc dark:prose-invert prose-headings:font-black prose-headings:tracking-tight prose-p:leading-relaxed prose-img:rounded-2xl prose-img:shadow-2xl prose-img:border prose-img:border-primary/5 max-w-none'>
+          {content}
+        </article>
+      </div>
+    </div>
+  )
+}
+
+const PreviewResultFooter = () => {
+  const { result } = useWebExtractor()
+  return (
+    <div className='text-muted-foreground bg-card/80 flex h-12 items-center justify-between border-t px-8 py-3 text-[10px] font-medium backdrop-blur-sm'>
+      <div className='flex items-center gap-4'>
+        {!result || !result.markdown
+          ? 'Dictum et factum.'
+          : `${result?.markdown?.length?.toLocaleString() || 0} caracteres`}
+      </div>
     </div>
   )
 }

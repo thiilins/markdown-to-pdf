@@ -76,8 +76,7 @@ const GlobalHeaderButtonSubmenu = ({ label, href, icon }: Modules) => {
 export const GlobalHeaderMenu = () => {
   const pathname = usePathname()
   const { setIsConfigOpen } = useConfig()
-  const config = CONFIG_MODAL_SHOW_OPTIONS?.[pathname]
-  console.log(config)
+  const config = CONFIG_MODAL_SHOW_OPTIONS?.[pathname] ?? []
   return (
     <nav className='flex items-center justify-center gap-2 px-3'>
       {Modules.map((module) => {

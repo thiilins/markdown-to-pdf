@@ -1,142 +1,97 @@
 'use client'
 
+import { IconButtonTooltip } from '@/components/custom-ui/tooltip'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { WebToMarkdownService } from '@/services/webToMarkdownService'
-import { Globe, Loader2 } from 'lucide-react'
-import { useState } from 'react'
-import { toast } from 'sonner'
+import { useWebExtractor } from '@/shared/contexts/webExtractorContext'
+import { AnimatePresence, motion } from 'framer-motion'
+import { AlertCircle, ArrowLeft, BadgeCheck, Loader2, Search, Sparkles } from 'lucide-react'
 import { PreviewPanel } from './preview-panel'
-import { ResultActions } from './result-actions'
 
 export const WebExtractorViewComponent = () => {
-  const [url, setUrl] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [result, setResult] = useState<ScrapeHtmlResponse | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  return (
+    <main className='bg-background flex min-h-full w-full flex-1 flex-col overflow-hidden bg-[url(https://loremflickr.com/1200/800/city)] bg-cover bg-center'>
+      <div className='flex flex-1 flex-col overflow-hidden bg-zinc-50/30 dark:bg-zinc-950/30'>
+        <div className='flex-1 overflow-hidden p-2'>
+          <PreviewPanel />
+        </div>
+      </div>
+    </main>
+  )
+}
 
-  const handleConvert = async () => {
-    if (!url.trim()) {
-      setError('Por favor, insira uma URL válida')
-      return
-    }
+const StatusBadge = ({ result }: { result: any | null }) => {
+  return result ? (
+    <div className='flex items-center gap-2'>
+      <Sparkles className='text-primary h-3.5 w-3.5 animate-pulse' />
+      <span className='text-xs font-medium'>Extração Concluída</span>
+    </div>
+  ) : (
+    <div className='flex items-center gap-2'>
+      <BadgeCheck className='text-primary h-3.5 w-3.5 animate-pulse' />
+      <span className='text-xs font-medium'>Pronto para converter</span>
+    </div>
+  )
+}
 
-    setIsLoading(true)
-    setError(null)
-    setResult(null)
-
-    try {
-      const response = await WebToMarkdownService.scrape({ url: url.trim() })
-
-      if (response.success && response.markdown) {
-        setResult(response)
-        toast.success('Conteúdo convertido com sucesso!')
-      } else {
-        const errorMsg = response.error || 'Erro ao converter conteúdo'
-        setError(errorMsg)
-        toast.error(errorMsg, {
-          duration: 5000,
-          description: 'Tente novamente ou use outra URL',
-        })
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido ao processar'
-      setError(errorMessage)
-      toast.error(errorMessage, {
-        duration: 5000,
-        description: 'Verifique sua conexão e tente novamente',
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
+export const WebExtractorSearchComponent = () => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !isLoading && url.trim()) {
       handleConvert()
     }
   }
+  const { url, setUrl, isLoading, handleConvert, error, result, handleReset } = useWebExtractor()
 
   return (
-    <div className='flex min-h-full w-full flex-1 flex-col overflow-hidden'>
-      {/* Header */}
-      <div className='flex items-center gap-2 border-b p-4'>
-        <Globe className='text-primary h-5 w-5' />
-        <h2 className='font-bold'>Web to Markdown</h2>
-      </div>
-
-      {/* Input Section */}
-      <div className='bg-muted/20 border-b p-4'>
-        <div className='space-y-2'>
-          <div className='flex gap-2'>
+    <div className='flex w-full items-center justify-center'>
+      <div className='w-full max-w-4xl'>
+        <div className='flex gap-3'>
+          <div className='flex w-full items-center gap-2'>
+            <IconButtonTooltip
+              disabled={!result?.markdown || isLoading}
+              className={{
+                button: 'h-7 w-7',
+              }}
+              variant='default'
+              content='Limpar'
+              onClick={handleReset}
+              icon={ArrowLeft}
+            />
             <Input
               type='url'
-              placeholder='https://example.com/article'
+              placeholder='Cole a URL do artigo (ex: G1, Wikipedia, Medium...)'
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={isLoading}
-              className='h-9'
+              className='bg-background border-primary/10 focus-visible:ring-primary/20 h-8 pl-10 shadow-sm transition-all'
             />
-            <Button
-              onClick={handleConvert}
-              disabled={isLoading || !url.trim()}
-              size='sm'
-              className='h-9'>
-              {isLoading ? (
-                <>
-                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                  Convertendo
-                </>
-              ) : (
-                'Converter'
-              )}
-            </Button>
           </div>
+          <Button
+            onClick={handleConvert}
+            disabled={isLoading || !url.trim()}
+            className='shadow-primary/10 h-8 w-8 px-6 font-bold shadow-lg transition-transform active:scale-95'>
+            {isLoading ? (
+              <>
+                <Loader2 className='h-4 w-4 animate-spin' />
+              </>
+            ) : (
+              <Search className='h-4 w-4' />
+            )}
+          </Button>
+        </div>
+
+        <AnimatePresence>
           {error && (
-            <p className='text-destructive text-xs' role='alert'>
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className='text-destructive flex items-center gap-2 pl-1 text-xs font-medium'>
+              <AlertCircle className='h-3 w-3' />
               {error}
-            </p>
+            </motion.div>
           )}
-        </div>
-      </div>
-
-      {/* Result Info & Actions */}
-      {result && result.markdown && (
-        <div className='bg-background border-b px-4 py-3'>
-          <div className='flex items-center justify-between'>
-            <div className='min-w-0 flex-1'>
-              {result.title && <h3 className='truncate text-sm font-medium'>{result.title}</h3>}
-              {result.excerpt && (
-                <p className='text-muted-foreground line-clamp-1 text-xs'>{result.excerpt}</p>
-              )}
-            </div>
-            <div className='ml-4'>
-              <ResultActions markdown={result.markdown} title={result.title} />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Preview Section */}
-      <div className='flex flex-1 flex-col overflow-hidden'>
-        {result?.markdown ? (
-          <PreviewPanel markdown={result.markdown} />
-        ) : (
-          <div className='bg-muted/10 flex h-full items-center justify-center'>
-            <div className='text-muted-foreground text-center'>
-              <Globe className='mx-auto mb-4 h-16 w-16 opacity-20' />
-              <p className='font-medium'>
-                {isLoading ? 'Convertendo conteúdo...' : 'Nenhum conteúdo convertido ainda'}
-              </p>
-              <p className='text-muted-foreground mt-2 text-sm'>
-                {isLoading
-                  ? 'Aguarde enquanto extraímos o conteúdo do site...'
-                  : 'Cole uma URL acima e clique em "Converter" para começar'}
-              </p>
-            </div>
-          </div>
-        )}
+        </AnimatePresence>
       </div>
     </div>
   )

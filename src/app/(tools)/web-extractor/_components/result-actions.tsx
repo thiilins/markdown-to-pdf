@@ -1,18 +1,21 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Copy, Download, ExternalLink } from 'lucide-react'
+import { useWebExtractor } from '@/shared/contexts/webExtractorContext'
+import { Copy, Download, Eraser, ExternalLink } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { IconButtonTooltip } from '../../../../components/custom-ui/tooltip'
 
 interface ResultActionsProps {
   markdown: string
   title?: string
 }
 
-export function ResultActions({ markdown, title }: ResultActionsProps) {
+export function ResultActions() {
+  const { result, handleReset } = useWebExtractor()
+  const markdown = result?.markdown || ''
+  const title = result?.title || ''
   const router = useRouter()
-
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(markdown)
@@ -55,18 +58,20 @@ export function ResultActions({ markdown, title }: ResultActionsProps) {
 
   return (
     <div className='flex gap-2'>
-      <Button onClick={handleCopy} variant='outline' size='sm'>
-        <Copy className='mr-2 h-4 w-4' />
-        Copiar
-      </Button>
-      <Button onClick={handleExport} variant='outline' size='sm'>
-        <Download className='mr-2 h-4 w-4' />
-        Exportar
-      </Button>
-      <Button onClick={handleOpenInMdToPdf} size='sm'>
-        <ExternalLink className='mr-2 h-4 w-4' />
-        Abrir no MD-to-PDF
-      </Button>
+      <IconButtonTooltip disabled={!markdown} content='Copiar' onClick={handleCopy} icon={Copy} />
+      <IconButtonTooltip
+        disabled={!markdown}
+        content='Exportar'
+        onClick={handleExport}
+        icon={Download}
+      />
+      <IconButtonTooltip
+        disabled={!markdown}
+        variant='default'
+        content='Abrir no MD-to-PDF'
+        onClick={handleOpenInMdToPdf}
+        icon={ExternalLink}
+      />
     </div>
   )
 }
