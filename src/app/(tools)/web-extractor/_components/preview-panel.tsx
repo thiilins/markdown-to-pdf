@@ -4,11 +4,11 @@ import { Card } from '@/components/ui/card'
 import { useWebExtractor } from '@/shared/contexts/webExtractorContext'
 import { motion } from 'framer-motion'
 import { Globe } from 'lucide-react'
+import Link from 'next/link'
 import { useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { ResultActions } from './result-actions'
 import { WebExtractorSearchComponent } from './view'
-
 export function PreviewPanel() {
   const { result } = useWebExtractor()
   return (
@@ -16,57 +16,55 @@ export function PreviewPanel() {
       initial={{ opacity: 0, scale: 0.98, y: 10 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className='mx-auto flex h-full w-full max-w-7xl flex-col'>
+      className='max-[1920px] mx-auto flex h-full w-full flex-col'>
       <Card className='border-background shadown-black flex flex-1 flex-col overflow-hidden bg-white p-0 shadow-2xl dark:bg-zinc-950'>
         <div className='bg-muted/40 flex flex-col items-center justify-between border-b px-6 py-3'>
           {result ? (
-            <div className='flex w-full items-center justify-center p-0'>
-              <Globe className='mr-2 h-4 w-4 text-gray-400' />
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className='bg-card/30 p-0'>
-                <div className='flex flex-1 flex-col text-center'>
-                  {result?.title && (
-                    <h3 className='flex-1 truncate text-[13px] leading-tight font-normal text-gray-400'>
-                      Web Extractor - {result?.title}
-                    </h3>
-                  )}
-                </div>
-              </motion.div>
-            </div>
-          ) : (
-            <div className='flex w-full items-center justify-center p-0'>
-              <Globe className='mr-2 h-4 w-4 text-gray-400' />
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className='bg-card/30 p-0'>
-                <div className='flex flex-1 flex-col text-center'>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className='bg-card/30 p-0'>
+              <div className='flex w-full items-center justify-center p-0'>
+                <Globe className='mr-2 h-4 w-4 text-gray-400' />
+                {result?.title && (
                   <h3 className='flex-1 truncate text-[13px] leading-tight font-normal text-gray-400'>
-                    Web Extractor
+                    Web Extractor - {result?.title}
                   </h3>
-                </div>
-              </motion.div>
-            </div>
+                )}
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className='bg-card/30 p-0'>
+              <div className='flex w-full items-center justify-center p-0'>
+                <Globe className='mr-2 h-4 w-4 text-gray-400' />
+                <h3 className='flex-1 truncate text-[13px] leading-tight font-normal text-gray-400'>
+                  Web Extractor
+                </h3>
+              </div>
+            </motion.div>
           )}
 
           <div className='flex w-full items-center justify-between px-6 py-3'>
             <div className='flex items-center gap-4'>
               <div className='flex gap-1.5'>
-                <div className='h-3 w-3 cursor-pointer rounded-full bg-red-400/40 transition-colors hover:bg-red-400' />
+                <Link href='/'>
+                  <div className='h-3 w-3 cursor-pointer rounded-full bg-red-400/40 transition-colors hover:bg-red-400' />
+                </Link>
                 <div className='h-3 w-3 cursor-pointer rounded-full bg-amber-400/40 transition-colors hover:bg-amber-400' />
                 <div className='h-3 w-3 cursor-pointer rounded-full bg-emerald-400/40 transition-colors hover:bg-emerald-400' />
               </div>
               <div className='bg-border mx-1 h-5 w-px' />
             </div>
-            <WebExtractorSearchComponent />
-            <ResultActions />
+            <WebExtractorSearchComponent key='web-extractor-search-component' />
+            <ResultActions key='result-actions' />
           </div>
         </div>
 
-        <PreviewResultContent />
-        <PreviewResultFooter />
+        <PreviewResultContent key='preview-result-content' />
+        <PreviewResultFooter key='preview-result-footer' />
       </Card>
     </motion.div>
   )
@@ -77,7 +75,7 @@ export const PreviewResultContent = () => {
   const content = useMemo(() => {
     if (isLoading || !result) {
       return (
-        <div className='flex h-full flex-col items-center justify-center p-8 text-center'>
+        <div className='flex h-full! w-full flex-col items-center justify-center text-center'>
           <div className='relative mb-6'>
             <div className='bg-primary/5 absolute -inset-4 animate-pulse rounded-full blur-2xl' />
             <Globe className='text-primary relative h-20 w-20 opacity-20' />
@@ -99,8 +97,8 @@ export const PreviewResultContent = () => {
     return <ReactMarkdown>{result.markdown}</ReactMarkdown>
   }, [result, isLoading])
   return (
-    <div className='flex-1 overflow-y-auto bg-zinc-50/20 dark:bg-zinc-950/20 print:hidden'>
-      <div className='max-[1920px] mx-auto h-full p-8 lg:p-16'>
+    <div className='flex-1! overflow-y-auto bg-zinc-50/20 dark:bg-zinc-950/20 print:hidden'>
+      <div className='mx-auto h-full! lg:p-16'>
         <article className='prose prose-zinc dark:prose-invert prose-headings:font-black prose-headings:tracking-tight prose-p:leading-relaxed prose-img:rounded-2xl prose-img:shadow-2xl prose-img:border prose-img:border-primary/5 max-w-none'>
           {content}
         </article>
