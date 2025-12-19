@@ -2,17 +2,16 @@
 
 import { SelectComponent } from '@/components/custom-ui/select-component'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { MARGIN_PRESETS, PAGE_SIZES } from '@/shared/constants'
 import { useConfig } from '@/shared/contexts/configContext'
 import { convertUnit, extractNumber, extractUnit } from '@/shared/utils'
 import { TabsContent } from '@radix-ui/react-tabs'
-import { FileText, Maximize2 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import { SettingsCard } from './layout'
 
-export const PageSizeConfigComponent = ({ value }: { value: string }) => {
+export const PageSizeConfigComponent = () => {
   const {
     config,
     updateConfig,
@@ -21,7 +20,6 @@ export const PageSizeConfigComponent = ({ value }: { value: string }) => {
     applyMarginPreset,
     getCurrentMargin,
   } = useConfig()
-  // Detecta a unidade atual baseado nos valores existentes
   const detectCurrentUnit = useCallback((): Unit => {
     const marginTop = extractUnit(config.page.margin.top)
     const padding = extractUnit(config.page.padding)
@@ -30,23 +28,12 @@ export const PageSizeConfigComponent = ({ value }: { value: string }) => {
 
   const [unit, setUnit] = useState<Unit>(detectCurrentUnit())
 
-  // Atualiza a unidade quando o componente monta
   useEffect(() => {
     setUnit(detectCurrentUnit())
   }, [config.page.margin.top, config.page.padding, detectCurrentUnit])
 
-  // Atualiza padding com a unidade selecionada
-  const updatePadding = (numValue: number) => {
-    const valueWithUnit = `${numValue}${unit}`
-    updateConfig({
-      page: { ...config.page, padding: valueWithUnit },
-    })
-  }
-
-  // Quando a unidade muda, converte todos os valores
   const handleUnitChange = (newUnit: Unit) => {
     setUnit(newUnit)
-
     // Converte todas as margens
     const currentTopUnit = extractUnit(config.page.margin.top)
     const topNum = extractNumber(config.page.margin.top)
@@ -84,57 +71,12 @@ export const PageSizeConfigComponent = ({ value }: { value: string }) => {
   }
 
   return (
-    <TabsContent value={value} className='mt-4 space-y-4'>
-      <GeneralConfigPart
-        config={config}
-        onPageSizeChange={updatePageSize}
-        onOrientationChange={updateOrientation}
-        unit={unit}
-        handleUnitChange={handleUnitChange}
-        getCurrentMarginPreset={getCurrentMargin}
-        onApplyMarginPreset={applyMarginPreset}
-      />
-    </TabsContent>
-  )
-}
-
-const GeneralConfigPart = ({
-  config,
-  onPageSizeChange,
-  onOrientationChange,
-  unit,
-  handleUnitChange,
-  getCurrentMarginPreset,
-  onApplyMarginPreset,
-}: {
-  config: AppConfig
-  onPageSizeChange: (size: PageSize) => void
-  onOrientationChange: (orientation: Orientation) => void
-  getCurrentMarginPreset: () => MarginPreset
-  onApplyMarginPreset: (preset: MarginPreset) => void
-  unit: Unit
-  handleUnitChange: (unit: Unit) => void
-}) => {
-  return (
-    <Card>
-      <CardHeader>
-        <div className='mb-3 flex items-center gap-2'>
-          <div className='rounded-lg bg-linear-to-br from-blue-500 to-indigo-600 p-2 text-white'>
-            <FileText className='h-8 w-8' />
-          </div>
-          <div>
-            <h3 className='text-foreground text-sm font-semibold'>Configurações Gerais</h3>
-            <p className='text-muted-foreground text-xs'>
-              Configurações de tamanho e orientação do documento e unidade de medida
-            </p>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className='flex w-full flex-col gap-3'>
+    <TabsContent value='page' className='mt-4 space-y-4'>
+      <SettingsCard type='page'>
         <SelectComponent
           label='Tamanho'
           value={config.page.size}
-          onValueChange={(value) => onPageSizeChange(value as PageSize)}
+          onValueChange={(value) => updatePageSize(value as PageSize)}
           data={Object.entries(PAGE_SIZES).map(([key, value]) => ({
             value: key,
             label: `${value.name} (${value.width} × ${value.height})`,
@@ -147,7 +89,7 @@ const GeneralConfigPart = ({
         <SelectComponent
           label='Orientação'
           value={config.page.orientation}
-          onValueChange={(value) => onOrientationChange(value as Orientation)}
+          onValueChange={(value) => updateOrientation(value as Orientation)}
           data={[
             { value: 'portrait', label: 'Retrato' },
             { value: 'landscape', label: 'Paisagem' },
@@ -173,8 +115,8 @@ const GeneralConfigPart = ({
         />
         <SelectComponent
           label='Margens'
-          value={getCurrentMarginPreset()}
-          onValueChange={(value) => onApplyMarginPreset(value as MarginPreset)}
+          value={getCurrentMargin()}
+          onValueChange={(value) => applyMarginPreset(value as MarginPreset)}
           data={Object.entries(MARGIN_PRESETS).map(([key, preset]) => ({
             value: key,
             label: preset.name,
@@ -184,122 +126,144 @@ const GeneralConfigPart = ({
             container: 'w-full! flex-1',
           }}
         />
-      </CardContent>
-    </Card>
+        {getCurrentMargin() === 'custom' && (
+          <PageSpacingPart config={config} unit={unit} onConfigChange={updateConfig} />
+        )}
+      </SettingsCard>
+    </TabsContent>
   )
 }
+
 const PageSpacingPart = ({
   config,
   unit,
-  unitColors,
   onConfigChange,
 }: {
   config: AppConfig
   unit: Unit
-  unitColors: { [key in Unit]: string }
   onConfigChange: (config: Partial<AppConfig>) => void
 }) => {
-  // Extrai apenas os números dos valores atuais
-  const getMarginValue = (marginValue: string): number => {
+  // Calcula valores iniciais convertidos
+  const getConvertedMargin = (marginValue: string): string => {
     const num = extractNumber(marginValue)
     const currentUnit = extractUnit(marginValue)
-    return convertUnit(num, currentUnit, unit)
+    return String(convertUnit(num, currentUnit, unit))
   }
 
-  const getPaddingValue = (): number => {
+  const getConvertedPadding = (): string => {
     const num = extractNumber(config.page.padding)
     const currentUnit = extractUnit(config.page.padding)
-    return convertUnit(num, currentUnit, unit)
+    return String(convertUnit(num, currentUnit, unit))
   }
 
-  // Atualiza padding com a unidade selecionada
-  const updatePadding = (numValue: number) => {
-    const valueWithUnit = `${numValue}${unit}`
+  // Estados locais para permitir edição livre
+  const [paddingInput, setPaddingInput] = useState(getConvertedPadding())
+  const [marginInputs, setMarginInputs] = useState({
+    top: getConvertedMargin(config.page.margin.top),
+    right: getConvertedMargin(config.page.margin.right),
+    bottom: getConvertedMargin(config.page.margin.bottom),
+    left: getConvertedMargin(config.page.margin.left),
+  })
+
+  // Sincroniza estados locais quando config ou unit mudam externamente
+  useEffect(() => {
+    setPaddingInput(getConvertedPadding())
+    setMarginInputs({
+      top: getConvertedMargin(config.page.margin.top),
+      right: getConvertedMargin(config.page.margin.right),
+      bottom: getConvertedMargin(config.page.margin.bottom),
+      left: getConvertedMargin(config.page.margin.left),
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unit])
+
+  // Filtra apenas números e ponto decimal
+  const sanitizeNumericInput = (value: string): string => {
+    return value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')
+  }
+
+  const handlePaddingChange = (value: string) => {
+    const sanitized = sanitizeNumericInput(value)
+    setPaddingInput(sanitized)
+  }
+
+  const handlePaddingBlur = () => {
+    const numValue = parseFloat(paddingInput) || 0
+    setPaddingInput(String(numValue))
     onConfigChange({
-      page: { ...config.page, padding: valueWithUnit },
+      page: { ...config.page, padding: `${numValue}${unit}` },
     })
   }
 
-  const updateMargin = (side: 'top' | 'right' | 'bottom' | 'left', numValue: number) => {
-    const valueWithUnit = `${numValue}${unit}`
+  const handleMarginChange = (side: 'top' | 'right' | 'bottom' | 'left', value: string) => {
+    const sanitized = sanitizeNumericInput(value)
+    setMarginInputs((prev) => ({ ...prev, [side]: sanitized }))
+  }
+
+  const handleMarginBlur = (side: 'top' | 'right' | 'bottom' | 'left') => {
+    const numValue = parseFloat(marginInputs[side]) || 0
+    setMarginInputs((prev) => ({ ...prev, [side]: String(numValue) }))
     onConfigChange({
       page: {
         ...config.page,
-        margin: { ...config.page.margin, [side]: valueWithUnit },
+        margin: { ...config.page.margin, [side]: `${numValue}${unit}` },
       },
     })
   }
-  return (
-    <div className='border-gradient-to-br space-y-4 rounded-xl border-2 bg-linear-to-br from-orange-50 to-amber-50 p-4 dark:from-orange-950/30 dark:to-amber-950/30'>
-      <div className='flex items-center gap-2'>
-        <div className='rounded-lg bg-linear-to-br from-orange-500 to-amber-600 p-2 text-white'>
-          <Maximize2 className='h-4 w-4' />
-        </div>
-        <div>
-          <h3 className='text-foreground text-sm font-semibold'>Espaçamentos</h3>
-          <p className='text-muted-foreground text-xs'>Margens e padding</p>
-        </div>
-      </div>
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, onBlur: () => void) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur()
+      onBlur()
+    }
+  }
+
+  return (
+    <div className='space-y-3 pt-2'>
       {/* Padding */}
       <div className='space-y-1.5'>
-        <Label className='text-muted-foreground flex items-center gap-1.5 text-xs font-medium'>
-          <span className='h-1.5 w-1.5 rounded-full bg-orange-500'></span>
-          Padding
-        </Label>
-        <div className='flex gap-2'>
+        <Label className='text-muted-foreground text-xs font-medium'>Padding</Label>
+        <div className='flex items-center gap-2'>
           <Input
-            type='number'
-            step='0.1'
-            min='0'
-            value={getPaddingValue()}
-            onChange={(e) => {
-              const numValue = parseFloat(e.target.value) || 0
-              updatePadding(numValue)
-            }}
+            inputMode='decimal'
+            value={paddingInput}
+            onChange={(e) => handlePaddingChange(e.target.value)}
+            onBlur={handlePaddingBlur}
+            onKeyDown={(e) => handleKeyDown(e, handlePaddingBlur)}
             placeholder='20'
-            className='bg-background/80 h-9 flex-1 border-orange-200 backdrop-blur-sm focus:border-orange-400 dark:border-orange-800 dark:focus:border-orange-600'
+            className='bg-background/80 h-9 flex-1 backdrop-blur-sm'
           />
-          <Badge
-            className={`${unitColors[unit]} h-9 min-w-[60px] justify-center border font-medium`}>
+          <Badge variant='secondary' className='h-9 min-w-[50px] justify-center font-medium'>
             {unit}
           </Badge>
         </div>
       </div>
 
-      {/* Margens - Grid Visual */}
-      <div className='space-y-2'>
-        <Label className='text-muted-foreground flex items-center gap-1.5 text-xs font-medium'>
-          <span className='h-1.5 w-1.5 rounded-full bg-amber-500'></span>
-          Margens
-        </Label>
-        <div className='grid grid-cols-2 gap-2.5'>
+      {/* Margens */}
+      <div className='space-y-1.5'>
+        <Label className='text-muted-foreground text-xs font-medium'>Margens Personalizadas</Label>
+        <div className='grid grid-cols-2 gap-2'>
           {[
-            { side: 'top' as const, label: 'Superior', icon: '⬆️' },
-            { side: 'right' as const, label: 'Direita', icon: '➡️' },
-            { side: 'bottom' as const, label: 'Inferior', icon: '⬇️' },
-            { side: 'left' as const, label: 'Esquerda', icon: '⬅️' },
-          ].map(({ side, label, icon }) => (
-            <div key={side} className='space-y-1.5'>
-              <Label className='text-muted-foreground flex items-center gap-1 text-xs'>
-                <span>{icon}</span>
-                {label}
-              </Label>
-              <div className='flex gap-2'>
+            { side: 'top' as const, label: 'Superior' },
+            { side: 'right' as const, label: 'Direita' },
+            { side: 'bottom' as const, label: 'Inferior' },
+            { side: 'left' as const, label: 'Esquerda' },
+          ].map(({ side, label }) => (
+            <div key={side} className='space-y-1'>
+              <Label className='text-muted-foreground text-[11px]'>{label}</Label>
+              <div className='flex items-center gap-1.5'>
                 <Input
                   type='number'
                   step='0.1'
                   min='0'
-                  value={getMarginValue(config.page.margin[side])}
-                  onChange={(e) => {
-                    const numValue = parseFloat(e.target.value) || 0
-                    updateMargin(side, numValue)
-                  }}
+                  value={marginInputs[side]}
+                  onChange={(e) => handleMarginChange(side, e.target.value)}
+                  onBlur={() => handleMarginBlur(side)}
+                  onKeyDown={(e) => handleKeyDown(e, () => handleMarginBlur(side))}
                   placeholder='0'
-                  className='bg-background/80 h-9 flex-1 border-orange-200 backdrop-blur-sm focus:border-orange-400 dark:border-orange-800 dark:focus:border-orange-600'
+                  className='bg-background/80 h-8 flex-1 backdrop-blur-sm'
                 />
-                <Badge
-                  className={`${unitColors[unit]} h-9 min-w-[50px] justify-center border text-xs font-medium`}>
+                <Badge variant='secondary' className='h-8 min-w-[40px] justify-center text-xs'>
                   {unit}
                 </Badge>
               </div>

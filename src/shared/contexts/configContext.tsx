@@ -1,7 +1,16 @@
 'use client'
 
 import usePersistedState from '@/hooks/use-persisted-state'
-import { createContext, useCallback, useContext, useEffect, type ReactNode } from 'react'
+import {
+  Dispatch,
+  SetStateAction,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from 'react'
 import { MARGIN_PRESETS, PAGE_SIZES, THEME_PRESETS, defaultConfig } from '../constants'
 
 interface ConfigContextType {
@@ -14,13 +23,15 @@ interface ConfigContextType {
   getCurrentTheme: () => ThemePreset
   applyMarginPreset: (preset: MarginPreset) => void
   applyThemePreset: (preset: ThemePreset) => void
+  isConfigOpen: boolean
+  setIsConfigOpen: Dispatch<SetStateAction<boolean>>
 }
 
 const ConfigContext = createContext<ConfigContextType | undefined>(undefined)
 
 export function ConfigProvider({ children }: { children: ReactNode }) {
   const [config, setConfig] = usePersistedState<AppConfig>('md-to-pdf-config', defaultConfig)
-
+  const [isConfigOpen, setIsConfigOpen] = useState(false)
   // Garante que o tema sempre existe
   useEffect(() => {
     if (!config.theme) {
@@ -127,8 +138,6 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
 
   const applyMarginPreset = useCallback(
     (preset: MarginPreset) => {
-      if (preset === 'custom') return
-
       const marginPreset = MARGIN_PRESETS[preset]
       setConfig((prev) => {
         const newConfig = {
@@ -174,6 +183,8 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
     <ConfigContext.Provider
       value={{
         config,
+        isConfigOpen,
+        setIsConfigOpen,
         updateConfig,
         updatePageSize,
         updateOrientation,

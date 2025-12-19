@@ -7,7 +7,7 @@ import { SiCsswizardry, SiDotenv, SiGnubash, SiYaml } from 'react-icons/si'
 import { TbBrandPowershell, TbBrandPython, TbBrandTypescript, TbSql, TbTxt } from 'react-icons/tb'
 
 import { FaMarkdown } from 'react-icons/fa'
-export const IconsAvailable = [
+export const FILE_ICONS_AVAILABLE = [
   'JSON',
   'PowerShell',
   'Markdown',
@@ -25,7 +25,7 @@ export const IconsAvailable = [
   'Rust',
   'Python',
 ].map((icon) => icon.toLowerCase())
-export const GistFileIcon = {
+export const FILE_ICONS = {
   json: BsFiletypeJson,
   powershell: TbBrandPowershell,
   markdown: FaMarkdown,
@@ -46,9 +46,9 @@ export const GistFileIcon = {
 }
 
 export const getIcon = (language: string) => {
-  const haveIcon = IconsAvailable.includes(language.toLowerCase())
+  const haveIcon = FILE_ICONS_AVAILABLE.includes(language.toLowerCase())
   const languageIcon = haveIcon
-    ? GistFileIcon[language.toLowerCase() as keyof typeof GistFileIcon]
+    ? FILE_ICONS[language.toLowerCase() as keyof typeof FILE_ICONS]
     : FaRegFileAlt
   return haveIcon ? languageIcon : FaRegFileAlt
 }

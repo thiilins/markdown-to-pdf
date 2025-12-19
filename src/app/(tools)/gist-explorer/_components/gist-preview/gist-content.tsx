@@ -1,6 +1,7 @@
 'use client'
 
 import { StaticPreview } from '@/components/preview-panel/static-pages'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useConfig } from '@/shared/contexts/configContext'
 import { useGist } from '@/shared/contexts/gistContext'
 import { isImageFile, isMarkdownFile, mapLanguage } from '@/shared/utils'
@@ -8,18 +9,6 @@ import { AlertCircle } from 'lucide-react'
 import { useMemo } from 'react'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { darcula } from 'react-syntax-highlighter/dist/esm/styles/hljs'
-import { LoadingPreviewComponent } from './additional-components'
-
-const NoContentComponent = () => {
-  return (
-    <div className='flex items-center justify-center py-12'>
-      <div className='text-muted-foreground text-center'>
-        <AlertCircle className='mx-auto mb-2 h-8 w-8' />
-        <p className='text-sm'>Conteúdo não disponível</p>
-      </div>
-    </div>
-  )
-}
 
 const ContentComponent = ({
   filename,
@@ -49,12 +38,14 @@ const ContentComponent = ({
 
 const ContentMdPreview = ({ content }: { content: string }) => {
   const { config } = useConfig()
+  const { contentRef } = useGist()
   return (
     <div className='h-full w-full'>
       <StaticPreview
         markdown={content}
         typographyConfig={config.typography}
         themeConfig={config.theme}
+        contentRef={contentRef}
       />
     </div>
   )
@@ -110,7 +101,7 @@ export const GistContent = ({
   selectedFile: GistFile
   fileContents: Record<string, string>
 }) => {
-  const { loadingFiles } = useGist()
+  const { loadingFiles, contentRef } = useGist()
 
   const RenderComponent = useMemo(() => {
     if (!selectedFile) return null
@@ -134,8 +125,32 @@ export const GistContent = ({
     // ID fixo para impressão e exportação PDF
     <div
       id='gist-render-area'
+      ref={contentRef}
       className='prose min-h-full w-full max-w-none overflow-visible bg-white p-8 dark:bg-slate-950'>
       {RenderComponent}
+    </div>
+  )
+}
+
+const NoContentComponent = () => {
+  return (
+    <div className='flex items-center justify-center py-12'>
+      <div className='text-muted-foreground text-center'>
+        <AlertCircle className='mx-auto mb-2 h-8 w-8' />
+        <p className='text-sm'>Conteúdo não disponível</p>
+      </div>
+    </div>
+  )
+}
+export const LoadingPreviewComponent = () => {
+  return (
+    <div className='bg-muted/10 flex flex-1 items-center justify-center'>
+      <div className='w-full max-w-2xl space-y-4 p-8'>
+        <Skeleton className='h-8 w-48' />
+        <Skeleton className='h-4 w-full' />
+        <Skeleton className='h-4 w-3/4' />
+        <Skeleton className='h-64 w-full' />
+      </div>
     </div>
   )
 }

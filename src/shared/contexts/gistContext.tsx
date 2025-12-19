@@ -1,34 +1,40 @@
 'use client'
 
+import {
+  filterGistBySearch,
+  handleDownloadOriginal,
+  handleDownloadPackageMD,
+} from '@/app/(tools)/gist-explorer/_components/utils'
 import usePersistedStateInDB from '@/hooks/use-persisted-in-db'
+import { useToogleMultiple } from '@/hooks/use-toogle-multiple'
 import { GistService } from '@/services/gistService'
 import {
+  RefObject,
   createContext,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react'
 import { toast } from 'sonner'
 import { mountGistSelectedfile } from '../utils'
-import { searchText } from '../utils/search-text'
+import { handleDownloadPDFApi } from '../utils/download-pdf-api'
+import { useConfig } from './configContext'
 
 interface GistContextType {
   gists: Gist[]
   setGists: (gists: Gist[]) => void
   onGetGists: ({ username, type }: FetchGistsParams) => Promise<void>
   error: string | null | undefined
-  loading: boolean
   onSearch: ({ username, type }: FetchGistsParams) => Promise<void>
   onSelectGist: (gist: Gist) => void
   selectedGist: Gist | null
   selectedGistId: string | null
-  typeMyGists: GistType
-  setTypeMyGists: (type: GistType) => void
-  typeAllGists: GistType
-  setTypeAllGists: (type: GistType) => void
+  types: { myGists: GistType; allGists: GistType }
+  handleSetTypes: (type: 'myGists' | 'allGists', value: GistType) => void
   searchUser: string
   setSearchUser: (searchUser: string) => void
   selectedFile: SelectedGistFileProps | null
@@ -42,7 +48,6 @@ interface GistContextType {
   OnChangeSearchType: (checked: boolean) => void
   setSearchValue: (value: string) => void
   handleResetData: () => void
-  // Novas propriedades para Tags
   allTags: string[]
   selectedTags: string[]
   fileOptions: { value: string; label: string; language: string | null }[]
@@ -50,18 +55,28 @@ interface GistContextType {
   allLanguages: string[]
   selectedLanguages: string[]
   toggleLanguage: (lang: string) => void
+  isLoading: boolean
+  setIsLoading: (isLoading: boolean) => void
+  handleDownloadPDF: () => Promise<void>
+  onDownloadOriginal: () => void
+  onDownloadPackageMD: () => Promise<void> | void
+  contentRef: RefObject<HTMLDivElement | null>
 }
 
 const GistContext = createContext<GistContextType | undefined>(undefined)
 
 export function GistProvider({ children }: { children: ReactNode }) {
+  const { config } = useConfig()
+  const contentRef = useRef<HTMLDivElement>(null)
   const [gists, setGists] = usePersistedStateInDB<Gist[]>('gists', [])
-
+  const [isLoading, setIsLoading] = useState(false)
   // GIST LIST
   const [error, setError] = useState<string | null | undefined>(null)
-  const [loading, setLoading] = useState(false)
-  const [typeMyGists, setTypeMyGists] = useState<GistType>('all')
-  const [typeAllGists, setTypeAllGists] = useState<GistType>('public')
+  const [types, setTypes] = useState<{ myGists: GistType; allGists: GistType }>({
+    myGists: 'all',
+    allGists: 'public',
+  })
+
   const [searchUser, setSearchUser] = useState('')
   const [selectedGist, setSelectedGist] = useState<Gist | null>(null)
 
@@ -73,18 +88,15 @@ export function GistProvider({ children }: { children: ReactNode }) {
   // GIST SEARCH & FILTERS
   const [searchValue, setSearchValue] = useState('')
   const [searchType, setSearchType] = useState<{ description: boolean }>({ description: true })
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([])
-
+  const { selected: selectedTags, toggle: toggleTag } = useToogleMultiple()
+  const { selected: selectedLanguages, toggle: toggleLanguage } = useToogleMultiple()
   const OnChangeSearchType = (checked: boolean) => {
     setSearchType({ ...searchType, description: checked })
   }
 
-  // Lógica de Extração de Tags (Feature 3.1)
   const allTags = useMemo(() => {
     const tags = new Set<string>()
     gists.forEach((gist) => {
-      // Procura por palavras começando com # na descrição
       const matches = gist.description?.match(/#[\w-]+/g)
       if (matches) {
         matches.forEach((tag) => tags.add(tag.toLowerCase()))
@@ -103,43 +115,9 @@ export function GistProvider({ children }: { children: ReactNode }) {
     return Array.from(langs).sort()
   }, [gists])
 
-  const toggleLanguage = useCallback((lang: string) => {
-    setSelectedLanguages((prev) =>
-      prev.includes(lang) ? prev.filter((l) => l !== lang) : [...prev, lang],
-    )
-  }, [])
-
-  const toggleTag = useCallback((tag: string) => {
-    setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
-  }, [])
-
-  const filteredGists = useMemo(() => {
-    return gists.filter((gist) => {
-      const descriptionMatch = searchText(gist.description, searchValue)
-      const filesMatch = gist.files.some((file) => searchText(file.filename, searchValue))
-      const textMatch = !searchType.description ? filesMatch : descriptionMatch || filesMatch
-
-      // 2. Filtro de Tags (#)
-      let tagsMatch = true
-      if (selectedTags.length > 0) {
-        const gistTags = (gist.description?.match(/#[\w-]+/g) || []).map((t) => t.toLowerCase())
-        tagsMatch = selectedTags.every((tag) => gistTags.includes(tag))
-      }
-
-      // 3. Filtro de Linguagens
-      let langMatch = true
-      if (selectedLanguages.length > 0) {
-        langMatch = gist.files.some(
-          (file) => file.language && selectedLanguages.includes(file.language),
-        )
-      }
-
-      return textMatch && tagsMatch && langMatch
-    })
-  }, [gists, searchValue, searchType, selectedTags, selectedLanguages])
   const onGetGists = useCallback(
     async ({ username, type }: FetchGistsParams) => {
-      setLoading(true)
+      setIsLoading(true)
       setError(null)
       setSelectedGist(null)
 
@@ -159,7 +137,7 @@ export function GistProvider({ children }: { children: ReactNode }) {
           toast.error(response.error || 'Erro inesperado.', { duration: 4000 })
         }
       } finally {
-        setLoading(false)
+        setIsLoading(false)
       }
     },
     [setGists],
@@ -240,6 +218,35 @@ export function GistProvider({ children }: { children: ReactNode }) {
     return options
   }, [selectedGist?.files])
 
+  const filteredGists = useMemo(() => {
+    return filterGistBySearch(gists, searchValue, searchType, selectedTags, selectedLanguages)
+  }, [gists, searchValue, searchType, selectedTags, selectedLanguages])
+
+  const onDownloadOriginal = useCallback(() => {
+    return handleDownloadOriginal(fileContents, selectedFile)
+  }, [fileContents, selectedFile])
+
+  const onDownloadPackageMD = useCallback(() => {
+    return handleDownloadPackageMD(selectedGist, fileContents)
+  }, [fileContents, selectedGist])
+
+  const handleDownloadPDF = useCallback(async () => {
+    setIsLoading(true)
+    const element = document.getElementById('gist-render-area')
+    if (!element) {
+      toast.error('Área de conteúdo não encontrada.')
+      return
+    }
+    const filename = `${selectedFile?.filename ?? 'gist-document'}.pdf`
+    try {
+      const htmlContent = element.innerHTML
+      await handleDownloadPDFApi(config, htmlContent, filename)
+      return
+    } finally {
+      setIsLoading(false)
+    }
+  }, [config, selectedFile?.filename])
+
   const handleResetData = useCallback(() => {
     setGists([])
     setError(null)
@@ -248,42 +255,57 @@ export function GistProvider({ children }: { children: ReactNode }) {
     setSelectedFile(null)
     setLoadingFiles({})
   }, [setGists])
-  const value = {
-    gists,
-    setGists,
-    onGetGists,
-    error,
-    loading,
-    selectedGist,
-    onSearch,
-    onSelectGist,
-    selectedGistId,
-    typeMyGists,
-    setTypeMyGists,
-    typeAllGists,
-    setTypeAllGists,
-    searchUser,
-    setSearchUser,
-    selectedFile,
-    handleLoadFileContent,
-    handleSelectFile,
-    loadingFiles,
-    fileContents,
-    filteredGists,
-    searchValue,
-    searchType,
-    OnChangeSearchType,
-    setSearchValue,
-    allTags,
-    fileOptions,
-    selectedTags,
-    toggleTag,
-    allLanguages,
-    selectedLanguages,
-    toggleLanguage,
-    handleResetData,
-  }
-  return <GistContext.Provider value={value}>{children}</GistContext.Provider>
+
+  const handleSetTypes = useCallback((type: 'myGists' | 'allGists', value: string) => {
+    setTypes((prev) => ({ ...prev, [type]: value }))
+  }, [])
+  return (
+    <GistContext.Provider
+      value={{
+        gists,
+        setGists,
+        onGetGists,
+        error,
+        selectedGist,
+        onSearch,
+        onSelectGist,
+        selectedGistId,
+        // typeMyGists,
+        // setTypeMyGists,
+        // typeAllGists,
+        // setTypeAllGists,\
+        types,
+        handleSetTypes,
+        searchUser,
+        setSearchUser,
+        selectedFile,
+        handleLoadFileContent,
+        handleSelectFile,
+        loadingFiles,
+        fileContents,
+        filteredGists,
+        searchValue,
+        searchType,
+        OnChangeSearchType,
+        setSearchValue,
+        allTags,
+        fileOptions,
+        selectedTags,
+        toggleTag,
+        allLanguages,
+        selectedLanguages,
+        toggleLanguage,
+        handleResetData,
+        onDownloadOriginal,
+        onDownloadPackageMD,
+        handleDownloadPDF,
+        isLoading,
+        setIsLoading,
+        contentRef,
+      }}>
+      {children}
+    </GistContext.Provider>
+  )
 }
 
 export function useGist() {

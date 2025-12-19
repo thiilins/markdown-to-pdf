@@ -107,5 +107,4 @@ interface ModuleItem {
 interface EnableTools {
   zoom: boolean
   printExport: boolean
-  settings: boolean
 }

@@ -7,9 +7,10 @@ import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { TabsContent } from '@/components/ui/tabs'
 import { useConfig } from '@/shared/contexts/configContext'
-import { Code, Eye, EyeOff, Maximize2, Monitor, Moon, Sun, Type } from 'lucide-react'
+import { Eye, EyeOff, Monitor, Moon, Sun, TextWrap, Type } from 'lucide-react'
+import { SettingsCard } from './layout'
 
-export const EditorConfigComponent = ({ value }: { value: string }) => {
+export const EditorConfigComponent = () => {
   const { config, updateConfig } = useConfig()
   const getThemeIcon = (theme: string) => {
     switch (theme) {
@@ -38,18 +39,9 @@ export const EditorConfigComponent = ({ value }: { value: string }) => {
   }
 
   return (
-    <TabsContent value={value} className='mt-4 space-y-4'>
+    <TabsContent value='editor' className='mt-4 space-y-4'>
       {/* Tema do Editor */}
-      <div className='border-gradient-to-br space-y-3 rounded-xl border-2 bg-linear-to-br from-slate-50 to-gray-50 p-4 dark:from-slate-950/30 dark:to-gray-950/30'>
-        <div className='mb-3 flex items-center gap-2'>
-          <div className='rounded-lg bg-linear-to-br from-slate-500 to-gray-600 p-2 text-white'>
-            <Code className='h-4 w-4' />
-          </div>
-          <div>
-            <h3 className='text-foreground text-sm font-semibold'>Tema do Editor</h3>
-            <p className='text-muted-foreground text-xs'>Aparência do editor de código</p>
-          </div>
-        </div>
+      <SettingsCard type='editor'>
         <SelectComponent
           data={[
             { value: 'light', label: 'Claro' },
@@ -73,132 +65,102 @@ export const EditorConfigComponent = ({ value }: { value: string }) => {
             Tema atual: <span className='font-semibold'>{getThemeLabel(config.editor.theme)}</span>
           </p>
         </div>
-      </div>
-
-      {/* Configurações de Visualização */}
-      <div className='border-gradient-to-br space-y-4 rounded-xl border-2 bg-linear-to-br from-indigo-50 to-blue-50 p-4 dark:from-indigo-950/30 dark:to-blue-950/30'>
-        <div className='mb-2 flex items-center gap-2'>
-          <div className='rounded-lg bg-linear-to-br from-indigo-500 to-blue-600 p-2 text-white'>
-            <Maximize2 className='h-4 w-4' />
+        {/* Configurações de Visualização */}
+        <div className='mt-4 space-y-2'>
+          <div className='flex items-center justify-between'>
+            <Label className='text-muted-foreground flex items-center gap-1.5 text-xs font-medium'>
+              <Type className='h-3.5 w-3.5' />
+              Tamanho da Fonte
+            </Label>
+            <Badge className='border border-indigo-200 bg-indigo-500/10 px-2 py-0.5 text-xs font-semibold text-indigo-600 dark:border-indigo-800 dark:bg-indigo-500/20 dark:text-indigo-400'>
+              {config.editor.fontSize}px
+            </Badge>
           </div>
-          <div>
-            <h3 className='text-foreground text-sm font-semibold'>Visualização</h3>
-            <p className='text-muted-foreground text-xs'>Ajuste a aparência do editor</p>
-          </div>
+          <Slider
+            value={[config.editor.fontSize]}
+            onValueChange={([value]) =>
+              updateConfig({
+                editor: { ...config.editor, fontSize: value },
+              })
+            }
+            min={10}
+            max={20}
+            step={1}
+            className='w-full'
+          />
+        </div>
+        <div className='mt-4 flex items-center justify-between space-y-2'>
+          <Label htmlFor='word-wrap' className='flex cursor-pointer items-center gap-2'>
+            <TextWrap className='text-muted-foreground h-4 w-4' />
+            <div>
+              <p className='cursor-pointer text-sm font-medium'>Quebra de Linha</p>
+              <p className='text-muted-foreground text-xs'>Quebra de linha automática do código</p>
+            </div>
+          </Label>
+          <Switch
+            id='word-wrap'
+            checked={config.editor.wordWrap === 'on'}
+            className='cursor-pointer'
+            onCheckedChange={(checked) =>
+              updateConfig({
+                editor: { ...config.editor, wordWrap: checked ? 'on' : 'off' },
+              })
+            }
+          />
         </div>
 
-        <div className='space-y-4'>
-          {/* Tamanho da Fonte */}
-          <div className='space-y-2'>
-            <div className='flex items-center justify-between'>
-              <Label className='text-muted-foreground flex items-center gap-1.5 text-xs font-medium'>
-                <Type className='h-3.5 w-3.5' />
-                Tamanho da Fonte
-              </Label>
-              <Badge className='border border-indigo-200 bg-indigo-500/10 px-2 py-0.5 text-xs font-semibold text-indigo-600 dark:border-indigo-800 dark:bg-indigo-500/20 dark:text-indigo-400'>
-                {config.editor.fontSize}px
-              </Badge>
+        <div className='mt-4 flex items-center justify-between space-y-2'>
+          <Label htmlFor='minimap' className='flex cursor-pointer items-center gap-2'>
+            {config.editor.minimap ? (
+              <Eye className='text-muted-foreground h-4 w-4' />
+            ) : (
+              <EyeOff className='text-muted-foreground h-4 w-4' />
+            )}
+            <div>
+              <p className='cursor-pointer text-sm font-medium'>Minimap</p>
+              <p className='text-muted-foreground text-xs'>Visualização em miniatura do código</p>
             </div>
-            <Slider
-              value={[config.editor.fontSize]}
-              onValueChange={([value]) =>
-                updateConfig({
-                  editor: { ...config.editor, fontSize: value },
-                })
-              }
-              min={10}
-              max={20}
-              step={1}
-              className='w-full'
-            />
+          </Label>
+          <Switch
+            id='minimap'
+            checked={config.editor.minimap}
+            className='cursor-pointer'
+            onCheckedChange={(checked) =>
+              updateConfig({
+                editor: { ...config.editor, minimap: checked },
+              })
+            }
+          />
+        </div>
+
+        {/* Números de Linha */}
+        <div className='mt-4 grid grid-cols-3 items-center justify-between space-y-2'>
+          <div className='col-span-2 flex items-center gap-2'>
+            <Type className='h-4 w-4 text-emerald-600 dark:text-emerald-400' />
+            <div>
+              <Label className='cursor-pointer text-sm font-medium'>Números de Linha</Label>
+              <p className='text-muted-foreground text-xs'>Exibir numeração das linhas</p>
+            </div>
           </div>
-
-          {/* Quebra de Linha */}
-
           <SelectComponent
-            label='Quebra de Linha'
-            value={config.editor.wordWrap}
+            value={config.editor.lineNumbers}
             onValueChange={(value) =>
               updateConfig({
-                editor: { ...config.editor, wordWrap: value as any },
+                editor: { ...config.editor, lineNumbers: value as any },
               })
             }
             data={[
               { value: 'on', label: 'Ativado' },
               { value: 'off', label: 'Desativado' },
+              { value: 'relative', label: 'Relativo' },
+              { value: 'interval', label: 'Intervalo' },
             ]}
             className={{
-              trigger: 'bg-background/80 h-9 backdrop-blur-sm',
+              trigger: 'bg-background/80 h-8 w-24 backdrop-blur-sm',
             }}
           />
         </div>
-      </div>
-
-      {/* Opções Avançadas */}
-      <div className='border-gradient-to-br space-y-4 rounded-xl border-2 bg-linear-to-br from-emerald-50 to-teal-50 p-4 dark:from-emerald-950/30 dark:to-teal-950/30'>
-        <div className='mb-2 flex items-center gap-2'>
-          <div className='rounded-lg bg-linear-to-br from-emerald-500 to-teal-600 p-2 text-white'>
-            <Eye className='h-4 w-4' />
-          </div>
-          <div>
-            <h3 className='text-foreground text-sm font-semibold'>Opções Avançadas</h3>
-            <p className='text-muted-foreground text-xs'>Recursos adicionais do editor</p>
-          </div>
-        </div>
-
-        <div className='space-y-3'>
-          {/* Minimap */}
-          <div className='flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50/50 p-3 dark:border-emerald-800 dark:bg-emerald-900/20'>
-            <div className='flex items-center gap-2'>
-              {config.editor.minimap ? (
-                <Eye className='h-4 w-4 text-emerald-600 dark:text-emerald-400' />
-              ) : (
-                <EyeOff className='text-muted-foreground h-4 w-4' />
-              )}
-              <div>
-                <Label className='cursor-pointer text-sm font-medium'>Minimap</Label>
-                <p className='text-muted-foreground text-xs'>Visualização em miniatura do código</p>
-              </div>
-            </div>
-            <Switch
-              checked={config.editor.minimap}
-              onCheckedChange={(checked) =>
-                updateConfig({
-                  editor: { ...config.editor, minimap: checked },
-                })
-              }
-            />
-          </div>
-
-          {/* Números de Linha */}
-          <div className='flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50/50 p-3 dark:border-emerald-800 dark:bg-emerald-900/20'>
-            <div className='flex items-center gap-2'>
-              <Type className='h-4 w-4 text-emerald-600 dark:text-emerald-400' />
-              <div>
-                <Label className='cursor-pointer text-sm font-medium'>Números de Linha</Label>
-                <p className='text-muted-foreground text-xs'>Exibir numeração das linhas</p>
-              </div>
-            </div>
-            <SelectComponent
-              value={config.editor.lineNumbers}
-              onValueChange={(value) =>
-                updateConfig({
-                  editor: { ...config.editor, lineNumbers: value as any },
-                })
-              }
-              data={[
-                { value: 'on', label: 'Ativado' },
-                { value: 'off', label: 'Desativado' },
-                { value: 'relative', label: 'Relativo' },
-                { value: 'interval', label: 'Intervalo' },
-              ]}
-              className={{
-                trigger: 'bg-background/80 h-8 w-24 backdrop-blur-sm',
-              }}
-            />
-          </div>
-        </div>
-      </div>
+      </SettingsCard>
     </TabsContent>
   )
 }

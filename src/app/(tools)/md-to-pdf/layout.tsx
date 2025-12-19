@@ -1,6 +1,8 @@
 'use client'
-import { MdPdfLayout } from '@/shared/layouts/md-pdf'
+
+import { mdToPdfBreadcrumbs } from '@/shared/constants/breadcrumbs'
+import { ToolsLayoutComponent } from '@/shared/layouts/tools'
 
 export default function MDToPdfLayout({ children }: { children: React.ReactNode }) {
-  return <MdPdfLayout>{children}</MdPdfLayout>
+  return <ToolsLayoutComponent breadcrumbs={mdToPdfBreadcrumbs}>{children}</ToolsLayoutComponent>
 }

@@ -13,12 +13,14 @@ interface SelectComponentProps {
     content?: string
     item?: string
   }
+  id?: string
   label?: string | React.ReactNode
   placeholder?: string
   disabled?: boolean
 }
 
 export const SelectComponent = ({
+  id,
   value,
   onValueChange,
   data,
