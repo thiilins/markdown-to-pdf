@@ -13,6 +13,7 @@ import {
   Lightbulb,
   Link,
   List,
+  ListChecks,
   ListChevronsUpDown,
   ListOrdered,
   Minus,
@@ -443,6 +444,7 @@ export const BlocksToolbar = ({ actions }: { actions: IToolbarActions }) => {
     },
     { type: 'action', icon: Link, tooltip: 'Link', onClick: actions.insertLink },
     { type: 'action', icon: Image, tooltip: 'Imagem', onClick: actions.insertImage },
+    { type: 'action', icon: ListChecks, tooltip: 'TOC', onClick: actions.generateTOC },
   ]
   return (
     <div className='flex w-full items-center justify-around gap-2 rounded border p-1'>

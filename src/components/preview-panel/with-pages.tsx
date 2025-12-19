@@ -10,8 +10,8 @@ import { Loader2, Ruler } from 'lucide-react'
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 import ReactMarkdown, { Components } from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
-
 // Conversão precisa: 1mm = 3.7795px (96 DPI standard)
 const mmToPx = (mm: number) => mm * 3.7795275591
 
@@ -247,9 +247,27 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
           }}>
           <div ref={ghostRef}>
             <PreviewStyle theme={theme} />
+            {/* <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeRaw, rehypeSanitize]}
+              components={markdownComponents}>
+              {markdown}
+            </ReactMarkdown> */}
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeRaw]}
+              rehypePlugins={[
+                rehypeRaw,
+                [
+                  rehypeSanitize,
+                  {
+                    ...defaultSchema,
+                    attributes: {
+                      ...defaultSchema.attributes,
+                      div: [...(defaultSchema.attributes?.div || []), ['className']],
+                    },
+                  },
+                ],
+              ]}
               components={markdownComponents}>
               {markdown}
             </ReactMarkdown>

@@ -184,7 +184,38 @@ export const useToolbarActions = (editor: any): IUseToolbarActions => {
       console.warn('Não foi possível abrir o widget de busca:', error)
     }
   }, [editor])
+  const handleGenerateTOC = useCallback(() => {
+    if (!editor) return
+    const model = editor.getModel()
+    const content = model.getValue()
 
+    // Encontra todos os cabeçalhos
+    const headers = content.match(/^#{1,6}\s+.+/gm) || []
+
+    const toc = headers
+      .map((h: string) => {
+        const level = (h.match(/^#+/) || ['#'])[0].length
+        const title = h.replace(/^#+\s+/, '').trim()
+        // Gera o slug para o link interno
+        const anchor = title
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, '')
+          .replace(/\s+/g, '-')
+        return `${'  '.repeat(level - 1)}- [${title}](#${anchor})`
+      })
+      .join('\n')
+
+    const tocContent = `\n## Sumário\n${toc}\n\n---\n`
+
+    // Insere no topo do documento
+    editor.executeEdits('insert-toc', [
+      {
+        range: { startLineNumber: 1, startColumn: 1, endLineNumber: 1, endColumn: 1 },
+        text: tocContent,
+        forceMoveMarkers: true,
+      },
+    ])
+  }, [editor])
   const actions: IToolbarActions = {
     insertTable: () => insertBlock(TABLE),
     insertTableDynamic,
@@ -202,6 +233,7 @@ export const useToolbarActions = (editor: any): IUseToolbarActions => {
     insertBlockquote: () => insertAtLineStart(BLOCKQUOTE),
     insertOrderedList: () => insertAtLineStart(ORDERED_LIST),
     insertUnorderedList: () => insertAtLineStart(UNORDERED_LIST),
+    generateTOC: handleGenerateTOC,
     insertCallout: (type: 'NOTE' | 'TIP' | 'IMPORTANT' | 'WARNING' | 'CAUTION') => {
       const calloutMap = {
         NOTE: CALLOUT_NOTE,
@@ -250,6 +282,7 @@ export const useToolbarActions = (editor: any): IUseToolbarActions => {
       }
     },
   }
+
   return {
     insertText,
     insertAtLineStart,
