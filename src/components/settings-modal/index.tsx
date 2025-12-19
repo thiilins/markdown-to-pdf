@@ -78,7 +78,7 @@ export function SettingsDialog() {
             />
           </div>
         </div>
-        <Tabs defaultValue='page' className='w-full'>
+        <Tabs defaultValue={configTabs.defaultTab} className='w-full'>
           <TabsList className='grid w-full grid-cols-4 p-1'>
             {configTabs.tabs.map((tab) => (
               <TabsTrigger

@@ -17,6 +17,8 @@ type SettingsModalTabsOptions =
   | 'view'
   | 'advanced'
 
+type ConfigEditorShowOptions = 'wordWrap' | 'minimap' | 'lineNumbers' | 'theme'
+
 interface SettingCardModalProps {
   value: SettingsModalTabsOptions
   label: string

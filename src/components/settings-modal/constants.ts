@@ -1,13 +1,20 @@
 import { Code, Eye, FileText, Maximize2, Palette, Settings, Type } from 'lucide-react'
 
-const all = ['page', 'typography', 'theme', 'editor']
+const ALL_TABS = ['page', 'typography', 'theme', 'editor']
 export const CONFIG_MODAL_SHOW_OPTIONS: Record<string, string[]> = {
-  '/': all,
-  '/md-to-pdf': all,
-  '/gist-explorer': ['typography', 'theme', 'editor'],
-  '*': all,
+  '/': ALL_TABS,
+  '/md-to-pdf': ALL_TABS,
+  '/gist-explorer': ['typography', 'theme'],
+  '*': ALL_TABS,
 }
 
+const ALL_EDITOR = ['wordWrap', 'minimap', 'lineNumbers', 'theme']
+export const CONFIG_EDITOR_SHOW_OPTIONS: Record<string, string[]> = {
+  '/': ALL_EDITOR,
+  '/md-to-pdf': ALL_EDITOR,
+  '/gist-explorer': [],
+  '*': ALL_EDITOR,
+}
 export const CONFIG_MODAL_COLORS = {
   page: {
     color: {
