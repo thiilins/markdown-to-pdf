@@ -19,6 +19,7 @@ import {
   Minus,
   Quote,
   Redo,
+  RefreshCcw,
   Search,
   ShieldAlert,
   Sparkles,
@@ -49,7 +50,7 @@ export const MarkdownToolbarItem = ({
 }: {
   icon: React.ElementType
   tooltip: string
-  onClick: () => void | Promise<void>
+  onClick?: () => void | Promise<void>
 }) => {
   const Icon = icon
   return (
@@ -155,9 +156,14 @@ export const MoreOptionsToolbar = ({
 export const ActionsToolbar = ({
   options,
   className,
+  additional,
 }: {
   options: ToolbarOption[]
   className?: string
+  additional?: {
+    key: string
+    component: React.ReactNode
+  }[]
 }) => {
   return (
     <div
@@ -172,6 +178,9 @@ export const ActionsToolbar = ({
           />
         )
       })}
+      {additional?.map((additional) => {
+        return additional.component
+      })}
     </div>
   )
 }
@@ -183,7 +192,15 @@ export const UndoRedoToolbar = ({ actions }: { actions: IToolbarActions }) => {
   ]
   return <ActionsToolbar options={options} />
 }
-export const FormatPageToolbar = ({ actions }: { actions: IToolbarActions }) => {
+export const FormatPageToolbar = ({
+  actions,
+  onResetMarkdown,
+  onResetEditorData,
+}: {
+  actions: IToolbarActions
+  onResetMarkdown?: () => void
+  onResetEditorData?: () => void
+}) => {
   const options: ToolbarOption[] = [
     {
       type: 'action',
@@ -204,7 +221,26 @@ export const FormatPageToolbar = ({ actions }: { actions: IToolbarActions }) => 
       onClick: actions.openFind,
     },
   ]
-  return <ActionsToolbar options={options} />
+  return (
+    <>
+      <ActionsToolbar
+        options={options}
+        additional={[
+          {
+            key: 'reset-markdown',
+            component: onResetEditorData ? (
+              <MarkdownToolbarItem
+                icon={RefreshCcw}
+                key='reset-editor-data'
+                tooltip='Resetar Markdown'
+                onClick={onResetEditorData}
+              />
+            ) : null,
+          },
+        ]}
+      />
+    </>
+  )
 }
 
 export const FormatDocumentToolbar = ({ actions }: { actions: IToolbarActions }) => {

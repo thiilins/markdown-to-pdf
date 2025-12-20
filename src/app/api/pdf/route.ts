@@ -64,6 +64,40 @@ export async function POST(request: NextRequest) {
           codeTextColor: config.theme.codeTextColor,
         },
       }),
+      // Só envia headerFooter se pelo menos um estiver habilitado
+      ...(config.headerFooter &&
+        (config.headerFooter.header.enabled || config.headerFooter.footer.enabled) && {
+          headerFooter: {
+            header: {
+              enabled: config.headerFooter.header.enabled,
+              left: config.headerFooter.header.left,
+              center: config.headerFooter.header.center,
+              right: config.headerFooter.header.right,
+              height: config.headerFooter.header.height,
+              border: config.headerFooter.header.border,
+              ...(config.headerFooter.header.logo && {
+                logo: config.headerFooter.header.logo,
+              }),
+              ...(config.headerFooter.header.fullImage && {
+                fullImage: config.headerFooter.header.fullImage,
+              }),
+            },
+            footer: {
+              enabled: config.headerFooter.footer.enabled,
+              left: config.headerFooter.footer.left,
+              center: config.headerFooter.footer.center,
+              right: config.headerFooter.footer.right,
+              height: config.headerFooter.footer.height,
+              border: config.headerFooter.footer.border,
+              ...(config.headerFooter.footer.logo && {
+                logo: config.headerFooter.footer.logo,
+              }),
+              ...(config.headerFooter.footer.fullImage && {
+                fullImage: config.headerFooter.footer.fullImage,
+              }),
+            },
+          },
+        }),
     }
 
     const abortController = new AbortController()

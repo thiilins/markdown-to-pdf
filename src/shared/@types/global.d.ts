@@ -1,19 +1,44 @@
 type PageSize = 'a4' | 'a5' | 'letter' | 'legal' | 'a3' | 'custom'
 type Unit = 'mm' | 'cm' | 'px'
+type PositionDirection = 'left' | 'center' | 'right'
+type Position = 'left' | 'right' | 'top' | 'bottom'
 type Orientation = 'portrait' | 'landscape'
 type AuthStatus = 'authenticated' | 'unauthenticated' | 'loading'
+interface PageMargin {
+  top: string
+  bottom: string
+  left: string
+  right: string
+}
 interface PageConfig {
   size: PageSize
   width: string
   height: string
   orientation: Orientation
   padding: string
-  margin: {
-    top: string
-    right: string
-    bottom: string
-    left: string
+  margin: PageMargin
+}
+interface HeaderFooterSlotItemConfig {
+  enabled: boolean
+  title?: string
+  author?: string
+  left?: string
+  center?: string
+  right?: string
+  logo?: {
+    url: string
+    position: PositionDirection
+    size: { width: string; height: string }
   }
+  fullImage?: string // base64 - imagem completa do header/footer (timbrado)
+  height?: string
+  border?: boolean
+  padding?: Record<Position, string>
+  fontSize?: number // Tamanho da fonte em pixels
+}
+interface HeaderFooterConfig {
+  header: HeaderFooterSlotItemConfig
+  footer: HeaderFooterSlotItemConfig
 }
 
 interface TypographyConfig {
@@ -41,6 +66,7 @@ interface AppConfig {
   typography: TypographyConfig
   editor: EditorConfig
   theme?: ThemeConfig
+  headerFooter?: HeaderFooterConfig
 }
 
 interface ThemeConfig {
@@ -108,3 +134,5 @@ interface EnableTools {
   zoom: boolean
   printExport: boolean
 }
+
+type IChildren = React.ReactNode | React.ReactNode[]

@@ -72,7 +72,6 @@ const GistListItem = ({ gist, isSelected = false, onClick }: GistItemProps) => {
   const firstFile = gist.files[0]
   const fileCount = gist.files.length
   const createdDate = moment(gist.created_at)
-  console.log(gist)
   const timeAgo = formatDistanceToNow(createdDate.toISOString(), {
     addSuffix: true,
     locale: ptBR,

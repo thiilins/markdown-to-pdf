@@ -23,25 +23,25 @@ export function SettingsDialog() {
         value: 'page',
         label: 'Página',
         icon: Layout,
-        content: <PageSizeConfigComponent />,
+        content: <PageSizeConfigComponent key='page' />,
       },
       {
         value: 'typography',
         label: 'Tipografia',
         icon: Type,
-        content: <TypographyConfigComponent />,
+        content: <TypographyConfigComponent key='typography' />,
       },
       {
         value: 'theme',
         label: 'Tema',
         icon: Palette,
-        content: <ThemeConfigComponent />,
+        content: <ThemeConfigComponent key='theme' />,
       },
       {
         value: 'editor',
         label: 'Editor',
         icon: Code,
-        content: <EditorConfigComponent />,
+        content: <EditorConfigComponent key='editor' />,
       },
     ]
     const config = CONFIG_MODAL_SHOW_OPTIONS?.[pathname]

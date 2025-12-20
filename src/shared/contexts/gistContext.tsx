@@ -23,10 +23,12 @@ import { toast } from 'sonner'
 import { handleDownloadPDFApi } from '../constants/download-pdf-api'
 import { mountGistSelectedfile } from '../utils'
 import { useConfig } from './configContext'
-
+type GistsAccessType = 'allGists' | 'myGists'
 interface GistContextType {
   gists: Gist[]
-  setGists: (gists: Gist[]) => void
+  setGists: (gists: Gist[]) => Promise<void>
+  setGistType: (type: GistsAccessType) => void
+  gistType: GistsAccessType
   onGetGists: ({ username, type }: FetchGistsParams) => Promise<void>
   error: string | null | undefined
   onSearch: ({ username, type }: FetchGistsParams) => Promise<void>
@@ -68,7 +70,14 @@ const GistContext = createContext<GistContextType | undefined>(undefined)
 export function GistProvider({ children }: { children: ReactNode }) {
   const { config } = useConfig()
   const contentRef = useRef<HTMLDivElement>(null)
-  const [gists, setGists] = usePersistedStateInDB<Gist[]>('gists', [])
+  const [gistAccessType, setGistAccessType] = useState<GistsAccessType>('allGists')
+  const [gistsData, setGistsData] = usePersistedStateInDB<{
+    allGists: Gist[]
+    myGists: Gist[]
+  }>('gists', {
+    allGists: [],
+    myGists: [],
+  })
   const [isLoading, setIsLoading] = useState(false)
   // GIST LIST
   const [error, setError] = useState<string | null | undefined>(null)
@@ -94,6 +103,17 @@ export function GistProvider({ children }: { children: ReactNode }) {
     setSearchType({ ...searchType, description: checked })
   }
 
+  const gists = useMemo(() => {
+    const gists = gistsData[gistAccessType]
+    return gists ?? []
+  }, [gistsData, gistAccessType])
+
+  const setGists = useCallback(
+    async (gists: Gist[]) => {
+      await setGistsData({ ...gistsData, [gistAccessType]: gists })
+    },
+    [setGistsData, gistsData, gistAccessType],
+  )
   const allTags = useMemo(() => {
     const tags = new Set<string>()
     gists.forEach((gist) => {
@@ -247,18 +267,19 @@ export function GistProvider({ children }: { children: ReactNode }) {
     }
   }, [config, selectedFile?.filename])
 
-  const handleResetData = useCallback(() => {
-    setGists([])
+  const handleResetData = useCallback(async () => {
+    await setGistsData({ allGists: [], myGists: [] })
     setError(null)
     setSelectedGist(null)
     setFileContents({})
     setSelectedFile(null)
     setLoadingFiles({})
-  }, [setGists])
+  }, [setGistsData])
 
-  const handleSetTypes = useCallback((type: 'myGists' | 'allGists', value: string) => {
+  const handleSetTypes = useCallback(async (type: 'myGists' | 'allGists', value: string) => {
     setTypes((prev) => ({ ...prev, [type]: value }))
   }, [])
+
   return (
     <GistContext.Provider
       value={{
@@ -270,10 +291,8 @@ export function GistProvider({ children }: { children: ReactNode }) {
         onSearch,
         onSelectGist,
         selectedGistId,
-        // typeMyGists,
-        // setTypeMyGists,
-        // typeAllGists,
-        // setTypeAllGists,\
+        gistType: gistAccessType,
+        setGistType: setGistAccessType,
         types,
         handleSetTypes,
         searchUser,

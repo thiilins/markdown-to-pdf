@@ -1,8 +1,9 @@
 'use client'
 
 import { handleSignInWithGitHub } from '@/app/actions/auth'
+import { ConditionalRender } from '@/components/custom-ui/conditional-render'
 import { SwitchComponent } from '@/components/custom-ui/switch'
-import { TabsComponent } from '@/components/custom-ui/tabs'
+import { CustomTabsComponent } from '@/components/custom-ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
@@ -12,10 +13,19 @@ import { BookHeart, FileSearch, LogIn, Search, SearchCode } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useCallback, useMemo } from 'react'
 export const GistSearch = () => {
-  const { onSearch, searchUser, setSearchUser, isLoading, onGetGists, types, handleSetTypes } =
-    useGist()
+  const {
+    onSearch,
+    searchUser,
+    setSearchUser,
+    isLoading,
+    onGetGists,
+    types,
+    handleSetTypes,
+    handleResetData,
+    gistType,
+    setGistType,
+  } = useGist()
   const { status } = useSession()
-
   const handleGetMyGists = useCallback(async () => {
     await onGetGists({ type: types?.myGists })
   }, [types?.myGists, onGetGists])
@@ -40,7 +50,7 @@ export const GistSearch = () => {
       {
         condition: true,
         config: {
-          value: 'general',
+          value: 'allGists',
           icon: FileSearch,
           label: 'Buscar Gists',
           className: {
@@ -66,7 +76,7 @@ export const GistSearch = () => {
                   <Search className='h-4 w-4' />
                 </Button>
               </div>
-              {searchUser && (
+              <ConditionalRender condition={!!searchUser}>
                 <div className='flex items-center space-x-2'>
                   <Checkbox
                     id='include-all'
@@ -82,7 +92,7 @@ export const GistSearch = () => {
                     Buscar todos os gists (pode demorar mais)
                   </Label>
                 </div>
-              )}
+              </ConditionalRender>
             </div>
           ),
         },
@@ -90,7 +100,7 @@ export const GistSearch = () => {
       {
         condition: status === 'unauthenticated',
         config: {
-          value: 'unauthenticated',
+          value: 'myGists',
           label: 'Acessar Meus Gists',
           icon: LogIn,
           content: (
@@ -153,7 +163,12 @@ export const GistSearch = () => {
   ])
   return (
     <div className='bg-primary/20 space-y-4 border-b p-4'>
-      <TabsComponent tabs={tabs} defaultValue='general' />
+      <CustomTabsComponent
+        tabs={tabs}
+        defaultValue='general'
+        activeTab={gistType}
+        setActiveTab={(value) => setGistType(value as any)}
+      />
     </div>
   )
 }

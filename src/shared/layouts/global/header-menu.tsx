@@ -25,7 +25,15 @@ const GlobalHeaderButton = ({ label, href, icon, submenu }: ModuleItem) => {
     if (!href) return null
     const isActive = urlIsActive(pathname, href)
     return (
-      <Button asChild variant='outline' size='sm' className={cn('gap-2', isActive && 'bg-accent')}>
+      <Button
+        asChild
+        variant='outline'
+        size='sm'
+        className={cn(
+          'bg-primary/10 hover:bg-primary text-primary cursor-pointer gap-2 transition-colors hover:text-white',
+          isActive &&
+            'bg-primary hover:bg-primary/90 text-white transition-colors hover:text-white',
+        )}>
         <Link href={href} className='flex items-center gap-2'>
           {Icon && <Icon className='h-4 w-4 shrink-0' />}
           <span>{label}</span>

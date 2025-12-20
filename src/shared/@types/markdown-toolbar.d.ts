@@ -30,4 +30,6 @@ export type ToolbarOption = {
 }
 export interface MarkdownToolbarProps {
   editor: any // Monaco editor instance
+  onResetEditorData?: () => void
+  onResetMarkdown?: () => void
 }

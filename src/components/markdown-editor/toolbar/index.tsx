@@ -12,9 +12,12 @@ import {
 } from './actions'
 import { useToolbarActions } from './useToolbarActions'
 
-export function MarkdownToolbar({ editor }: MarkdownToolbarProps) {
+export function MarkdownToolbar({
+  editor,
+  onResetEditorData,
+  onResetMarkdown,
+}: MarkdownToolbarProps) {
   const { actions } = useToolbarActions(editor)
-  // const [moreOpen, setMoreOpen] = useState(false)
   return (
     <TooltipProvider>
       <div className='border-border bg-muted/30 flex flex-wrap gap-1 border-b p-2'>
@@ -24,7 +27,11 @@ export function MarkdownToolbar({ editor }: MarkdownToolbarProps) {
           <FormatDocumentToolbar actions={actions} />
           <BlocksToolbar actions={actions} />
           <UndoRedoToolbar actions={actions} />
-          <FormatPageToolbar actions={actions} />
+          <FormatPageToolbar
+            actions={actions}
+            onResetEditorData={onResetEditorData}
+            onResetMarkdown={onResetMarkdown}
+          />
         </div>
       </div>
     </TooltipProvider>

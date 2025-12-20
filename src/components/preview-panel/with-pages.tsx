@@ -3,15 +3,17 @@
 import { cn } from '@/lib/utils'
 import { THEME_PRESETS } from '@/shared/constants'
 import { useConfig } from '@/shared/contexts/configContext'
+import { useHeaderFooter } from '@/shared/contexts/headerFooterContext'
 import { useMDToPdf } from '@/shared/contexts/mdToPdfContext'
 import { useZoom } from '@/shared/contexts/zoomContext'
 import { PreviewStyle } from '@/shared/styles/preview-styles'
-import { Loader2, Ruler, Layout, AlignLeft } from 'lucide-react'
+import { AlignLeft, Layout, Loader2, Ruler } from 'lucide-react'
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
-import ReactMarkdown, { Components } from 'react-markdown'
+import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
+import { Button } from '../ui/button'
 
 const mmToPx = (mm: number) => mm * 3.7795275591
 
@@ -24,6 +26,7 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
     const { contentRef, markdown } = useMDToPdf()
     const { config } = useConfig()
     const { zoom } = useZoom()
+    const { headerFooter, parseVariables } = useHeaderFooter()
 
     // Estado para alternar o modo de visualização
     const [viewMode, setViewMode] = useState<'realistic' | 'direct'>('realistic')
@@ -87,8 +90,24 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
         const marginTop = getMarginPx(pageConfig.margin.top)
         const marginBottom = getMarginPx(pageConfig.margin.bottom)
 
+        // Calcula altura do header e footer se estiverem habilitados
+        // Se for imagem completa, usa altura configurada ou padrão maior
+        const headerHeight = headerFooter.header.enabled
+          ? headerFooter.header.fullImage
+            ? getMarginPx(headerFooter.header.height || '30mm') // Imagem completa precisa de mais espaço
+            : getMarginPx(headerFooter.header.height || '15mm')
+          : 0
+        const footerHeight = headerFooter.footer.enabled
+          ? headerFooter.footer.fullImage
+            ? getMarginPx(headerFooter.footer.height || '30mm') // Imagem completa precisa de mais espaço
+            : getMarginPx(headerFooter.footer.height || '15mm')
+          : 0
+
         // Espaço real disponível para conteúdo dentro da folha
-        const contentHeightLimit = Math.floor(dimensions.heightPx - marginTop - marginBottom)
+        // Considera margens + altura do header + altura do footer
+        const contentHeightLimit = Math.floor(
+          dimensions.heightPx - marginTop - marginBottom - headerHeight - footerHeight,
+        )
 
         const newPages: string[] = []
         let currentPageAccumulator: string[] = []
@@ -154,7 +173,19 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
       }, 400)
 
       return () => clearTimeout(timer)
-    }, [markdown, dimensions, pageConfig.margin, typographyConfig, theme])
+    }, [
+      markdown,
+      dimensions,
+      pageConfig.margin,
+      typographyConfig,
+      theme,
+      headerFooter.header.enabled,
+      headerFooter.header.height,
+      headerFooter.footer.enabled,
+      headerFooter.footer.height,
+      headerFooter.header.fullImage,
+      headerFooter.footer.fullImage,
+    ])
 
     const commonPageStyle = useMemo(
       () => ({
@@ -170,6 +201,174 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
       }),
       [dimensions, pageConfig.margin, theme],
     )
+
+    // Função para renderizar header/footer
+    const renderHeaderFooter = (
+      slot: typeof headerFooter.header,
+      position: 'top' | 'bottom',
+      pageNumber: number,
+      totalPages: number,
+    ) => {
+      if (!slot.enabled) return null
+
+      const borderStyle = slot.border
+        ? position === 'top'
+          ? { borderBottom: `1px solid ${theme.borderColor || '#e5e7eb'}` }
+          : { borderTop: `1px solid ${theme.borderColor || '#e5e7eb'}` }
+        : {}
+
+      const height = slot.height || '15mm'
+
+      // Se tiver imagem completa (timbrado), renderiza ela ocupando 100% da largura e altura configurada
+      if (slot.fullImage) {
+        return (
+          <div
+            style={{
+              width: '100%',
+              height: '100%',
+              overflow: 'hidden',
+            }}>
+            <img
+              src={slot.fullImage}
+              alt={position === 'top' ? 'Cabeçalho timbrado' : 'Rodapé timbrado'}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: position === 'top' ? 'top' : 'bottom',
+              }}
+            />
+          </div>
+        )
+      }
+
+      // Verifica se é modo avançado (HTML) ou simples (campos separados)
+      const isAdvancedMode = slot.left && !slot.center && !slot.right && slot.left.includes('<')
+
+      const padding = slot.padding || { top: '5mm', right: '5mm', bottom: '5mm', left: '5mm' }
+      const fontSize = slot.fontSize || 11
+
+      if (isAdvancedMode) {
+        // Modo avançado: renderiza HTML completo
+        return (
+          <div
+            style={{
+              width: '100%',
+              height: '100%',
+              paddingTop: padding.top,
+              paddingRight: padding.right,
+              paddingBottom: padding.bottom,
+              paddingLeft: padding.left,
+              fontSize: `${fontSize}px`,
+              color: theme.textColor,
+              opacity: 0.8,
+              ...borderStyle,
+            }}
+            dangerouslySetInnerHTML={{
+              __html: parseVariables(
+                slot.left || '',
+                pageNumber,
+                totalPages,
+                slot.logo?.url,
+                slot.logo?.size,
+              ),
+            }}
+          />
+        )
+      }
+
+      // Modo simples: campos separados
+      return (
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingTop: padding.top,
+            paddingRight: padding.right,
+            paddingBottom: padding.bottom,
+            paddingLeft: padding.left,
+            fontSize: `${fontSize}px`,
+            color: theme.textColor,
+            opacity: 0.8,
+            ...borderStyle,
+          }}>
+          <div
+            style={{
+              flex: 1,
+              textAlign: 'left',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}>
+            {slot.logo && slot.logo.position === 'left' && (
+              <img
+                src={slot.logo.url}
+                alt='Logo'
+                style={{
+                  width: slot.logo.size.width,
+                  height: slot.logo.size.height,
+                  objectFit: 'contain',
+                }}
+              />
+            )}
+            {slot.left
+              ? parseVariables(slot.left, pageNumber, totalPages, slot.logo?.url, slot.logo?.size)
+              : ''}
+          </div>
+          <div
+            style={{
+              flex: 1,
+              textAlign: 'center',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+            }}>
+            {slot.logo && slot.logo.position === 'center' && (
+              <img
+                src={slot.logo.url}
+                alt='Logo'
+                style={{
+                  width: slot.logo.size.width,
+                  height: slot.logo.size.height,
+                  objectFit: 'contain',
+                }}
+              />
+            )}
+            {slot.center
+              ? parseVariables(slot.center, pageNumber, totalPages, slot.logo?.url, slot.logo?.size)
+              : ''}
+          </div>
+          <div
+            style={{
+              flex: 1,
+              textAlign: 'right',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              gap: '8px',
+            }}>
+            {slot.right
+              ? parseVariables(slot.right, pageNumber, totalPages, slot.logo?.url, slot.logo?.size)
+              : ''}
+            {slot.logo && slot.logo.position === 'right' && (
+              <img
+                src={slot.logo.url}
+                alt='Logo'
+                style={{
+                  width: slot.logo.size.width,
+                  height: slot.logo.size.height,
+                  objectFit: 'contain',
+                }}
+              />
+            )}
+          </div>
+        </div>
+      )
+    }
 
     return (
       <div className={cn('relative h-full w-full bg-slate-200/90 dark:bg-slate-950', className)}>
@@ -215,17 +414,18 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
           ref={ref}
           className='absolute inset-0 flex flex-col items-center overflow-auto scroll-smooth px-8 py-12 print:p-0'>
           {/* Seletor de Modo (Floating) */}
-          <div className='fixed top-24 right-10 z-50 flex flex-col gap-2 rounded-xl border border-white/10 bg-black/40 p-1 backdrop-blur-md print:hidden'>
-            <button
+          <div className='fixed top-30 right-10 z-50 flex flex-col gap-2 rounded-xl border border-white/10 bg-black/40 p-1 backdrop-blur-md print:hidden'>
+            <Button
+              variant='ghost'
               onClick={() => setViewMode('realistic')}
               className={cn(
-                'rounded-lg p-2 transition-all',
+                'cursor-pointer rounded-lg p-2 transition-all',
                 viewMode === 'realistic'
                   ? 'bg-blue-500 text-white'
                   : 'text-white/60 hover:text-white',
               )}>
               <Layout className='h-4 w-4' />
-            </button>
+            </Button>
             <button
               onClick={() => setViewMode('direct')}
               className={cn(
@@ -242,37 +442,96 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
               className={cn(
                 viewMode === 'direct' ? 'flex flex-col gap-0 shadow-2xl' : 'flex flex-col',
               )}>
-              {pagesHTML.map((html, idx) => (
-                <div
-                  key={idx}
-                  className={cn(
-                    'print-page transition-all duration-500',
-                    viewMode === 'realistic'
-                      ? 'mb-12 shadow-2xl'
-                      : 'mb-0 border-b border-dashed border-white/10',
-                  )}
-                  style={{
-                    ...commonPageStyle,
-                    minHeight: viewMode === 'realistic' ? dimensions.heightPx : 'auto',
-                    height: viewMode === 'realistic' ? dimensions.heightPx : 'auto',
-                  }}>
-                  <div
-                    className='prose h-full w-full max-w-none wrap-break-word'
-                    style={typographyStyles}>
-                    <PreviewStyle theme={theme} />
-                    <div dangerouslySetInnerHTML={{ __html: html }} />
-                  </div>
+              {pagesHTML.map((html, idx) => {
+                const pageNumber = idx + 1
+                const totalPages = pagesHTML.length
+                const headerHeight = headerFooter.header.enabled
+                  ? headerFooter.header.height || '15mm'
+                  : '0'
+                const footerHeight = headerFooter.footer.enabled
+                  ? headerFooter.footer.height || '15mm'
+                  : '0'
 
-                  {/* Numeração e Margens Visuais apenas no modo Realista */}
-                  {viewMode === 'realistic' && (
+                const pageStyle = {
+                  ...commonPageStyle,
+                  paddingTop: headerFooter.header.enabled
+                    ? `calc(${pageConfig.margin.top} + ${headerHeight})`
+                    : pageConfig.margin.top,
+                  paddingBottom: headerFooter.footer.enabled
+                    ? `calc(${pageConfig.margin.bottom} + ${footerHeight})`
+                    : pageConfig.margin.bottom,
+                }
+
+                return (
+                  <div
+                    key={idx}
+                    className={cn(
+                      'print-page transition-all duration-500',
+                      viewMode === 'realistic'
+                        ? 'mb-12 shadow-2xl'
+                        : 'mb-0 border-b border-dashed border-white/10',
+                    )}
+                    style={{
+                      ...pageStyle,
+                      minHeight: viewMode === 'realistic' ? dimensions.heightPx : 'auto',
+                      height: viewMode === 'realistic' ? dimensions.heightPx : 'auto',
+                    }}>
+                    {headerFooter.header.enabled && (
+                      <div
+                        className='print-header'
+                        style={{
+                          position: 'absolute',
+                          top: 0, // Começa no topo da página
+                          left: 0,
+                          right: 0,
+                          height: `calc(${pageConfig.margin.top} + ${headerFooter.header.height || '15mm'})`, // Margem + altura do header
+                          paddingTop: pageConfig.margin.top, // Padding interno = margem superior
+                          paddingLeft: pageConfig.margin.left, // Respeita margem esquerda da página
+                          paddingRight: pageConfig.margin.right, // Respeita margem direita da página
+                        }}>
+                        {renderHeaderFooter(headerFooter.header, 'top', pageNumber, totalPages)}
+                      </div>
+                    )}
+
+                    {/* Conteúdo */}
                     <div
-                      className='pointer-events-none absolute right-8 bottom-6 font-mono text-[10px] tracking-widest uppercase opacity-20 print:hidden'
-                      style={{ color: theme.textColor }}>
-                      {idx + 1} / {pagesHTML.length}
+                      className='prose h-full w-full max-w-none wrap-break-word'
+                      style={typographyStyles}>
+                      <PreviewStyle theme={theme} />
+                      <div dangerouslySetInnerHTML={{ __html: html }} />
                     </div>
-                  )}
-                </div>
-              ))}
+
+                    {/* Footer - posicionado antes da margem inferior */}
+                    {headerFooter.footer.enabled && (
+                      <div
+                        className='print-footer'
+                        style={{
+                          position: 'absolute',
+                          bottom: 0, // Começa no fundo da página
+                          left: 0,
+                          right: 0,
+                          height: `calc(${pageConfig.margin.bottom} + ${headerFooter.footer.height || '15mm'})`, // Margem + altura do footer
+                          paddingBottom: pageConfig.margin.bottom, // Padding interno = margem inferior
+                          paddingLeft: pageConfig.margin.left, // Respeita margem esquerda da página
+                          paddingRight: pageConfig.margin.right, // Respeita margem direita da página
+                          display: 'flex',
+                          alignItems: 'flex-end', // Alinha o conteúdo do footer no final
+                        }}>
+                        {renderHeaderFooter(headerFooter.footer, 'bottom', pageNumber, totalPages)}
+                      </div>
+                    )}
+
+                    {/* Numeração e Margens Visuais apenas no modo Realista */}
+                    {viewMode === 'realistic' && (
+                      <div
+                        className='pointer-events-none absolute right-8 bottom-6 font-mono text-[10px] tracking-widest uppercase opacity-20 print:hidden'
+                        style={{ color: theme.textColor }}>
+                        {pageNumber} / {totalPages}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
         </div>

@@ -8,7 +8,7 @@ import { IconButtonTooltip } from '../custom-ui/tooltip'
 export const PrintExportButtons = () => {
   const { onPrint, onDownloadPDF, isLoading, disabledDownload } = useMDToPdf()
   return (
-    <div className='flex flex-1 items-center gap-2 rounded-md bg-blue-500/20 p-1'>
+    <div className='flex items-center gap-1 rounded-md'>
       <Button
         variant='outline'
         onClick={onPrint}

@@ -56,6 +56,10 @@ interface TabsComponentProps {
   }
   defaultValue?: string
 }
+interface CustomTabsComponentProps extends TabsComponentProps {
+  activeTab: string
+  setActiveTab: (value: string) => void
+}
 
 interface TabsConditionalItel {
   condition: boolean

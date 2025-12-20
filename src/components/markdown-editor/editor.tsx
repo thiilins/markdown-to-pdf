@@ -19,6 +19,8 @@ interface MarkdownEditorProps {
   onScroll?: (percentage: number) => void // Nova prop para Scroll Sync
   config: EditorConfig
   className?: string
+  onResetEditorData?: () => void
+  onResetMarkdown?: () => void
 }
 
 export function MarkdownEditor({
@@ -27,6 +29,8 @@ export function MarkdownEditor({
   onScroll,
   config,
   className,
+  onResetEditorData,
+  onResetMarkdown,
 }: MarkdownEditorProps) {
   const editorRef = useRef<any | null>(null)
   const [theme, setTheme] = useState<'light' | 'vs-dark'>('light')
@@ -101,7 +105,13 @@ export function MarkdownEditor({
   return (
     <div
       className={cn('bg-background flex h-full w-full flex-col overflow-hidden border', className)}>
-      {editorReady && <MarkdownToolbar editor={editorRef.current} />}
+      {editorReady && (
+        <MarkdownToolbar
+          editor={editorRef.current}
+          onResetEditorData={onResetEditorData}
+          onResetMarkdown={onResetMarkdown}
+        />
+      )}
 
       <div className='flex-1 overflow-hidden'>
         <Editor

@@ -42,7 +42,7 @@ interface IconButtonTooltipProps extends Omit<
   'children' | 'content' | 'className'
 > {
   icon: React.ElementType
-  onClick: () => void
+  onClick?: () => void
   side?: 'top' | 'right' | 'bottom' | 'left'
   align?: 'start' | 'center' | 'end'
   variant?: ButtonProps['variant']

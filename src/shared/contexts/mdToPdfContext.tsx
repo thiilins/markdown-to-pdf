@@ -30,6 +30,7 @@ interface MDToPdfContextType {
   setMarkdown: (newState: string) => Promise<void>
   contentRef: RefObject<HTMLDivElement | null>
   disabledDownload: boolean
+  onResetMarkdown: () => void
 }
 
 const MDToPdfContext = createContext<MDToPdfContextType | undefined>(undefined)
@@ -66,6 +67,9 @@ export function MDToPdfProvider({ children }: { children: ReactNode }) {
       setDisabledDownload(true)
     }
   }, [])
+  const onResetMarkdown = useCallback(() => {
+    setMarkdown(DEFAULT_MARKDOWN)
+  }, [setMarkdown])
 
   // Memoização do value do Context para evitar re-renders desnecessários
   const contextValue = useMemo<MDToPdfContextType>(
@@ -74,12 +78,21 @@ export function MDToPdfProvider({ children }: { children: ReactNode }) {
       setIsLoading,
       onPrint: handlePrint,
       disabledDownload,
+      onResetMarkdown,
       onDownloadPDF: handleDownloadPDF,
       markdown,
       setMarkdown,
       contentRef,
     }),
-    [isLoading, disabledDownload, handleDownloadPDF, handlePrint, markdown, setMarkdown],
+    [
+      isLoading,
+      disabledDownload,
+      handleDownloadPDF,
+      handlePrint,
+      markdown,
+      setMarkdown,
+      onResetMarkdown,
+    ],
   )
 
   return <MDToPdfContext.Provider value={contextValue}>{children}</MDToPdfContext.Provider>
