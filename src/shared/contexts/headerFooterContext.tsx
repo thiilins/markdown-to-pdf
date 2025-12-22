@@ -57,7 +57,7 @@ export function HeaderFooterProvider({ children }: { children: ReactNode }) {
   const { config, updateConfig } = useConfig()
   const [logosStore, setLogosStore] = usePersistedStateInDB<LogoStorage>('header-footer-logos', {})
   const [logosTemp, setLogosTemp] = useState<LogoStorage>(logosStore)
-  const [modalOpen, setModalOpen] = useState(true)
+  const [modalOpen, setModalOpen] = useState(false)
 
   const [headerFooterTemp, setHeaderFooterTemp] = useState<HeaderFooterConfig>(
     config.headerFooter || DEFAULT_HEADER_FOOTER,
