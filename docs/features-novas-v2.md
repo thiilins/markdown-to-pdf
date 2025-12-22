@@ -1,249 +1,124 @@
-# 🚀 Master Roadmap: Editor Markdown SaaS (Enterprise Ready)
+# **🚀 Master Roadmap: Markdown to PDF Pro (Versão Expandida & SaaS Ready)**
 
-Este documento especifica a evolução da plataforma de um simples editor de texto para uma suíte
-completa de automação de documentos (Document Automation SaaS), atendendo desde desenvolvedores
-individuais até grandes corporações.
+Este documento detalha a evolução técnica e estratégica da plataforma, consolidando análises de
+performance, UX avançada e arquitetura de negócios.
 
----
+## **1\. Fundação Técnica e Performance (Estabilidade Enterprise)**
 
-## 1. Experiência de Edição (Core & Usabilidade)
+_O objetivo é garantir que a aplicação não "engasgue" com documentos de centenas de páginas._
 
-_O alicerce da retenção. Se a edição não for fluida, o usuário não fica._
+### **A. Pipeline de Renderização com React 19**
 
-### A. Scroll Sync (Sincronização de Rolagem)
+- **Priorização com useTransition:** Em documentos massivos, a atualização do preview causa lag no
+  editor. Marcaremos a atualização do preview como "baixa prioridade".
+  - **Resultado:** O Monaco Editor permanece a 60fps, enquanto o preview é processado em background.
+- **Isolamento via Shadow DOM ou Iframe:**
+  - **Problema:** O CSS do Tailwind 4 da aplicação conflita com os estilos que o usuário quer no
+    PDF.
+  - **Solução:** Encapsular o preview num Shadow DOM. Isso isola completamente os estilos,
+    permitindo que o usuário use qualquer CSS customizado sem "quebrar" a interface da aplicação.
 
-A marca registrada de editores profissionais. O preview deve acompanhar a leitura do código.
+### **B. Resiliência de Assets**
 
-- **Desafio Técnico:** O editor (Monaco) e o Preview (HTML) têm alturas de conteúdo diferentes.
-- **Solução:** Calcular a porcentagem de scroll (`scrollTop / scrollHeight`) de um container e
-  aplicar ao outro.
-- **Dica:** Usar `useRef` para acessar ambos os DOM nodes no `view.tsx`.
+- **Conversão Base64 no Cliente:** Antes de disparar a Server Action para o Puppeteer, um script
+  varre o HTML e converte todas as \<img\> para Data URIs.
+  - **Porquê:** Evita erros de timeout na API de PDF quando o servidor não consegue aceder a imagens
+    externas lentas.
+- **Virtualização do Preview:** Implementar _windowing_ para renderizar apenas as páginas visíveis.
+  Carregar 100 páginas no DOM simultaneamente destrói a performance do browser.
 
-### B. Mobile UX: Sistema de Abas
+## **2\. Experiência de Edição (UX de Elite)**
 
-Em telas pequenas, o `ResizablePanel` (split view) é inutilizável.
+_Recursos que transformam a percepção do produto de "utilitário" para "ferramenta de trabalho"._
 
-- **Solução:** Detectar mobile (`useIsMobile`).
-- **Implementação:** Substituir a visão lado a lado por **Tabs (Abas)** que alternam estados de
-  visibilidade ("Escrever" vs "Visualizar").
+### **A. Scroll Sync (Sincronização de Precisão)**
 
-### C. Persistência Local (Local History)
+- **A Solução:** Calcular a percentagem de scroll do Monaco (scrollTop / scrollHeight) e aplicar
+  proporcionalmente ao container de preview.
+- **Desafio:** Lidar com elementos de alturas diferentes (uma linha de código pode gerar 3 linhas de
+  preview).
 
-Prevenção de perda de dados. "Nunca perca uma linha sequer".
+### **B. Mobile UX: Sistema de Abas**
 
-- **Implementação:** Hook `useDocuments` conectado ao `localStorage` ou `IndexedDB`.
-- **Estrutura:** Array `{ id, title, content, updatedAt }`.
-- **UI:** Drawer lateral "Meus Documentos" para troca rápida de contexto.
+- **Adaptação:** Em dispositivos móveis, os ResizablePanels são removidos.
+- **Implementação:** Usar um sistema de abas fixas no fundo: **\[Escrever\] | \[Visualizar\]**.
+  Garante que 50% dos utilizadores (mobile) consigam usar a ferramenta.
 
-### D. Barra de Status (Status Bar)
+### **C. Command Palette (Ctrl \+ K)**
 
-Feedback visual e polimento de UI.
+- Implementação via cmdk para acesso rápido a:
+  - Inserção de tabelas, snippets de código e quebras de página.
+  - Troca de temas e configurações de página (A4, Letter).
+  - Busca de documentos salvos no IndexedDB.
 
-- **Métricas:** Palavras, caracteres, tempo de leitura.
-- **Estado:** Indicadores de "Salvando...", "Salvo", "Offline".
-- **Local:** Rodapé fixo do editor.
+## **3\. Automação e Inteligência de Documentos**
 
-### E. Drag & Drop de Imagens
+_Foco no mercado técnico e acadêmico._
 
-Fim da fricção de upload manual.
+### **A. Smart Variables (YAML Frontmatter)**
 
-- **Fluxo:** Arrastar arquivo do desktop -> Editor.
-- **Processamento:** Interceptar evento `drop` do Monaco -> Converter para Base64 (imediato) ou
-  Upload S3 (background) -> Inserir sintaxe `![alt](url)` no cursor.
+- **O que é:** Permitir metadados no topo do arquivo. \--- titulo: Relatório Técnico autor:
+  Engenharia data: 2024-03-20 \---
 
----
+- **Funcionalidade:** O sistema faz um _string replace_ automático dessas variáveis no corpo do
+  texto e nos Cabeçalhos/Rodapés.
 
-## 2. Modo "Construtor" (Low-Code Entry)
+### **B. Diagramas e Matemática**
 
-_Focado em baixar a barreira de entrada para usuários não técnicos._
+- **Mermaid.js:** Integração para renderizar fluxogramas e gráficos. No PDF, o SVG deve ser
+  convertido em PNG de alta resolução para evitar distorções.
+- **LaTeX (KaTeX):** Suporte total a fórmulas matemáticas, essencial para o nicho académico e
+  científico.
 
-### A. Sistema de Templates
+### **C. Navegação Nativa (PDF Bookmarks)**
 
-Resolve o problema da "folha em branco".
+- **Diferencial:** Converter os H1, H2 e H3 em marcadores nativos do PDF. Isso permite que o
+  utilizador navegue pelo documento através da barra lateral do leitor de PDF (Adobe, Chrome).
 
-- **Funcionalidade:** Galeria de iniciais (Contratos, Currículos, RFPs).
-- **Tech:** `src/data/templates.ts` com metadados e conteúdo pré-definido.
-- **UI:** Modal com cards visuais ao criar novo documento.
+## **4\. Estratégia SaaS e Expansão de Negócio**
 
-### B. Sidebar de Blocos (Drag-and-Drop)
+_Como transformar o editor numa fonte de receita recorrente._
 
-Montagem visual de documentos complexos.
+### **A. Arquitetura de Projetos (Cloud Sync)**
 
-- **Conceito:** Aba "Componentes" na sidebar. Arrastar "Tabela de Preços" injeta o Markdown da
-  tabela.
-- **Categorias:** Marketing (Hero, FAQ), Jurídico (Assinatura, Cláusulas), Dev (API Blocks).
-- **Lib:** `dnd-kit` para React.
+- **Persistência:** Migrar do IndexedDB puro para um modelo híbrido com backend
+  (PostgreSQL/Supabase).
+- **Sistema de Pastas:** Organização hierárquica de documentos, permitindo múltiplos projetos por
+  utilizador.
+- **PWA (Modo Offline):** O utilizador deve poder escrever no avião; a sincronização ocorre quando
+  volta a ter rede.
 
-### C. Preview Interativo (Híbrido)
+### **B. Módulos de Especialidade (Templates)**
 
-Edição direta no visual (estilo Notion).
+- **Resume Builder:** Interface simplificada para criação de currículos com exportação ATS-friendly.
+- **Web-to-Markdown (Premium):** Um extractor que limpa o lixo visual de qualquer URL (blogs,
+  documentações) e gera um Markdown limpo pronto para virar PDF.
+- **Relatórios Dinâmicos:** Templates que aceitam injeção de dados externos (JSON) para gerar
+  relatórios automatizados.
 
-- **Conceito:** Permitir edições de texto simples (typos, frases) direto no painel da direita.
-- **Tech:** Avaliar `ProseMirror` ou `Tiptap` para sincronização bidirecional futura.
+### **C. Modelo de Receita (Tiering)**
 
----
-
-## 3. "Documentos Inteligentes" (SaaS Features)
-
-_Onde o produto deixa de ser um editor e vira uma plataforma de automação._
-
-### A. Variáveis Dinâmicas (Smart Contracts)
-
-- **Uso:** `Contrato para {{cliente}} no valor de {{valor}}`.
-- **Lógica:** Regex detecta chaves `{{...}}` -> Gera formulário lateral -> User preenche -> Replace
-  no render final.
-- **Valor:** Geração de documentos em massa.
-
-### B. Importação e Exportação (.md)
-
-Liberdade de dados (Data Portability).
-
-- **Funcionalidade:** Upload de arquivo local e Download do source code.
-- **Tech:** API `FileReader` e manipulação de `Blob` no cliente.
-
-### C. Inteligência Artificial (AI Magic Writer)
-
-- **Features:** "Formalizar texto", "Resumir", "Expandir tópicos".
-- **Tech:** Vercel AI SDK ou OpenAI API direta.
-
----
-
-## 4. Motor de PDF Profissional (Backend)
-
-_Necessário para funcionalidades Enterprise que o navegador não suporta._
-
-### A. Cabeçalho e Rodapé Dinâmicos
-
-- **Requisito:** Numeração ("Página 1 de 10") e Logos repetidos.
-- **Solução:** **Puppeteer (Headless Chrome)** no backend. Uso de CSS `@page` para controle de
-  impressão nativo.
-
-### B. Sumário Automático (TOC)
-
-- **Funcionalidade:** Página de índice com links e números de página corretos.
-- **Processo:** Renderizar PDF -> Analisar quebras de página -> Injetar página de TOC no início.
-
-### C. Capa Personalizada (Cover Page)
-
-- **Conceito:** Builder visual isolado para a capa (full bleed image, títulos centralizados).
-- **Merge:** O PDF da capa é gerado e concatenado ao PDF do conteúdo.
-
-### D. Segurança e Metadados
-
-- **Features:** Senha no PDF, Metadados (Autor, Keywords para SEO/Arquivamento), Marcas d'água.
-
----
-
-## 5. Developer Experience (DX)
-
-_Qualidade de código para escalar com segurança._
-
-### A. Centralização de Tipos
-
-- Refatorar interfaces dispersas para `src/types/domain.d.ts`.
-
-### B. Abstração do Monaco
-
-- Encapsular configurações complexas em `useMonacoConfig`. Preparar para temas.
-
-### C. Error Boundaries
-
-- Envolver o `PreviewPanel` em Error Boundary para evitar "Tela Branca da Morte" se o usuário
-  digitar HTML inválido.
-
----
-
-## 6. Colaboração & "Multiplayer"
-
-_O fator Google Docs._
-
-### A. Edição em Tempo Real
-
-- **Tech Stack:** **Y.js** (CRDTs) + WebSockets (Hocuspocus ou Socket.io).
-- **MVP:** "Locking" (Bloqueio de edição - apenas um edita por vez) antes do real-time total.
-
-### B. Comentários e Anotações
-
-- Metadados atrelados a blocos de texto ou linhas para revisão assíncrona.
-
----
-
-## 7. Ecossistema Visual (Riqueza de Conteúdo)
-
-_Indo além do texto puro._
-
-### A. Diagramas como Código (Mermaid.js)
-
-- **Funcionalidade:** Renderizar blocos ` ```mermaid ` como fluxogramas e gráficos de Gantt.
-  Essencial para docs técnicos e de gestão.
-
-### B. Gráficos Dinâmicos (Chart.js)
-
-- **Funcionalidade:** Gerar gráficos de barras/pizza a partir de CSV/JSON inline no documento.
-
----
-
-## 8. Branding e Customização (White Label B2B)
-
-_Para vender para empresas que exigem identidade visual._
-
-### A. Temas CSS Customizáveis
-
-- **Funcionalidade:** Cliente define Cores (Hex), Fontes (Google Fonts) e Espaçamentos.
-- **Tech:** Variáveis CSS (`--primary-color`) injetadas no container do Preview e no Puppeteer.
-
-### B. Snippets Globais
-
-- **Conceito:** Text Expander. Digitar `/footer_padrao` expande para um bloco de texto jurídico
-  complexo definido nas configurações da empresa.
-
----
-
-## 9. Fluxo de Trabalho
-
-_Produtividade para Power Users._
-
-### A. Command Palette (`Cmd + K`)
-
-- **Lib:** `cmdk` (React).
-- **Ações:** Navegação rápida, exportar, mudar tema, inserir snippet, invocar AI. Sensação de
-  ferramenta "Pro".
-
-### B. Versionamento (Time Travel)
-
-- Snapshot automático a cada sessão. Diff visual para restaurar versões antigas.
-
----
-
-## 10. Acessibilidade (Compliance)
-
-_Requisito para Governo e Grandes Corporações._
-
-### A. PDF Tagging (PDF/UA)
-
-- Garantir que o HTML gerado para o Puppeteer tenha estrutura semântica (ARIA roles, heading levels
-  corretos) para compatibilidade com leitores de tela.
-
----
-
-## 11. Resumo Estratégico de Priorização (Execution Plan)
-
-Como **Product Manager Técnico**, esta é a ordem lógica de desenvolvimento para maximizar valor
-percebido, estabilidade e capacidade de venda:
-
-1.  **Mobile UX (Tabs):** _Fundação._ Garante que o app não quebre em 50% dos dispositivos.
-2.  **Scroll Sync:** _Wow Factor._ Diferencia imediatamente de um `textarea` comum.
-3.  **Templates:** _Onboarding._ Resolve a paralisia inicial do usuário.
-4.  **Command Palette:** _Power User._ Implementação rápida (`cmdk`) que eleva a percepção de
-    qualidade profissional.
-5.  **Variáveis Dinâmicas (Smart Docs):** _SaaS Value._ Funcionalidade de alto valor comercial e
-    baixa complexidade técnica (string replace).
-6.  **Branding/Temas CSS:** _B2B Sales._ Permite que os primeiros clientes empresariais usem a
-    ferramenta "com a cara deles".
-7.  **Sidebar de Blocos (Drag & Drop):** _UX._ Melhora a criação de layouts complexos.
-8.  **Diagramas (Mermaid):** _Feature._ Baixo esforço (lib pronta) e alto impacto visual.
-9.  **Backend Puppeteer:** _Infraestrutura._ Necessário para Cabeçalhos/Rodapés profissionais. É o
-    divisor de águas entre "Brinquedo" e "Enterprise".
-10. **Colaboração Real-time:** _Complexidade._ Deixar para a fase 2.0 ("Team Plan"), pois exige
-    arquitetura de websocket robusta.
-11. **AI Writer:** _Marketing._ A cereja do bolo para vender produtividade.
+- **Freemium:** Exportação local básica.
+- **Pro ($):** Geração via Server Action (alta fidelidade), templates profissionais, Mermaid.js, IA
+  e armazenamento em nuvem.
+- **Enterprise ($$$):** API para geração de PDFs em massa, Custom Branding (sem logo da app) e
+  fontes corporativas exclusivas.
+
+## **📈 Execution Plan (Cronograma de Prioridades)**
+
+1. **Fase 1: Estabilização (Quick Wins)**
+   - Implementar useTransition e Scroll Sync.
+   - Adicionar o sistema de abas para Mobile.
+   - Suporte a Mermaid.js e KaTeX.
+2. **Fase 2: Valor Agregado (Professional Growth)**
+   - YAML Frontmatter e Variáveis Dinâmicas.
+   - Editor de Cabeçalho/Rodapé profissional.
+   - Bookmarks nativos no PDF.
+3. **Fase 3: SaaS & Cloud (Infraestrutura)**
+   - Implementação de autenticação e banco de dados na nuvem.
+   - Sistema de pastas e gerenciamento de projetos.
+   - Modo offline (PWA).
+4. **Fase 4: Ecossistema (Expansion)**
+   - Assistente de Escrita com IA.
+   - API pública para terceiros.
+   - Marketplace de Templates.
