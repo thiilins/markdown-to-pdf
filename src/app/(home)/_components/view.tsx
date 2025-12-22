@@ -1,12 +1,13 @@
 'use client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { Modules } from '@/shared/constants/modules'
+import { Modules_Front } from '@/shared/constants/modules'
 import Link from 'next/link'
 
 export const HomeViewComponent = () => {
-  const hasModules = Modules.some((category) => category.submenu && category.submenu.length > 0)
-
+  const hasModules = Modules_Front.some(
+    (category) => category.submenu && category.submenu.length > 0,
+  )
   return (
     <div className='from-background via-background to-muted/20 flex min-h-screen flex-col items-center justify-center bg-linear-to-br p-4 md:p-8'>
       <div className='w-full max-w-6xl space-y-12'>
@@ -26,7 +27,7 @@ export const HomeViewComponent = () => {
         {/* Categorias e Módulos */}
         {hasModules ? (
           <div className='space-y-10'>
-            {Modules.map((category) => {
+            {Modules_Front.map((category) => {
               if (!category.submenu || category.submenu.length === 0) return null
 
               const CategoryIcon = category.icon

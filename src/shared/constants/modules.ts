@@ -20,7 +20,7 @@ export const Modules: ModuleItem[] = [
     description: 'Extraia conteúdo de sites e blogs para Markdown',
   },
 ]
-const Modules_old: ModuleItem[] = [
+export const Modules_Front: ModuleItem[] = [
   {
     label: 'Tools',
     icon: ToolCase,
