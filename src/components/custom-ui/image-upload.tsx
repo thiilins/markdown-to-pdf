@@ -16,7 +16,7 @@ interface FullImageUploadProps {
 
 interface LogoUploadProps {
   value?: string // base64
-  onChange: (base64: string | null) => Promise<void>
+  onChange: (base64: string | null) => Promise<void> | void
   label?: string
   maxSizeMB?: number
 }

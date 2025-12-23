@@ -5,6 +5,7 @@ import { useConfig } from '@/shared/contexts/configContext'
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 import { DEFAULT_HEADER_FOOTER, DEFAULT_HEADER_FOOTER_SLOT_ITEM } from '../constants/header-footer'
 import { parseHeaderFooterText } from '../utils/parse-header-footer'
+import { validateCleanHtml } from '../utils/strip-html'
 import { useMDToPdf } from './mdToPdfContext'
 
 interface LogoStorage {
@@ -44,14 +45,6 @@ interface HeaderFooterContextType {
 
 const HeaderFooterContext = createContext<HeaderFooterContextType | undefined>(undefined)
 
-/**
- * Variáveis disponíveis para uso em header/footer
- */
-
-/**
- * Parse de variáveis dinâmicas no texto do header/footer
- */
-
 export function HeaderFooterProvider({ children }: { children: ReactNode }) {
   const { onResetMarkdown } = useMDToPdf()
   const { config, updateConfig } = useConfig()
@@ -68,6 +61,7 @@ export function HeaderFooterProvider({ children }: { children: ReactNode }) {
   )
 
   const handleOpenModal = useCallback(() => {
+    console.log('config.headerFooter', config.headerFooter)
     setHeaderFooterTemp(config.headerFooter || DEFAULT_HEADER_FOOTER)
     setModalOpen(true)
   }, [config.headerFooter])
@@ -76,7 +70,7 @@ export function HeaderFooterProvider({ children }: { children: ReactNode }) {
     (save?: boolean) => {
       if (save) {
         updateConfig({
-          headerFooter: headerFooterTemp,
+          headerFooter: validateCleanHtml(headerFooterTemp),
         })
         setLogosStore(logosTemp)
       }
@@ -99,6 +93,7 @@ export function HeaderFooterProvider({ children }: { children: ReactNode }) {
     },
     [],
   )
+  // stripParagraphs
 
   const updateHeaderFooter = useCallback(
     (updates: Partial<HeaderFooterConfig>) => {

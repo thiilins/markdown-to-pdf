@@ -1,18 +1,46 @@
-import { JSDOM } from 'jsdom'
-
-/**
- * Remove tags HTML e retorna apenas o texto
- * Funciona tanto no servidor (Node.js) quanto no cliente (browser)
- */
 export const stripHTML = (html: string): string => {
   if (typeof window !== 'undefined') {
-    // Cliente (browser)
-    const div = document.createElement('div')
-    div.innerHTML = html
-    return div.textContent || div.innerText || ''
+    try {
+      const parser = new DOMParser()
+      const doc = parser.parseFromString(html, 'text/html')
+      return doc.body.textContent || ''
+    } catch (e) {
+      return html.replace(/<[^>]*>?/gm, '')
+    }
   } else {
-    // Servidor (Node.js)
-    const dom = new JSDOM(html)
-    return dom.window.document.body.textContent || dom.window.document.body.innerText || ''
+    return html
+      .replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gim, '') // Remove scripts
+      .replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gim, '') // Remove estilos
+      .replace(/<[^>]*>?/gm, '') // Remove tags
+      .replace(/&nbsp;/g, ' ') // Converte entidades básicas
+      .trim()
+  }
+}
+
+export const hasHTMLTags = (html: string) => {
+  const regexTags = /<[^>]+>/gi
+  const tagsEncontradas = html.match(regexTags) || []
+  const temTags = tagsEncontradas.length > 0
+
+  return {
+    contemHTML: temTags,
+    tags: tagsEncontradas,
+    quantidade: tagsEncontradas.length,
+  }
+}
+
+export const stripParagraphs = (html: string): string => {
+  return html.replace(/<p\b[^>]*>/gi, '').replace(/<\/p>/gi, '')
+}
+export const validateCleanHtml = (html: HeaderFooterConfig): HeaderFooterConfig => {
+  const header = html.header.left || ''
+  const footer = html.footer.left || ''
+  const resultHeader = stripParagraphs(header)
+  const resultFooter = stripParagraphs(footer)
+  const cleanerHeader = String(resultHeader).trim().length > 0 ? resultHeader : ''
+  const cleanerFooter = String(resultFooter).trim().length > 0 ? resultFooter : ''
+  return {
+    header: { ...html.header, left: cleanerHeader },
+    footer: { ...html.footer, left: cleanerFooter },
   }
 }

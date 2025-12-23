@@ -71,7 +71,6 @@ export function MDToPdfProvider({ children }: { children: ReactNode }) {
     setMarkdown(DEFAULT_MARKDOWN)
   }, [setMarkdown])
 
-  // Memoização do value do Context para evitar re-renders desnecessários
   const contextValue = useMemo<MDToPdfContextType>(
     () => ({
       isLoading,

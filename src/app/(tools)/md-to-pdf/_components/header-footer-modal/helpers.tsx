@@ -27,6 +27,8 @@ import {
   POSITION_OPTIONS,
   SIMPLE_FIELDS,
 } from '@/shared/constants/header-footer'
+import { useHeaderFooter } from '@/shared/contexts/headerFooterContext'
+import { stripParagraphs, hasHTMLTags } from '@/shared/utils/strip-html'
 import {
   FileText,
   Images,
@@ -40,7 +42,7 @@ import {
   TextCursorInput,
   Type,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { MdRebaseEdit } from 'react-icons/md'
 import { RxColumnSpacing } from 'react-icons/rx'
 
@@ -80,13 +82,27 @@ const SlotSimpleConfig = ({ slot, onUpdate }: SlotSimpleConfigProps) => {
   )
 }
 const SlotAdvancedConfig = ({
-  slot,
-  onUpdate,
   slotType,
-  hasFullImage,
+  onUpdate,
   contentType,
   setContentType,
-}: SlotAdvancedConfigProps) => {
+  hasFullImage,
+}: {
+  slotType: 'footer' | 'header'
+  onUpdate: (updates: Partial<HeaderFooterSlotItemConfig>) => void
+  contentType: 'editor' | 'fullImage'
+  setContentType: (contentType: 'editor' | 'fullImage') => void
+  hasFullImage: boolean
+}) => {
+  const { headerFooterTemp } = useHeaderFooter()
+  const slot = useMemo(() => headerFooterTemp[slotType], [headerFooterTemp, slotType])
+
+  const handleOnEditorUpdate = useCallback(
+    (html: string) => {
+      onUpdate({ left: html, center: '', right: '' })
+    },
+    [onUpdate],
+  )
   return (
     <VisualEditorProvider
       editorConfig={{
@@ -95,7 +111,7 @@ const SlotAdvancedConfig = ({
       placeholders={HEADER_FOOTER_VARIABLES_LIST_OPTIONS}
       config={{ preset: 'minimal', bubbleMenu: true }}
       initialValue={slot.left || ''}
-      updateEditorValue={(html) => onUpdate({ left: html, center: '', right: '' })}>
+      updateEditorValue={(html) => handleOnEditorUpdate(html)}>
       <div className='space-y-4'>
         <div className='flex h-10 items-center justify-between gap-1 rounded-md p-1'>
           <div className='bg-primary/50 grid h-10 grid-cols-2 items-center gap-1 rounded-md p-1'>
@@ -158,18 +174,41 @@ const SlotAdvancedConfig = ({
   )
 }
 
-export const SlotConfigForm = ({
-  slot,
-  slotType,
-  onUpdate,
-  logoValue,
-  onLogoChange,
-  onResetSlot,
-}: SlotConfigFormProps) => {
+export const SlotConfigForm = ({ slotType }: { slotType: 'header' | 'footer' }) => {
+  const { headerFooterTemp, handleEditTemp, setTempLogo, resetSlot } = useHeaderFooter()
+  const slot = useMemo(() => headerFooterTemp[slotType], [headerFooterTemp, slotType])
   const [contentType, setContentType] = useState<'editor' | 'fullImage'>(() =>
     slot.fullImage ? 'fullImage' : 'editor',
   )
-  const [mode, setMode] = useState<'simple' | 'advanced'>('advanced')
+  const disableSimpleMode = useMemo(() => {
+    const result = hasHTMLTags(slot?.left || '')
+    console.log('result', result)
+    return result?.contemHTML
+  }, [slot.left])
+  const [mode, setMode] = useState<'simple' | 'advanced'>(disableSimpleMode ? 'advanced' : 'simple')
+
+  const handleOnUpdate = useCallback(
+    (updates: Partial<HeaderFooterSlotItemConfig>) => {
+      handleEditTemp(updates, slotType)
+    },
+    [handleEditTemp, slotType],
+  )
+
+  const handleOnLogoChange = useCallback(
+    (base64: string | null) => {
+      setTempLogo(base64, slotType)
+    },
+    [setTempLogo, slotType],
+  )
+  const handleOnEnabledChange = useCallback(
+    (checked: boolean) => {
+      handleOnUpdate({ enabled: checked })
+      if (!checked) {
+        resetSlot(slotType)
+      }
+    },
+    [handleOnUpdate, resetSlot, slotType],
+  )
   return (
     <div className='grid grid-cols-1 gap-6 lg:grid-cols-12'>
       <div className='space-y-4 lg:col-span-4'>
@@ -181,7 +220,7 @@ export const SlotConfigForm = ({
             <Switch
               id={`${slotType}-enabled`}
               checked={slot.enabled}
-              onCheckedChange={(checked) => onUpdate({ enabled: checked })}
+              onCheckedChange={handleOnEnabledChange}
             />
           </div>
         </SectionBox>
@@ -199,7 +238,7 @@ export const SlotConfigForm = ({
                     type='number'
                     placeholder='15mm'
                     value={slot.height?.replace('mm', '') || '15'}
-                    onChange={(e) => onUpdate({ height: e.target.value + 'mm' })}
+                    onChange={(e) => handleOnUpdate({ height: e.target.value + 'mm' })}
                   />
                 </div>
                 <div className='space-y-1.5'>
@@ -210,7 +249,7 @@ export const SlotConfigForm = ({
                     className='h-8 border-none bg-white text-xs shadow-none outline-none hover:border-none focus:border-none focus:outline-none'
                     type='number'
                     value={slot.fontSize || 11}
-                    onChange={(e) => onUpdate({ fontSize: parseInt(e.target.value) })}
+                    onChange={(e) => handleOnUpdate({ fontSize: parseInt(e.target.value) })}
                   />
                 </div>
               </div>
@@ -228,8 +267,8 @@ export const SlotConfigForm = ({
                         className='h-8 border-none bg-white text-xs shadow-none outline-none hover:border-none focus:border-none focus:outline-none'
                         value={slot.padding?.[p.value]?.replace('mm', '') || '5'}
                         onChange={(e) =>
-                          onUpdate({
-                            padding: { ...slot.padding, [p.value]: e.target.value + 'mm' },
+                          handleOnUpdate({
+                            padding: { ...slot.padding, [p.value]: e.target.value + 'mm' } as any,
                           })
                         }
                       />
@@ -246,15 +285,15 @@ export const SlotConfigForm = ({
                   <Label className='text-primary flex w-full gap-2 text-center text-[10px] font-bold'>
                     <Images className='h-4 w-4' /> Logo
                   </Label>
-                  <LogoUpload value={logoValue} onChange={onLogoChange} />
-                  <ConditionalRender condition={!!logoValue}>
+                  <LogoUpload value={slot?.logo?.url} onChange={(v) => handleOnLogoChange(v)} />
+                  <ConditionalRender condition={!!slot?.logo?.url}>
                     <div className='mt-4 grid gap-3 border-t pt-4'>
                       <div className='space-y-1.5'>
                         <Label className='text-[10px]'>Posição (Se sem tag)</Label>
                         <Select
                           value={slot.logo?.position || 'left'}
                           onValueChange={(v: PositionDirection) =>
-                            onUpdate({ logo: { ...slot?.logo, position: v } })
+                            handleOnUpdate({ logo: { ...slot?.logo, position: v } })
                           }>
                           <SelectTrigger className='h-8 text-xs'>
                             <SelectValue />
@@ -271,7 +310,9 @@ export const SlotConfigForm = ({
                         <Select
                           value={slot.logo?.size?.width || '50px'}
                           onValueChange={(v) =>
-                            onUpdate({ logo: { ...slot.logo, size: { width: v, height: v } } })
+                            handleOnUpdate({
+                              logo: { ...slot.logo, size: { width: v, height: v } },
+                            })
                           }>
                           <SelectTrigger className='h-8 text-xs'>
                             <SelectValue />
@@ -294,7 +335,7 @@ export const SlotConfigForm = ({
                 </Label>
                 <Switch
                   checked={slot.border ?? true}
-                  onCheckedChange={(checked) => onUpdate({ border: checked })}
+                  onCheckedChange={(checked) => handleOnUpdate({ border: checked })}
                 />
               </div>
             </div>
@@ -323,7 +364,7 @@ export const SlotConfigForm = ({
                     value={mode}
                     onValueChange={(v) => v && setMode(v as any)}
                     className='justify-start gap-2'>
-                    <TooltipComponent content={'Simples'}>
+                    <TooltipComponent content={'Simples'} disabled={disableSimpleMode}>
                       <ToggleGroupItem value='simple' className='h-8 border px-4 text-xs'>
                         <TextCursorInput className='h-4 w-4' />
                       </ToggleGroupItem>
@@ -342,15 +383,16 @@ export const SlotConfigForm = ({
                 <SlotAdvancedConfig
                   contentType={contentType}
                   setContentType={setContentType}
-                  slot={slot}
-                  onUpdate={onUpdate}
+                  onUpdate={(updates) => handleOnUpdate(updates)}
                   slotType={slotType}
                   hasFullImage={!!slot.fullImage}
                 />
               </TabsContent>
-              <TabsContent value='simple'>
-                <SlotSimpleConfig slot={slot} onUpdate={onUpdate} />
-              </TabsContent>
+              {!disableSimpleMode && (
+                <TabsContent value='simple'>
+                  <SlotSimpleConfig slot={slot} onUpdate={handleOnUpdate} />
+                </TabsContent>
+              )}
             </Tabs>
           </SectionBox>
         </ConditionalRender>

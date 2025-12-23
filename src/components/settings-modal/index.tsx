@@ -1,11 +1,12 @@
 'use client'
 
-import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
+import { Sheet, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useConfig } from '@/shared/contexts/configContext'
 import { CircleX, Code, Layout, Palette, RotateCcw, Type } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { useMemo } from 'react'
+import { SheetContentComponent } from '../custom-ui/sheet-component'
 import { IconButtonTooltip } from '../custom-ui/tooltip'
 import { CONFIG_MODAL_SHOW_OPTIONS } from './constants'
 import { EditorConfigComponent } from './editor'
@@ -16,7 +17,6 @@ import { TypographyConfigComponent } from './typography'
 export function SettingsDialog() {
   const pathname = usePathname()
   const { resetConfig, setIsConfigOpen, isConfigOpen } = useConfig()
-
   const configTabs = useMemo(() => {
     const tabsOptions: SettingCardModalProps[] = [
       {
@@ -53,7 +53,8 @@ export function SettingsDialog() {
   }, [pathname])
   return (
     <Sheet open={isConfigOpen} onOpenChange={setIsConfigOpen} defaultOpen>
-      <SheetContent
+      <SheetContentComponent
+        disabledCloseButton
         side='right'
         className='min-h-full w-full max-w-[500px] overflow-y-auto px-4 pb-6 sm:max-w-[500px]'>
         <div className='flex items-center justify-between gap-4 p-3'>
@@ -70,8 +71,12 @@ export function SettingsDialog() {
               content='Resetar configurações'
             />
             <IconButtonTooltip
-              variant='destructive'
+              variant='outline'
               icon={CircleX}
+              className={{
+                button:
+                  'bg-primary hover:bg-primary/80 text-primary-foreground hover:text-primary-foreground',
+              }}
               onClick={() => setIsConfigOpen(false)}
               content='Fechar'
             />
@@ -91,7 +96,7 @@ export function SettingsDialog() {
           </TabsList>
           {configTabs.tabs.map((tab) => tab?.content)}
         </Tabs>
-      </SheetContent>
+      </SheetContentComponent>
     </Sheet>
   )
 }

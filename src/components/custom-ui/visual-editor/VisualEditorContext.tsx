@@ -31,10 +31,11 @@ export const VisualEditorProvider = ({
   config,
   updateEditorValue,
   editorConfig,
+  initialValue,
 }: VisualEditorProviderProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>('visual')
   const [fontSizeValue, setFontSizeValue] = useState('14')
-  const [editorValue, setEditorValue] = useState('')
+  const [editorValue, setEditorValue] = useState(initialValue || '')
   const handleUpdateEditorValue = useCallback(
     (value: string) => {
       setEditorValue(value)

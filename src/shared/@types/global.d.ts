@@ -26,14 +26,14 @@ interface HeaderFooterSlotItemConfig {
   center?: string
   right?: string
   logo?: {
-    url: string
-    position: PositionDirection
-    size: { width: string; height: string }
+    url?: string
+    position?: PositionDirection
+    size?: { width?: string; height?: string }
   }
   fullImage?: string // base64 - imagem completa do header/footer (timbrado)
   height?: string
   border?: boolean
-  padding?: Record<Position, string>
+  padding?: Record<Position, string> | undefined
   fontSize?: number // Tamanho da fonte em pixels
 }
 interface HeaderFooterConfig {

@@ -13,16 +13,7 @@ import { SlotConfigForm } from './helpers'
 
 export const HeaderFooterModal = () => {
   const [selectedSlot, setSelectedSlot] = useState<'header' | 'footer'>('header')
-  const {
-    setTempLogo,
-    logosTemp,
-    modalOpen,
-    handleOpenModal,
-    handleCloseModal,
-    headerFooterTemp,
-    handleEditTemp,
-    resetSlot,
-  } = useHeaderFooter()
+  const { modalOpen, handleOpenModal, handleCloseModal } = useHeaderFooter()
 
   const handleOpenChange = (open: boolean, save?: boolean) => {
     if (open) {
@@ -85,25 +76,11 @@ export const HeaderFooterModal = () => {
 
           <div className='scrollbar-thin flex-1 overflow-y-auto p-6'>
             <TabsContent value='header' className='mt-0'>
-              <SlotConfigForm
-                slot={headerFooterTemp.header}
-                slotType='header'
-                onUpdate={(updates) => handleEditTemp(updates, 'header')}
-                logoValue={logosTemp.header}
-                onLogoChange={(base64) => setTempLogo(base64, 'header')}
-                onResetSlot={() => resetSlot('header')}
-              />
+              <SlotConfigForm slotType='header' />
             </TabsContent>
 
             <TabsContent value='footer' className='mt-0'>
-              <SlotConfigForm
-                slot={headerFooterTemp.footer}
-                slotType='footer'
-                onUpdate={(updates) => handleEditTemp(updates, 'footer')}
-                logoValue={logosTemp.footer}
-                onLogoChange={(base64) => setTempLogo(base64, 'footer')}
-                onResetSlot={() => resetSlot('footer')}
-              />
+              <SlotConfigForm slotType='footer' />
             </TabsContent>
           </div>
         </Tabs>

@@ -35,8 +35,8 @@ export const DEFAULT_HEADER_FOOTER_SLOT_ITEM: HeaderFooterSlotItemConfig = {
   left: '',
   center: '',
   right: '',
-  height: '15mm',
-  border: true,
+  height: '18mm',
+  border: false,
   padding: DEFAULT_HEADER_FOOTER_SLOT_ITEM_PADDING,
   fontSize: 11,
 }
