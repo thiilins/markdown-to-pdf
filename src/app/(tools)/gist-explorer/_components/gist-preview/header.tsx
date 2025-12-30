@@ -72,7 +72,6 @@ export function GistPreviewHeader() {
     currentUserLogin &&
     selectedGist.owner?.login &&
     currentUserLogin.toLowerCase() === selectedGist.owner.login.toLowerCase()
-
   return (
     <header className='bg-background/95 sticky top-0 z-10 flex h-[60px] w-full items-center justify-between border-b px-4 backdrop-blur-sm'>
       <div className='flex flex-col overflow-hidden'>

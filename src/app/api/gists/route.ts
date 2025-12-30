@@ -2,8 +2,29 @@ import { auth } from '@/auth'
 import { NextResponse } from 'next/server'
 
 // Cache em memória (TTL de 5 minutos)
-const gistsCache = new Map<string, { data: any; timestamp: number }>()
+export const gistsCache = new Map<string, { data: any; timestamp: number }>()
 const CACHE_TTL = 5 * 60 * 1000
+
+/**
+ * Invalida o cache de gists para um usuário específico
+ * @param username - Username do GitHub ou email do usuário
+ */
+export function invalidateGistsCache(username?: string, sessionEmail?: string) {
+  if (username) {
+    // Invalida cache para busca por username
+    gistsCache.delete(`${username}-true`)
+    gistsCache.delete(`${username}-false`)
+  }
+  if (sessionEmail) {
+    // Invalida cache para "meus gists"
+    gistsCache.delete(`${sessionEmail}-true`)
+    gistsCache.delete(`${sessionEmail}-false`)
+  }
+  // Se não especificar, invalida todos (último recurso)
+  if (!username && !sessionEmail) {
+    gistsCache.clear()
+  }
+}
 
 export async function GET(request: Request) {
   const session = await auth()

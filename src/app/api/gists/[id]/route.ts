@@ -1,4 +1,5 @@
 import { auth } from '@/auth'
+import { invalidateGistsCache } from '@/app/api/gists/route'
 import { NextResponse } from 'next/server'
 
 export async function PATCH(
@@ -62,6 +63,10 @@ export async function PATCH(
         size: updatedGist.files[key].size,
       })),
     }
+
+    // Invalida o cache para o owner do gist e para o usuário logado
+    // Isso garante que a próxima busca retorne os dados atualizados
+    invalidateGistsCache(updatedGist.owner?.login, session?.user?.email)
 
     return NextResponse.json(sanitizedGist)
   } catch (error) {
