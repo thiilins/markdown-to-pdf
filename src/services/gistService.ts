@@ -89,4 +89,53 @@ export const GistService = {
       }
     }
   },
+
+  update: async (
+    gistId: string,
+    description: string,
+  ): Promise<{ success: boolean; error?: string; data?: Gist }> => {
+    const url = `/api/gists/${gistId}`
+
+    try {
+      const response = await fetchWithRetry(
+        url,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ description }),
+        },
+        {
+          maxRetries: 3,
+          initialDelay: 1000,
+          maxDelay: 10000,
+          retryableStatuses: [503, 504, 429],
+          onRetry: (attempt, error) => {
+            console.log(`Tentativa ${attempt} de atualizar gist após erro:`, error.message)
+          },
+        },
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        return {
+          success: false,
+          error: errorData.error || 'Erro ao atualizar gist',
+        }
+      }
+
+      const data = await response.json()
+
+      return {
+        success: true,
+        data,
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro ao atualizar gist',
+      }
+    }
+  },
 }

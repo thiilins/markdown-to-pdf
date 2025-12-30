@@ -62,6 +62,7 @@ interface GistContextType {
   handleDownloadPDF: () => Promise<void>
   onDownloadOriginal: () => void
   onDownloadPackageMD: () => Promise<void> | void
+  onUpdateGist: (gistId: string, description: string) => Promise<void>
   contentRef: RefObject<HTMLDivElement | null>
 }
 
@@ -280,6 +281,37 @@ export function GistProvider({ children }: { children: ReactNode }) {
     setTypes((prev) => ({ ...prev, [type]: value }))
   }, [])
 
+  const onUpdateGist = useCallback(
+    async (gistId: string, description: string) => {
+      try {
+        const response = await GistService.update(gistId, description)
+
+        if (!response.success) {
+          throw new Error(response.error || 'Erro ao atualizar gist')
+        }
+
+        const updatedGist = response.data
+
+        if (!updatedGist) {
+          throw new Error('Gist atualizado não retornado')
+        }
+
+        // Atualiza o gist na lista
+        const updatedGists = gists.map((gist) => (gist.id === gistId ? updatedGist : gist))
+        await setGists(updatedGists)
+
+        // Se o gist atualizado é o selecionado, atualiza também
+        if (selectedGist?.id === gistId) {
+          setSelectedGist(updatedGist)
+        }
+      } catch (error) {
+        console.error('Erro ao atualizar gist:', error)
+        throw error
+      }
+    },
+    [gists, setGists, selectedGist],
+  )
+
   return (
     <GistContext.Provider
       value={{
@@ -318,6 +350,7 @@ export function GistProvider({ children }: { children: ReactNode }) {
         onDownloadOriginal,
         onDownloadPackageMD,
         handleDownloadPDF,
+        onUpdateGist,
         isLoading,
         setIsLoading,
         contentRef,

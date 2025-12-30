@@ -6,10 +6,21 @@ import { ENVIROMENT } from '@/env'
 import { useGist } from '@/shared/contexts/gistContext'
 import { useMDToPdf } from '@/shared/contexts/mdToPdfContext'
 import { isMarkdownFile, wrapContentInMarkdown } from '@/shared/utils/gist-tools'
-import { Download, ExternalLink, FileEdit, FileOutput, FileText, Printer } from 'lucide-react'
+import {
+  Download,
+  ExternalLink,
+  FileEdit,
+  FileOutput,
+  FileText,
+  Pencil,
+  Printer,
+} from 'lucide-react'
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { useReactToPrint } from 'react-to-print'
 import { toast } from 'sonner'
+import { GistEditModal } from '../gist-edit-modal'
 import { FileSelector } from './file-selector'
 
 export function GistPreviewHeader() {
@@ -22,18 +33,45 @@ export function GistPreviewHeader() {
     handleDownloadPDF,
     isLoading,
     contentRef,
+    onUpdateGist,
   } = useGist()
+  const { data: session } = useSession()
   const { setMarkdown } = useMDToPdf()
   const router = useRouter()
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [currentUserLogin, setCurrentUserLogin] = useState<string | null>(null)
   const handlePrint = useReactToPrint({
     contentRef: contentRef,
     documentTitle: selectedFile?.filename || 'gist-document',
   })
 
+  // Busca o username do GitHub quando a sessão está disponível
+  useEffect(() => {
+    if (session?.accessToken && !currentUserLogin) {
+      fetch('/api/user')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.login) {
+            setCurrentUserLogin(data.login)
+          }
+        })
+        .catch(() => {
+          // Silenciosamente falha se não conseguir buscar
+        })
+    }
+  }, [session?.accessToken, currentUserLogin])
+
   // document.getElementById('gist-render-area') as HTMLDivElement
   if (!selectedGist || !selectedFile) return null
   const isMD = isMarkdownFile(selectedFile.filename)
   const currentContent = fileContents[selectedFile.filename] || ''
+
+  // Verifica se o usuário é dono do gist
+  // Compara o login do owner com o login do usuário atual
+  const isOwner =
+    currentUserLogin &&
+    selectedGist.owner?.login &&
+    currentUserLogin.toLowerCase() === selectedGist.owner.login.toLowerCase()
 
   return (
     <header className='bg-background/95 sticky top-0 z-10 flex h-[60px] w-full items-center justify-between border-b px-4 backdrop-blur-sm'>
@@ -54,6 +92,12 @@ export function GistPreviewHeader() {
           </Button>
 
           <Separator orientation='vertical' className='mx-1 h-6' />
+
+          {isOwner && (
+            <Button variant='outline' size='sm' onClick={() => setIsEditModalOpen(true)}>
+              <Pencil className='mr-1 h-4 w-4' /> Descrição
+            </Button>
+          )}
 
           <Button
             variant='secondary'
@@ -95,6 +139,12 @@ export function GistPreviewHeader() {
           </Button>
         </div>
       </div>
+      <GistEditModal
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        gist={selectedGist}
+        onSave={onUpdateGist}
+      />
     </header>
   )
 }
