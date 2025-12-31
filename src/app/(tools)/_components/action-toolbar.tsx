@@ -4,16 +4,29 @@ import { ZoomButtonsComponent } from '@/components/layout-components/zoom-button
 import { ENVIROMENT } from '@/env'
 import { useApp } from '@/shared/contexts/appContext'
 import { useMarkdown } from '@/shared/contexts/markdownContext'
-import { CloudDownload, Edit, Loader2, Plus, Printer, RefreshCcw } from 'lucide-react'
+import { CloudDownload, Edit, Loader2, Plus, Printer, RefreshCcw, Trash } from 'lucide-react'
 import { FaExpand } from 'react-icons/fa'
-import { ImportUrlButton } from './modals/import-url-modal'
 import { FilesManager } from './editor-files-manager'
 import { HeaderFooterBtns } from './header-footer-btns'
 import { CreateMetaModal } from './modals/create-meta-modal'
+import { DeleteDocumentModal } from './modals/delete-document-modal'
+import { DownloadDocumentModal } from './modals/download-document-modal'
 import { EditMetaModal } from './modals/edit-meta-modal'
+import { ImportUrlButton } from './modals/import-url-modal'
 export const ActionToolbar = ({ additional, headerFooter }: EnableTools) => {
   const { onResetZoom, onPrint, onDownloadPDF, isLoading, disabledDownload } = useApp()
-  const { onResetMarkdown, setOpenCreateMeta, setOpenEditMeta } = useMarkdown()
+  const {
+    onResetMarkdown,
+    setOpenCreateMeta,
+    setOpenEditMeta,
+    setOpenDeleteDocument,
+    setOpenDownloadDocument,
+  } = useMarkdown()
+
+  function onDownloadOriginal(): void {
+    throw new Error('Function not implemented.')
+  }
+
   return (
     <div className='bg-primary/10 flex w-full! items-center justify-center! gap-2 py-1'>
       <IconButtonTooltip
@@ -37,6 +50,16 @@ export const ActionToolbar = ({ additional, headerFooter }: EnableTools) => {
           button: 'flex h-8 w-10 cursor-pointer items-center justify-center',
         }}
       />
+      <IconButtonTooltip
+        variant='outline'
+        icon={Trash}
+        onClick={() => setOpenDeleteDocument(true)}
+        content='Deletar arquivo'
+        className={{
+          button:
+            'flex h-8 w-10 cursor-pointer items-center justify-center text-red-500 hover:text-red-500',
+        }}
+      />
       <ZoomButtonsComponent />
       <IconButtonTooltip
         key='reset-zoom'
@@ -46,6 +69,15 @@ export const ActionToolbar = ({ additional, headerFooter }: EnableTools) => {
           button: 'flex h-8 w-10 cursor-pointer items-center justify-center',
         }}
         icon={FaExpand}
+      />
+      <IconButtonTooltip
+        variant='outline'
+        icon={CloudDownload}
+        onClick={() => setOpenDownloadDocument(true)}
+        content='Download Documento'
+        className={{
+          button: 'flex h-8 w-10 cursor-pointer items-center justify-center',
+        }}
       />
       <IconButtonTooltip
         content='Imprimir'
@@ -67,7 +99,6 @@ export const ActionToolbar = ({ additional, headerFooter }: EnableTools) => {
         disabled={isLoading || disabledDownload || isLoading}
       />
       <ImportUrlButton />
-
       <IconButtonTooltip
         icon={RefreshCcw}
         key='reset-editor-data'
@@ -80,6 +111,8 @@ export const ActionToolbar = ({ additional, headerFooter }: EnableTools) => {
           return additional.component
         })}
       </div>
+      <DeleteDocumentModal />
+      <DownloadDocumentModal />
       <EditMetaModal />
       <CreateMetaModal />
     </div>

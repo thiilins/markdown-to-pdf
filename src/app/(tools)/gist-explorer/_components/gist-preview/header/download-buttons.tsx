@@ -32,7 +32,7 @@ export const DownloadGistButtons = ({
         }}
       />
       <IconButtonTooltip
-        content='Baixar Original'
+        content='Baixar Markdown'
         onClick={onDownloadPackageMD}
         icon={FaMarkdown}
         className={{

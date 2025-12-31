@@ -12,12 +12,13 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useMarkdown } from '@/shared/contexts/markdownContext'
-import { FilePlusCorner, Save } from 'lucide-react'
+import { FileEdit, PencilLine, Save } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
 export function EditMetaModal() {
   const { onUpdateMarkdown, markdown, setOpenEditMeta, openEditMeta } = useMarkdown()
   const [title, setTitle] = useState<string | undefined>(markdown?.name)
+
   const handleEdit = useCallback(() => {
     if (!title || !markdown?.id) return
     onUpdateMarkdown(undefined, title)
@@ -29,44 +30,59 @@ export function EditMetaModal() {
       setTitle(markdown?.name)
     }
   }, [openEditMeta, markdown?.name])
+
   return (
     <Dialog open={openEditMeta} onOpenChange={setOpenEditMeta}>
       <DialogContent className='gap-0 overflow-hidden border-none p-0 shadow-2xl sm:max-w-[440px]'>
-        <div className='from-primary/5 flex flex-col items-center justify-center bg-linear-to-b to-transparent pt-8 pb-4'>
-          <div className='bg-primary/10 ring-primary/5 mb-4 flex h-12 w-12 items-center justify-center rounded-full ring-8'>
-            <FilePlusCorner className='text-primary h-6 w-6' />
+        {/* Header com Gradiente de "Informação/Edição" */}
+        <div className='from-primary/10 flex flex-col items-center justify-center bg-gradient-to-b to-transparent pt-8 pb-4'>
+          <div className='bg-primary/10 ring-primary/5 mb-4 flex h-14 w-14 items-center justify-center rounded-full ring-8'>
+            <FileEdit className='text-primary h-7 w-7' />
           </div>
-          <DialogHeader className='flex w-full flex-col items-center justify-center'>
-            <DialogTitle className='text-xl font-bold tracking-tight'>Editar arquivo</DialogTitle>
-            <DialogDescription className='text-center text-xs'>
-              Edite o título do arquivo.
+          <DialogHeader className='flex w-full flex-col items-center justify-center px-6 text-center'>
+            <DialogTitle className='text-foreground text-xl font-bold tracking-tight'>
+              Renomear Arquivo
+            </DialogTitle>
+            <DialogDescription className='text-sm'>
+              Altere o título do documento para facilitar a organização.
             </DialogDescription>
           </DialogHeader>
         </div>
 
-        <div className='flex flex-col gap-2 space-y-4 px-6 py-4'>
-          <Label htmlFor='title'>Título do arquivo</Label>
-          <Input
-            id='title'
-            placeholder='Título do arquivo'
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
+        <div className='px-6 py-6'>
+          <div className='group space-y-2'>
+            <Label
+              htmlFor='title'
+              className='text-muted-foreground group-focus-within:text-primary text-sm font-semibold transition-colors'>
+              Título do arquivo
+            </Label>
+            <div className='relative'>
+              <PencilLine className='text-muted-foreground/50 absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
+              <Input
+                id='title'
+                placeholder='Ex: Novo nome do arquivo'
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className='focus-visible:ring-primary h-11 pl-10 transition-all'
+              />
+            </div>
+          </div>
         </div>
 
-        <DialogFooter className='flex w-full items-center justify-between gap-4 border-t bg-red-50 px-6 py-4'>
+        {/* Footer com contraste de botões correto */}
+        <DialogFooter className='bg-muted/30 flex w-full flex-col-reverse items-center gap-3 border-t px-6 py-4 sm:flex-row sm:justify-end'>
           <Button
             variant='ghost'
-            className='bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground w-full sm:w-auto'
+            className='hover:bg-background w-full font-medium transition-colors sm:w-auto'
             onClick={() => setOpenEditMeta(false)}>
             Cancelar
           </Button>
           <Button
-            variant='default'
-            className='bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground w-full gap-2 font-semibold transition-all active:scale-95 sm:w-auto'
-            onClick={handleEdit}>
+            className='shadow-primary/10 w-full gap-2 font-bold shadow-md transition-all active:scale-95 sm:w-auto'
+            onClick={handleEdit}
+            disabled={!title || title === markdown?.name}>
             <Save className='h-4 w-4' />
-            Salvar
+            Salvar Alterações
           </Button>
         </DialogFooter>
       </DialogContent>
