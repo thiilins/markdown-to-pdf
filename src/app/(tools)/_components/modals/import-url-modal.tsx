@@ -13,7 +13,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { ImportUrlService } from '@/services/importUrlService'
-import { useMDToPdf } from '@/shared/contexts/mdToPdfContext'
 import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -26,7 +25,7 @@ interface ImportUrlModalProps {
 type ImportMode = 'replace' | 'append'
 
 function ImportUrlModal({ open, onOpenChange }: ImportUrlModalProps) {
-  const { markdown, setMarkdown } = useMDToPdf()
+  const { markdown, onUpdateMarkdown } = useMarkdown()
   const [url, setUrl] = useState('')
   const [mode, setMode] = useState<ImportMode>('replace')
   const [isLoading, setIsLoading] = useState(false)
@@ -36,9 +35,7 @@ function ImportUrlModal({ open, onOpenChange }: ImportUrlModalProps) {
       toast.error('Por favor, insira uma URL')
       return
     }
-
     setIsLoading(true)
-
     try {
       const result = await ImportUrlService.import({ url: url.trim() })
 
@@ -49,12 +46,12 @@ function ImportUrlModal({ open, onOpenChange }: ImportUrlModalProps) {
 
       // Aplica o conteúdo conforme o modo selecionado
       if (mode === 'replace') {
-        await setMarkdown(result.content)
+        await onUpdateMarkdown(result.content)
         toast.success('Conteúdo importado com sucesso')
       } else {
         // Append: adiciona ao final do conteúdo atual
         const separator = markdown ? '\n\n---\n\n' : ''
-        await setMarkdown(markdown + separator + result.content)
+        await onUpdateMarkdown(markdown + separator + result.content)
         toast.success('Conteúdo adicionado ao documento')
       }
 
@@ -139,6 +136,7 @@ function ImportUrlModal({ open, onOpenChange }: ImportUrlModalProps) {
   )
 }
 
+import { useMarkdown } from '@/shared/contexts/markdownContext'
 import { Download } from 'lucide-react'
 import { IconButtonTooltip } from '../../../../components/custom-ui/tooltip'
 

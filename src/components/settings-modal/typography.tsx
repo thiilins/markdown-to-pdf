@@ -1,13 +1,13 @@
 'use client'
 
 import { TabsContent } from '@/components/ui/tabs'
-import { useConfig } from '@/shared/contexts/configContext'
+import { useApp } from '@/shared/contexts/appContext'
 import { Code, Heading1, Heading2, Minus, Quote, Type } from 'lucide-react'
 import { FontSelectComponent, FontSizeSliderComponent } from '../custom-ui/custom-inputs'
 import { SettingsCard } from './layout'
 
 export const TypographyConfigComponent = () => {
-  const { config, updateConfig } = useConfig()
+  const { config, updateConfig } = useApp()
   const fontColors = {
     headings:
       'bg-violet-500/10 text-violet-600 border-violet-200 dark:bg-violet-500/20 dark:text-violet-400 dark:border-violet-800',

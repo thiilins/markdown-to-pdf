@@ -33,7 +33,7 @@ export const FontSelectComponent = ({
 }) => {
   const Icon = icon ?? null
   return (
-    <div className={cn('flex flex-col gap-2 space-y-1.5', className?.container)}>
+    <div className={cn('flex flex-col gap-2 space-y-1.5', className?.container)} key={key}>
       <div className='flex items-center justify-between gap-2'>
         {label && (
           <Label

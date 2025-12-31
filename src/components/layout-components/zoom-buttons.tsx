@@ -1,12 +1,12 @@
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { useZoom } from '@/shared/contexts/zoomContext'
+import { useApp } from '@/shared/contexts/appContext'
 import { ZoomIn, ZoomOut } from 'lucide-react'
 
 export const ZoomButtonsComponent = () => {
-  const { zoom, onZoomIn, onZoomOut, onResetZoom } = useZoom()
+  const { zoom, onZoomIn, onZoomOut } = useApp()
   return (
-    <div className='flex max-w-[180px] flex-1 items-center gap-1 rounded-md bg-blue-500/20 p-1'>
+    <div className='flex max-w-[180px] flex-1 items-center gap-1 rounded-md'>
       <div className='flex w-full items-center gap-1 rounded-md bg-white'>
         <Button
           variant='ghost'

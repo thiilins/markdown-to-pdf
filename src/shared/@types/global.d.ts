@@ -131,8 +131,11 @@ interface ModuleItem {
 }
 
 interface EnableTools {
-  zoom: boolean
-  printExport: boolean
+  headerFooter?: boolean
+  additional?: {
+    key: string
+    component: React.ReactNode
+  }[]
 }
 
 type IChildren = React.ReactNode | React.ReactNode[]

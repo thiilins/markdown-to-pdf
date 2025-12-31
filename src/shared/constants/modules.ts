@@ -1,6 +1,12 @@
-import { GitBranch, Globe, RotateCw, ToolCase } from 'lucide-react'
+import { GitBranch, Globe, PencilRuler, RotateCw, ToolCase } from 'lucide-react'
 
 export const Modules: ModuleItem[] = [
+  {
+    label: 'MD Editor',
+    href: '/md-editor',
+    icon: PencilRuler,
+    description: 'Editor de Markdown',
+  },
   {
     label: 'MD to PDF',
     href: '/md-to-pdf',
@@ -25,6 +31,12 @@ export const Modules_Front: ModuleItem[] = [
     label: 'Tools',
     icon: ToolCase,
     submenu: [
+      {
+        label: 'MD Editor',
+        href: '/md-editor',
+        icon: PencilRuler,
+        description: 'Editor de Markdown',
+      },
       {
         label: 'MD to PDF',
         href: '/md-to-pdf',

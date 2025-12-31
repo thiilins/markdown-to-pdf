@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react'
 
 type Response<T> = [T, Dispatch<SetStateAction<T>>, boolean]
 
@@ -12,7 +12,6 @@ function usePersistedState<T>(
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
-    // Função para carregar os dados do localStorage
     const loadData = () => {
       const storageValue = localStorage.getItem(`${prefix}:${key}`)
       if (storageValue) {
@@ -33,6 +32,17 @@ function usePersistedState<T>(
   }, [state, loaded, isString, key, prefix])
 
   return [state, setState, loaded]
+}
+
+export const useGetPersistedState = <T>(key: string, prefix = '@MD_TOOLS_PRO'): T => {
+  const value = useMemo(() => {
+    const storageValue = localStorage.getItem(`${prefix}:${key}`)
+    if (storageValue) {
+      return JSON.parse(storageValue)
+    }
+    return null
+  }, [key, prefix])
+  return value
 }
 
 export default usePersistedState

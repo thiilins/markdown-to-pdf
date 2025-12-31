@@ -1,12 +1,12 @@
 'use client'
 
 import usePersistedStateInDB from '@/hooks/use-persisted-in-db'
-import { useConfig } from '@/shared/contexts/configContext'
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 import { DEFAULT_HEADER_FOOTER, DEFAULT_HEADER_FOOTER_SLOT_ITEM } from '../constants/header-footer'
 import { parseHeaderFooterText } from '../utils/parse-header-footer'
 import { validateCleanHtml } from '../utils/strip-html'
-import { useMDToPdf } from './mdToPdfContext'
+import { useApp } from './appContext'
+import { useMarkdown } from './markdownContext'
 
 interface LogoStorage {
   header?: string // base64
@@ -23,7 +23,7 @@ interface HeaderFooterContextType {
     pageNumber?: number,
     totalPages?: number,
     logoUrl?: string,
-    logoSize?: { width: string; height: string },
+    logoSize?: { width?: string; height?: string },
   ) => string
   logos: LogoStorage
   setTempLogo: (base64: string | null, slotType: 'header' | 'footer') => Promise<void>
@@ -46,8 +46,8 @@ interface HeaderFooterContextType {
 const HeaderFooterContext = createContext<HeaderFooterContextType | undefined>(undefined)
 
 export function HeaderFooterProvider({ children }: { children: ReactNode }) {
-  const { onResetMarkdown } = useMDToPdf()
-  const { config, updateConfig } = useConfig()
+  const { config, updateConfig } = useApp()
+  const { onResetMarkdown } = useMarkdown()
   const [logosStore, setLogosStore] = usePersistedStateInDB<LogoStorage>('header-footer-logos', {})
   const [logosTemp, setLogosTemp] = useState<LogoStorage>(logosStore)
   const [modalOpen, setModalOpen] = useState(false)
@@ -128,9 +128,9 @@ export function HeaderFooterProvider({ children }: { children: ReactNode }) {
       pageNumber?: number,
       totalPages?: number,
       logoUrl?: string,
-      logoSize?: { width: string; height: string },
+      logoSize?: { width?: string; height?: string } | undefined,
     ) => {
-      return parseHeaderFooterText(text, pageNumber, totalPages, logoUrl, logoSize)
+      return parseHeaderFooterText(text, pageNumber, totalPages, logoUrl, logoSize || undefined)
     },
     [],
   )

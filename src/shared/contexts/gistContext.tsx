@@ -22,7 +22,7 @@ import {
 import { toast } from 'sonner'
 import { handleDownloadPDFApi } from '../constants/download-pdf-api'
 import { mountGistSelectedfile } from '../utils'
-import { useConfig } from './configContext'
+import { useApp } from './appContext'
 type GistsAccessType = 'allGists' | 'myGists'
 interface GistContextType {
   gists: Gist[]
@@ -62,14 +62,17 @@ interface GistContextType {
   handleDownloadPDF: () => Promise<void>
   onDownloadOriginal: () => void
   onDownloadPackageMD: () => Promise<void> | void
-  onUpdateGist: (gistId: string, description: string) => Promise<void>
+  onUpdateGist: (gistId: string, description: string, isPublic: boolean) => Promise<void>
+  onDuplicateGist: (gist: Gist, description: string, isPublic: boolean) => Promise<void>
+  onDeleteGist: (gistId: string) => Promise<void>
+  onConvertPublicToPrivate: (gist: Gist, description: string) => Promise<void>
   contentRef: RefObject<HTMLDivElement | null>
 }
 
 const GistContext = createContext<GistContextType | undefined>(undefined)
 
 export function GistProvider({ children }: { children: ReactNode }) {
-  const { config } = useConfig()
+  const { config } = useApp()
   const contentRef = useRef<HTMLDivElement>(null)
   const [gistAccessType, setGistAccessType] = useState<GistsAccessType>('allGists')
   const [gistsData, setGistsData] = usePersistedStateInDB<{
@@ -80,7 +83,6 @@ export function GistProvider({ children }: { children: ReactNode }) {
     myGists: [],
   })
   const [isLoading, setIsLoading] = useState(false)
-  // GIST LIST
   const [error, setError] = useState<string | null | undefined>(null)
   const [types, setTypes] = useState<{ myGists: GistType; allGists: GistType }>({
     myGists: 'all',
@@ -100,9 +102,12 @@ export function GistProvider({ children }: { children: ReactNode }) {
   const [searchType, setSearchType] = useState<{ description: boolean }>({ description: true })
   const { selected: selectedTags, toggle: toggleTag } = useToogleMultiple()
   const { selected: selectedLanguages, toggle: toggleLanguage } = useToogleMultiple()
-  const OnChangeSearchType = (checked: boolean) => {
-    setSearchType({ ...searchType, description: checked })
-  }
+  const OnChangeSearchType = useCallback(
+    (checked: boolean) => {
+      setSearchType({ ...searchType, description: checked })
+    },
+    [searchType],
+  )
 
   const gists = useMemo(() => {
     const gists = gistsData[gistAccessType]
@@ -221,13 +226,6 @@ export function GistProvider({ children }: { children: ReactNode }) {
     [handleLoadFileContent, selectedGist],
   )
 
-  useEffect(() => {
-    if (!selectedGist) {
-      setFileContents({})
-      setSelectedFile(null)
-    }
-  }, [selectedGist])
-
   const fileOptions = useMemo(() => {
     const options = (selectedGist?.files ?? []).map((file) => {
       return {
@@ -282,11 +280,15 @@ export function GistProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const onUpdateGist = useCallback(
-    async (gistId: string, description: string) => {
+    async (gistId: string, description: string, isPublic: boolean) => {
       try {
-        const response = await GistService.update(gistId, description)
+        const response = await GistService.update(gistId, description, isPublic)
 
         if (!response.success) {
+          // Verifica se é erro de conversão necessária
+          if (response.error === 'CONVERSION_REQUIRED') {
+            throw new Error('CONVERSION_REQUIRED')
+          }
           throw new Error(response.error || 'Erro ao atualizar gist')
         }
 
@@ -311,6 +313,102 @@ export function GistProvider({ children }: { children: ReactNode }) {
     },
     [gists, setGists, selectedGist],
   )
+
+  const onDuplicateGist = useCallback(
+    async (gist: Gist, description: string, isPublic: boolean) => {
+      try {
+        const response = await GistService.duplicate(gist, description, isPublic)
+
+        if (!response.success) {
+          throw new Error(response.error || 'Erro ao duplicar gist')
+        }
+
+        const duplicatedGist = response.data
+
+        if (!duplicatedGist) {
+          throw new Error('Gist duplicado não retornado')
+        }
+
+        // Adiciona o novo gist na lista (se estiver na aba "Meus Gists")
+        if (gistAccessType === 'myGists') {
+          await setGists([duplicatedGist, ...gists])
+        }
+
+        // Seleciona o novo gist duplicado
+        setSelectedGist(duplicatedGist)
+        const firstFile = duplicatedGist.files[0]
+        if (firstFile) {
+          const selectedFile = mountGistSelectedfile(duplicatedGist, firstFile.filename)
+          setSelectedFile(selectedFile)
+          handleLoadFileContent(firstFile)
+        }
+      } catch (error) {
+        console.error('Erro ao duplicar gist:', error)
+        throw error
+      }
+    },
+    [gists, setGists, gistAccessType, handleLoadFileContent],
+  )
+
+  const onDeleteGist = useCallback(
+    async (gistId: string) => {
+      try {
+        const response = await GistService.delete(gistId)
+
+        if (!response.success) {
+          throw new Error(response.error || 'Erro ao deletar gist')
+        }
+
+        // Remove o gist da lista
+        const updatedGists = gists.filter((gist) => gist.id !== gistId)
+        await setGists(updatedGists)
+
+        // Se o gist deletado era o selecionado, limpa a seleção
+        if (selectedGist?.id === gistId) {
+          setSelectedGist(null)
+          setSelectedFile(null)
+        }
+      } catch (error) {
+        console.error('Erro ao deletar gist:', error)
+        throw error
+      }
+    },
+    [gists, setGists, selectedGist],
+  )
+
+  const onConvertPublicToPrivate = useCallback(
+    async (gist: Gist, description: string) => {
+      try {
+        const response = await GistService.convertPublicToPrivate(gist, description)
+        if (!response.success) {
+          throw new Error(response.error || 'Erro ao converter gist')
+        }
+        const newGist = response.data
+        if (!newGist) {
+          throw new Error('Novo gist não retornado')
+        }
+        const updatedGists = gists.filter((g) => g.id !== gist.id)
+        await setGists([newGist, ...updatedGists])
+        setSelectedGist(newGist)
+        const firstFile = newGist.files[0]
+        if (firstFile) {
+          const selectedFile = mountGistSelectedfile(newGist, firstFile.filename)
+          setSelectedFile(selectedFile)
+          handleLoadFileContent(firstFile)
+        }
+      } catch (error) {
+        console.error('Erro ao converter gist:', error)
+        throw error
+      }
+    },
+    [gists, setGists, handleLoadFileContent],
+  )
+  useEffect(() => {
+    if (!selectedGist) {
+      setFileContents({})
+      setSelectedFile(null)
+    }
+  }, [selectedGist])
 
   return (
     <GistContext.Provider
@@ -351,6 +449,9 @@ export function GistProvider({ children }: { children: ReactNode }) {
         onDownloadPackageMD,
         handleDownloadPDF,
         onUpdateGist,
+        onDuplicateGist,
+        onDeleteGist,
+        onConvertPublicToPrivate,
         isLoading,
         setIsLoading,
         contentRef,

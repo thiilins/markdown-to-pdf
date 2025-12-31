@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { MARGIN_PRESETS, PAGE_SIZES } from '@/shared/constants'
-import { useConfig } from '@/shared/contexts/configContext'
+import { useApp } from '@/shared/contexts/appContext'
 import { convertUnit, extractNumber, extractUnit } from '@/shared/utils'
 import { TabsContent } from '@radix-ui/react-tabs'
 import { useCallback, useEffect, useState } from 'react'
@@ -19,7 +19,7 @@ export const PageSizeConfigComponent = () => {
     updateOrientation,
     applyMarginPreset,
     getCurrentMargin,
-  } = useConfig()
+  } = useApp()
   const detectCurrentUnit = useCallback((): Unit => {
     const marginTop = extractUnit(config.page.margin.top)
     const padding = extractUnit(config.page.padding)
@@ -34,7 +34,6 @@ export const PageSizeConfigComponent = () => {
 
   const handleUnitChange = (newUnit: Unit) => {
     setUnit(newUnit)
-    // Converte todas as margens
     const currentTopUnit = extractUnit(config.page.margin.top)
     const topNum = extractNumber(config.page.margin.top)
     const topConverted = convertUnit(topNum, currentTopUnit, newUnit)

@@ -5,12 +5,12 @@ import { SelectComponent } from '@/components/custom-ui/select-component'
 import { Label } from '@/components/ui/label'
 import { TabsContent } from '@/components/ui/tabs'
 import { THEME_PRESETS } from '@/shared/constants'
-import { useConfig } from '@/shared/contexts/configContext'
+import { useApp } from '@/shared/contexts/appContext'
 import { Code, Paintbrush, Type } from 'lucide-react'
 import { SettingsCard } from './layout'
 
 export const ThemeConfigComponent = () => {
-  const { config, updateConfig, applyThemePreset, getCurrentTheme } = useConfig()
+  const { config, updateConfig, applyThemePreset, getCurrentTheme } = useApp()
   const currentPreset = getCurrentTheme()
 
   return (

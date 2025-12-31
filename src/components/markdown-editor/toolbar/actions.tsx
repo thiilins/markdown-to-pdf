@@ -1,33 +1,12 @@
-import { cn } from '@/lib/utils'
 import {
   AlertCircle,
   AlertTriangle,
-  Bold,
-  CheckSquare,
-  Code,
-  CodeXml,
-  FileText,
-  Image,
   Info,
-  Italic,
   Lightbulb,
-  Link,
-  List,
-  ListChecks,
   ListChevronsUpDown,
-  ListOrdered,
-  Minus,
-  Quote,
-  Redo,
-  RefreshCcw,
-  Search,
   ShieldAlert,
-  Sparkles,
-  Strikethrough,
   Table,
-  Undo,
 } from 'lucide-react'
-import type { IToolbarActions, ToolbarOption } from '../../../shared/@types/markdown-toolbar'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -58,7 +37,7 @@ export const MarkdownToolbarItem = ({
       <TooltipTrigger asChild>
         <Button
           variant='ghost'
-          className='flex h-7 w-7 flex-1 rounded bg-transparent p-1'
+          className='flex h-7 w-7 max-w-7 flex-1 rounded bg-transparent p-1'
           onClick={onClick}>
           <Icon className='h-4 w-4' />
         </Button>
@@ -103,31 +82,29 @@ export const HeadingsToolbar = ({ actions }: { actions: IToolbarActions }) => {
     },
   ]
   return (
-    <div className='flex w-10 items-center justify-around gap-2 rounded border p-1'>
-      <DropdownMenu open={open} onOpenChange={setOpen}>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant='ghost'
-            className='h-7 w-7 rounded bg-transparent p-1'
-            onClick={() => setOpen(!open)}>
-            <Heading1 className='h-4 w-4' />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align='start'
-          className='bg-background text-foreground z-50 cursor-pointer rounded px-2 py-2 shadow-sm'>
-          {headings.map((heading) => (
-            <DropdownMenuItem
-              key={heading.title}
-              onClick={heading.onClick}
-              className='hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm font-normal'>
-              <heading.icon className='mr-2 h-4 w-4' />
-              {heading.title}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant='ghost'
+          className='h-7 w-7 rounded bg-transparent p-1'
+          onClick={() => setOpen(!open)}>
+          <Heading1 className='h-4 w-4' />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align='start'
+        className='bg-background text-foreground z-50 cursor-pointer rounded px-2 py-2 shadow-sm'>
+        {headings.map((heading) => (
+          <DropdownMenuItem
+            key={heading.title}
+            onClick={heading.onClick}
+            className='hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm font-normal'>
+            <heading.icon className='mr-2 h-4 w-4' />
+            {heading.title}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 export const MoreOptionsToolbar = ({
@@ -153,124 +130,11 @@ export const MoreOptionsToolbar = ({
   )
 }
 
-export const ActionsToolbar = ({
-  options,
-  className,
-  additional,
+export const TableGenerator = ({
+  onInsert,
 }: {
-  options: ToolbarOption[]
-  className?: string
-  additional?: {
-    key: string
-    component: React.ReactNode
-  }[]
+  onInsert: (rows: number, cols: number) => void
 }) => {
-  return (
-    <div
-      className={cn('flex w-full items-center justify-around gap-2 rounded border p-1', className)}>
-      {options.map((option: ToolbarOption) => {
-        return (
-          <MarkdownToolbarItem
-            key={option.tooltip}
-            icon={option.icon}
-            tooltip={option.tooltip}
-            onClick={option.onClick}
-          />
-        )
-      })}
-      {additional?.map((additional) => {
-        return additional.component
-      })}
-    </div>
-  )
-}
-
-export const UndoRedoToolbar = ({ actions }: { actions: IToolbarActions }) => {
-  const options: ToolbarOption[] = [
-    { type: 'action', icon: Undo, tooltip: 'Desfazer (Ctrl+Z)', onClick: actions.undo },
-    { type: 'action', icon: Redo, tooltip: 'Refazer (Ctrl+Y)', onClick: actions.redo },
-  ]
-  return <ActionsToolbar options={options} />
-}
-export const FormatPageToolbar = ({
-  actions,
-  onResetMarkdown,
-  onResetEditorData,
-}: {
-  actions: IToolbarActions
-  onResetMarkdown?: () => void
-  onResetEditorData?: () => void
-}) => {
-  const options: ToolbarOption[] = [
-    {
-      type: 'action',
-      icon: FileText,
-      tooltip: 'Quebra de página',
-      onClick: actions.insertPageBreak,
-    },
-    {
-      type: 'action',
-      icon: Sparkles,
-      tooltip: 'Formatar com Prettier (Shift+Alt+F)',
-      onClick: actions.formatDocument,
-    },
-    {
-      type: 'action',
-      icon: Search,
-      tooltip: 'Buscar (Ctrl+F)',
-      onClick: actions.openFind,
-    },
-  ]
-  return (
-    <>
-      <ActionsToolbar
-        options={options}
-        additional={[
-          {
-            key: 'reset-markdown',
-            component: onResetEditorData ? (
-              <MarkdownToolbarItem
-                icon={RefreshCcw}
-                key='reset-editor-data'
-                tooltip='Resetar Markdown'
-                onClick={onResetEditorData}
-              />
-            ) : null,
-          },
-        ]}
-      />
-    </>
-  )
-}
-
-export const FormatDocumentToolbar = ({ actions }: { actions: IToolbarActions }) => {
-  const options: ToolbarOption[] = [
-    { type: 'action', icon: Bold, tooltip: 'Negrito (Ctrl+B)', onClick: actions.insertBold },
-    { type: 'action', icon: Italic, tooltip: 'Itálico (Ctrl+I)', onClick: actions.insertItalic },
-    {
-      type: 'action',
-      icon: Strikethrough,
-      tooltip: 'Riscado (Ctrl+S)',
-      onClick: actions.insertStrikethrough,
-    },
-    {
-      type: 'action',
-      icon: Code,
-      tooltip: 'Código inline',
-      onClick: actions.insertInlineCode,
-    },
-    {
-      type: 'action',
-      icon: Minus,
-      tooltip: 'Linha horizontal',
-      onClick: actions.insertHorizontalRule,
-    },
-  ]
-  return <ActionsToolbar options={options} />
-}
-
-// Componente para Gerador de Tabelas Dinâmico
-const TableGenerator = ({ onInsert }: { onInsert: (rows: number, cols: number) => void }) => {
   const [open, setOpen] = useState(false)
   const [rows, setRows] = useState<string>('3')
   const [cols, setCols] = useState<string>('3')
@@ -309,7 +173,7 @@ const TableGenerator = ({ onInsert }: { onInsert: (rows: number, cols: number) =
           <PopoverTrigger asChild>
             <Button
               variant='ghost'
-              className='flex h-7 w-7 flex-1 rounded bg-transparent p-1'
+              className='flex h-7 w-7 max-w-7 flex-1 rounded bg-transparent p-1'
               onClick={() => setOpen(!open)}>
               <Table className='h-4 w-4' />
             </Button>
@@ -364,8 +228,7 @@ const TableGenerator = ({ onInsert }: { onInsert: (rows: number, cols: number) =
   )
 }
 
-// Componente para Callouts/Admonitions
-const CalloutsMenu = ({
+export const CalloutsMenu = ({
   onInsert,
 }: {
   onInsert: (type: 'NOTE' | 'TIP' | 'IMPORTANT' | 'WARNING' | 'CAUTION') => void
@@ -412,7 +275,7 @@ const CalloutsMenu = ({
           <DropdownMenuTrigger asChild>
             <Button
               variant='ghost'
-              className='flex h-7 w-7 flex-1 rounded bg-transparent p-1'
+              className='flex h-7 w-7 max-w-7 flex-1 rounded bg-transparent p-1'
               onClick={() => setOpen(!open)}>
               <Info className='h-4 w-4' />
             </Button>
@@ -443,59 +306,5 @@ const CalloutsMenu = ({
         })}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
-}
-
-export const BlocksToolbar = ({ actions }: { actions: IToolbarActions }) => {
-  const options: ToolbarOption[] = [
-    {
-      type: 'action',
-      icon: CodeXml,
-      tooltip: 'Código block',
-      onClick: actions.insertCodeBlock,
-    },
-    {
-      type: 'action',
-      icon: CheckSquare,
-      tooltip: 'Checkbox',
-      onClick: actions.insertCheckbox,
-    },
-    {
-      type: 'action',
-      icon: List,
-      tooltip: 'Lista não ordenada',
-      onClick: actions.insertUnorderedList,
-    },
-    {
-      type: 'action',
-      icon: ListOrdered,
-      tooltip: 'Lista ordenada',
-      onClick: actions.insertOrderedList,
-    },
-    {
-      type: 'action',
-      icon: Quote,
-      tooltip: 'Citação',
-      onClick: actions.insertBlockquote,
-    },
-    { type: 'action', icon: Link, tooltip: 'Link', onClick: actions.insertLink },
-    { type: 'action', icon: Image, tooltip: 'Imagem', onClick: actions.insertImage },
-    { type: 'action', icon: ListChecks, tooltip: 'TOC', onClick: actions.generateTOC },
-  ]
-  return (
-    <div className='flex w-full items-center justify-around gap-2 rounded border p-1'>
-      {options.map((option: ToolbarOption) => {
-        return (
-          <MarkdownToolbarItem
-            key={option.tooltip}
-            icon={option.icon}
-            tooltip={option.tooltip}
-            onClick={option.onClick}
-          />
-        )
-      })}
-      <TableGenerator onInsert={actions.insertTableDynamic} />
-      <CalloutsMenu onInsert={actions.insertCallout} />
-    </div>
   )
 }

@@ -5,6 +5,8 @@ import { OnMount } from '@monaco-editor/react'
 import dynamic from 'next/dynamic'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import { useApp } from '@/shared/contexts/appContext'
+import { useMarkdown } from '@/shared/contexts/markdownContext'
 import { MarkdownStatusBar } from './status-bar'
 import { MarkdownToolbar } from './toolbar'
 
@@ -14,33 +16,23 @@ const Editor = dynamic(() => import('@monaco-editor/react'), {
 })
 
 interface MarkdownEditorProps {
-  value: string
-  onChange: (value: string | undefined) => void
   onScroll?: (percentage: number) => void // Nova prop para Scroll Sync
-  config: EditorConfig
   className?: string
-  onResetEditorData?: () => void
   onResetMarkdown?: () => void
 }
 
-export function MarkdownEditor({
-  value,
-  onChange,
-  onScroll,
-  config,
-  className,
-  onResetEditorData,
-  onResetMarkdown,
-}: MarkdownEditorProps) {
+export function MarkdownEditor({ onScroll, className, onResetMarkdown }: MarkdownEditorProps) {
+  const { markdown, onUpdateMarkdown } = useMarkdown()
+  const { config: generalConfig } = useApp()
+
+  const config = generalConfig.editor
   const editorRef = useRef<any | null>(null)
   const [theme, setTheme] = useState<'light' | 'vs-dark'>('light')
   const [editorReady, setEditorReady] = useState(false)
 
-  // Ref para controle do requestAnimationFrame (throttle do scroll sync)
   const rafIdRef = useRef<number | null>(null)
   const onScrollRef = useRef(onScroll)
 
-  // Mantém a ref atualizada para evitar stale closure
   useEffect(() => {
     onScrollRef.current = onScroll
   }, [onScroll])
@@ -59,7 +51,6 @@ export function MarkdownEditor({
     setTheme(getTheme())
   }, [config.theme])
 
-  // Função throttled com requestAnimationFrame para scroll sync
   const handleScrollSync = useCallback((editor: any) => {
     // Cancela frame anterior para garantir apenas 1 execução por frame
     if (rafIdRef.current !== null) {
@@ -108,7 +99,7 @@ export function MarkdownEditor({
       {editorReady && (
         <MarkdownToolbar
           editor={editorRef.current}
-          onResetEditorData={onResetEditorData}
+          onResetEditorData={() => onResetMarkdown?.()}
           onResetMarkdown={onResetMarkdown}
         />
       )}
@@ -117,9 +108,9 @@ export function MarkdownEditor({
         <Editor
           height='100%'
           defaultLanguage='markdown'
-          value={value}
+          value={markdown?.content}
           language='markdown'
-          onChange={onChange}
+          onChange={(value) => onUpdateMarkdown(value || ' ')}
           onMount={handleEditorDidMount}
           theme={theme}
           options={{
@@ -137,7 +128,7 @@ export function MarkdownEditor({
       </div>
 
       {/* Item 2: Status Bar adicionada ao rodapé do editor */}
-      <MarkdownStatusBar value={value} />
+      <MarkdownStatusBar value={markdown?.content || ''} />
     </div>
   )
 }

@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid'
 export const DEFAULT_MARKDOWN = `# Título do Documento
 
 Este é um exemplo de **Markdown** sendo convertido para PDF.
@@ -51,3 +52,10 @@ Você pode adicionar [links](https://example.com) e imagens:
 
 **Nota:** Este documento suporta múltiplas páginas automaticamente quando o conteúdo excede o tamanho da página configurada.
 `
+export const DEFAULT_MARKDOWN_ITEM = [
+  {
+    id: uuidv4(),
+    content: DEFAULT_MARKDOWN,
+    name: 'Documento',
+  },
+]

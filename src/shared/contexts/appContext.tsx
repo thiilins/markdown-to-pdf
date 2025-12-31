@@ -1,5 +1,6 @@
 'use client'
 
+import { ENVIROMENT } from '@/env'
 import usePersistedState from '@/hooks/use-persisted-state'
 import {
   Dispatch,
@@ -11,33 +12,97 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { useReactToPrint } from 'react-to-print'
+import { toast } from 'sonner'
 import { MARGIN_PRESETS, PAGE_SIZES, THEME_PRESETS, defaultConfig } from '../constants'
+import { filename_now, handleDownloadPDFApi } from '../utils'
 import { normalizeConfig } from '../utils/normalize-config'
-
-interface ConfigContextType {
+import { useMarkdown } from './markdownContext'
+interface AppContextType {
   config: AppConfig
-  getCurrentMargin: () => MarginPreset
+  isConfigOpen: boolean
+  setIsConfigOpen: Dispatch<SetStateAction<boolean>>
   updateConfig: (updates: Partial<AppConfig>) => void
   updatePageSize: (size: PageSize) => void
   updateOrientation: (orientation: Orientation) => void
   resetConfig: () => void
-  getCurrentTheme: () => ThemePreset
+  zoom: number
+  onResetZoom: () => void
+  onZoomIn: () => void
+  onZoomOut: () => void
+  onZoomChange: (zoom: number) => void
+  isLoading: boolean
+  setIsLoading: Dispatch<SetStateAction<boolean>>
+  disabledDownload: boolean
+  onPrint: () => void
   applyMarginPreset: (preset: MarginPreset) => void
   applyThemePreset: (preset: ThemePreset) => void
-  isConfigOpen: boolean
-  setIsConfigOpen: Dispatch<SetStateAction<boolean>>
+  getCurrentMargin: () => MarginPreset
+  getCurrentTheme: () => ThemePreset
+  onDownloadPDF: () => void
 }
 
-const ConfigContext = createContext<ConfigContextType | undefined>(undefined)
+const AppContext = createContext<AppContextType | undefined>(undefined)
 
-export function ConfigProvider({ children }: { children: ReactNode }) {
-  // Normaliza o config na inicialização para garantir que sempre tenha tema
-  // Isso evita um ciclo extra de renderização que ocorria com o useEffect
+export function AppProvider({ children }: { children: ReactNode }) {
+  const { contentRef, markdown } = useMarkdown()
+
+  const disabledDownload = !ENVIROMENT.ENABLE_EXPORT
+  const [isLoading, setIsLoading] = useState(false)
   const [rawConfig, setRawConfig] = usePersistedState<AppConfig>('md-to-pdf-config', defaultConfig)
   const config = useMemo(() => normalizeConfig(rawConfig), [rawConfig])
   const [isConfigOpen, setIsConfigOpen] = useState(false)
+  const [zoom, setZoom] = usePersistedState('zoom', 1)
+  /**
+   *
+   *  FUNÇOES
+   *
+   */
+  const onDownloadPDF = useCallback(async () => {
+    const element = contentRef.current
+    if (!element) return toast.error('Conteúdo não encontrado para exportação.')
+    const htmlContent = element.innerHTML
+    const filename = `documento_${filename_now}.pdf`
+    setIsLoading(true)
+    try {
+      return await handleDownloadPDFApi(config, htmlContent, filename)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [config, contentRef])
 
-  // Wrapper para setConfig que sempre normaliza antes de salvar
+  const documentTitle = useMemo(() => {
+    const name = markdown?.name || `documento_${filename_now}`
+    return name
+  }, [markdown?.name])
+
+  const handlePrint = useReactToPrint({
+    contentRef: contentRef,
+    documentTitle: documentTitle,
+  })
+  /*
+   * ZOOM FUNCTIONS
+   */
+  const onZoomOut = useCallback(() => {
+    setZoom((prev) => Math.max(prev - 0.1, 0.3))
+  }, [setZoom])
+  const onZoomIn = useCallback(() => {
+    setZoom((prev) => Math.min(prev + 0.1, 1.5))
+  }, [setZoom])
+  const onResetZoom = useCallback(() => {
+    setZoom(1)
+  }, [setZoom])
+  const onZoomChange = useCallback(
+    (newZoom: number) => {
+      setZoom(newZoom)
+    },
+    [setZoom],
+  )
+
+  /**
+   * CONFIG FUNCTIONS
+   *   - Removido de ConfigContext para simplificar o contexto
+   */
   const setConfig = useCallback<Dispatch<SetStateAction<AppConfig>>>(
     (value) => {
       setRawConfig((prev) => {
@@ -73,8 +138,6 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
     return 'custom'
   }, [config.page.margin])
 
-  // Detecta qual preset de tema está ativo
-  // Nota: config.theme sempre existe devido à normalização
   const getCurrentThemePreset = useCallback((): ThemePreset => {
     const current = config.theme!
     for (const [key, preset] of Object.entries(THEME_PRESETS)) {
@@ -184,9 +247,13 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
     [setConfig],
   )
 
-  // Memoização do value do Context para evitar re-renders desnecessários
-  const contextValue = useMemo<ConfigContextType>(
+  const ContextValues = useMemo(
     () => ({
+      zoom,
+      onResetZoom,
+      onZoomIn,
+      onZoomOut,
+      onZoomChange,
       config,
       isConfigOpen,
       setIsConfigOpen,
@@ -198,8 +265,18 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
       getCurrentTheme: getCurrentThemePreset,
       applyMarginPreset,
       applyThemePreset,
+      isLoading,
+      setIsLoading,
+      disabledDownload,
+      onPrint: handlePrint,
+      onDownloadPDF,
     }),
     [
+      zoom,
+      onResetZoom,
+      onZoomIn,
+      onZoomOut,
+      onZoomChange,
       config,
       isConfigOpen,
       updateConfig,
@@ -210,16 +287,20 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
       getCurrentThemePreset,
       applyMarginPreset,
       applyThemePreset,
+      isLoading,
+      disabledDownload,
+      handlePrint,
+      onDownloadPDF,
     ],
   )
 
-  return <ConfigContext.Provider value={contextValue}>{children}</ConfigContext.Provider>
+  return <AppContext.Provider value={ContextValues}>{children}</AppContext.Provider>
 }
 
-export function useConfig() {
-  const context = useContext(ConfigContext)
+export function useApp() {
+  const context = useContext(AppContext)
   if (context === undefined) {
-    throw new Error('<useConfig> deve ser usado dentro de um ConfigProvider')
+    throw new Error('<useApp> deve ser usado dentro de um AppProvider')
   }
   return context
 }

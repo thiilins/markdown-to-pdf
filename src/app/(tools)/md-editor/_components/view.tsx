@@ -1,23 +1,18 @@
 'use client'
-import { PreviewPanelWithPages } from '@/components/preview-panel/with-pages'
-import { PrintStyle } from '@/shared/styles/print-styles'
 
 import { MarkdownEditor } from '@/components/markdown-editor/editor'
+import { PreviewPanelNoPages } from '@/components/preview-panel/no-pages'
 import { cn } from '@/lib/utils'
 import { useApp } from '@/shared/contexts/appContext'
-import { useHeaderFooter } from '@/shared/contexts/headerFooterContext'
 import { useMarkdown } from '@/shared/contexts/markdownContext'
+import { PrintStyle } from '@/shared/styles/print-styles'
 import { useRef } from 'react'
 import { ActionToolbar } from '../../_components/action-toolbar'
 
-export const MDToPdfViewComponent = () => {
-  const { markdown, onUpdateMarkdown, onResetMarkdown } = useMarkdown()
+export const MDEditorViewComponent = () => {
+  const previewContainerRef = useRef<HTMLDivElement | null>(null)
+  const { markdown, onResetMarkdown, onUpdateMarkdown } = useMarkdown()
   const { config } = useApp()
-  const { handleOnResetEditorData, onResetHeaderFooter } = useHeaderFooter()
-
-  const previewContainerRef = useRef<HTMLDivElement>(null)
-
-  // Função que sincroniza o scroll do preview com base na porcentagem do editor
   const handleEditorScroll = (percentage: number) => {
     if (previewContainerRef.current) {
       const element = previewContainerRef.current
@@ -31,16 +26,30 @@ export const MDToPdfViewComponent = () => {
       <div className='flex min-h-0 flex-1'>
         <div id='md-pdf-editor' className={cn('flex h-full w-[50%] flex-col border-r')}>
           <div className='min-h-0 flex-1'>
-            <MarkdownEditor
-              onScroll={handleEditorScroll} // Passa o handler para o Monaco
-              onResetMarkdown={onResetMarkdown}
-            />
+            <MarkdownEditor onScroll={handleEditorScroll} onResetMarkdown={onResetMarkdown} />
           </div>
         </div>
         <div id='md-pdf-preview' className={cn('flex h-full w-[50%] flex-col')}>
-          <ActionToolbar headerFooter />
+          <ActionToolbar />
           <div className='min-h-0 flex-1'>
-            <PreviewPanelWithPages ref={previewContainerRef} />
+            <PreviewPanelNoPages
+              ref={previewContainerRef}
+              customConfig={{
+                pageConfig: {
+                  size: 'a4',
+                  width: '210mm',
+                  height: '297mm',
+                  orientation: 'portrait',
+                  padding: '10mm',
+                  margin: {
+                    top: '10mm',
+                    right: '10mm',
+                    bottom: '10mm',
+                    left: '10mm',
+                  },
+                },
+              }}
+            />
           </div>
         </div>
         <PrintStyle config={config} />

@@ -2,7 +2,6 @@
 
 import { Sheet, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useConfig } from '@/shared/contexts/configContext'
 import { CircleX, Code, Layout, Palette, RotateCcw, Type } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { useMemo } from 'react'
@@ -13,10 +12,11 @@ import { EditorConfigComponent } from './editor'
 import { PageSizeConfigComponent } from './page-size'
 import { ThemeConfigComponent } from './theme'
 import { TypographyConfigComponent } from './typography'
+import { useApp } from '@/shared/contexts/appContext'
 
 export function SettingsDialog() {
   const pathname = usePathname()
-  const { resetConfig, setIsConfigOpen, isConfigOpen } = useConfig()
+  const { resetConfig, setIsConfigOpen, isConfigOpen } = useApp()
   const configTabs = useMemo(() => {
     const tabsOptions: SettingCardModalProps[] = [
       {
@@ -84,9 +84,9 @@ export function SettingsDialog() {
         </div>
         <Tabs defaultValue={configTabs.defaultTab} className='w-full'>
           <TabsList className='grid w-full grid-cols-4 p-1'>
-            {configTabs.tabs.map((tab) => (
+            {configTabs.tabs.map((tab, index) => (
               <TabsTrigger
-                key={tab?.value || ''}
+                key={(tab?.value || '') + index}
                 value={tab?.value || ''}
                 className='cursor-pointer p-1'>
                 {tab?.icon && <tab.icon className='h-3 w-3' />}

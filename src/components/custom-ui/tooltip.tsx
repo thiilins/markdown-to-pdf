@@ -48,6 +48,7 @@ interface IconButtonTooltipProps extends Omit<
   variant?: ButtonProps['variant']
   sideOffset?: number
   content: string
+  hide?: boolean
   disabled?: boolean
   className?: {
     trigger?: string
@@ -60,12 +61,14 @@ export const IconButtonTooltip = ({
   icon,
   onClick,
   className,
+  hide = false,
   content,
   disabled = false,
   variant = 'outline',
   ...props
 }: IconButtonTooltipProps) => {
   const Icon = icon
+  if (hide) return null
   return (
     <TooltipComponent content={content} className={className} disabled={disabled} {...props}>
       <Button

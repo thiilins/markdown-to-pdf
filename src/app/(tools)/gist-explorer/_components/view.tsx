@@ -1,12 +1,12 @@
 'use client'
 
-import { useConfig } from '@/shared/contexts/configContext'
+import { useApp } from '@/shared/contexts/appContext'
 import { GistPrintStyle } from '@/shared/styles/gist-print-style'
 import { GistPreview } from './gist-preview'
 import { GistSidebar } from './gist-sidebar'
 
 export const GistExplorerViewComponent = () => {
-  const { config } = useConfig()
+  const { config } = useApp()
   return (
     <div className='flex min-h-full w-full flex-1 overflow-hidden'>
       <GistSidebar />

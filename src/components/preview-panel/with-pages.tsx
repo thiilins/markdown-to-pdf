@@ -2,10 +2,9 @@
 
 import { cn } from '@/lib/utils'
 import { THEME_PRESETS } from '@/shared/constants'
-import { useConfig } from '@/shared/contexts/configContext'
+import { useApp } from '@/shared/contexts/appContext'
 import { useHeaderFooter } from '@/shared/contexts/headerFooterContext'
-import { useMDToPdf } from '@/shared/contexts/mdToPdfContext'
-import { useZoom } from '@/shared/contexts/zoomContext'
+import { useMarkdown } from '@/shared/contexts/markdownContext'
 import { PreviewStyle } from '@/shared/styles/preview-styles'
 import { AlignLeft, Layout, Loader2, Ruler } from 'lucide-react'
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
@@ -23,9 +22,8 @@ interface PreviewPanelProps {
 
 export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProps>(
   ({ className }, ref) => {
-    const { contentRef, markdown } = useMDToPdf()
-    const { config } = useConfig()
-    const { zoom } = useZoom()
+    const { contentRef, markdown } = useMarkdown()
+    const { config, zoom } = useApp()
     const { headerFooter, parseVariables } = useHeaderFooter()
 
     // Estado para alternar o modo de visualização
@@ -270,7 +268,7 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
                 pageNumber,
                 totalPages,
                 slot.logo?.url,
-                slot.logo?.size,
+                slot?.logo?.size || undefined,
               ),
             }}
           />
@@ -308,14 +306,14 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
                 src={slot.logo.url}
                 alt='Logo'
                 style={{
-                  width: slot.logo.size.width,
-                  height: slot.logo.size.height,
+                  width: slot?.logo?.size?.width,
+                  height: slot?.logo?.size?.height,
                   objectFit: 'contain',
                 }}
               />
             )}
             {slot.left
-              ? parseVariables(slot.left, pageNumber, totalPages, slot.logo?.url, slot.logo?.size)
+              ? parseVariables(slot.left, pageNumber, totalPages, slot.logo?.url, slot?.logo?.size)
               : ''}
           </div>
           <div
@@ -332,14 +330,20 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
                 src={slot.logo.url}
                 alt='Logo'
                 style={{
-                  width: slot.logo.size.width,
-                  height: slot.logo.size.height,
+                  width: slot?.logo?.size?.width,
+                  height: slot?.logo?.size?.height,
                   objectFit: 'contain',
                 }}
               />
             )}
             {slot.center
-              ? parseVariables(slot.center, pageNumber, totalPages, slot.logo?.url, slot.logo?.size)
+              ? parseVariables(
+                  slot.center,
+                  pageNumber,
+                  totalPages,
+                  slot.logo?.url,
+                  slot?.logo?.size,
+                )
               : ''}
           </div>
           <div
@@ -352,15 +356,15 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
               gap: '8px',
             }}>
             {slot.right
-              ? parseVariables(slot.right, pageNumber, totalPages, slot.logo?.url, slot.logo?.size)
+              ? parseVariables(slot.right, pageNumber, totalPages, slot.logo?.url, slot?.logo?.size)
               : ''}
             {slot.logo && slot.logo.position === 'right' && (
               <img
                 src={slot.logo.url}
                 alt='Logo'
                 style={{
-                  width: slot.logo.size.width,
-                  height: slot.logo.size.height,
+                  width: slot?.logo?.size?.width,
+                  height: slot?.logo?.size?.height,
                   objectFit: 'contain',
                 }}
               />
@@ -372,7 +376,6 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
 
     return (
       <div className={cn('relative h-full w-full bg-slate-200/90 dark:bg-slate-950', className)}>
-        {/* Ghost para Medição */}
         <div
           id='measurement-ghost'
           aria-hidden='true'
@@ -404,7 +407,7 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
                   },
                 ],
               ]}>
-              {markdown}
+              {markdown?.content || ''}
             </ReactMarkdown>
           </div>
         </div>

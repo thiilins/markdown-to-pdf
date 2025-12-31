@@ -15,10 +15,11 @@ export function parseHeaderFooterText(
   pageNumber?: number,
   totalPages?: number,
   logoBase64?: string,
-  logoSize?: { width: string; height: string },
-): string {
+  logoSize?: { width?: string; height?: string } | undefined,
+) {
   if (!text) return ''
-
+  const logoSizeWidth = logoSize?.width || '50px'
+  const logoSizeHeight = logoSize?.height || '50px'
   const now = moment()
 
   const tags: Record<string, string> = {
@@ -30,8 +31,8 @@ export function parseHeaderFooterText(
     '{logo}': logoBase64
       ? `<img src="${logoBase64}"
               alt="Logo"
-              style="width: ${logoSize?.width || '50px'};
-                     height: ${logoSize?.height || '50px'};
+              style="width: ${logoSizeWidth};
+                     height: ${logoSizeHeight};
                      object-fit: contain;
                      display: inline-block;
                      vertical-align: middle;" />`

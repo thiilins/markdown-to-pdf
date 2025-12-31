@@ -2,7 +2,7 @@
 
 import { StaticPreview } from '@/components/preview-panel/static-pages'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useConfig } from '@/shared/contexts/configContext'
+import { useApp } from '@/shared/contexts/appContext'
 import { useGist } from '@/shared/contexts/gistContext'
 import { isImageFile, isMarkdownFile, mapLanguage } from '@/shared/utils'
 import { AlertCircle } from 'lucide-react'
@@ -37,7 +37,7 @@ const ContentComponent = ({
 }
 
 const ContentMdPreview = ({ content }: { content: string }) => {
-  const { config } = useConfig()
+  const { config } = useApp()
   const { contentRef } = useGist()
   return (
     <div className='h-full w-full'>

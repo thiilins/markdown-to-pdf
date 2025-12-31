@@ -6,14 +6,14 @@ import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { TabsContent } from '@/components/ui/tabs'
-import { useConfig } from '@/shared/contexts/configContext'
+import { useApp } from '@/shared/contexts/appContext'
 import { Eye, EyeOff, Monitor, Moon, Sun, TextWrap, Type } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { CONFIG_EDITOR_SHOW_OPTIONS } from './constants'
 import { SettingsCard } from './layout'
 
 export const EditorConfigComponent = () => {
-  const { config, updateConfig } = useConfig()
+  const { config, updateConfig } = useApp()
   const pathname = usePathname()
   const editorShowOptions = CONFIG_EDITOR_SHOW_OPTIONS?.[pathname]
   const getThemeIcon = (theme: string) => {
@@ -73,7 +73,6 @@ export const EditorConfigComponent = () => {
             </div>
           </>
         )}
-        {/* Configurações de Visualização */}
         {editorShowOptions?.includes('fontSize') && (
           <div className='mt-4 space-y-2'>
             <div className='flex items-center justify-between'>

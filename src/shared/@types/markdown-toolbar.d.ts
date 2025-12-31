@@ -1,4 +1,4 @@
-export interface IToolbarActions {
+interface IToolbarActions {
   insertTable: () => void
   insertTableDynamic: (rows: number, cols: number) => void
   insertHeading: (level: number) => void
@@ -22,13 +22,22 @@ export interface IToolbarActions {
   formatDocument: () => Promise<void>
   generateTOC: () => void
 }
-export type ToolbarOption = {
+interface ToolbarSeparator {
+  type: 'separator'
+}
+interface ToolbarComponent {
+  type: 'component'
+  component: React.ReactNode
+  condition?: boolean
+}
+interface ToolbarAction {
   type: 'action'
   icon: React.ElementType
   tooltip: string
   onClick: () => void | Promise<void>
 }
-export interface MarkdownToolbarProps {
+type ToolbarOption = ToolbarSeparator | ToolbarComponent | ToolbarAction
+interface MarkdownToolbarProps {
   editor: any // Monaco editor instance
   onResetEditorData?: () => void
   onResetMarkdown?: () => void

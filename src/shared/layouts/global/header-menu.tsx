@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 import { Modules } from '@/shared/constants'
-import { useConfig } from '@/shared/contexts/configContext'
+import { useApp } from '@/shared/contexts/appContext'
 import { urlIsActive, urlIsActiveWithSubmenu } from '@/shared/utils'
 import { ChevronDown, Settings } from 'lucide-react'
 import Link from 'next/link'
@@ -83,20 +83,19 @@ const GlobalHeaderButtonSubmenu = ({ label, href, icon }: Modules) => {
 }
 export const GlobalHeaderMenu = () => {
   const pathname = usePathname()
-  const { setIsConfigOpen } = useConfig()
+  const { setIsConfigOpen } = useApp()
   const config = CONFIG_MODAL_SHOW_OPTIONS?.[pathname] ?? []
   return (
     <nav className='flex items-center justify-center gap-2 px-3'>
       {Modules.map((module) => {
         return <GlobalHeaderButton key={module.label} {...module} />
       })}
-      {config.length > 0 && (
-        <IconButtonTooltip
-          icon={Settings}
-          onClick={() => setIsConfigOpen(true)}
-          content='Configurações'
-        />
-      )}
+      <IconButtonTooltip
+        icon={Settings}
+        onClick={() => setIsConfigOpen(true)}
+        content='Configurações'
+        disabled={config.length === 0}
+      />
       <UserNav />
     </nav>
   )

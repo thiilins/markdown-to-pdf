@@ -12,38 +12,48 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { extractGistTags } from '@/shared/utils/gist-tools'
-import { X } from 'lucide-react'
+import { Copy, Globe, Lock, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
-interface GistEditModalProps {
+interface GistDuplicateModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   gist: Gist | null
-  onSave: (gistId: string, description: string) => Promise<void>
+  onDuplicate: (gist: Gist, description: string, isPublic: boolean) => Promise<void>
 }
 
-export function GistEditModal({ open, onOpenChange, gist, onSave }: GistEditModalProps) {
+export function GistDuplicateModal({
+  open,
+  onOpenChange,
+  gist,
+  onDuplicate,
+}: GistDuplicateModalProps) {
   const [description, setDescription] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [newTag, setNewTag] = useState('')
-  const [isSaving, setIsSaving] = useState(false)
+  const [isPublic, setIsPublic] = useState(true)
+  const [isDuplicating, setIsDuplicating] = useState(false)
 
-  // Extrai descrição e tags quando o modal abre
   useEffect(() => {
     if (open && gist) {
       const currentTags = extractGistTags(gist.description)
-      // Remove tags da descrição para mostrar apenas o texto
       let cleanDescription = gist.description || ''
       currentTags.forEach((tag) => {
         cleanDescription = cleanDescription.replace(new RegExp(`#${tag}\\b`, 'gi'), '').trim()
       })
-      // Remove múltiplos espaços
       cleanDescription = cleanDescription.replace(/\s+/g, ' ').trim()
+      if (cleanDescription && !cleanDescription.toLowerCase().includes('cópia')) {
+        cleanDescription = `Cópia: ${cleanDescription}`
+      } else if (!cleanDescription) {
+        cleanDescription = 'Cópia de gist'
+      }
       setDescription(cleanDescription)
       setTags(currentTags)
+      setIsPublic(gist.public ?? true)
     }
   }, [open, gist])
 
@@ -75,30 +85,26 @@ export function GistEditModal({ open, onOpenChange, gist, onSave }: GistEditModa
     [tags],
   )
 
-  const handleSave = useCallback(async () => {
+  const handleDuplicate = useCallback(async () => {
     if (!gist) return
-
-    setIsSaving(true)
+    setIsDuplicating(true)
     try {
-      // Monta a descrição final com tags
       let finalDescription = description.trim()
       if (tags.length > 0) {
         const tagsString = tags.map((tag) => `#${tag}`).join(' ')
-        finalDescription = finalDescription
-          ? `${finalDescription} ${tagsString}`
-          : tagsString
+        finalDescription = finalDescription ? `${finalDescription} ${tagsString}` : tagsString
       }
 
-      await onSave(gist.id, finalDescription)
-      toast.success('Gist atualizado com sucesso!')
+      await onDuplicate(gist, finalDescription, isPublic)
+      toast.success('Gist duplicado com sucesso!')
       onOpenChange(false)
     } catch (error) {
-      console.error('Erro ao salvar gist:', error)
-      toast.error('Erro ao salvar gist. Tente novamente.')
+      console.error('Erro ao duplicar gist:', error)
+      toast.error('Erro ao duplicar gist. Tente novamente.')
     } finally {
-      setIsSaving(false)
+      setIsDuplicating(false)
     }
-  }, [gist, description, tags, onSave, onOpenChange])
+  }, [gist, description, tags, onDuplicate, isPublic, onOpenChange])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -110,20 +116,30 @@ export function GistEditModal({ open, onOpenChange, gist, onSave }: GistEditModa
     [handleAddTag],
   )
 
+  useEffect(() => {
+    console.log('isPublic', isPublic)
+  }, [isPublic])
   if (!gist) return null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='sm:max-w-[600px]'>
         <DialogHeader>
-          <DialogTitle>Editar Descrição e Tags</DialogTitle>
+          <DialogTitle>Duplicar Gist</DialogTitle>
           <DialogDescription>
-            Edite a descrição do gist e gerencie suas tags. As tags serão adicionadas à descrição
-            no formato #tag.
+            Crie uma cópia deste gist na sua conta. Edite a descrição e adicione tags antes de
+            finalizar.
           </DialogDescription>
         </DialogHeader>
 
         <div className='space-y-4 py-4'>
+          {/* Info do gist original */}
+          <div className='bg-muted/50 rounded-md border p-3'>
+            <p className='text-muted-foreground text-xs font-medium'>Gist Original</p>
+            <p className='text-sm font-medium'>{gist.files[0]?.filename || 'Sem nome'}</p>
+            <p className='text-muted-foreground text-xs'>Por: {gist.owner?.login || 'Anônimo'}</p>
+          </div>
+
           {/* Descrição */}
           <div className='space-y-2'>
             <Label htmlFor='description'>Descrição</Label>
@@ -140,13 +156,10 @@ export function GistEditModal({ open, onOpenChange, gist, onSave }: GistEditModa
           {/* Tags */}
           <div className='space-y-2'>
             <Label htmlFor='tags'>Tags</Label>
-            <div className='flex flex-wrap gap-2 rounded-md border p-3 min-h-[60px]'>
+            <div className='flex min-h-[60px] flex-wrap gap-2 rounded-md border p-3'>
               {tags.length > 0 ? (
                 tags.map((tag) => (
-                  <Badge
-                    key={tag}
-                    variant='secondary'
-                    className='flex items-center gap-1 pr-1'>
+                  <Badge key={tag} variant='secondary' className='flex items-center gap-1 pr-1'>
                     <span>#{tag}</span>
                     <button
                       type='button'
@@ -177,18 +190,44 @@ export function GistEditModal({ open, onOpenChange, gist, onSave }: GistEditModa
               Use apenas letras, números e underscore. Máximo 20 caracteres.
             </p>
           </div>
+
+          {/* Privacidade */}
+          <div className='flex items-center justify-between rounded-md border p-3'>
+            <div className='space-y-0.5'>
+              <Label htmlFor='privacy' className='text-base'>
+                Visibilidade
+              </Label>
+              <p className='text-muted-foreground text-sm'>
+                {isPublic ? 'Qualquer pessoa pode ver este gist' : 'Apenas você pode ver este gist'}
+              </p>
+            </div>
+            <div className='flex items-center gap-2'>
+              {isPublic ? (
+                <Globe className='text-muted-foreground h-4 w-4' />
+              ) : (
+                <Lock className='text-muted-foreground h-4 w-4' />
+              )}
+              <Switch
+                id='privacy'
+                checked={isPublic}
+                onCheckedChange={(checked) => {
+                  setIsPublic(checked)
+                }}
+              />
+            </div>
+          </div>
         </div>
 
         <DialogFooter>
-          <Button variant='outline' onClick={() => onOpenChange(false)} disabled={isSaving}>
+          <Button variant='outline' onClick={() => onOpenChange(false)} disabled={isDuplicating}>
             Cancelar
           </Button>
-          <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? 'Salvando...' : 'Salvar'}
+          <Button onClick={handleDuplicate} disabled={isDuplicating}>
+            <Copy className='mr-2 h-4 w-4' />
+            {isDuplicating ? 'Duplicando...' : 'Duplicar'}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   )
 }
-
