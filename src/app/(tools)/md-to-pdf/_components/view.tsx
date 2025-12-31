@@ -1,23 +1,28 @@
 'use client'
-import { PreviewPanelWithPages } from '@/components/preview-panel/with-pages'
-import { PrintStyle } from '@/shared/styles/print-styles'
 
-import { MarkdownEditor } from '@/components/markdown-editor/editor'
+import { Button } from '@/components/ui/button' // Assumindo shadcn
 import { cn } from '@/lib/utils'
 import { useApp } from '@/shared/contexts/appContext'
 import { useHeaderFooter } from '@/shared/contexts/headerFooterContext'
 import { useMarkdown } from '@/shared/contexts/markdownContext'
-import { useRef } from 'react'
+import { PrintStyle } from '@/shared/styles/print-styles'
+import { Code2, Eye } from 'lucide-react'
+import { useRef, useState } from 'react'
 import { ActionToolbar } from '../../_components/action-toolbar'
+import { EditorComponent } from './editor'
+import { PreviewPanelWithPages } from './preview'
 
 export const MDToPdfViewComponent = () => {
-  const { markdown, onUpdateMarkdown, onResetMarkdown } = useMarkdown()
+  const { onResetMarkdown } = useMarkdown()
   const { config } = useApp()
-  const { handleOnResetEditorData, onResetHeaderFooter } = useHeaderFooter()
+  // Nota: handleOnResetEditorData e onResetHeaderFooter não estavam sendo usados no JSX original,
+  // mas mantive o hook caso precise no futuro.
+  const {} = useHeaderFooter()
+  const [mobileTab, setMobileTab] = useState<'editor' | 'preview'>('editor')
 
   const previewContainerRef = useRef<HTMLDivElement>(null)
 
-  // Função que sincroniza o scroll do preview com base na porcentagem do editor
+  // Função que sincroniza o scroll do preview
   const handleEditorScroll = (percentage: number) => {
     if (previewContainerRef.current) {
       const element = previewContainerRef.current
@@ -27,22 +32,52 @@ export const MDToPdfViewComponent = () => {
   }
 
   return (
-    <div className='flex min-h-0 flex-1 flex-col'>
-      <div className='flex min-h-0 flex-1'>
-        <div id='md-pdf-editor' className={cn('flex h-full w-[50%] flex-col border-r')}>
+    <div className='bg-background flex h-full w-full flex-col overflow-hidden'>
+      <div className='flex items-center border-b p-1 md:hidden'>
+        <Button
+          variant={mobileTab === 'editor' ? 'secondary' : 'ghost'}
+          size='sm'
+          className='flex-1'
+          onClick={() => setMobileTab('editor')}>
+          <Code2 className='mr-2 h-4 w-4' /> Editor
+        </Button>
+        <Button
+          variant={mobileTab === 'preview' ? 'secondary' : 'ghost'}
+          size='sm'
+          className='flex-1'
+          onClick={() => setMobileTab('preview')}>
+          <Eye className='mr-2 h-4 w-4' /> Preview Paginado
+        </Button>
+      </div>
+
+      <div className='flex flex-1 overflow-hidden'>
+        <div
+          id='md-pdf-editor'
+          className={cn(
+            'flex h-full flex-col border-r transition-all',
+            mobileTab === 'editor' ? 'flex w-full' : 'hidden',
+            'md:flex md:w-1/2',
+          )}>
           <div className='min-h-0 flex-1'>
-            <MarkdownEditor
-              onScroll={handleEditorScroll} // Passa o handler para o Monaco
-              onResetMarkdown={onResetMarkdown}
-            />
+            <EditorComponent onScroll={handleEditorScroll} onResetMarkdown={onResetMarkdown} />
           </div>
         </div>
-        <div id='md-pdf-preview' className={cn('flex h-full w-[50%] flex-col')}>
+
+        <div
+          id='md-pdf-preview'
+          className={cn(
+            'bg-muted/30 flex h-full flex-col transition-all',
+
+            mobileTab === 'preview' ? 'flex w-full' : 'hidden',
+            'md:flex md:w-1/2',
+          )}>
           <ActionToolbar headerFooter />
-          <div className='min-h-0 flex-1'>
+
+          <div className='relative min-h-0 flex-1'>
             <PreviewPanelWithPages ref={previewContainerRef} />
           </div>
         </div>
+
         <PrintStyle config={config} />
         <link
           rel='stylesheet'

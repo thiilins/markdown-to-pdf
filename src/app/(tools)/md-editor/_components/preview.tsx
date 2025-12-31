@@ -21,25 +21,23 @@ interface PreviewPanelProps {
   }
 }
 
-export const PreviewPanelNoPages = forwardRef<HTMLDivElement, PreviewPanelProps>(
+export const PreviewComponent = forwardRef<HTMLDivElement, PreviewPanelProps>(
   ({ className, customConfig }, ref) => {
     const { contentRef, markdown } = useMarkdown()
     const { config, zoom } = useApp()
+
+    // ... (Lógica de configurações de página/tipografia mantida igual) ...
     const typographyConfig = customConfig?.typographyConfig ?? config.typography
-    // Usa tema padrão se não houver tema configurado
     const theme = (customConfig?.theme ?? config.theme) || THEME_PRESETS.modern
     const pageConfig = customConfig?.pageConfig ?? config.page
-    // Calcula dimensões da página baseado na orientação
+
     const pageDimensions = useMemo(() => {
       const { width, height, orientation } = pageConfig
-
-      // Extrai valores numéricos das dimensões
       const widthValue = parseFloat(width)
       const heightValue = parseFloat(height)
       const widthUnit = width.replace(/[\d.]/g, '')
       const heightUnit = height.replace(/[\d.]/g, '')
 
-      // Aplica orientação corretamente
       if (orientation === 'landscape') {
         const maxDim = Math.max(widthValue, heightValue)
         const minDim = Math.min(widthValue, heightValue)
@@ -61,7 +59,6 @@ export const PreviewPanelNoPages = forwardRef<HTMLDivElement, PreviewPanelProps>
 
     const getPageStyle = useMemo(() => {
       const { padding } = pageConfig
-
       return {
         width: pageDimensions.width,
         minHeight: pageDimensions.height,
@@ -94,35 +91,30 @@ export const PreviewPanelNoPages = forwardRef<HTMLDivElement, PreviewPanelProps>
       } as React.CSSProperties
     }, [typographyConfig])
 
-    // Componentes customizados para ReactMarkdown
+    // ... (Markdown Components mantidos iguais) ...
     const markdownComponents: Components = useMemo(
       () => ({
         div: ({ node, className, children, ...props }) => {
-          if (className === 'page-break') {
-            return <div className='page-break' {...props} />
-          }
+          if (className === 'page-break') return <div className='page-break' {...props} />
           return (
             <div className={className} {...props}>
               {children}
             </div>
           )
         },
-        pre: ({ node, children, ...props }) => {
-          return (
-            <pre {...props} style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
-              {children}
-            </pre>
-          )
-        },
+        pre: ({ node, children, ...props }) => (
+          <pre {...props} style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
+            {children}
+          </pre>
+        ),
         code: ({ node, className, children, ...props }: any) => {
           const isInline = !className || !className.includes('language-')
-          if (isInline) {
+          if (isInline)
             return (
               <code className={className} {...props}>
                 {children}
               </code>
             )
-          }
           return (
             <code
               className={className}
@@ -137,35 +129,37 @@ export const PreviewPanelNoPages = forwardRef<HTMLDivElement, PreviewPanelProps>
     )
 
     return (
-      <div className={cn('bg-background dark:bg-background relative h-full w-full', className)}>
+      <div className={cn('bg-muted/30 relative h-full w-full', className)}>
+        {/* Container de Scroll */}
         <div
           ref={ref}
-          className='bg-muted/30 absolute inset-0 overflow-auto scroll-smooth print:hidden'
+          className='absolute inset-0 overflow-x-hidden overflow-y-auto scroll-smooth print:hidden'
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            padding: '2rem',
+            paddingTop: '2rem',
+            paddingBottom: '5rem', // Espaço extra para o footer flutuante não cobrir o texto
           }}>
           {/* Wrapper do zoom */}
           <div
+            className='transition-transform duration-200 ease-out will-change-transform'
             style={{
               transform: `scale(${zoom})`,
               transformOrigin: 'top center',
               flexShrink: 0,
             }}>
-            {/* Página do documento */}
+            {/* A "Página" em si */}
             <div
               ref={contentRef}
               data-pdf-content
-              className='print-content rounded-md bg-white text-left shadow-2xl print:scale-100 print:transform-none print:shadow-none'
+              className='print-content rounded bg-white text-left shadow-lg ring-1 ring-black/5 dark:ring-white/10 print:scale-100 print:transform-none print:shadow-none'
               style={{
                 ...getPageStyle,
                 backgroundColor: theme.background,
-                boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.25), 0 0 0 1px rgb(0 0 0 / 0.05)',
               }}>
               <div
-                className='prose prose-slate max-w-none'
+                className='prose prose-slate dark:prose-invert max-w-none'
                 style={{
                   ...getTypographyStyles,
                   ...getContentStyle,
@@ -182,17 +176,26 @@ export const PreviewPanelNoPages = forwardRef<HTMLDivElement, PreviewPanelProps>
           </div>
         </div>
 
-        <div className='pointer-events-none absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center justify-center gap-2 rounded-full bg-blue-500/20 px-4 py-1.5 text-xs font-medium text-blue-500 shadow-sm backdrop-blur-xl print:hidden'>
-          <Ruler className='h-3.5 w-3.5' />
+        {/* Floating Info Pill */}
+        <div className='bg-background/80 text-muted-foreground hover:bg-background pointer-events-none absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center justify-center gap-2 rounded-full border px-4 py-1.5 text-xs font-medium shadow-sm backdrop-blur-md transition-all print:hidden'>
+          <Ruler className='text-primary h-3.5 w-3.5' />
+          <span>{pageConfig.size.toUpperCase()}</span>
+          <span className='text-muted-foreground/40'>•</span>
           <span>
-            {pageConfig.size.toUpperCase()} • {pageDimensions.width} × {pageDimensions.height}
-            {pageDimensions.isLandscape ? ' • Paisagem' : ' • Retrato'}
-            {zoom !== 1 && ` • ${Math.round(zoom * 100)}%`}
+            {pageDimensions.width} × {pageDimensions.height}
           </span>
+          <span className='text-muted-foreground/40'>•</span>
+          <span>{pageDimensions.isLandscape ? 'Paisagem' : 'Retrato'}</span>
+          {zoom !== 1 && (
+            <>
+              <span className='text-muted-foreground/40'>•</span>
+              <span className='text-primary font-bold'>{Math.round(zoom * 100)}%</span>
+            </>
+          )}
         </div>
       </div>
     )
   },
 )
 
-PreviewPanelNoPages.displayName = 'PreviewPanelNoPages'
+PreviewComponent.displayName = 'PreviewComponent'

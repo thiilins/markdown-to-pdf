@@ -1,28 +1,27 @@
 'use client'
 
+import { IconButtonTooltip } from '@/components/custom-ui/tooltip' // Ajuste o import conforme necessário
+import { useMarkdown } from '@/shared/contexts/markdownContext'
 import { useWebExtractor } from '@/shared/contexts/webExtractorContext'
-import { Copy, Download, Eraser, ExternalLink } from 'lucide-react'
+import { Copy, Download, FileEdit } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { IconButtonTooltip } from '../../../../components/custom-ui/tooltip'
-
-interface ResultActionsProps {
-  markdown: string
-  title?: string
-}
 
 export function ResultActions() {
-  const { result, handleReset } = useWebExtractor()
+  const { result } = useWebExtractor()
+  const { onAddMarkdown } = useMarkdown()
   const markdown = result?.markdown || ''
   const title = result?.title || ''
   const router = useRouter()
+
+  const disabled = !markdown
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(markdown)
-      toast.success('Markdown copiado para a área de transferência!')
-    } catch (error) {
-      toast.error('Erro ao copiar markdown')
-      console.error('Erro ao copiar:', error)
+      toast.success('Markdown copiado!')
+    } catch {
+      toast.error('Erro ao copiar')
     }
   }
 
@@ -37,40 +36,59 @@ export function ResultActions() {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-      toast.success('Arquivo Markdown exportado com sucesso!')
-    } catch (error) {
-      toast.error('Erro ao exportar arquivo')
-      console.error('Erro ao exportar:', error)
+      toast.success('Download iniciado')
+    } catch {
+      toast.error('Erro ao exportar')
     }
   }
 
-  const handleOpenInMdToPdf = () => {
+  const handleOpenInEditor = async () => {
+    if (!markdown) {
+      toast.error('Nenhum conteúdo para abrir')
+      return
+    }
+
     try {
-      // Codifica o markdown em base64 para passar via URL
-      const encoded = btoa(encodeURIComponent(markdown))
-      router.push(`/md-to-pdf?content=${encoded}`)
-      toast.success('Abrindo no MD-to-PDF...')
+      // Adiciona o conteúdo ao editor com o título como nome do arquivo
+      const fileName = title ? title.replace(/[^a-z0-9]/gi, '_') : 'conteudo_extraido'
+      await onAddMarkdown(markdown, fileName)
+      // Navega para o editor
+      router.push('/md-editor')
+      toast.success('Conteúdo carregado no editor!')
     } catch (error) {
-      toast.error('Erro ao abrir no MD-to-PDF')
-      console.error('Erro ao abrir:', error)
+      console.error('Erro ao abrir no editor:', error)
+      toast.error('Erro ao abrir no editor')
     }
   }
 
   return (
-    <div className='flex gap-2'>
-      <IconButtonTooltip disabled={!markdown} content='Copiar' onClick={handleCopy} icon={Copy} />
+    <div className='flex items-center gap-1 border-l pl-2 dark:border-zinc-800'>
       <IconButtonTooltip
-        disabled={!markdown}
-        content='Exportar'
-        onClick={handleExport}
-        icon={Download}
+        disabled={disabled}
+        content='Copiar MD'
+        onClick={handleCopy}
+        icon={Copy}
+        className={{ button: 'h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100' }}
+        variant='ghost'
       />
       <IconButtonTooltip
-        disabled={!markdown}
-        variant='default'
-        content='Abrir no MD-to-PDF'
-        onClick={handleOpenInMdToPdf}
-        icon={ExternalLink}
+        disabled={disabled}
+        content='Baixar Arquivo'
+        onClick={handleExport}
+        icon={Download}
+        className={{ button: 'h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100' }}
+        variant='ghost'
+      />
+      <IconButtonTooltip
+        disabled={disabled}
+        content='Abrir no Editor'
+        onClick={handleOpenInEditor}
+        icon={FileEdit}
+        className={{
+          button:
+            'h-8 w-8 text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/20',
+        }}
+        variant='ghost'
       />
     </div>
   )

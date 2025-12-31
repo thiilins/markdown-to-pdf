@@ -1,5 +1,6 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { THEME_PRESETS } from '@/shared/constants'
 import { useApp } from '@/shared/contexts/appContext'
@@ -12,7 +13,6 @@ import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
-import { Button } from '../ui/button'
 
 const mmToPx = (mm: number) => mm * 3.7795275591
 
@@ -88,21 +88,17 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
         const marginTop = getMarginPx(pageConfig.margin.top)
         const marginBottom = getMarginPx(pageConfig.margin.bottom)
 
-        // Calcula altura do header e footer se estiverem habilitados
-        // Se for imagem completa, usa altura configurada ou padrão maior
         const headerHeight = headerFooter.header.enabled
           ? headerFooter.header.fullImage
-            ? getMarginPx(headerFooter.header.height || '30mm') // Imagem completa precisa de mais espaço
+            ? getMarginPx(headerFooter.header.height || '30mm')
             : getMarginPx(headerFooter.header.height || '15mm')
           : 0
         const footerHeight = headerFooter.footer.enabled
           ? headerFooter.footer.fullImage
-            ? getMarginPx(headerFooter.footer.height || '30mm') // Imagem completa precisa de mais espaço
+            ? getMarginPx(headerFooter.footer.height || '30mm')
             : getMarginPx(headerFooter.footer.height || '15mm')
           : 0
 
-        // Espaço real disponível para conteúdo dentro da folha
-        // Considera margens + altura do header + altura do footer
         const contentHeightLimit = Math.floor(
           dimensions.heightPx - marginTop - marginBottom - headerHeight - footerHeight,
         )
@@ -123,12 +119,10 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
           const isBlock =
             ['PRE', 'BLOCKQUOTE', 'TABLE', 'IMG'].includes(el.tagName) || el.tagName.startsWith('H')
 
-          // Lógica de Quebra Natural (Word-like)
           if (
             (currentHeight + elHeight > contentHeightLimit || isForceBreak) &&
             currentHeight > 0
           ) {
-            // Se for um bloco ou um parágrafo que cabe inteiro na próxima página, "empurramos"
             if (isBlock || elHeight <= contentHeightLimit) {
               newPages.push(currentPageAccumulator.join(''))
               currentPageAccumulator =
@@ -138,7 +132,6 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
             }
           }
 
-          // Caso o elemento seja maior que uma página inteira (Fatiamento técnico inevitável)
           if (elHeight > contentHeightLimit) {
             let remaining = elHeight
             let offset = 0
@@ -187,7 +180,7 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
 
     const commonPageStyle = useMemo(
       () => ({
-        width: dimensions.widthPx, // Usamos PX para garantir precisão no cálculo
+        width: dimensions.widthPx,
         paddingTop: pageConfig.margin.top,
         paddingRight: pageConfig.margin.right,
         paddingBottom: pageConfig.margin.bottom,
@@ -200,7 +193,6 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
       [dimensions, pageConfig.margin, theme],
     )
 
-    // Função para renderizar header/footer
     const renderHeaderFooter = (
       slot: typeof headerFooter.header,
       position: 'top' | 'bottom',
@@ -217,15 +209,9 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
 
       const height = slot.height || '15mm'
 
-      // Se tiver imagem completa (timbrado), renderiza ela ocupando 100% da largura e altura configurada
       if (slot.fullImage) {
         return (
-          <div
-            style={{
-              width: '100%',
-              height: '100%',
-              overflow: 'hidden',
-            }}>
+          <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
             <img
               src={slot.fullImage}
               alt={position === 'top' ? 'Cabeçalho timbrado' : 'Rodapé timbrado'}
@@ -240,14 +226,11 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
         )
       }
 
-      // Verifica se é modo avançado (HTML) ou simples (campos separados)
       const isAdvancedMode = slot.left && !slot.center && !slot.right && slot.left.includes('<')
-
       const padding = slot.padding || { top: '5mm', right: '5mm', bottom: '5mm', left: '5mm' }
       const fontSize = slot.fontSize || 11
 
       if (isAdvancedMode) {
-        // Modo avançado: renderiza HTML completo
         return (
           <div
             style={{
@@ -275,7 +258,6 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
         )
       }
 
-      // Modo simples: campos separados
       return (
         <div
           style={{
@@ -293,6 +275,7 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
             opacity: 0.8,
             ...borderStyle,
           }}>
+          {/* Lógica original de renderização simples mantida... */}
           <div
             style={{
               flex: 1,
@@ -375,7 +358,8 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
     }
 
     return (
-      <div className={cn('relative h-full w-full bg-slate-200/90 dark:bg-slate-950', className)}>
+      <div className={cn('bg-muted/30 relative h-full w-full', className)}>
+        {/* Elemento Ghost (Invisível) para Cálculos */}
         <div
           id='measurement-ghost'
           aria-hidden='true'
@@ -412,38 +396,39 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
           </div>
         </div>
 
-        {/* Viewport Principal */}
+        {/* Viewport Principal com Scroll */}
         <div
           ref={ref}
-          className='absolute inset-0 flex flex-col items-center overflow-auto scroll-smooth px-8 py-12 print:p-0'>
-          {/* Seletor de Modo (Floating) */}
-          <div className='fixed top-30 right-10 z-50 flex flex-col gap-2 rounded-xl border border-white/10 bg-black/40 p-1 backdrop-blur-md print:hidden'>
+          className='absolute inset-0 flex flex-col items-center overflow-auto scroll-smooth px-8 py-12 print:p-0'
+          style={{ paddingBottom: '6rem' }} // Espaço extra para o footer flutuante
+        >
+          {/* Botão de Modos de Visualização (Floating, posicionado relativo ao conteúdo) */}
+          <div className='bg-background/80 sticky top-0 z-50 mb-4 ml-auto flex gap-1 rounded-md border p-1 backdrop-blur-md print:hidden'>
             <Button
-              variant='ghost'
+              variant={viewMode === 'realistic' ? 'secondary' : 'ghost'}
+              size='sm'
               onClick={() => setViewMode('realistic')}
-              className={cn(
-                'cursor-pointer rounded-lg p-2 transition-all',
-                viewMode === 'realistic'
-                  ? 'bg-blue-500 text-white'
-                  : 'text-white/60 hover:text-white',
-              )}>
+              className='h-8 w-8 p-0'
+              title='Modo Páginas Reais'>
               <Layout className='h-4 w-4' />
             </Button>
-            <button
+            <Button
+              variant={viewMode === 'direct' ? 'secondary' : 'ghost'}
+              size='sm'
               onClick={() => setViewMode('direct')}
-              className={cn(
-                'rounded-lg p-2 transition-all',
-                viewMode === 'direct' ? 'bg-blue-500 text-white' : 'text-white/60 hover:text-white',
-              )}>
+              className='h-8 w-8 p-0'
+              title='Modo Contínuo'>
               <AlignLeft className='h-4 w-4' />
-            </button>
+            </Button>
           </div>
 
-          <div style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }}>
+          <div
+            className='transition-transform duration-200 ease-out will-change-transform'
+            style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }}>
             <div
               ref={contentRef}
               className={cn(
-                viewMode === 'direct' ? 'flex flex-col gap-0 shadow-2xl' : 'flex flex-col',
+                viewMode === 'direct' ? 'flex flex-col gap-0 shadow-lg' : 'flex flex-col',
               )}>
               {pagesHTML.map((html, idx) => {
                 const pageNumber = idx + 1
@@ -469,62 +454,63 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
                   <div
                     key={idx}
                     className={cn(
-                      'print-page transition-all duration-500',
+                      'print-page transition-all duration-300',
                       viewMode === 'realistic'
-                        ? 'mb-12 shadow-2xl'
-                        : 'mb-0 border-b border-dashed border-white/10',
+                        ? 'mb-12 rounded-sm shadow-lg ring-1 ring-black/5 dark:ring-white/10'
+                        : 'border-muted-foreground/20 mb-0 border-b border-dashed',
                     )}
                     style={{
                       ...pageStyle,
                       minHeight: viewMode === 'realistic' ? dimensions.heightPx : 'auto',
                       height: viewMode === 'realistic' ? dimensions.heightPx : 'auto',
                     }}>
+                    {/* Header */}
                     {headerFooter.header.enabled && (
                       <div
                         className='print-header'
                         style={{
                           position: 'absolute',
-                          top: 0, // Começa no topo da página
+                          top: 0,
                           left: 0,
                           right: 0,
-                          height: `calc(${pageConfig.margin.top} + ${headerFooter.header.height || '15mm'})`, // Margem + altura do header
-                          paddingTop: pageConfig.margin.top, // Padding interno = margem superior
-                          paddingLeft: pageConfig.margin.left, // Respeita margem esquerda da página
-                          paddingRight: pageConfig.margin.right, // Respeita margem direita da página
+                          height: `calc(${pageConfig.margin.top} + ${headerFooter.header.height || '15mm'})`,
+                          paddingTop: pageConfig.margin.top,
+                          paddingLeft: pageConfig.margin.left,
+                          paddingRight: pageConfig.margin.right,
                         }}>
                         {renderHeaderFooter(headerFooter.header, 'top', pageNumber, totalPages)}
                       </div>
                     )}
 
-                    {/* Conteúdo */}
+                    {/* Conteúdo da Página */}
                     <div
-                      className='prose h-full w-full max-w-none wrap-break-word'
+                      className='prose dark:prose-invert h-full w-full max-w-none wrap-break-word'
                       style={typographyStyles}>
                       <PreviewStyle theme={theme} />
                       <div dangerouslySetInnerHTML={{ __html: html }} />
                     </div>
 
-                    {/* Footer - posicionado antes da margem inferior */}
+                    {/* Footer */}
                     {headerFooter.footer.enabled && (
                       <div
                         className='print-footer'
                         style={{
                           position: 'absolute',
-                          bottom: 0, // Começa no fundo da página
+                          bottom: 0,
                           left: 0,
                           right: 0,
-                          height: `calc(${pageConfig.margin.bottom} + ${headerFooter.footer.height || '15mm'})`, // Margem + altura do footer
-                          paddingBottom: pageConfig.margin.bottom, // Padding interno = margem inferior
-                          paddingLeft: pageConfig.margin.left, // Respeita margem esquerda da página
-                          paddingRight: pageConfig.margin.right, // Respeita margem direita da página
+                          height: `calc(${pageConfig.margin.bottom} + ${headerFooter.footer.height || '15mm'})`,
+                          paddingBottom: pageConfig.margin.bottom,
+                          paddingLeft: pageConfig.margin.left,
+                          paddingRight: pageConfig.margin.right,
                           display: 'flex',
-                          alignItems: 'flex-end', // Alinha o conteúdo do footer no final
+                          alignItems: 'flex-end',
                         }}>
                         {renderHeaderFooter(headerFooter.footer, 'bottom', pageNumber, totalPages)}
                       </div>
                     )}
 
-                    {/* Numeração e Margens Visuais apenas no modo Realista */}
+                    {/* Número da página (Apenas visualização em tela) */}
                     {viewMode === 'realistic' && (
                       <div
                         className='pointer-events-none absolute right-8 bottom-6 font-mono text-[10px] tracking-widest uppercase opacity-20 print:hidden'
@@ -539,26 +525,24 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
           </div>
         </div>
 
-        {/* Barra de Status */}
-        <div className='pointer-events-none absolute bottom-8 left-1/2 flex -translate-x-1/2 items-center justify-center gap-4 rounded-full border border-white/20 bg-black/80 px-6 py-2 text-xs font-bold tracking-tighter text-white shadow-2xl backdrop-blur-xl print:hidden'>
-          <div className='flex items-center gap-2'>
-            <Ruler className='h-3.5 w-3.5 text-blue-400' />
-            <span className='uppercase'>
-              {pageConfig.size} • {dimensions.widthDisplay}
+        {/* Floating Status Pill (Estilo novo) */}
+        <div className='bg-background/80 text-muted-foreground hover:bg-background pointer-events-none absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center justify-center gap-2 rounded-full border px-4 py-1.5 text-xs font-medium shadow-sm backdrop-blur-md transition-all print:hidden'>
+          <Ruler className='text-primary h-3.5 w-3.5' />
+          <span>{pageConfig.size.toUpperCase()}</span>
+          <span className='text-muted-foreground/40'>•</span>
+          {isCalculating ? (
+            <span className='text-primary flex items-center gap-1.5'>
+              <Loader2 className='h-3 w-3 animate-spin' /> Calculando...
             </span>
-          </div>
-          <div className='h-4 w-px bg-white/20' />
-          <div className='flex items-center gap-2'>
-            {isCalculating ? (
-              <span className='flex items-center gap-2 text-blue-400'>
-                <Loader2 className='h-3 w-3 animate-spin' /> CALCULANDO...
-              </span>
-            ) : (
-              <span className='text-emerald-400'>{pagesHTML.length} PÁGINAS</span>
-            )}
-          </div>
-          <div className='h-4 w-px bg-white/20' />
-          <span className='text-blue-400'>{Math.round(zoom * 100)}%</span>
+          ) : (
+            <span className='text-foreground font-semibold'>{pagesHTML.length} Páginas</span>
+          )}
+          {zoom !== 1 && (
+            <>
+              <span className='text-muted-foreground/40'>•</span>
+              <span className='text-primary font-bold'>{Math.round(zoom * 100)}%</span>
+            </>
+          )}
         </div>
       </div>
     )

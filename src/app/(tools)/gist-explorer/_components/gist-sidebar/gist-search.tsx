@@ -9,9 +9,11 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useGist } from '@/shared/contexts/gistContext'
-import { BookHeart, FileSearch, LogIn, Search, SearchCode } from 'lucide-react'
+import { BookHeart, FileSearch, LogIn, Search, SearchCode, Github } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useCallback, useMemo } from 'react'
+import { motion } from 'framer-motion'
+
 export const GistSearch = () => {
   const {
     onSearch,
@@ -21,11 +23,12 @@ export const GistSearch = () => {
     onGetGists,
     types,
     handleSetTypes,
-    handleResetData,
     gistType,
     setGistType,
   } = useGist()
+
   const { status } = useSession()
+
   const handleGetMyGists = useCallback(async () => {
     await onGetGists({ type: types?.myGists })
   }, [types?.myGists, onGetGists])
@@ -46,54 +49,64 @@ export const GistSearch = () => {
   )
 
   const tabs = useMemo(() => {
-    const options: TabsConditionalItel[] = [
+    const options = [
       {
         condition: true,
         config: {
           value: 'allGists',
           icon: FileSearch,
-          label: 'Buscar Gists',
+          label: 'Explorar',
           className: {
-            icon: 'text-primary',
-            label: 'text-primary',
+            icon: 'h-4 w-4',
+            label: 'font-medium',
           },
           content: (
-            <div className='space-y-2'>
+            <motion.div
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className='space-y-3 pt-3'>
               <div className='flex gap-2'>
-                <Input
-                  placeholder='Digite o usuário do GitHub...'
-                  value={searchUser}
-                  onChange={(e) => setSearchUser(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  disabled={isLoading}
-                  className='flex-1 bg-white shadow-none'
-                />
+                <div className='relative flex-1'>
+                  <Github className='text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4 opacity-50' />
+                  <Input
+                    placeholder='Usuário do GitHub...'
+                    value={searchUser}
+                    onChange={(e) => setSearchUser(e.target.value)}
+                    onKeyDown={handleKeyPress}
+                    disabled={isLoading}
+                    className='bg-background focus:ring-primary/20 h-9 pl-9 shadow-sm transition-all focus:ring-1'
+                  />
+                </div>
                 <Button
                   size='icon'
                   onClick={handleSearch}
-                  className='rounded-full'
+                  className='h-9 w-9 shrink-0 shadow-sm'
                   disabled={isLoading || !searchUser.trim()}>
                   <Search className='h-4 w-4' />
                 </Button>
               </div>
+
               <ConditionalRender condition={!!searchUser}>
-                <div className='flex items-center space-x-2'>
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className='bg-muted/30 flex items-center space-x-2 rounded-md border border-dashed p-2'>
                   <Checkbox
                     id='include-all'
                     checked={types?.allGists === 'all'}
                     onCheckedChange={(checked) =>
-                      handleSetTypes('allGists', checked ? 'all' : ('public' as GistType))
+                      handleSetTypes('allGists', checked ? 'all' : ('public' as any))
                     }
                     disabled={isLoading}
                   />
                   <Label
                     htmlFor='include-all'
                     className='text-muted-foreground cursor-pointer text-xs font-normal'>
-                    Buscar todos os gists (pode demorar mais)
+                    Deep Search (Incluir Secretos)
                   </Label>
-                </div>
+                </motion.div>
               </ConditionalRender>
-            </div>
+            </motion.div>
           ),
         },
       },
@@ -101,17 +114,19 @@ export const GistSearch = () => {
         condition: status === 'unauthenticated',
         config: {
           value: 'myGists',
-          label: 'Acessar Meus Gists',
+          label: 'Entrar',
           icon: LogIn,
           content: (
-            <Button
-              variant='outline'
-              className='w-full'
-              onClick={() => handleSignInWithGitHub()}
-              disabled={isLoading}>
-              <LogIn className='mr-2 h-4 w-4' />
-              Entrar com GitHub
-            </Button>
+            <div className='pt-3'>
+              <Button
+                variant='outline'
+                className='bg-muted/20 hover:bg-muted/40 w-full gap-2 border-dashed'
+                onClick={() => handleSignInWithGitHub()}
+                disabled={isLoading}>
+                <LogIn className='h-4 w-4' />
+                Conectar GitHub
+              </Button>
+            </div>
           ),
         },
       },
@@ -122,28 +137,32 @@ export const GistSearch = () => {
           value: 'my-gists',
           label: 'Meus Gists',
           content: (
-            <div className='flex w-full flex-1 items-center gap-2 shadow-none'>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className='flex w-full flex-1 items-center gap-2 pt-3'>
               <SwitchComponent
                 id='include-all'
                 className={{
-                  container: 'flex-1 rounded-md bg-white p-2',
+                  container:
+                    'border-border/50 bg-background hover:border-primary/20 flex-1 rounded-lg border p-2 transition-colors',
                 }}
-                label={types?.myGists === 'all' ? 'Públicos e Privados' : 'Públicos'}
+                label={types?.myGists === 'all' ? 'Todos (Públicos + Secretos)' : 'Apenas Públicos'}
                 onChange={(checked) =>
-                  handleSetTypes('myGists', checked ? 'all' : ('public' as GistType))
+                  handleSetTypes('myGists', checked ? 'all' : ('public' as any))
                 }
                 checked={types?.myGists === 'all'}
                 disabled={isLoading}
               />
               <Button
                 variant='default'
-                className='border-primary/30 bg-primary hover:bg-primary/20 h-10 w-10 rounded-[20px] p-2 text-white'
+                className='h-10 w-10 shrink-0 rounded-lg shadow-sm transition-transform active:scale-95'
                 size='icon'
                 onClick={handleGetMyGists}
                 disabled={isLoading}>
-                <SearchCode className='h-4 w-4 text-white' />
+                <SearchCode className='h-4 w-4' />
               </Button>
-            </div>
+            </motion.div>
           ),
         },
       },
@@ -161,14 +180,13 @@ export const GistSearch = () => {
     handleGetMyGists,
     types?.myGists,
   ])
+
   return (
-    <div className='bg-primary/20 space-y-4 border-b p-4'>
-      <CustomTabsComponent
-        tabs={tabs}
-        defaultValue='general'
-        activeTab={gistType}
-        setActiveTab={(value) => setGistType(value as any)}
-      />
-    </div>
+    <CustomTabsComponent
+      tabs={tabs}
+      defaultValue='allGists'
+      activeTab={gistType}
+      setActiveTab={(value) => setGistType(value as any)}
+    />
   )
 }

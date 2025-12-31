@@ -1,14 +1,28 @@
 'use client'
 
 import { IconButtonTooltip } from '@/components/custom-ui/tooltip'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { useGist } from '@/shared/contexts/gistContext'
+import { useMarkdown } from '@/shared/contexts/markdownContext'
 import { isMarkdownFile } from '@/shared/utils/gist-tools'
-import { Copy, ExternalLink, Globe, Lock, Pencil, PencilLine, Trash } from 'lucide-react'
+import {
+  ChevronRight,
+  Copy,
+  ExternalLink,
+  FileEdit,
+  FileText,
+  Globe,
+  Lock,
+  PencilLine,
+  Trash,
+} from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { useReactToPrint } from 'react-to-print'
+import { toast } from 'sonner'
 import { FileSelector } from '../file-selector'
 import { GistDeleteModal } from '../modals/gist-delete-modal'
 import { GistDuplicateModal } from '../modals/gist-duplicate-modal'
@@ -30,130 +44,151 @@ export function GistPreviewHeader() {
     onDeleteGist,
     onConvertPublicToPrivate,
   } = useGist()
+
+  const { onLoadGistFromExplorer } = useMarkdown()
   const { data: session, status: sessionStatus } = useSession()
   const router = useRouter()
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [currentUserLogin, setCurrentUserLogin] = useState<string | null>(null)
+
   const handlePrint = useReactToPrint({
     contentRef: contentRef,
     documentTitle: selectedFile?.filename || 'gist-document',
   })
 
-  // Busca o username do GitHub quando a sessão está disponível
   useEffect(() => {
     if (session?.accessToken && !currentUserLogin) {
       fetch('/api/user')
         .then((res) => res.json())
         .then((data) => {
-          if (data.login) {
-            setCurrentUserLogin(data.login)
-          }
+          if (data.login) setCurrentUserLogin(data.login)
         })
-        .catch(() => {
-          // Silenciosamente falha se não conseguir buscar
-        })
+        .catch(() => {})
     }
   }, [session?.accessToken, currentUserLogin])
 
-  const handleDeleteClick = useCallback(() => {
-    setIsDeleteModalOpen(true)
-  }, [])
+  const handleOpenInEditor = useCallback(async () => {
+    if (!selectedGist || !fileContents) {
+      toast.error('Gist ou conteúdo não encontrado')
+      return
+    }
+    try {
+      await onLoadGistFromExplorer(selectedGist, fileContents)
+      router.push('/md-editor')
+    } catch (error) {
+      toast.error('Erro ao carregar gist no editor')
+    }
+  }, [selectedGist, fileContents, onLoadGistFromExplorer, router])
 
   if (!selectedGist || !selectedFile) return null
 
   const isMD = isMarkdownFile(selectedFile.filename)
-  const currentContent = fileContents[selectedFile.filename] || ''
-
   const isOwner =
     currentUserLogin &&
     selectedGist.owner?.login &&
     currentUserLogin.toLowerCase() === selectedGist.owner.login.toLowerCase()
 
-  const canDuplicate = sessionStatus === 'authenticated'
+  const actionBtnClass =
+    'h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors'
+
   return (
-    <header className='bg-background/95 sticky top-0 z-10 flex h-[60px] w-full items-center justify-between border-b px-4 backdrop-blur-sm'>
-      <div className='flex items-center gap-3 overflow-hidden'>
-        <div className='flex flex-col overflow-hidden'>
-          <h3 className='truncate text-sm font-medium'>{selectedFile.filename}</h3>
-          <span className='text-muted-foreground text-[10px] font-bold uppercase'>
-            {selectedFile.language || 'Plain Text'}
-          </span>
-        </div>
-        {/* Badge de visibilidade */}
-        <div
-          className={cn(
-            'flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium',
-            selectedGist.public
-              ? 'bg-emerald-500/10 text-emerald-600'
-              : 'bg-amber-500/10 text-amber-600',
-          )}>
-          {selectedGist.public ? <Globe className='h-3 w-3' /> : <Lock className='h-3 w-3' />}
-          <span>{selectedGist.public ? 'Público' : 'Privado'}</span>
+    <header className='bg-background/80 sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b px-6 backdrop-blur-xl transition-all'>
+      {/* Esquerda: Breadcrumbs e Info */}
+      <div className='flex items-center gap-4 overflow-hidden'>
+        <div className='flex items-center gap-2'>
+          {/* Ícone decorativo */}
+          <div className='bg-muted/20 hidden h-9 w-9 items-center justify-center rounded-lg border sm:flex'>
+            <FileText className='text-primary h-4 w-4' />
+          </div>
+
+          <div className='flex flex-col'>
+            {/* Caminho: User > Arquivo */}
+            <div className='text-muted-foreground flex items-center gap-1.5 text-xs'>
+              <span className='hover:text-foreground cursor-default font-medium transition-colors'>
+                {selectedGist.owner?.login}
+              </span>
+              <ChevronRight className='h-3 w-3 opacity-40' />
+            </div>
+
+            <div className='flex items-center gap-2'>
+              <h3 className='text-foreground max-w-[200px] truncate text-sm font-semibold tracking-tight sm:max-w-md'>
+                {selectedFile.filename}
+              </h3>
+
+              {/* Badge de Privacidade */}
+              <div
+                className={cn(
+                  'flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold tracking-wide uppercase ring-1 ring-inset',
+                  selectedGist.public
+                    ? 'bg-emerald-500/10 text-emerald-600 ring-emerald-500/20 dark:text-emerald-400'
+                    : 'bg-amber-500/10 text-amber-600 ring-amber-500/20 dark:text-amber-400',
+                )}>
+                {selectedGist.public ? (
+                  <Globe className='h-2.5 w-2.5' />
+                ) : (
+                  <Lock className='h-2.5 w-2.5' />
+                )}
+                <span>{selectedGist.public ? 'Public' : 'Private'}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <FileSelector />
-      <div className='flex items-center gap-2'>
-        <div className='bg-primary/20 flex items-center gap-1 rounded-md p-1'>
+
+      {/* Centro: Seletor de Arquivos (Em telas grandes) */}
+      <div className='hidden flex-1 justify-center px-4 lg:flex'>
+        <div className='w-full max-w-sm'>
+          <FileSelector />
+        </div>
+      </div>
+
+      {/* Direita: Toolbar de Ações */}
+      <div className='flex items-center gap-3'>
+        {/* Actions Toolbar */}
+        <div className='bg-background/50 flex items-center gap-1 rounded-md border p-1 shadow-sm'>
           <IconButtonTooltip
-            content='Abrir em Nova Aba'
+            content='Ver no GitHub'
             onClick={() => window.open(selectedGist.html_url, '_blank')}
             icon={ExternalLink}
-            className={{
-              button: 'flex h-8 w-10 cursor-pointer items-center justify-center',
-            }}
+            className={{ button: actionBtnClass }}
           />
+
+          {/* Ações do Dono */}
           {isOwner && (
             <>
               <IconButtonTooltip
                 content='Editar Detalhes'
                 onClick={() => setIsEditModalOpen(true)}
                 icon={PencilLine}
-                className={{
-                  button: 'flex h-8 w-10 cursor-pointer items-center justify-center',
-                }}
+                className={{ button: actionBtnClass }}
               />
               <IconButtonTooltip
                 content='Deletar Gist'
-                onClick={handleDeleteClick}
+                onClick={() => setIsDeleteModalOpen(true)}
                 icon={Trash}
                 className={{
-                  button:
-                    'text-destructive hover:text-destructive flex h-8 w-10 cursor-pointer items-center justify-center',
+                  button: cn(actionBtnClass, 'hover:text-destructive hover:bg-destructive/10'),
                 }}
               />
             </>
           )}
-          {canDuplicate && (
+
+          {sessionStatus === 'authenticated' && (
             <IconButtonTooltip
               content='Duplicar Gist'
               onClick={() => setIsDuplicateModalOpen(true)}
               icon={Copy}
-              className={{
-                button: 'flex h-8 w-10 cursor-pointer items-center justify-center',
-              }}
+              className={{ button: actionBtnClass }}
             />
           )}
-          {/* !! Refatorar para usar o novo editor */}
-          {/* <Button
-            variant='secondary'
-            size='sm'
-            onClick={() => {
-              if (currentContent) {
-                setMarkdown(wrapContentInMarkdown(selectedFile.filename, currentContent))
-                toast.success('Carregado no editor!')
-                // Se o usuário estiver logado e for o dono, passa o gist ID para edição
-                if (isOwner && selectedGist) {
-                  router.push(`/md-editor?gist=${selectedGist.id}`)
-                } else {
-                  router.push('/md-editor')
-                }
-              }
-            }}>
-            <FileEdit className='mr-1 h-4 w-4' />
-          </Button> */}
         </div>
+
+        <Separator orientation='vertical' className='h-6' />
+
+        {/* Download Buttons Component */}
         <DownloadGistButtons
           onDownloadOriginal={onDownloadOriginal}
           onDownloadPackageMD={onDownloadPackageMD}
@@ -162,7 +197,20 @@ export function GistPreviewHeader() {
           isLoading={isLoading}
           handlePrint={handlePrint}
         />
+
+        <Separator orientation='vertical' className='h-6' />
+
+        {/* Botão Primário: Editor */}
+        <Button
+          size='sm'
+          onClick={handleOpenInEditor}
+          className='bg-primary text-primary-foreground hover:bg-primary/90 hidden h-9 items-center gap-2 px-4 font-semibold shadow transition-all hover:shadow-md active:scale-95 sm:flex'>
+          <FileEdit className='h-4 w-4' />
+          Editor
+        </Button>
       </div>
+
+      {/* Modais */}
       <GistEditModal
         open={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}

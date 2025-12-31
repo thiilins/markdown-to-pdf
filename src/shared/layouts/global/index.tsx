@@ -14,7 +14,7 @@ export const GlobalLayout = ({ children }: { children: React.ReactNode }) => {
         <AppProvider>
           <HeaderFooterProvider>
             <GistProvider>
-              <main className='bg-background flex h-screen w-screen flex-1 flex-col overflow-hidden bg-[url(https://picsum.photos/1920/1080)] bg-cover bg-center font-sans'>
+              <main className='bg-background flex h-screen w-screen flex-1 flex-col bg-[url(https://picsum.photos/1920/1080)] bg-cover bg-center font-sans'>
                 <GlobalHeaderComponent />
                 <Toaster />
                 <SettingsDialog />

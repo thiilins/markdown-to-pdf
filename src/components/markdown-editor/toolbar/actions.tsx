@@ -1,135 +1,140 @@
+'use client'
+
 import {
   AlertCircle,
   AlertTriangle,
+  ChevronDown,
+  Grid3X3,
+  Heading1,
+  Heading2,
+  Heading3,
+  Heading4,
+  Heading5,
+  Heading6,
   Info,
   Lightbulb,
-  ListChevronsUpDown,
+  Plus,
   ShieldAlert,
-  Table,
+  Table as TableIcon,
+  Type,
 } from 'lucide-react'
+import React, { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@radix-ui/react-dropdown-menu'
-import { Heading1, Heading2, Heading3, Heading4, Heading5, Heading6 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+} from '@/components/ui/dropdown-menu'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { cn } from '@/lib/utils'
 
+/**
+ * Item padrão da toolbar (seguindo o padrão do action-toolbar)
+ */
 export const MarkdownToolbarItem = ({
-  icon,
+  icon: Icon,
   tooltip,
   onClick,
+  className,
+  disabled,
 }: {
   icon: React.ElementType
   tooltip: string
-  onClick?: () => void | Promise<void>
+  onClick?: () => void
+  className?: string
+  disabled?: boolean
 }) => {
-  const Icon = icon
   return (
-    <Tooltip>
+    <Tooltip delayDuration={200}>
       <TooltipTrigger asChild>
         <Button
           variant='ghost'
-          className='flex h-7 w-7 max-w-7 flex-1 rounded bg-transparent p-1'
+          size='icon'
+          disabled={disabled}
+          className={cn('h-8 max-h-8 w-8 max-w-8 rounded-md transition-all', className)}
           onClick={onClick}>
           <Icon className='h-4 w-4' />
         </Button>
       </TooltipTrigger>
-      <TooltipContent>{tooltip}</TooltipContent>
+      <TooltipContent side='bottom' className='px-2 py-1 text-[12px] font-medium'>
+        {tooltip}
+      </TooltipContent>
     </Tooltip>
   )
 }
 
-export const HeadingsToolbar = ({ actions }: { actions: IToolbarActions }) => {
-  const [open, setOpen] = useState(false)
+/**
+ * Menu de Cabeçalhos (Dropdown compacto)
+ */
+export const HeadingsToolbar = ({ actions }: { actions: any }) => {
+  const [open, setOpen] = React.useState(false)
   const headings = [
-    {
-      icon: Heading1,
-      title: 'Título 1',
-      onClick: () => actions.insertHeading(1),
-    },
-    {
-      icon: Heading2,
-      title: 'Título 2',
-      onClick: () => actions.insertHeading(2),
-    },
-    {
-      icon: Heading3,
-      title: 'Título 3',
-      onClick: () => actions.insertHeading(3),
-    },
-    {
-      icon: Heading4,
-      title: 'Título 4',
-      onClick: () => actions.insertHeading(4),
-    },
-    {
-      icon: Heading5,
-      title: 'Título 5',
-      onClick: () => actions.insertHeading(5),
-    },
-    {
-      icon: Heading6,
-      title: 'Título 6',
-      onClick: () => actions.insertHeading(6),
-    },
+    { level: 1, icon: Heading1, label: 'Título 1', shortcut: '#' },
+    { level: 2, icon: Heading2, label: 'Título 2', shortcut: '##' },
+    { level: 3, icon: Heading3, label: 'Título 3', shortcut: '###' },
+    { level: 4, icon: Heading4, label: 'Título 4', shortcut: '####' },
+    { level: 5, icon: Heading5, label: 'Título 5', shortcut: '#####' },
+    { level: 6, icon: Heading6, label: 'Título 6', shortcut: '######' },
   ]
+
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant='ghost'
-          className='h-7 w-7 rounded bg-transparent p-1'
-          onClick={() => setOpen(!open)}>
-          <Heading1 className='h-4 w-4' />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align='start'
-        className='bg-background text-foreground z-50 cursor-pointer rounded px-2 py-2 shadow-sm'>
-        {headings.map((heading) => (
+      <Tooltip delayDuration={200}>
+        <TooltipTrigger asChild>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant='ghost'
+              size='sm'
+              className={cn(
+                'h-8 w-9 gap-0.5 rounded-md px-1.5 transition-all',
+                open
+                  ? 'bg-accent text-accent-foreground'
+                  : 'hover:bg-accent hover:text-accent-foreground',
+              )}>
+              <Type className='h-4 w-4' />
+              <ChevronDown className='h-2.5 w-2.5 opacity-50 transition-transform' />
+            </Button>
+          </DropdownMenuTrigger>
+        </TooltipTrigger>
+        <TooltipContent side='bottom' className='px-2 py-1 text-[12px] font-medium'>
+          Títulos
+        </TooltipContent>
+      </Tooltip>
+
+      <DropdownMenuContent align='start' className='w-52 p-1.5'>
+        <div className='text-muted-foreground mb-1 px-2 py-1 text-[10px] font-bold tracking-wider uppercase'>
+          Hierarquia
+        </div>
+        {headings.map((item) => (
           <DropdownMenuItem
-            key={heading.title}
-            onClick={heading.onClick}
-            className='hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm font-normal'>
-            <heading.icon className='mr-2 h-4 w-4' />
-            {heading.title}
+            key={item.level}
+            onClick={() => {
+              actions.insertHeading(item.level)
+              setOpen(false)
+            }}
+            className='focus:bg-accent focus:text-accent-foreground flex cursor-pointer items-center justify-between gap-2 rounded-sm px-2 py-1.5 text-xs transition-colors'>
+            <div className='flex items-center gap-2'>
+              <item.icon className='text-muted-foreground h-3.5 w-3.5' />
+              <span className='font-medium'>{item.label}</span>
+            </div>
+            <span className='text-muted-foreground bg-muted rounded px-1.5 py-0.5 font-mono text-[9px]'>
+              {item.shortcut}
+            </span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
-export const MoreOptionsToolbar = ({
-  moreOpen,
-  setMoreOpen,
-}: {
-  moreOpen: boolean
-  setMoreOpen: (moreOpen: boolean) => void
-}) => {
-  const content = useMemo(() => {
-    return moreOpen
-      ? { icon: ListChevronsUpDown, tooltip: 'Menos opções' }
-      : { icon: ListChevronsUpDown, tooltip: 'Mais opções' }
-  }, [moreOpen])
-  return (
-    <div className='flex flex-1 items-center justify-around gap-2 rounded border p-1'>
-      <MarkdownToolbarItem
-        icon={content.icon}
-        tooltip={content.tooltip}
-        onClick={() => setMoreOpen(!moreOpen)}
-      />
-    </div>
-  )
-}
 
+/**
+ * Gerador de Tabelas
+ */
 export const TableGenerator = ({
   onInsert,
 }: {
@@ -142,168 +147,139 @@ export const TableGenerator = ({
   const MIN_SIZE = 2
   const MAX_SIZE = 50
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const rowsNum = parseInt(rows, 10)
-    const colsNum = parseInt(cols, 10)
-
-    if (rowsNum >= MIN_SIZE && rowsNum <= MAX_SIZE && colsNum >= MIN_SIZE && colsNum <= MAX_SIZE) {
-      onInsert(rowsNum, colsNum)
+  const handleSubmit = () => {
+    const r = parseInt(rows, 10)
+    const c = parseInt(cols, 10)
+    if (!isNaN(r) && !isNaN(c) && r >= MIN_SIZE && c >= MIN_SIZE) {
+      onInsert(r, c)
       setOpen(false)
-      // Reset para valores padrão após inserção
       setRows('3')
       setCols('3')
     }
   }
 
-  const rowsNum = parseInt(rows, 10)
-  const colsNum = parseInt(cols, 10)
   const isValid =
-    !isNaN(rowsNum) &&
-    !isNaN(colsNum) &&
-    rowsNum >= MIN_SIZE &&
-    rowsNum <= MAX_SIZE &&
-    colsNum >= MIN_SIZE &&
-    colsNum <= MAX_SIZE
+    parseInt(rows, 10) >= MIN_SIZE &&
+    parseInt(rows, 10) <= MAX_SIZE &&
+    parseInt(cols, 10) >= MIN_SIZE &&
+    parseInt(cols, 10) <= MAX_SIZE
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <Tooltip>
+      <Tooltip delayDuration={200}>
         <TooltipTrigger asChild>
           <PopoverTrigger asChild>
             <Button
               variant='ghost'
-              className='flex h-7 w-7 max-w-7 flex-1 rounded bg-transparent p-1'
-              onClick={() => setOpen(!open)}>
-              <Table className='h-4 w-4' />
+              size='icon'
+              className={cn(
+                'hover:bg-accent hover:text-accent-foreground h-8 w-9 rounded-md transition-all',
+                open && 'bg-accent text-accent-foreground',
+              )}>
+              <TableIcon className='h-4 w-4' />
             </Button>
           </PopoverTrigger>
         </TooltipTrigger>
-        <TooltipContent>Tabela dinâmica</TooltipContent>
+        <TooltipContent side='bottom' className='px-2 py-1 text-[12px] font-medium'>
+          Tabela
+        </TooltipContent>
       </Tooltip>
-      <PopoverContent
-        className='flex w-70 flex-col items-center justify-center space-y-4 p-4'
-        align='start'
-        onOpenAutoFocus={(e) => e.preventDefault()}>
-        <div className='flex w-full flex-1 items-center justify-center gap-2'>
-          <div className='flex flex-1 flex-col items-center justify-center'>
-            <Label htmlFor='table-rows' className='text-sm font-medium'>
-              Linhas
-            </Label>
-            <Input
-              id='table-rows'
-              type='number'
-              min={MIN_SIZE}
-              max={MAX_SIZE}
-              value={rows}
-              onChange={(e) => setRows(e.target.value)}
-              placeholder='Ex: 3'
-              className='w-full'
-              autoFocus
-            />
+      <PopoverContent className='w-64 p-3' align='start'>
+        <div className='space-y-3'>
+          <div className='border-border flex items-center gap-2 border-b pb-2'>
+            <Grid3X3 className='text-primary h-4 w-4' />
+            <span className='text-sm font-semibold'>Gerar Tabela</span>
           </div>
-
-          <div className='flex flex-1 flex-col items-center justify-center'>
-            <Label htmlFor='table-cols' className='text-sm font-medium'>
-              Colunas
-            </Label>
-            <Input
-              id='table-cols'
-              type='number'
-              min={MIN_SIZE}
-              max={MAX_SIZE}
-              value={cols}
-              onChange={(e) => setCols(e.target.value)}
-              placeholder='Ex: 3'
-              className='w-full'
-            />
+          <div className='grid grid-cols-2 gap-3'>
+            <div className='space-y-1.5'>
+              <Label className='text-muted-foreground text-[10px] font-semibold tracking-wide uppercase'>
+                Linhas
+              </Label>
+              <Input
+                type='number'
+                min={MIN_SIZE}
+                max={MAX_SIZE}
+                value={rows}
+                onChange={(e) => setRows(e.target.value)}
+                className='h-8 text-xs'
+              />
+            </div>
+            <div className='space-y-1.5'>
+              <Label className='text-muted-foreground text-[10px] font-semibold tracking-wide uppercase'>
+                Colunas
+              </Label>
+              <Input
+                type='number'
+                min={MIN_SIZE}
+                max={MAX_SIZE}
+                value={cols}
+                onChange={(e) => setCols(e.target.value)}
+                className='h-8 text-xs'
+              />
+            </div>
           </div>
+          <Button
+            size='sm'
+            className='h-8 w-full gap-1.5 text-xs font-medium'
+            disabled={!isValid}
+            onClick={handleSubmit}>
+            <Plus className='h-3.5 w-3.5' /> Inserir Tabela
+          </Button>
         </div>
-
-        <Button className='w-full flex-1' disabled={!isValid} onClick={handleSubmit}>
-          Inserir Tabela ({rowsNum} × {colsNum})
-        </Button>
       </PopoverContent>
     </Popover>
   )
 }
 
-export const CalloutsMenu = ({
-  onInsert,
-}: {
-  onInsert: (type: 'NOTE' | 'TIP' | 'IMPORTANT' | 'WARNING' | 'CAUTION') => void
-}) => {
+/**
+ * Menu de Callouts
+ */
+export const CalloutsMenu = ({ onInsert }: { onInsert: (type: any) => void }) => {
   const [open, setOpen] = useState(false)
-
   const callouts = [
-    {
-      type: 'NOTE' as const,
-      icon: Info,
-      label: 'Nota',
-      description: 'Informação importante',
-    },
-    {
-      type: 'TIP' as const,
-      icon: Lightbulb,
-      label: 'Dica',
-      description: 'Dica útil',
-    },
-    {
-      type: 'IMPORTANT' as const,
-      icon: AlertCircle,
-      label: 'Importante',
-      description: 'Informação importante',
-    },
-    {
-      type: 'WARNING' as const,
-      icon: AlertTriangle,
-      label: 'Aviso',
-      description: 'Aviso de atenção',
-    },
-    {
-      type: 'CAUTION' as const,
-      icon: ShieldAlert,
-      label: 'Cuidado',
-      description: 'Cuidado necessário',
-    },
+    { type: 'NOTE', icon: Info, label: 'Nota', color: 'text-blue-500' },
+    { type: 'TIP', icon: Lightbulb, label: 'Dica', color: 'text-emerald-500' },
+    { type: 'IMPORTANT', icon: AlertCircle, label: 'Importante', color: 'text-purple-500' },
+    { type: 'WARNING', icon: AlertTriangle, label: 'Aviso', color: 'text-amber-500' },
+    { type: 'CAUTION', icon: ShieldAlert, label: 'Cuidado', color: 'text-destructive' },
   ]
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
-      <Tooltip>
+      <Tooltip delayDuration={200}>
         <TooltipTrigger asChild>
           <DropdownMenuTrigger asChild>
             <Button
               variant='ghost'
-              className='flex h-7 w-7 max-w-7 flex-1 rounded bg-transparent p-1'
-              onClick={() => setOpen(!open)}>
+              size='icon'
+              className={cn(
+                'hover:bg-accent hover:text-accent-foreground h-8 w-9 rounded-md transition-all',
+                open && 'bg-accent text-accent-foreground',
+              )}>
               <Info className='h-4 w-4' />
             </Button>
           </DropdownMenuTrigger>
         </TooltipTrigger>
-        <TooltipContent>Callouts/Admonitions</TooltipContent>
+        <TooltipContent side='bottom' className='px-2 py-1 text-[12px] font-medium'>
+          Alertas
+        </TooltipContent>
       </Tooltip>
-      <DropdownMenuContent
-        align='start'
-        className='bg-background text-foreground z-50 cursor-pointer rounded px-2 py-2 shadow-sm'>
-        {callouts.map((callout) => {
-          const Icon = callout.icon
-          return (
-            <DropdownMenuItem
-              key={callout.type}
-              onClick={() => {
-                onInsert(callout.type)
-                setOpen(false)
-              }}
-              className='hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm font-normal'>
-              <Icon className='mr-2 h-4 w-4' />
-              <div className='flex flex-col'>
-                <span>{callout.label}</span>
-                <span className='text-muted-foreground text-xs'>{callout.description}</span>
-              </div>
-            </DropdownMenuItem>
-          )
-        })}
+      <DropdownMenuContent align='start' className='w-52 p-1.5'>
+        <div className='text-muted-foreground mb-1 px-2 py-1 text-[10px] font-bold tracking-wider uppercase'>
+          Inserir Alerta
+        </div>
+        {callouts.map((item) => (
+          <DropdownMenuItem
+            key={item.type}
+            onClick={() => {
+              onInsert(item.type)
+              setOpen(false)
+            }}
+            className='focus:bg-accent focus:text-accent-foreground flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-xs transition-colors'>
+            <item.icon className={cn('h-3.5 w-3.5', item.color)} />
+            <span className='font-medium'>{item.label}</span>
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   )

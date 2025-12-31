@@ -183,6 +183,90 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Scrollbar customizada global - Moderna e sutil */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(var(--muted-foreground) / 0.3) transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: oklch(var(--muted-foreground) / 0.3);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background-color 0.2s ease;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: oklch(var(--muted-foreground) / 0.5);
+    background-clip: padding-box;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:active {
+    background: oklch(var(--primary) / 0.6);
+    background-clip: padding-box;
+  }
+
+  /* Scrollbar fina para áreas menores */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(var(--muted-foreground) / 0.25) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: oklch(var(--muted-foreground) / 0.25);
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: oklch(var(--muted-foreground) / 0.4);
+  }
+
+  /* Scrollbar com cor primária */
+  .scrollbar-primary {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(var(--primary) / 0.4) transparent;
+  }
+
+  .scrollbar-primary::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-primary::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-primary::-webkit-scrollbar-thumb {
+    background: oklch(var(--primary) / 0.4);
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+  }
+
+  .scrollbar-primary::-webkit-scrollbar-thumb:hover {
+    background: oklch(var(--primary) / 0.6);
+  }
 }
 
 body {
@@ -202,5 +286,77 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Scrollbar global customizada para toda a aplicação */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(var(--muted-foreground) / 0.2) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 5px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: oklch(var(--muted-foreground) / 0.2);
+    border-radius: 5px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background-color 0.2s ease, width 0.2s ease;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: oklch(var(--muted-foreground) / 0.35);
+    background-clip: padding-box;
+  }
+
+  *::-webkit-scrollbar-thumb:active {
+    background: oklch(var(--primary) / 0.5);
+    background-clip: padding-box;
+  }
+
+  /* Scrollbar mais fina em elementos menores */
+  input,
+  textarea,
+  select {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(var(--muted-foreground) / 0.15) transparent;
+  }
+
+  input::-webkit-scrollbar,
+  textarea::-webkit-scrollbar,
+  select::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  input::-webkit-scrollbar-thumb,
+  textarea::-webkit-scrollbar-thumb,
+  select::-webkit-scrollbar-thumb {
+    background: oklch(var(--muted-foreground) / 0.15);
+    border-radius: 3px;
+  }
+
+  input::-webkit-scrollbar-thumb:hover,
+  textarea::-webkit-scrollbar-thumb:hover,
+  select::-webkit-scrollbar-thumb:hover {
+    background: oklch(var(--muted-foreground) / 0.25);
+  }
+
+  /* Scroll suave global */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Melhorar performance do scroll */
+  * {
+    -webkit-overflow-scrolling: touch;
   }
 }

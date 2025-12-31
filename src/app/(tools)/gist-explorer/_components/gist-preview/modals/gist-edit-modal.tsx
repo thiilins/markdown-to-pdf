@@ -14,8 +14,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import { cn } from '@/lib/utils'
 import { extractGistTags } from '@/shared/utils/gist-tools'
-import { Globe, Lock, X } from 'lucide-react'
+import { AlertCircle, Globe, Loader2, Lock, Plus, Settings2, Tag, TextQuote, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -40,16 +41,13 @@ export function GistEditModal({
   const [isPublic, setIsPublic] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
 
-  // Extrai descrição e tags quando o modal abre
   useEffect(() => {
     if (open && gist) {
       const currentTags = extractGistTags(gist.description)
-      // Remove tags da descrição para mostrar apenas o texto
       let cleanDescription = gist.description || ''
       currentTags.forEach((tag) => {
         cleanDescription = cleanDescription.replace(new RegExp(`#${tag}\\b`, 'gi'), '').trim()
       })
-      // Remove múltiplos espaços
       cleanDescription = cleanDescription.replace(/\s+/g, ' ').trim()
       setDescription(cleanDescription)
       setTags(currentTags)
@@ -58,7 +56,7 @@ export function GistEditModal({
   }, [open, gist])
 
   const handleAddTag = useCallback(() => {
-    const trimmedTag = newTag.trim().toLowerCase()
+    const trimmedTag = newTag.trim().toLowerCase().replace(/\s+/g, '_')
     if (!trimmedTag) return
     if (tags.includes(trimmedTag)) {
       toast.error('Tag já existe')
@@ -66,36 +64,26 @@ export function GistEditModal({
       return
     }
     if (trimmedTag.length > 20) {
-      toast.error('Tag muito longa (máximo 20 caracteres)')
+      toast.error('Tag muito longa')
       return
     }
-    // Valida se contém apenas letras, números e underscore
     if (!/^[a-z0-9_]+$/.test(trimmedTag)) {
-      toast.error('Tag inválida. Use apenas letras, números e underscore')
+      toast.error('Use apenas letras, números e underscore')
       return
     }
     setTags([...tags, trimmedTag])
     setNewTag('')
   }, [newTag, tags])
 
-  const handleRemoveTag = useCallback(
-    (tagToRemove: string) => {
-      setTags(tags.filter((tag) => tag !== tagToRemove))
-    },
-    [tags],
-  )
+  const handleRemoveTag = (tagToRemove: string) => {
+    setTags(tags.filter((tag) => tag !== tagToRemove))
+  }
 
   const handleSave = useCallback(async () => {
     if (!gist) return
 
-    // Verifica se está tentando tornar público em privado
-    if (gist.public === true && isPublic === false) {
-      return
-    }
-
     setIsSaving(true)
     try {
-      // Monta a descrição final com tags
       let finalDescription = description.trim()
       if (tags.length > 0) {
         const tagsString = tags.map((tag) => `#${tag}`).join(' ')
@@ -104,16 +92,8 @@ export function GistEditModal({
       await onSave(gist.id, finalDescription, isPublic)
       toast.success('Gist atualizado com sucesso!')
       onOpenChange(false)
-    } catch (error) {
-      console.error('Erro ao salvar gist:', error)
-      const errorMessage =
-        error instanceof Error ? error.message : 'Erro ao salvar gist. Tente novamente.'
-
-      // Verifica se é erro de conversão necessária
-      if (errorMessage === 'CONVERSION_REQUIRED') {
-      } else {
-        toast.error(errorMessage)
-      }
+    } catch (error: any) {
+      toast.error(error.message || 'Erro ao salvar alterações')
     } finally {
       setIsSaving(false)
     }
@@ -124,163 +104,187 @@ export function GistEditModal({
 
     setIsSaving(true)
     try {
-      // Monta a descrição final com tags
       let finalDescription = description.trim()
       if (tags.length > 0) {
         const tagsString = tags.map((tag) => `#${tag}`).join(' ')
         finalDescription = finalDescription ? `${finalDescription} ${tagsString}` : tagsString
       }
       await onConvertPublicToPrivate(gist, finalDescription)
-      toast.success('Gist convertido para privado com sucesso!')
+      toast.success('Gist convertido e recriado como privado!')
       onOpenChange(false)
-    } catch (error) {
-      console.error('Erro ao converter gist:', error)
-      const errorMessage =
-        error instanceof Error ? error.message : 'Erro ao converter gist. Tente novamente.'
-      toast.error(errorMessage)
+    } catch (error: any) {
+      toast.error(error.message || 'Erro na conversão do Gist')
     } finally {
       setIsSaving(false)
     }
   }, [gist, description, tags, onConvertPublicToPrivate, onOpenChange])
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
-        e.preventDefault()
-        handleAddTag()
-      }
-    },
-    [handleAddTag],
-  )
+  // Flag para detecção de mudança crítica de visibilidade
+  const isConversionRequired = gist?.public === true && isPublic === false
 
-  useEffect(() => {
-    console.log('isPublic', isPublic)
-  }, [isPublic])
   if (!gist) return null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-[600px]'>
-        <DialogHeader>
-          <DialogTitle>Editar Descrição e Tags</DialogTitle>
-          <DialogDescription>
-            Edite a descrição do gist e gerencie suas tags. As tags serão adicionadas à descrição no
-            formato #tag.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className='gap-0 overflow-hidden border-none p-0 shadow-2xl sm:max-w-[550px]'>
+        {/* Header Consistente */}
+        <div className='from-primary/10 flex flex-col items-center justify-center bg-gradient-to-b to-transparent pt-8 pb-4'>
+          <div className='bg-primary/10 ring-primary/5 mb-4 flex h-14 w-14 items-center justify-center rounded-full ring-8'>
+            <Settings2 className='text-primary h-7 w-7' />
+          </div>
+          <DialogHeader className='flex w-full flex-col items-center justify-center px-6 text-center'>
+            <DialogTitle className='text-xl font-bold tracking-tight'>
+              Editar Descrição e Tags
+            </DialogTitle>
+            <DialogDescription className='text-sm'>
+              Gerencie os metadados do seu Gist no GitHub.
+            </DialogDescription>
+          </DialogHeader>
+        </div>
 
-        <div className='space-y-4 py-4'>
+        <div className='custom-scrollbar max-h-[65vh] space-y-6 overflow-y-auto px-6 py-6'>
+          {/* Descrição */}
           <div className='space-y-2'>
-            <Label htmlFor='description'>Descrição</Label>
+            <Label
+              htmlFor='description'
+              className='text-muted-foreground flex items-center gap-2 text-sm font-semibold'>
+              <TextQuote className='h-3.5 w-3.5' /> Descrição do Gist
+            </Label>
             <Textarea
               id='description'
-              placeholder='Digite a descrição do gist...'
+              placeholder='Digite a descrição...'
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              rows={4}
-              className='resize-none'
+              rows={3}
+              className='focus-visible:ring-primary resize-none'
             />
           </div>
 
           {/* Tags */}
-          <div className='space-y-2'>
-            <Label htmlFor='tags'>Tags</Label>
-            <div className='flex min-h-[60px] flex-wrap gap-2 rounded-md border p-3'>
-              {tags.length > 0 ? (
-                tags.map((tag) => (
-                  <Badge key={tag} variant='secondary' className='flex items-center gap-1 pr-1'>
-                    <span>#{tag}</span>
-                    <button
-                      type='button'
-                      onClick={() => handleRemoveTag(tag)}
-                      className='hover:bg-destructive/20 rounded-full p-0.5 transition-colors'>
-                      <X className='h-3 w-3' />
-                    </button>
-                  </Badge>
-                ))
-              ) : (
-                <span className='text-muted-foreground text-sm'>Nenhuma tag adicionada</span>
-              )}
+          <div className='space-y-3'>
+            <Label className='text-muted-foreground flex items-center gap-2 text-sm font-semibold'>
+              <Tag className='h-3.5 w-3.5' /> Tags (#tag)
+            </Label>
+            <div className='bg-muted/20 focus-within:border-primary/50 space-y-3 rounded-xl border p-3 transition-colors'>
+              <div className='flex min-h-[32px] flex-wrap gap-1.5'>
+                {tags.length > 0 ? (
+                  tags.map((tag) => (
+                    <Badge key={tag} variant='secondary' className='gap-1 py-1 pr-1 pl-2'>
+                      <span className='text-[11px]'>#{tag}</span>
+                      <button
+                        onClick={() => handleRemoveTag(tag)}
+                        className='hover:bg-destructive/20 text-muted-foreground hover:text-destructive rounded-full p-0.5'>
+                        <X className='h-3 w-3' />
+                      </button>
+                    </Badge>
+                  ))
+                ) : (
+                  <span className='text-muted-foreground px-1 text-[11px] italic'>
+                    Nenhuma tag...
+                  </span>
+                )}
+              </div>
+              <div className='flex gap-2'>
+                <Input
+                  placeholder='Nova tag...'
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
+                  className='bg-background h-8 text-xs'
+                />
+                <Button size='sm' variant='outline' onClick={handleAddTag} className='h-8 px-3'>
+                  <Plus className='mr-1 h-3.5 w-3.5' /> Add
+                </Button>
+              </div>
             </div>
-            <div className='flex gap-2'>
-              <Input
-                id='tags'
-                placeholder='Digite uma tag e pressione Enter'
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className='flex-1'
-              />
-              <Button type='button' variant='outline' onClick={handleAddTag}>
-                Adicionar
-              </Button>
-            </div>
-            <p className='text-muted-foreground text-xs'>
-              Use apenas letras, números e underscore. Máximo 20 caracteres.
-            </p>
           </div>
 
-          {/* Privacidade */}
+          {/* Privacidade Card */}
           <div className='space-y-3'>
-            <div className='flex items-center justify-between rounded-md border p-3'>
+            <div
+              className={cn(
+                'flex items-center justify-between rounded-xl border p-4 transition-all',
+                isConversionRequired ? 'border-amber-500/50 bg-amber-500/5' : 'bg-muted/10',
+              )}>
               <div className='space-y-0.5'>
-                <Label htmlFor='privacy' className='text-base'>
-                  Visibilidade
-                </Label>
-                <p className='text-muted-foreground text-sm'>
+                <div className='flex items-center gap-2 text-sm font-semibold'>
+                  {isPublic ? (
+                    <Globe className='text-primary h-4 w-4' />
+                  ) : (
+                    <Lock className='h-4 w-4 text-amber-500' />
+                  )}
+                  {isPublic ? 'Visibilidade Pública' : 'Visibilidade Privada'}
+                </div>
+                <p className='text-muted-foreground text-[11px] leading-tight'>
                   {isPublic
-                    ? 'Qualquer pessoa pode ver este gist'
-                    : 'Apenas você pode ver este gist'}
+                    ? 'Qualquer pessoa pode encontrar e ver.'
+                    : 'Apenas quem possui o link pode acessar.'}
                 </p>
               </div>
-              <div className='flex items-center gap-2'>
-                {isPublic ? (
-                  <Globe className='text-muted-foreground h-4 w-4' />
-                ) : (
-                  <Lock className='text-muted-foreground h-4 w-4' />
-                )}
-                <Switch
-                  id='privacy'
-                  checked={isPublic}
-                  onCheckedChange={(checked) => {
-                    setIsPublic(checked)
-                  }}
-                />
-              </div>
+              <Switch checked={isPublic} onCheckedChange={setIsPublic} disabled={isSaving} />
             </div>
 
-            {/* Aviso de conversão */}
-            {gist?.public === true && isPublic === false && (
-              <div className='rounded-md border border-amber-500/20 bg-amber-500/10 p-3'>
-                <p className='text-sm font-medium text-amber-600'>
-                  ⚠️ Conversão de Visibilidade Necessária
-                </p>
-                <p className='mt-1 text-xs text-amber-600/80'>
-                  Gists públicos não podem ser tornados privados diretamente. Será criado um novo
-                  gist privado e o público será deletado. Isso resultará em uma nova URL.
-                </p>
-                <ul className='mt-2 list-inside list-disc text-xs text-amber-600/80'>
-                  <li>O gist público atual será deletado</li>
-                  <li>Um novo gist privado será criado com o mesmo conteúdo</li>
-                  <li>A URL do gist mudará</li>
-                  <li>Histórico, forks e comentários serão perdidos</li>
-                </ul>
+            {/* Aviso de Conversão Estilizado */}
+            {isConversionRequired && (
+              <div className='rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/30 dark:bg-amber-950/20'>
+                <div className='flex gap-3'>
+                  <AlertCircle className='h-5 w-5 shrink-0 text-amber-600' />
+                  <div className='space-y-2'>
+                    <p className='text-xs font-bold tracking-wider text-amber-700 uppercase dark:text-amber-400'>
+                      Atenção: Ação de Substituição
+                    </p>
+                    <p className='text-[11px] leading-relaxed text-amber-800 dark:text-amber-500'>
+                      Gists públicos não podem ser alterados para privados diretamente. Para
+                      realizar esta mudança, o Gist atual será{' '}
+                      <span className='font-bold underline'>deletado</span> e um novo Gist privado
+                      será criado. Isso alterará a URL e removerá comentários/forks existentes.
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant='outline' onClick={() => onOpenChange(false)} disabled={isSaving}>
+        {/* Footer Dinâmico */}
+        <DialogFooter className='bg-muted/20 flex w-full flex-col-reverse items-center gap-3 border-t px-6 py-4 sm:flex-row sm:justify-end'>
+          <Button
+            variant='ghost'
+            className='hover:bg-background w-full font-medium sm:w-auto'
+            onClick={() => onOpenChange(false)}
+            disabled={isSaving}>
             Cancelar
           </Button>
-          {gist?.public === true && isPublic === false && onConvertPublicToPrivate ? (
-            <Button onClick={handleConvert} disabled={isSaving} variant='destructive'>
+
+          {isConversionRequired ? (
+            <Button
+              variant='destructive'
+              className='shadow-destructive/20 w-full min-w-[160px] gap-2 font-bold shadow-lg sm:w-auto'
+              onClick={handleConvert}
+              disabled={isSaving}>
+              {isSaving ? (
+                <Loader2 className='h-4 w-4 animate-spin' />
+              ) : (
+                <Lock className='h-4 w-4' />
+              )}
               {isSaving ? 'Convertendo...' : 'Converter para Privado'}
             </Button>
           ) : (
-            <Button onClick={handleSave} disabled={isSaving}>
-              {isSaving ? 'Salvando...' : 'Salvar'}
+            <Button
+              className='w-full min-w-[120px] gap-2 font-bold shadow-md sm:w-auto'
+              onClick={handleSave}
+              disabled={
+                isSaving ||
+                (description === gist?.description &&
+                  tags.join(' ') === extractGistTags(gist?.description).join(' ') &&
+                  isPublic === gist?.public)
+              }>
+              {isSaving ? (
+                <Loader2 className='h-4 w-4 animate-spin' />
+              ) : (
+                <Settings2 className='h-4 w-4' />
+              )}
+              {isSaving ? 'Salvando...' : 'Salvar Alterações'}
             </Button>
           )}
         </DialogFooter>

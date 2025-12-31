@@ -1,14 +1,58 @@
 'use client'
 
-import { StaticPreview } from '@/components/preview-panel/static-pages'
 import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 import { useApp } from '@/shared/contexts/appContext'
 import { useGist } from '@/shared/contexts/gistContext'
 import { isImageFile, isMarkdownFile, mapLanguage } from '@/shared/utils'
-import { AlertCircle } from 'lucide-react'
-import { useMemo } from 'react'
+import { AlertCircle, ImageIcon } from 'lucide-react'
+import { ReactNode, useMemo } from 'react'
 import SyntaxHighlighter from 'react-syntax-highlighter'
-import { darcula } from 'react-syntax-highlighter/dist/esm/styles/hljs'
+
+import { vs2015 } from 'react-syntax-highlighter/dist/cjs/styles/hljs'
+import { MdPreview } from './md-preview'
+// ============================================================================
+// COMPONENTE DE LAYOUT PADRÃO (O "PAPEL" A4)
+// ============================================================================
+interface StandardPreviewWrapperProps {
+  children: ReactNode
+  className?: string
+  contentRef?: any
+}
+
+const StandardPreviewWrapper = ({
+  children,
+  className,
+  contentRef,
+}: StandardPreviewWrapperProps) => {
+  return (
+    <div className='bg-muted/10 relative flex min-h-full w-full flex-col items-center py-8 md:py-12'>
+      {/* Padrão de fundo sutil (Dot Pattern) */}
+      <div className='pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] bg-size-[16px_16px] opacity-50 dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)]' />
+
+      {/* A Folha de Papel */}
+      <div
+        ref={contentRef}
+        className={cn(
+          'print-content relative z-10 mx-auto flex w-full max-w-full flex-col overflow-hidden transition-all duration-300',
+          'ring-border/50 bg-white text-left shadow-sm ring-1 dark:bg-zinc-950 dark:ring-white/10',
+          'md:rounded-xl md:shadow-md',
+          className,
+        )}
+        style={{
+          maxWidth: 'min(310mm, 100%)', // Largura A4 máxima, mas nunca mais que 100% do container
+          minHeight: '297mm', // Altura A4 mínima
+        }}>
+        {children}
+      </div>
+
+      {/* Footer Visual Sutil */}
+      <div className='text-muted-foreground mt-8 font-mono text-[10px] tracking-widest uppercase opacity-40'>
+        Fim do arquivo
+      </div>
+    </div>
+  )
+}
 
 const ContentComponent = ({
   filename,
@@ -24,6 +68,8 @@ const ContentComponent = ({
   const isImage = isImageFile(selectedFile?.filename)
 
   const RenderedView = useMemo(() => {
+    // Markdown usa o StaticPreview que já tem seu próprio layout
+    // Passamos o contentRef para ele
     if (isMd) {
       return <ContentMdPreview content={content} />
     }
@@ -33,7 +79,7 @@ const ContentComponent = ({
     return <ContentCodePreview content={content} language={language} />
   }, [isMd, isImage, content, language, selectedFile])
 
-  return <div className='h-full w-full'>{RenderedView}</div>
+  return <div className='animate-in fade-in h-full w-full duration-300'>{RenderedView}</div>
 }
 
 const ContentMdPreview = ({ content }: { content: string }) => {
@@ -41,7 +87,7 @@ const ContentMdPreview = ({ content }: { content: string }) => {
   const { contentRef } = useGist()
   return (
     <div className='h-full w-full'>
-      <StaticPreview
+      <MdPreview
         markdown={content}
         typographyConfig={config.typography}
         themeConfig={config.theme}
@@ -58,42 +104,90 @@ const ContentCodePreview = ({
   content: string
   language?: string | null
 }) => {
+  const { contentRef } = useGist()
+
   return (
-    <div className='h-full w-full overflow-hidden font-mono text-sm'>
-      <SyntaxHighlighter
-        language={mapLanguage(language)}
-        style={darcula}
-        className='rounded-md'
-        showLineNumbers={true}
-        lineNumberStyle={{ minWidth: '3em', paddingRight: '1em', color: '#888' }}
-        customStyle={{
-          margin: 0,
-          padding: '2rem',
-          width: '100%',
-          backgroundColor: '#010101',
-        }}>
-        {content}
-      </SyntaxHighlighter>
-    </div>
+    <StandardPreviewWrapper contentRef={contentRef} className='bg-[#2b2b2b] dark:bg-[#2b2b2b]'>
+      <div className='flex shrink-0 items-center justify-between border-b border-white/10 bg-white/5 px-6 py-3'>
+        <div className='flex items-center gap-4'>
+          <div className='flex gap-1.5'>
+            <div className='h-3 w-3 rounded-full bg-red-500/80 shadow-sm' />
+            <div className='h-3 w-3 rounded-full bg-yellow-500/80 shadow-sm' />
+            <div className='h-3 w-3 rounded-full bg-green-500/80 shadow-sm' />
+          </div>
+        </div>
+        <span className='text-muted-foreground font-mono text-xs font-medium tracking-wider uppercase opacity-60'>
+          {language || 'text'}
+        </span>
+      </div>
+
+      <div className='flex-1 overflow-x-auto'>
+        <SyntaxHighlighter
+          language={mapLanguage(language)}
+          style={vs2015}
+          showLineNumbers={true}
+          wrapLines={true}
+          lineNumberStyle={{
+            minWidth: '3.5em',
+            paddingRight: '1.5em',
+            color: '#606366',
+            textAlign: 'right',
+            borderRight: '1px solid rgba(255,255,255,0.05)',
+            marginRight: '1.5em',
+            display: 'inline-block',
+          }}
+          customStyle={{
+            margin: 0,
+            padding: '2rem',
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'transparent',
+            fontSize: '13px',
+            lineHeight: '1.6',
+            fontFamily: 'var(--font-mono)',
+          }}>
+          {content}
+        </SyntaxHighlighter>
+      </div>
+    </StandardPreviewWrapper>
   )
 }
 
 const ContentImagePreview = ({ selectedFile }: { selectedFile?: any | null }) => {
+  const { contentRef } = useGist()
+
   return (
-    <div className='flex min-h-full flex-col items-center justify-center bg-slate-50 p-8 dark:bg-slate-900/20'>
-      <div className='relative overflow-hidden rounded-lg border bg-white shadow-2xl dark:bg-slate-950'>
-        <img
-          src={selectedFile?.raw_url}
-          alt={selectedFile?.filename}
-          className='max-h-[75vh] max-w-full object-contain'
-        />
+    <StandardPreviewWrapper contentRef={contentRef} className='justify-center'>
+      <div className='flex h-full w-full flex-col items-center justify-center p-12'>
+        <div className='relative overflow-hidden rounded-lg border shadow-sm ring-1 ring-black/5'>
+          <div
+            className='absolute inset-0 z-0 opacity-50'
+            style={{
+              backgroundImage:
+                'linear-gradient(45deg, #e5e5e5 25%, transparent 25%), linear-gradient(-45deg, #e5e5e5 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e5e5e5 75%), linear-gradient(-45deg, transparent 75%, #e5e5e5 75%)',
+              backgroundSize: '20px 20px',
+              backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px',
+              backgroundColor: '#fff',
+            }}
+          />
+
+          <img
+            src={selectedFile?.raw_url}
+            alt={selectedFile?.filename}
+            className='relative z-10 max-h-[600px] max-w-full object-contain'
+          />
+        </div>
+
+        {/* Legenda */}
+        <div className='bg-muted/30 text-muted-foreground mt-6 flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs backdrop-blur-sm'>
+          <ImageIcon className='h-3.5 w-3.5' />
+          <span className='font-medium'>{selectedFile?.filename}</span>
+        </div>
       </div>
-      <div className='text-muted-foreground mt-4 font-mono text-[10px] uppercase'>
-        {selectedFile?.filename}
-      </div>
-    </div>
+    </StandardPreviewWrapper>
   )
 }
+
 export const GistContent = ({
   selectedFile,
   fileContents,
@@ -101,7 +195,7 @@ export const GistContent = ({
   selectedFile: GistFile
   fileContents: Record<string, string>
 }) => {
-  const { loadingFiles, contentRef } = useGist()
+  const { loadingFiles } = useGist()
 
   const RenderComponent = useMemo(() => {
     if (!selectedFile) return null
@@ -111,7 +205,6 @@ export const GistContent = ({
     if (isLoading) return <LoadingPreviewComponent />
     if (!isLoading && !content) return <NoContentComponent />
 
-    // Seus componentes ContentMdPreview, ContentCodePreview, etc.
     return (
       <ContentComponent
         filename={selectedFile.filename}
@@ -122,11 +215,7 @@ export const GistContent = ({
   }, [loadingFiles, selectedFile, fileContents])
 
   return (
-    // ID fixo para impressão e exportação PDF
-    <div
-      id='gist-render-area'
-      ref={contentRef}
-      className='prose min-h-full w-full max-w-none overflow-visible bg-white p-8 dark:bg-slate-950'>
+    <div id='gist-render-area' className='min-h-full w-full'>
       {RenderComponent}
     </div>
   )
@@ -134,22 +223,44 @@ export const GistContent = ({
 
 const NoContentComponent = () => {
   return (
-    <div className='flex items-center justify-center py-12'>
-      <div className='text-muted-foreground text-center'>
-        <AlertCircle className='mx-auto mb-2 h-8 w-8' />
-        <p className='text-sm'>Conteúdo não disponível</p>
+    <div className='bg-muted/10 flex min-h-[calc(100vh-8rem)] items-center justify-center p-8'>
+      <div className='bg-background/50 flex max-w-md flex-col items-center gap-3 rounded-xl border border-dashed p-12 text-center'>
+        <div className='bg-muted rounded-full p-3'>
+          <AlertCircle className='text-muted-foreground h-6 w-6' />
+        </div>
+        <div>
+          <h3 className='font-semibold'>Conteúdo indisponível</h3>
+          <p className='text-muted-foreground text-sm'>Não foi possível renderizar este arquivo.</p>
+        </div>
       </div>
     </div>
   )
 }
+
 export const LoadingPreviewComponent = () => {
   return (
-    <div className='bg-muted/10 flex flex-1 items-center justify-center'>
-      <div className='w-full max-w-2xl space-y-4 p-8'>
-        <Skeleton className='h-8 w-48' />
-        <Skeleton className='h-4 w-full' />
-        <Skeleton className='h-4 w-3/4' />
-        <Skeleton className='h-64 w-full' />
+    <div className='bg-muted/10 relative flex min-h-full w-full flex-col items-center py-12'>
+      {/* Background Skeleton */}
+      <div className='pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] bg-size-[16px_16px] opacity-50' />
+
+      {/* Paper Skeleton */}
+      <div
+        className='bg-background relative z-10 w-full space-y-6 rounded-xl border p-8 shadow-sm md:p-12'
+        style={{ maxWidth: '210mm', minHeight: '297mm' }}>
+        <div className='flex items-center gap-4 border-b pb-6'>
+          <Skeleton className='h-12 w-12 rounded-lg' />
+          <div className='space-y-2'>
+            <Skeleton className='h-5 w-48' />
+            <Skeleton className='h-3 w-32' />
+          </div>
+        </div>
+        <div className='space-y-4 pt-4'>
+          <Skeleton className='h-4 w-full' />
+          <Skeleton className='h-4 w-[90%]' />
+          <Skeleton className='h-4 w-[95%]' />
+          <Skeleton className='h-4 w-[80%]' />
+        </div>
+        <Skeleton className='bg-muted/50 mt-8 h-[400px] w-full rounded-xl' />
       </div>
     </div>
   )

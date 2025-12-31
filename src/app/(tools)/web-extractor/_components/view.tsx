@@ -5,94 +5,103 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useWebExtractor } from '@/shared/contexts/webExtractorContext'
 import { AnimatePresence, motion } from 'framer-motion'
-import { AlertCircle, ArrowLeft, BadgeCheck, Loader2, Search, Sparkles } from 'lucide-react'
+import { AlertCircle, ArrowRight, Loader2, Lock, Search, X } from 'lucide-react'
 import { PreviewPanel } from './preview-panel'
 
 export const WebExtractorViewComponent = () => {
   return (
-    <main className='bg-background flex min-h-full w-full flex-1 flex-col overflow-hidden bg-[url(https://picsum.photos/1920/1080)] bg-cover bg-center'>
-      <div className='flex flex-1 flex-col overflow-hidden bg-zinc-50/30 dark:bg-zinc-950/30'>
-        <div className='flex-1 overflow-hidden p-2'>
-          <PreviewPanel />
-        </div>
+    <main className='relative flex h-full w-full flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950'>
+      {/* Background Decorativo Moderno */}
+      <div className='pointer-events-none absolute inset-0 flex justify-center'>
+        <div className='absolute inset-0 h-full w-full bg-linear-to-b from-blue-50 to-transparent dark:from-blue-950/20' />
+        <div className='absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px]' />
+      </div>
+
+      <div className='z-10 flex h-full min-h-0 flex-1 flex-col items-center justify-center p-4 md:p-8'>
+        <PreviewPanel />
       </div>
     </main>
   )
 }
 
-const StatusBadge = ({ result }: { result: any | null }) => {
-  return result ? (
-    <div className='flex items-center gap-2'>
-      <Sparkles className='text-primary h-3.5 w-3.5 animate-pulse' />
-      <span className='text-xs font-medium'>Extração Concluída</span>
-    </div>
-  ) : (
-    <div className='flex items-center gap-2'>
-      <BadgeCheck className='text-primary h-3.5 w-3.5 animate-pulse' />
-      <span className='text-xs font-medium'>Pronto para converter</span>
-    </div>
-  )
-}
-
 export const WebExtractorSearchComponent = () => {
+  const { url, setUrl, isLoading, handleConvert, error, result, handleReset } = useWebExtractor()
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !isLoading && url.trim()) {
       handleConvert()
     }
   }
-  const { url, setUrl, isLoading, handleConvert, error, result, handleReset } = useWebExtractor()
+
+  // Estado visual: Se tiver resultado, mostramos modo "leitura", senão modo "busca"
+  const isReadingMode = !!result?.markdown
 
   return (
-    <div className='flex w-full items-center justify-center'>
-      <div className='w-full max-w-4xl'>
-        <div className='flex gap-3'>
-          <div className='flex w-full items-center gap-2'>
-            <IconButtonTooltip
-              disabled={!result?.markdown || isLoading}
-              className={{
-                button: 'h-7 w-7',
-              }}
-              variant='default'
-              content='Voltar'
-              onClick={handleReset}
-              icon={ArrowLeft}
-            />
-            <Input
-              type='url'
-              placeholder='Cole a URL do artigo (ex: G1, Wikipedia, Medium...)'
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={isLoading}
-              className='bg-background border-primary/10 focus-visible:ring-primary/20 h-8 truncate overflow-hidden text-ellipsis shadow-sm transition-all'
-            />
-          </div>
-          <Button
-            onClick={handleConvert}
-            disabled={isLoading || !url.trim()}
-            className='shadow-primary/10 h-8 w-8 px-6 font-bold shadow-lg transition-transform active:scale-95'>
-            {isLoading ? (
-              <>
-                <Loader2 className='h-4 w-4 animate-spin' />
-              </>
-            ) : (
-              <Search className='h-4 w-4' />
-            )}
-          </Button>
+    <div className='group relative w-full transition-all duration-300 ease-in-out'>
+      <div
+        className={`flex items-center gap-2 rounded-lg border px-2 py-1.5 transition-all duration-300 ${
+          error
+            ? 'border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/20'
+            : 'border-zinc-200 bg-white shadow-sm focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 dark:border-zinc-800 dark:bg-zinc-900'
+        } `}>
+        {/* Ícone da esquerda (Lock ou Search) */}
+        <div className='flex h-6 w-6 items-center justify-center text-zinc-400'>
+          {isReadingMode ? <Lock className='h-3.5 w-3.5' /> : <Search className='h-4 w-4' />}
         </div>
 
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className='text-destructive flex items-center gap-2 pl-1 text-xs font-medium'>
+        <Input
+          type='url'
+          placeholder='Cole a URL do artigo (ex: G1, Medium, Dev.to...)'
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          onKeyDown={handleKeyDown}
+          disabled={isLoading}
+          className='text-foreground placeholder:text-muted-foreground h-7 flex-1 border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0'
+        />
+
+        {/* Ações da direita */}
+        <div className='flex items-center gap-1'>
+          {isReadingMode && (
+            <IconButtonTooltip
+              content='Limpar e Voltar'
+              onClick={handleReset}
+              disabled={isLoading}
+              className={{ button: 'h-6 w-6 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800' }}
+              icon={X}
+            />
+          )}
+
+          {!isReadingMode && url.trim().length > 0 && (
+            <Button
+              size='sm'
+              onClick={handleConvert}
+              disabled={isLoading}
+              className='h-6 rounded-md bg-zinc-900 px-3 text-xs text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900'>
+              {isLoading ? (
+                <Loader2 className='h-3 w-3 animate-spin' />
+              ) : (
+                <ArrowRight className='h-3 w-3' />
+              )}
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Mensagem de Erro Flutuante */}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className='absolute top-full left-0 mt-2 flex w-full items-center justify-center'>
+            <div className='flex items-center gap-2 rounded-md bg-red-100 px-3 py-1.5 text-xs font-medium text-red-600 shadow-sm dark:bg-red-900/80 dark:text-red-200'>
               <AlertCircle className='h-3 w-3' />
               {error}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

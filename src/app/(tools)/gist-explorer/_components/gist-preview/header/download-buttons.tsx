@@ -1,9 +1,11 @@
 'use client'
-import { FaMarkdown } from 'react-icons/fa'
 
 import { IconButtonTooltip } from '@/components/custom-ui/tooltip'
+import { Separator } from '@/components/ui/separator'
 import { ENVIROMENT } from '@/env'
+import { cn } from '@/lib/utils'
 import { CloudDownload, Loader2, Printer } from 'lucide-react'
+import { FaMarkdown } from 'react-icons/fa'
 import { FaFilePdf } from 'react-icons/fa6'
 
 export const DownloadGistButtons = ({
@@ -21,44 +23,54 @@ export const DownloadGistButtons = ({
   isLoading: boolean
   handlePrint: () => void
 }) => {
+  const btnBaseClass =
+    'h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors'
+
   return (
-    <div className='bg-primary/20 flex items-center gap-1 rounded-md p-1'>
+    <div className='bg-background/50 flex items-center rounded-md border p-0.5 shadow-sm backdrop-blur-sm'>
+      {/* Grupo: Download Original */}
       <IconButtonTooltip
         content='Baixar Original'
         onClick={onDownloadOriginal}
         icon={CloudDownload}
-        className={{
-          button: 'flex h-8 w-10 cursor-pointer items-center justify-center',
-        }}
+        className={{ button: btnBaseClass }}
       />
-      <IconButtonTooltip
-        content='Baixar Markdown'
-        onClick={onDownloadPackageMD}
-        icon={FaMarkdown}
-        className={{
-          button: 'flex h-8 w-10 cursor-pointer items-center justify-center',
-        }}
-      />
-      <IconButtonTooltip
-        onClick={handleDownloadPDF}
-        content='Exportar PDF'
-        className={{
-          button:
-            'flex h-8 w-10 cursor-pointer items-center justify-center bg-blue-600 font-bold text-white hover:bg-blue-700',
-        }}
-        icon={isLoading ? Loader2 : FaFilePdf}
-        disabled={!isMD || isLoading || !ENVIROMENT.ENABLE_EXPORT}
-        hide={!ENVIROMENT.ENABLE_EXPORT || !isMD}
-      />
+
+      {/* Grupo: Markdown (Se aplicável) */}
+      {isMD && (
+        <IconButtonTooltip
+          content='Baixar Markdown'
+          onClick={onDownloadPackageMD}
+          icon={FaMarkdown}
+          className={{ button: btnBaseClass }}
+        />
+      )}
+
+      <Separator orientation='vertical' className='mx-1 h-5' />
+
+      {/* Grupo: Exportação */}
+      {isMD && ENVIROMENT.ENABLE_EXPORT && (
+        <IconButtonTooltip
+          onClick={handleDownloadPDF}
+          content={isLoading ? 'Processando...' : 'Exportar PDF'}
+          disabled={isLoading}
+          icon={isLoading ? Loader2 : FaFilePdf}
+          className={{
+            button: cn(
+              btnBaseClass,
+              isLoading && 'animate-spin cursor-not-allowed opacity-70',
+              'hover:text-red-500', // Destaque sutil para PDF
+            ),
+          }}
+        />
+      )}
+
       <IconButtonTooltip
         onClick={handlePrint}
         content='Imprimir'
         icon={Printer}
-        className={{
-          button: 'flex h-8 w-10 cursor-pointer items-center justify-center',
-        }}
-        hide={!isMD}
-        disabled={!isMD}
+        disabled={isLoading}
+        className={{ button: btnBaseClass }}
       />
     </div>
   )
