@@ -235,8 +235,8 @@ export const GlobalHeaderMenu = () => {
 
       {/* Navegação Desktop (Centro/Esquerda) */}
       <nav className='hidden items-center gap-1 md:flex'>
-        {Modules.map((module) => (
-          <DesktopHeaderButton key={module.label} {...module} />
+        {Modules.map((module, i) => (
+          <DesktopHeaderButton key={module.label + module.href + i} {...module} />
         ))}
       </nav>
 

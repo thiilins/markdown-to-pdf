@@ -1,4 +1,5 @@
 import { GitBranch, Globe, PencilRuler, RotateCw, ToolCase } from 'lucide-react'
+import { TbPhotoCode } from 'react-icons/tb'
 
 export const Modules: ModuleItem[] = [
   {
@@ -13,6 +14,7 @@ export const Modules: ModuleItem[] = [
     icon: RotateCw,
     description: 'Converta arquivos Markdown em PDFs',
   },
+
   {
     label: 'Gist Explorer',
     href: '/gist-explorer',
@@ -24,6 +26,12 @@ export const Modules: ModuleItem[] = [
     href: '/web-extractor',
     icon: Globe,
     description: 'Extraia conteúdo de sites e blogs para Markdown',
+  },
+  {
+    label: 'Code Snapshot',
+    href: '/code-snapshot',
+    icon: TbPhotoCode,
+    description: 'Crie snapshots de código',
   },
 ]
 export const Modules_Front: ModuleItem[] = [
@@ -54,6 +62,12 @@ export const Modules_Front: ModuleItem[] = [
         href: '/web-extractor',
         icon: Globe,
         description: 'Extraia conteúdo de sites e blogs para Markdown',
+      },
+      {
+        label: 'Code Snapshot',
+        href: '/code-snapshot',
+        icon: TbPhotoCode,
+        description: 'Crie snapshots de código',
       },
     ],
   },
