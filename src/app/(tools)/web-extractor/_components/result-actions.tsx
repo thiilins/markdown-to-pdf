@@ -42,7 +42,7 @@ export function ResultActions() {
     }
   }
 
-  const handleOpenInEditor = async () => {
+  const handleOpenInEditor = () => {
     if (!markdown) {
       toast.error('Nenhum conteúdo para abrir')
       return
@@ -51,7 +51,8 @@ export function ResultActions() {
     try {
       // Adiciona o conteúdo ao editor com o título como nome do arquivo
       const fileName = title ? title.replace(/[^a-z0-9]/gi, '_') : 'conteudo_extraido'
-      await onAddMarkdown(markdown, fileName)
+      // onAddMarkdown já seleciona o item adicionado automaticamente
+      onAddMarkdown(markdown, fileName)
       // Navega para o editor
       router.push('/md-editor')
       toast.success('Conteúdo carregado no editor!')

@@ -105,7 +105,7 @@ const FiltersComponent = () => {
       <div className='bg-primary grid w-full grid-cols-2 items-center justify-center text-white'>
         <Button
           variant='ghost'
-          onClick={() => setShow('languages')}
+          onClick={() => setShow((prev) => (prev === 'languages' ? undefined : 'languages'))}
           className={cn(
             'hover:text-primary hover:border-primary w-full rounded-none border hover:bg-white',
             show === 'languages' && 'text-primary border-primary border bg-white',
@@ -115,7 +115,7 @@ const FiltersComponent = () => {
         </Button>
         <Button
           variant='ghost'
-          onClick={() => setShow('tags')}
+          onClick={() => setShow((prev) => (prev === 'tags' ? undefined : 'tags'))}
           className='hover:text-primary w-full rounded-none hover:bg-white'
           disabled={allTags.length === 0}>
           <Tag className='h-3 w-3' /> Tags

@@ -191,9 +191,8 @@ const ModuleCard = ({ module, index }: { module: any; index: number }) => {
                   rotate: [0, -10, 10, -5, 0],
                 }}
                 transition={{
-                  type: 'spring' as const,
-                  stiffness: 400,
-                  damping: 15,
+                  duration: 0.5,
+                  ease: 'easeInOut' as const,
                 }}
                 className='from-primary/20 via-primary/10 text-primary group-hover:from-primary group-hover:text-primary-foreground relative rounded-xl bg-gradient-to-br to-purple-500/20 p-3 shadow-lg backdrop-blur-sm transition-all duration-300 group-hover:to-purple-600'>
                 <ModuleIcon size={24} strokeWidth={2} />
@@ -359,9 +358,8 @@ export const HomeViewComponent = () => {
                 rotate: [0, -5, 5, -5, 0],
               }}
               transition={{
-                type: 'spring' as const,
-                stiffness: 300,
-                damping: 20,
+                duration: 0.5,
+                ease: 'easeInOut' as const,
               }}
               className='relative flex h-20 w-20 items-center justify-center rounded-2xl border border-white/10 bg-linear-to-b from-white/5 to-white/0 shadow-2xl backdrop-blur-xl'>
               <motion.div
@@ -514,9 +512,8 @@ export const HomeViewComponent = () => {
                             rotate: [0, -5, 5, 0],
                           }}
                           transition={{
-                            type: 'spring' as const,
-                            stiffness: 300,
-                            damping: 20,
+                            duration: 0.5,
+                            ease: 'easeInOut' as const,
                           }}
                           className='bg-card border-border/50 flex h-12 w-12 items-center justify-center rounded-2xl border shadow-sm'>
                           <motion.div

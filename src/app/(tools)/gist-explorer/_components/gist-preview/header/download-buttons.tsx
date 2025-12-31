@@ -8,6 +8,16 @@ import { CloudDownload, Loader2, Printer } from 'lucide-react'
 import { FaMarkdown } from 'react-icons/fa'
 import { FaFilePdf } from 'react-icons/fa6'
 
+interface DownloadGistButtonsProps {
+  onDownloadOriginal: () => void
+  onDownloadPackageMD: () => void
+  handleDownloadPDF: () => void
+  isMD: boolean
+  isLoading: boolean
+  handlePrint: () => void
+  className?: string // Adicionado para controle externo
+}
+
 export const DownloadGistButtons = ({
   onDownloadOriginal,
   onDownloadPackageMD,
@@ -15,19 +25,17 @@ export const DownloadGistButtons = ({
   isMD,
   isLoading,
   handlePrint,
-}: {
-  onDownloadOriginal: () => void
-  onDownloadPackageMD: () => void
-  handleDownloadPDF: () => void
-  isMD: boolean
-  isLoading: boolean
-  handlePrint: () => void
-}) => {
+  className,
+}: DownloadGistButtonsProps) => {
   const btnBaseClass =
     'h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors'
 
   return (
-    <div className='bg-background/50 flex items-center rounded-md border p-0.5 shadow-sm backdrop-blur-sm'>
+    <div
+      className={cn(
+        'bg-background/50 flex items-center rounded-md border p-0.5 shadow-sm backdrop-blur-sm',
+        className,
+      )}>
       {/* Grupo: Download Original */}
       <IconButtonTooltip
         content='Baixar Original'

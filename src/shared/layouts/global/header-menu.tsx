@@ -1,10 +1,17 @@
 'use client'
 
-import { ChevronDown, Settings } from 'lucide-react'
+import { ChevronDown, Menu, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState } from 'react'
 
 import { IconButtonTooltip } from '@/components/custom-ui/tooltip'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -13,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Separator } from '@/components/ui/separator'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
 
 import { CONFIG_MODAL_SHOW_OPTIONS } from '@/components/settings-modal/constants'
@@ -21,7 +29,7 @@ import { useApp } from '@/shared/contexts/appContext'
 import { urlIsActive, urlIsActiveWithSubmenu } from '@/shared/utils'
 import UserNav from '../auth/user-nav'
 
-// Tipagem local para auxiliar (se não estiver importada globalmente)
+// Tipagem local
 interface ModuleItem {
   label: string
   href?: string
@@ -29,15 +37,13 @@ interface ModuleItem {
   submenu?: ModuleItem[]
 }
 
-/**
- * Botão de Navegação Principal
- * Design: Minimalista com indicador de "Ativo" sutil.
- */
-const GlobalHeaderButton = ({ label, href, icon, submenu }: ModuleItem) => {
+// --- DESKTOP COMPONENTS ---
+
+const DesktopHeaderButton = ({ label, href, icon, submenu }: ModuleItem) => {
   const pathname = usePathname()
   const Icon = icon
 
-  // --- Lógica para item SEM submenu ---
+  // Item sem submenu
   if (!submenu || submenu.length === 0) {
     if (!href) return null
     const isActive = urlIsActive(pathname, href)
@@ -60,7 +66,6 @@ const GlobalHeaderButton = ({ label, href, icon, submenu }: ModuleItem) => {
             />
           )}
           <span>{label}</span>
-          {/* Indicador inferior (opcional para dar um toque "app") */}
           {isActive && (
             <span className='bg-primary absolute right-0 bottom-0 left-0 mx-auto h-[2px] w-3/4 rounded-full opacity-60' />
           )}
@@ -69,6 +74,7 @@ const GlobalHeaderButton = ({ label, href, icon, submenu }: ModuleItem) => {
     )
   }
 
+  // Item com submenu
   const isActive = urlIsActiveWithSubmenu(pathname, submenu as Modules[])
 
   return (
@@ -98,42 +104,125 @@ const GlobalHeaderButton = ({ label, href, icon, submenu }: ModuleItem) => {
         sideOffset={8}
         className='animate-in fade-in-0 zoom-in-95 border-border/50 w-56 p-1.5 shadow-xl backdrop-blur-md'>
         {submenu.map((item) => (
-          <GlobalHeaderButtonSubmenu key={item.href} {...item} />
+          <DropdownMenuItem key={item.href} asChild>
+            <Link
+              href={item.href || '#'}
+              className={cn(
+                'focus:bg-accent flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors outline-none',
+                urlIsActive(pathname, item.href || '')
+                  ? 'bg-primary/10 text-primary font-medium'
+                  : 'text-muted-foreground hover:bg-muted/80 hover:text-foreground',
+              )}>
+              {item.icon && <item.icon className='h-4 w-4 shrink-0' />}
+              <span>{item.label}</span>
+            </Link>
+          </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
 
-/**
- * Item do Submenu
- */
-const GlobalHeaderButtonSubmenu = ({ label, href, icon }: ModuleItem) => {
+// --- MOBILE COMPONENTS ---
+
+export const MobileNav = () => {
+  const [open, setOpen] = useState(false)
   const pathname = usePathname()
-  const isActive = urlIsActive(pathname, href || '')
-  const Icon = icon
 
   return (
-    <DropdownMenuItem asChild>
-      <Link
-        href={href || '#'}
-        className={cn(
-          'focus:bg-accent flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors outline-none',
-          isActive
-            ? 'bg-primary/10 text-primary font-medium'
-            : 'text-muted-foreground hover:bg-muted/80 hover:text-foreground',
-        )}>
-        {Icon && <Icon className='h-4 w-4 shrink-0' />}
-        <span>{label}</span>
-      </Link>
-    </DropdownMenuItem>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant='ghost' size='icon' className='md:hidden'>
+          <Menu className='h-5 w-5' />
+          <span className='sr-only'>Menu</span>
+        </Button>
+      </SheetTrigger>
+      {/* Aqui definimos o fundo branco explicitamente para o modo light */}
+      <SheetContent side='left' className='w-[300px] bg-white sm:w-[400px] dark:bg-zinc-950'>
+        <SheetHeader className='mb-6 text-left'>
+          <SheetTitle className='flex items-center gap-2'>
+            <span className='text-primary font-bold'>Menu</span>
+          </SheetTitle>
+        </SheetHeader>
+
+        <div className='flex flex-col gap-1'>
+          {Modules.map((module) => {
+            const Icon = module.icon
+
+            // Se não tiver submenu
+            if (!module.submenu || module.submenu.length === 0) {
+              const isActive = urlIsActive(pathname, module.href || '')
+              return (
+                <Link
+                  key={module.label}
+                  href={module.href || '#'}
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    'flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium transition-colors',
+                    isActive
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                  )}>
+                  {Icon && <Icon className='h-5 w-5' />}
+                  {module.label}
+                </Link>
+              )
+            }
+
+            // Se tiver submenu (Accordion)
+            const isActiveParent = urlIsActiveWithSubmenu(pathname, module.submenu as Modules[])
+
+            return (
+              <Accordion
+                type='single'
+                collapsible
+                key={module.label}
+                className='w-full border-none'>
+                <AccordionItem value={module.label} className='border-none'>
+                  <AccordionTrigger
+                    className={cn(
+                      'px-3 py-3 text-sm font-medium hover:no-underline',
+                      isActiveParent ? 'text-primary' : 'text-muted-foreground',
+                    )}>
+                    <div className='flex items-center gap-3'>
+                      {Icon && <Icon className='h-5 w-5' />}
+                      {module.label}
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className='pb-2 pl-4'>
+                    <div className='flex flex-col space-y-1 border-l pl-2'>
+                      {module.submenu.map((sub) => {
+                        const isSubActive = urlIsActive(pathname, sub.href || '')
+                        return (
+                          <Link
+                            key={sub.label}
+                            href={sub.href || '#'}
+                            onClick={() => setOpen(false)}
+                            className={cn(
+                              'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
+                              isSubActive
+                                ? 'bg-primary/10 text-primary font-medium'
+                                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+                            )}>
+                            {sub.icon && <sub.icon className='h-4 w-4' />}
+                            {sub.label}
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            )
+          })}
+        </div>
+      </SheetContent>
+    </Sheet>
   )
 }
 
-/**
- * Container do Menu
- * (Agora é apenas uma DIV flexível, não um HEADER)
- */
+// --- MAIN EXPORT ---
+
 export const GlobalHeaderMenu = () => {
   const pathname = usePathname()
   const { setIsConfigOpen } = useApp()
@@ -141,16 +230,18 @@ export const GlobalHeaderMenu = () => {
   const hasConfig = config.length > 0
 
   return (
-    <div className='flex flex-1 items-center justify-between gap-4'>
-      {/* Navegação Principal (Esquerda/Centro) */}
+    <div className='flex flex-1 items-center justify-end gap-2 md:justify-between md:gap-4'>
+      {/* Mobile Trigger (Esquerda no mobile, oculto no desktop) */}
+
+      {/* Navegação Desktop (Centro/Esquerda) */}
       <nav className='hidden items-center gap-1 md:flex'>
         {Modules.map((module) => (
-          <GlobalHeaderButton key={module.label} {...module} />
+          <DesktopHeaderButton key={module.label} {...module} />
         ))}
       </nav>
 
       {/* Área de Utilitários (Direita) */}
-      <div className='ml-auto flex items-center gap-2 pl-4'>
+      <div className='flex items-center gap-2 pl-0 md:pl-4'>
         {hasConfig && (
           <div className='flex items-center gap-1'>
             <IconButtonTooltip
