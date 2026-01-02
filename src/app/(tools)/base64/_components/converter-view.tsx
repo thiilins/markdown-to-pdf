@@ -394,7 +394,7 @@ function ImageConverter({
 }: {
   imagePreview: string
   imageBase64: string
-  fileInputRef: React.RefObject<HTMLInputElement>
+  fileInputRef: React.RefObject<HTMLInputElement | null>
   onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void
   onCopy: () => void
 }) {

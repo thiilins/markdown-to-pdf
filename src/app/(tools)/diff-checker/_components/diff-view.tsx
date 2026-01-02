@@ -2,9 +2,8 @@
 
 import { Button } from '@/components/ui/button'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
-import { Copy, FileText, GitCompare, RotateCcw, Swap } from 'lucide-react'
+import { Copy, FileText, GitCompare, RotateCcw, ArrowLeftRight } from 'lucide-react'
 import { diffWords, diffLines, type Change } from 'diff'
-import { useState } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { CodeFormatterEditor } from '../../_components/code-formatter-editor'
@@ -102,7 +101,7 @@ export default function DiffCheckerView() {
                 size='sm'
                 onClick={handleSwap}
                 className='h-9 gap-1.5 px-3 text-xs'>
-                <Swap className='h-3.5 w-3.5' />
+                <ArrowLeftRight className='h-3.5 w-3.5' />
                 Trocar
               </Button>
               <Button variant='ghost' size='sm' onClick={handleClear} className='h-9 w-9 p-0'>

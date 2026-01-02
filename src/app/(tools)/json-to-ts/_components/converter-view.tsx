@@ -88,7 +88,7 @@ export default function JsonToTsView() {
         try {
           result = await prettier.format(result, {
             parser: 'typescript',
-            plugins: [prettierPluginEstree],
+            plugins: [prettierPluginEstree as any],
             printWidth: 100,
             tabWidth: 2,
             useTabs: false,

@@ -2,12 +2,12 @@
  * Utilitários para formatação e minificação de código
  */
 
-import * as prettier from 'prettier/standalone'
-import * as prettierPluginHtml from 'prettier/plugins/html'
-import * as prettierPluginCss from 'prettier/plugins/postcss'
 import * as prettierPluginBabel from 'prettier/plugins/babel'
 import * as prettierPluginEstree from 'prettier/plugins/estree'
-import { format as formatSql, formatDialect, postgresql, mysql } from 'sql-formatter'
+import * as prettierPluginHtml from 'prettier/plugins/html'
+import * as prettierPluginCss from 'prettier/plugins/postcss'
+import * as prettier from 'prettier/standalone'
+import { formatDialect, format as formatSql, mysql, postgresql } from 'sql-formatter'
 
 export type CodeType = 'html' | 'css' | 'javascript' | 'sql'
 export type SqlDialect = 'postgresql' | 'mysql' | 'standard'
@@ -33,7 +33,7 @@ export async function formatCode(
       case 'html':
         return await prettier.format(code, {
           parser: 'html',
-          plugins: [prettierPluginHtml],
+          plugins: [prettierPluginHtml as any],
           printWidth: 100,
           tabWidth: 2,
           useTabs: false,
@@ -42,7 +42,7 @@ export async function formatCode(
       case 'css':
         return await prettier.format(code, {
           parser: 'css',
-          plugins: [prettierPluginCss],
+          plugins: [prettierPluginCss as any],
           printWidth: 100,
           tabWidth: 2,
           useTabs: false,
@@ -51,7 +51,7 @@ export async function formatCode(
       case 'javascript':
         return await prettier.format(code, {
           parser: 'babel',
-          plugins: [prettierPluginBabel, prettierPluginEstree],
+          plugins: [prettierPluginBabel as any, prettierPluginEstree as any],
           printWidth: 100,
           tabWidth: 2,
           useTabs: false,
@@ -200,10 +200,14 @@ export function validateCode(code: string, codeType: CodeType): ValidationResult
           errors.push(`Chaves desbalanceadas: ${jsOpenBraces} abertas, ${jsCloseBraces} fechadas`)
         }
         if (jsOpenParens !== jsCloseParens) {
-          errors.push(`Parênteses desbalanceados: ${jsOpenParens} abertos, ${jsCloseParens} fechados`)
+          errors.push(
+            `Parênteses desbalanceados: ${jsOpenParens} abertos, ${jsCloseParens} fechados`,
+          )
         }
         if (jsOpenBrackets !== jsCloseBrackets) {
-          errors.push(`Colchetes desbalanceados: ${jsOpenBrackets} abertos, ${jsCloseBrackets} fechados`)
+          errors.push(
+            `Colchetes desbalanceados: ${jsOpenBrackets} abertos, ${jsCloseBrackets} fechados`,
+          )
         }
 
         const varUsage = (code.match(/\bvar\s+/g) || []).length
@@ -217,7 +221,9 @@ export function validateCode(code: string, codeType: CodeType): ValidationResult
         const sqlCloseParens = (code.match(/\)/g) || []).length
 
         if (sqlOpenParens !== sqlCloseParens) {
-          errors.push(`Parênteses desbalanceados: ${sqlOpenParens} abertos, ${sqlCloseParens} fechados`)
+          errors.push(
+            `Parênteses desbalanceados: ${sqlOpenParens} abertos, ${sqlCloseParens} fechados`,
+          )
         }
 
         const hasSelect = code.match(/\bSELECT\b/i)
@@ -243,4 +249,3 @@ export function validateCode(code: string, codeType: CodeType): ValidationResult
     warnings,
   }
 }
-

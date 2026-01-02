@@ -82,7 +82,7 @@ export function removeHtmlInCodeElements(doc: Document): void {
 
   codeElements.forEach((element) => {
     // Obter o texto interno (já sem tags HTML)
-    const textContent = element.textContent || element.innerText || ''
+    const textContent = element.textContent || (element as HTMLElement).innerText || ''
 
     // Substituir todo o conteúdo do elemento pelo texto puro
     element.textContent = textContent
