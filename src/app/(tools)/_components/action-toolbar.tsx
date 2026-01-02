@@ -203,47 +203,47 @@ export const ActionToolbar = ({ additional, headerFooter }: EnableTools) => {
       <ToolbarWithScrollIndicators>
         {/* Grupo: Arquivos */}
         <div className='flex shrink-0 items-center gap-1'>
-          <IconButtonTooltip
+      <IconButtonTooltip
             variant='ghost'
-            icon={Plus}
-            onClick={() => setOpenCreateMeta(true)}
-            content='Novo arquivo'
+        icon={Plus}
+        onClick={() => setOpenCreateMeta(true)}
+        content='Novo arquivo'
             className={{ button: btnClass }}
-          />
+      />
           {/* FilesManager com largura responsiva */}
           <div className='min-w-[120px] shrink-0 sm:min-w-[180px] md:min-w-[240px]'>
-            <FilesManager />
-          </div>
-          <IconButtonTooltip
+        <FilesManager />
+      </div>
+      <IconButtonTooltip
             variant='ghost'
-            icon={Edit}
-            onClick={() => setOpenEditMeta(true)}
+        icon={Edit}
+        onClick={() => setOpenEditMeta(true)}
             content='Renomear/Editar'
             className={{ button: btnClass }}
-          />
-          <IconButtonTooltip
+      />
+      <IconButtonTooltip
             variant='ghost'
-            icon={Trash}
-            onClick={() => setOpenDeleteDocument(true)}
+        icon={Trash}
+        onClick={() => setOpenDeleteDocument(true)}
             content='Deletar'
-            className={{
+        className={{
               button: cn(
                 btnClass,
                 'text-destructive hover:bg-destructive/10 hover:text-destructive',
               ),
-            }}
-          />
+        }}
+      />
         </div>
 
         <Separator orientation='vertical' className='mx-1 h-7 shrink-0' />
 
         {/* Grupo: Visualização */}
         <div className='flex shrink-0 items-center gap-1'>
-          <ZoomButtonsComponent />
-          <IconButtonTooltip
+      <ZoomButtonsComponent />
+      <IconButtonTooltip
             variant='ghost'
             icon={Maximize2}
-            onClick={onResetZoom}
+        onClick={onResetZoom}
             content='Resetar Zoom'
             className={{ button: btnClass }}
           />
@@ -253,34 +253,34 @@ export const ActionToolbar = ({ additional, headerFooter }: EnableTools) => {
 
         {/* Grupo: Exportação */}
         <div className='flex shrink-0 items-center gap-1'>
-          <IconButtonTooltip
+      <IconButtonTooltip
             variant='ghost'
             icon={FileDown}
-            onClick={() => setOpenDownloadDocument(true)}
+        onClick={() => setOpenDownloadDocument(true)}
             content='Exportar como...'
             className={{ button: btnClass }}
-          />
-          <IconButtonTooltip
+      />
+      <IconButtonTooltip
             variant='ghost'
             icon={Printer}
             onClick={() => onPrint()}
-            content='Imprimir'
+        content='Imprimir'
             className={{ button: btnClass }}
-          />
-          <IconButtonTooltip
+      />
+      <IconButtonTooltip
             variant='ghost'
-            onClick={onDownloadPDF}
+        onClick={onDownloadPDF}
             content='Gerar PDF'
-            className={{
+        className={{
               button: btnClass,
-              icon: isLoading ? 'animate-spin' : '',
-            }}
-            icon={isLoading ? Loader2 : CloudDownload}
-            hide={!ENVIROMENT.ENABLE_EXPORT || disabledDownload}
+          icon: isLoading ? 'animate-spin' : '',
+        }}
+        icon={isLoading ? Loader2 : CloudDownload}
+        hide={!ENVIROMENT.ENABLE_EXPORT || disabledDownload}
             disabled={isLoading || disabledDownload}
-          />
+      />
           <div className='shrink-0'>
-            <ImportUrlButton />
+      <ImportUrlButton />
           </div>
         </div>
 
@@ -297,11 +297,11 @@ export const ActionToolbar = ({ additional, headerFooter }: EnableTools) => {
               className={{ button: cn(btnClass, 'hover:text-primary') }}
             />
           )}
-          <IconButtonTooltip
+      <IconButtonTooltip
             variant='ghost'
-            icon={RefreshCcw}
+        icon={RefreshCcw}
             content='Limpar Editor'
-            onClick={onResetMarkdown}
+        onClick={onResetMarkdown}
             className={{ button: btnClass }}
           />
 
@@ -324,15 +324,15 @@ export const ActionToolbar = ({ additional, headerFooter }: EnableTools) => {
               ))}
             </div>
           )}
-        </div>
+      </div>
       </ToolbarWithScrollIndicators>
 
       {/* Modais */}
       <div className='hidden'>
-        <DeleteDocumentModal />
-        <DownloadDocumentModal />
-        <EditMetaModal />
-        <CreateMetaModal />
+      <DeleteDocumentModal />
+      <DownloadDocumentModal />
+      <EditMetaModal />
+      <CreateMetaModal />
       </div>
     </div>
   )

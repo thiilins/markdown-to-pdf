@@ -184,15 +184,15 @@ export function MarkdownToolbar({ editor, onResetEditorData }: MarkdownToolbarPr
   return (
     <TooltipProvider>
       <div className='bg-background sticky top-0 z-20 flex w-full flex-col border-b backdrop-blur-md'>
-        <div className='flex h-12 w-full items-center gap-1 px-2 py-1'>
+        <div className='flex h-auto min-h-12 w-full flex-wrap items-center gap-1 px-2 py-1'>
           {primaryButtons}
 
-          {/* Botões secundários: visíveis em desktop, no menu "Mais" em mobile */}
+          {/* Botões secundários: sempre visíveis em desktop, quebram linha se necessário */}
           <div className='hidden shrink-0 items-center border-r px-1 md:flex'>
             {secondaryButtons}
           </div>
 
-          {/* Menu "Mais" para mobile */}
+          {/* Menu "Mais" para mobile (apenas em telas muito pequenas) */}
           <div className='flex shrink-0 items-center border-r px-1 md:hidden'>
             <DropdownMenu open={moreMenuOpen} onOpenChange={setMoreMenuOpen}>
               <TooltipProvider>

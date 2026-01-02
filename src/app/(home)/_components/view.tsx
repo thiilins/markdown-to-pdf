@@ -97,7 +97,7 @@ const BackgroundEffects = () => (
       className='absolute top-[10%] -right-[10%] h-[400px] w-[400px] rounded-full bg-purple-500/20 opacity-40 mix-blend-screen blur-[120px]'
     />
 
-    {/* Grid Pattern com Animação Sutil */}
+    {/* Grid  com Animação Sutil */}
     <motion.div
       animate={{
         opacity: [0.03, 0.05, 0.03],
@@ -109,7 +109,7 @@ const BackgroundEffects = () => (
       }}
       className='absolute inset-0 bg-[url(/grid.svg)] invert dark:invert-0'
     />
-    <div className='from-background via-background/90 to-background absolute inset-0 bg-gradient-to-b' />
+    <div className='from-background via-background/90 to-background absolute inset-0 bg-linear-to-b' />
   </div>
 )
 
@@ -132,7 +132,7 @@ const ModuleCard = ({ module, index }: { module: any; index: number }) => {
             hover: { opacity: 1, scale: 1.08 },
           }}
           transition={{ duration: 0.4 }}
-          className='from-primary/60 absolute -inset-1 rounded-2xl bg-gradient-to-br via-purple-500/40 to-blue-500/60 blur-xl'
+          className='from-primary/60 absolute -inset-1 rounded-2xl bg-linear-to-br via-purple-500/40 to-blue-500/60 blur-xl'
         />
         <motion.div
           variants={{
@@ -140,10 +140,9 @@ const ModuleCard = ({ module, index }: { module: any; index: number }) => {
             hover: { opacity: 0.8, scale: 1.05 },
           }}
           transition={{ duration: 0.3, delay: 0.05 }}
-          className='from-primary/40 absolute -inset-0.5 rounded-2xl bg-gradient-to-r to-purple-500/40 blur-md'
+          className='from-primary/40 absolute -inset-0.5 rounded-2xl bg-linear-to-r to-purple-500/40 blur-md'
         />
 
-        {/* Background Pattern Sutil */}
         <motion.div
           animate={{
             opacity: [0.02, 0.05, 0.02],
@@ -165,7 +164,7 @@ const ModuleCard = ({ module, index }: { module: any; index: number }) => {
             initial={{ x: '-100%', opacity: 0 }}
             whileHover={{ x: '200%', opacity: [0, 0.5, 0] }}
             transition={{ duration: 0.8, ease: 'easeInOut' }}
-            className='absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent'
+            className='absolute inset-0 -skew-x-12 bg-linear-to-r from-transparent via-white/20 to-transparent'
           />
 
           {/* Header do Card */}
@@ -194,7 +193,7 @@ const ModuleCard = ({ module, index }: { module: any; index: number }) => {
                   duration: 0.5,
                   ease: 'easeInOut' as const,
                 }}
-                className='from-primary/20 via-primary/10 text-primary group-hover:from-primary group-hover:text-primary-foreground relative rounded-xl bg-gradient-to-br to-purple-500/20 p-3 shadow-lg backdrop-blur-sm transition-all duration-300 group-hover:to-purple-600'>
+                className='from-primary/20 via-primary/10 text-primary group-hover:from-primary group-hover:text-primary-foreground relative rounded-xl bg-linear-to-br to-purple-500/20 p-3 shadow-lg backdrop-blur-sm transition-all duration-300 group-hover:to-purple-600'>
                 <ModuleIcon size={24} strokeWidth={2} />
               </motion.div>
             </motion.div>
@@ -210,7 +209,7 @@ const ModuleCard = ({ module, index }: { module: any; index: number }) => {
                 }}>
                 <Badge
                   variant='secondary'
-                  className='h-5 border-purple-500/30 bg-gradient-to-r from-purple-500/20 to-pink-500/20 px-2 text-[10px] font-semibold text-purple-600 shadow-sm dark:text-purple-400'>
+                  className='h-5 border-purple-500/30 bg-linear-to-r from-purple-500/20 to-pink-500/20 px-2 text-[10px] font-semibold text-purple-600 shadow-sm dark:text-purple-400'>
                   Beta
                 </Badge>
               </motion.div>
@@ -222,7 +221,7 @@ const ModuleCard = ({ module, index }: { module: any; index: number }) => {
             <motion.h3
               whileHover={{ x: 3 }}
               transition={{ type: 'spring' as const, stiffness: 400, damping: 17 }}
-              className='from-foreground to-foreground/80 group-hover:from-primary bg-gradient-to-r bg-clip-text text-lg font-bold tracking-tight text-transparent transition-all duration-300 group-hover:to-purple-600'>
+              className='from-foreground to-foreground/80 group-hover:from-primary bg-linear-to-r bg-clip-text text-lg font-bold tracking-tight text-transparent transition-all duration-300 group-hover:to-purple-600'>
               {module.label}
             </motion.h3>
             <motion.p
@@ -238,7 +237,7 @@ const ModuleCard = ({ module, index }: { module: any; index: number }) => {
             whileHover={{ x: 6 }}
             transition={{ type: 'spring' as const, stiffness: 400, damping: 17 }}
             className='relative mt-6 flex items-center'>
-            <motion.span className='from-primary bg-gradient-to-r to-purple-600 bg-clip-text text-xs font-semibold text-transparent opacity-70 transition-all duration-300 group-hover:opacity-100'>
+            <motion.span className='from-primary bg-linear-to-r to-purple-600 bg-clip-text text-xs font-semibold text-transparent opacity-70 transition-all duration-300 group-hover:opacity-100'>
               Acessar
             </motion.span>
             <motion.div
@@ -257,7 +256,7 @@ const ModuleCard = ({ module, index }: { module: any; index: number }) => {
               initial={{ width: 0 }}
               whileHover={{ width: '100%' }}
               transition={{ duration: 0.3 }}
-              className='from-primary/50 absolute bottom-0 left-0 h-0.5 rounded-full bg-gradient-to-r to-purple-500/50'
+              className='from-primary/50 absolute bottom-0 left-0 h-0.5 rounded-full bg-linear-to-r to-purple-500/50'
             />
           </motion.div>
 
@@ -273,7 +272,7 @@ const ModuleCard = ({ module, index }: { module: any; index: number }) => {
               ease: 'easeInOut',
               delay: index * 0.2,
             }}
-            className='from-primary/20 absolute -top-4 -right-4 h-24 w-24 rounded-full bg-gradient-to-br to-purple-500/20 blur-2xl'
+            className='from-primary/20 absolute -top-4 -right-4 h-24 w-24 rounded-full bg-linear-to-br to-purple-500/20 blur-2xl'
           />
         </motion.div>
       </Link>
@@ -495,7 +494,7 @@ export const HomeViewComponent = () => {
                 {filteredData.map((category) => {
                   const CategoryIcon = category.icon || Layers
 
-              return (
+                  return (
                     <motion.section key={category.label} variants={itemVariants} layout>
                       <motion.div
                         initial={{ opacity: 0, x: -20 }}
@@ -552,17 +551,17 @@ export const HomeViewComponent = () => {
                               </span>
                             )}
                           </motion.p>
-                  </div>
+                        </div>
                       </motion.div>
 
                       <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
                         {category.submenu?.map((module, idx) => (
                           <ModuleCard key={module.href} module={module} index={idx} />
                         ))}
-                              </div>
+                      </div>
                     </motion.section>
-                      )
-                    })}
+                  )
+                })}
               </motion.div>
             ) : (
               <motion.div
@@ -618,9 +617,9 @@ export const HomeViewComponent = () => {
                   </motion.button>
                 )}
               </motion.div>
-        )}
+            )}
           </AnimatePresence>
-      </div>
+        </div>
       </main>
     </div>
   )
