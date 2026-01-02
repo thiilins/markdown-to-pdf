@@ -1,7 +1,7 @@
-import * as React from 'react'
 import * as NavigationMenuPrimitive from '@radix-ui/react-navigation-menu'
 import { cva } from 'class-variance-authority'
 import { ChevronDownIcon } from 'lucide-react'
+import * as React from 'react'
 
 import { cn } from '@/lib/utils'
 
@@ -70,7 +70,7 @@ function NavigationMenuTrigger({
       {...props}>
       {children}{' '}
       <ChevronDownIcon
-        className='relative top-[1px] ml-1 size-3 transition duration-300 group-data-[state=open]:rotate-180'
+        className='relative top-px ml-1 size-3 transition duration-300 group-data-[state=open]:rotate-180'
         aria-hidden='true'
       />
     </NavigationMenuPrimitive.Trigger>
@@ -99,13 +99,27 @@ function NavigationMenuViewport({
   ...props
 }: React.ComponentProps<typeof NavigationMenuPrimitive.Viewport>) {
   return (
-    <div className={cn('absolute top-full left-0 isolate z-50 flex justify-center')}>
+    <div
+      className={cn(
+        'absolute top-full left-0 isolate z-50 flex justify-center',
+        'w-screen',
+        'left-1/2 -translate-x-1/2',
+      )}
+      style={{
+        maxWidth: '100vw',
+        paddingLeft: '1rem',
+        paddingRight: '1rem',
+      }}>
       <NavigationMenuPrimitive.Viewport
         data-slot='navigation-menu-viewport'
         className={cn(
-          'origin-top-center bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 relative mt-1.5 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden rounded-md border shadow md:w-[var(--radix-navigation-menu-viewport-width)]',
+          'origin-top-center bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 relative mt-1.5 h-(--radix-navigation-menu-viewport-height) w-full overflow-hidden rounded-md border shadow md:w-(--radix-navigation-menu-viewport-width)',
+          'max-w-[420px]',
           className,
         )}
+        style={{
+          maxWidth: 'min(420px, calc(100vw - 2rem))',
+        }}
         {...props}
       />
     </div>
@@ -136,7 +150,7 @@ function NavigationMenuIndicator({
     <NavigationMenuPrimitive.Indicator
       data-slot='navigation-menu-indicator'
       className={cn(
-        'data-[state=visible]:animate-in data-[state=hidden]:animate-out data-[state=hidden]:fade-out data-[state=visible]:fade-in top-full z-[1] flex h-1.5 items-end justify-center overflow-hidden',
+        'data-[state=visible]:animate-in data-[state=hidden]:animate-out data-[state=hidden]:fade-out data-[state=visible]:fade-in top-full z-1 flex h-1.5 items-end justify-center overflow-hidden',
         className,
       )}
       {...props}>
@@ -147,12 +161,12 @@ function NavigationMenuIndicator({
 
 export {
   NavigationMenu,
-  NavigationMenuList,
-  NavigationMenuItem,
   NavigationMenuContent,
-  NavigationMenuTrigger,
-  NavigationMenuLink,
   NavigationMenuIndicator,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
   NavigationMenuViewport,
   navigationMenuTriggerStyle,
 }

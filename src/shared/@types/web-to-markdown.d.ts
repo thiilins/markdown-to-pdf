@@ -8,7 +8,7 @@ interface ScrapeHtmlParams {
 
 interface ScrapeHtmlResponse {
   success: boolean
-  markdown?: string
+  html?: string
   title?: string
   excerpt?: string
   error?: string

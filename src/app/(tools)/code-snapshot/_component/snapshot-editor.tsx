@@ -98,7 +98,7 @@ export function SnapshotEditor({ onScroll, editorRef: externalEditorRef }: Snaps
           </div>
           <span className='text-[10px] font-bold tracking-widest text-zinc-400 uppercase'>
             Editor
-          </span>
+        </span>
         </div>
         <div className='text-[10px] font-bold tracking-widest text-zinc-400 uppercase'>
           {config.language}

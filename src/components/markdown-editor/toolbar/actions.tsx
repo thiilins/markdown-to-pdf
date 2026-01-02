@@ -56,7 +56,10 @@ export const MarkdownToolbarItem = ({
           variant='ghost'
           size='icon'
           disabled={disabled}
-          className={cn('h-8 max-h-8 w-8 max-w-8 rounded-md transition-all', className)}
+          className={cn(
+            'h-8 max-h-8 w-8 max-w-8 shrink-0 rounded-md transition-all sm:w-9 sm:max-w-9',
+            className,
+          )}
           onClick={onClick}>
           <Icon className='h-4 w-4' />
         </Button>
@@ -91,13 +94,13 @@ export const HeadingsToolbar = ({ actions }: { actions: any }) => {
               variant='ghost'
               size='sm'
               className={cn(
-                'h-8 w-9 gap-0.5 rounded-md px-1.5 transition-all',
+                'h-8 w-8 shrink-0 gap-0.5 rounded-md px-1.5 transition-all sm:w-9',
                 open
                   ? 'bg-accent text-accent-foreground'
                   : 'hover:bg-accent hover:text-accent-foreground',
               )}>
               <Type className='h-4 w-4' />
-              <ChevronDown className='h-2.5 w-2.5 opacity-50 transition-transform' />
+              <ChevronDown className='hidden h-2.5 w-2.5 opacity-50 transition-transform sm:block' />
             </Button>
           </DropdownMenuTrigger>
         </TooltipTrigger>
@@ -106,7 +109,10 @@ export const HeadingsToolbar = ({ actions }: { actions: any }) => {
         </TooltipContent>
       </Tooltip>
 
-      <DropdownMenuContent align='start' className='w-52 p-1.5'>
+      <DropdownMenuContent
+        align='start'
+        collisionPadding={16}
+        className='w-52 max-w-[calc(100vw-2rem)] p-1.5'>
         <div className='text-muted-foreground mb-1 px-2 py-1 text-[10px] font-bold tracking-wider uppercase'>
           Hierarquia
         </div>
@@ -173,7 +179,7 @@ export const TableGenerator = ({
               variant='ghost'
               size='icon'
               className={cn(
-                'hover:bg-accent hover:text-accent-foreground h-8 w-9 rounded-md transition-all',
+                'hover:bg-accent hover:text-accent-foreground h-8 w-8 shrink-0 rounded-md transition-all sm:w-9',
                 open && 'bg-accent text-accent-foreground',
               )}>
               <TableIcon className='h-4 w-4' />
@@ -184,7 +190,10 @@ export const TableGenerator = ({
           Tabela
         </TooltipContent>
       </Tooltip>
-      <PopoverContent className='w-64 p-3' align='start'>
+      <PopoverContent
+        className='w-64 max-w-[calc(100vw-2rem)] p-3'
+        align='start'
+        collisionPadding={16}>
         <div className='space-y-3'>
           <div className='border-border flex items-center gap-2 border-b pb-2'>
             <Grid3X3 className='text-primary h-4 w-4' />
@@ -253,7 +262,7 @@ export const CalloutsMenu = ({ onInsert }: { onInsert: (type: any) => void }) =>
               variant='ghost'
               size='icon'
               className={cn(
-                'hover:bg-accent hover:text-accent-foreground h-8 w-9 rounded-md transition-all',
+                'hover:bg-accent hover:text-accent-foreground h-8 w-8 shrink-0 rounded-md transition-all sm:w-9',
                 open && 'bg-accent text-accent-foreground',
               )}>
               <Info className='h-4 w-4' />
@@ -264,7 +273,10 @@ export const CalloutsMenu = ({ onInsert }: { onInsert: (type: any) => void }) =>
           Alertas
         </TooltipContent>
       </Tooltip>
-      <DropdownMenuContent align='start' className='w-52 p-1.5'>
+      <DropdownMenuContent
+        align='start'
+        collisionPadding={16}
+        className='w-52 max-w-[calc(100vw-2rem)] p-1.5'>
         <div className='text-muted-foreground mb-1 px-2 py-1 text-[10px] font-bold tracking-wider uppercase'>
           Inserir Alerta
         </div>

@@ -495,7 +495,7 @@ export const HomeViewComponent = () => {
                 {filteredData.map((category) => {
                   const CategoryIcon = category.icon || Layers
 
-                  return (
+              return (
                     <motion.section key={category.label} variants={itemVariants} layout>
                       <motion.div
                         initial={{ opacity: 0, x: -20 }}
@@ -552,17 +552,17 @@ export const HomeViewComponent = () => {
                               </span>
                             )}
                           </motion.p>
-                        </div>
+                  </div>
                       </motion.div>
 
                       <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
                         {category.submenu?.map((module, idx) => (
                           <ModuleCard key={module.href} module={module} index={idx} />
                         ))}
-                      </div>
+                              </div>
                     </motion.section>
-                  )
-                })}
+                      )
+                    })}
               </motion.div>
             ) : (
               <motion.div
@@ -618,9 +618,9 @@ export const HomeViewComponent = () => {
                   </motion.button>
                 )}
               </motion.div>
-            )}
+        )}
           </AnimatePresence>
-        </div>
+      </div>
       </main>
     </div>
   )

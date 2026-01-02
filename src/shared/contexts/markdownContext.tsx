@@ -37,7 +37,7 @@ interface GistMetadata {
 interface MarkdownContextType {
   list: MarkdownItem[]
   contentRef: RefObject<HTMLDivElement | null>
-  onAddMarkdownList: (list: MarkdownItem[]) => void
+  onAddMarkdownList: (list: MarkdownItem[]) => Promise<void>
   onAddMarkdown: (content?: string, name?: string) => void
   onDeleteMarkdown: () => void
   onUpdateMarkdown: (content?: string, name?: string) => Promise<void> | void
@@ -107,7 +107,14 @@ export function MarkdownProvider({ children }: { children: ReactNode }) {
   const [openDownloadDocument, setOpenDownloadDocument] = useState(false)
   const [openGistSaveModal, setOpenGistSaveModal] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
-
+  const handleSetList = useCallback(
+    async (list: MarkdownItem[]) => {
+      await setList(list)
+      await setMarkdown(list[0])
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    },
+    [setList, setMarkdown],
+  )
   // Busca o username do GitHub quando a sessão está disponível
   useEffect(() => {
     if (session?.accessToken && !currentUserLogin) {
@@ -397,10 +404,11 @@ export function MarkdownProvider({ children }: { children: ReactNode }) {
     },
     [gistMetadataMap, setGistMetadataMap],
   )
+
   const contextValue = useMemo(
     () => ({
       list,
-      onAddMarkdownList: setList,
+      onAddMarkdownList: handleSetList,
       onAddMarkdown,
       contentRef,
       onDeleteMarkdown,

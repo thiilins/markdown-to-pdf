@@ -1,6 +1,13 @@
 'use client'
 
 import { BadgeMultiSelector } from '@/components/custom-ui/badge-multi-selector'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  useSidebar,
+} from '@/components/custom-ui/sidebar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,93 +15,109 @@ import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { useGist } from '@/shared/contexts/gistContext'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Code, Eraser, Filter, Layers, Search, Tag } from 'lucide-react'
-import { useState } from 'react'
+import { Code, Eraser, Filter, Layers, Search, Tag, X } from 'lucide-react'
+import { useCallback, useState } from 'react'
 import { IoLogoGithub } from 'react-icons/io5'
 import { GistList } from './gist-list'
 import { GistSearch } from './gist-search'
 
-export const GistSidebar = () => {
-  const {
-    allLanguages,
-    selectedLanguages,
-    toggleLanguage,
-    allTags,
-    selectedTags,
-    toggleTag,
-    filteredGists,
-  } = useGist()
-
+export function GistExplorerSidebar() {
+  const { allLanguages, allTags, filteredGists } = useGist()
+  const { isMobile, setOpen, setOpenMobile } = useSidebar()
+  const handleOpenSidebar = useCallback(
+    (open: boolean) => {
+      setOpen(open)
+      setOpenMobile(open)
+    },
+    [setOpen, setOpenMobile],
+  )
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      className='bg-background/80 flex h-full w-[400px] shrink-0 flex-col border-r backdrop-blur-xl transition-all'>
-      {/* Header - Fixed */}
-      <div className='flex h-16 shrink-0 items-center justify-between border-b px-4 py-3'>
-        <div className='flex items-center gap-3'>
-          <div className='bg-background flex h-8 w-8 items-center justify-center rounded-lg border shadow-sm'>
-            <IoLogoGithub className='text-primary h-5 w-5' />
+    <Sidebar className={cn('h-full', isMobile ? 'w-full pt-2' : 'pt-12')}>
+      <SidebarHeader className='bg-white px-4 py-3'>
+        <div className='flex h-16 shrink-0 items-center justify-between px-4 py-3'>
+          <div className='flex items-center gap-3'>
+            <div className='bg-background flex h-8 w-8 items-center justify-center rounded-lg border shadow-sm'>
+              <IoLogoGithub className='text-primary h-5 w-5' />
+            </div>
+            <div className='flex flex-col'>
+              <h2 className='text-sm leading-none font-bold tracking-tight'>Gist Explorer</h2>
+              <span className='text-muted-foreground text-[10px] font-medium'>
+                GitHub Integration
+              </span>
+            </div>
           </div>
-          <div className='flex flex-col'>
-            <h2 className='text-sm leading-none font-bold tracking-tight'>Gist Explorer</h2>
-            <span className='text-muted-foreground text-[10px] font-medium'>
-              GitHub Integration
-            </span>
+
+          <div>
+            {filteredGists?.length > 0 && (
+              <Badge
+                variant='outline'
+                className='border-primary/10 bg-primary/5 text-primary gap-1.5 px-2 py-0.5 text-[10px]'>
+                <Layers className='h-3 w-3' />
+                <span>{filteredGists.length}</span>
+              </Badge>
+            )}
+            {isMobile && (
+              <Button
+                variant='ghost'
+                size='icon'
+                onClick={() => handleOpenSidebar(false)}
+                className='bg-background ml-2 h-6 w-6 cursor-pointer rounded-full border border-red-500 text-red-500 hover:bg-red-500 hover:text-white'>
+                <X className='h-4 w-4' />
+              </Button>
+            )}
           </div>
         </div>
+      </SidebarHeader>
+      <SidebarContent>
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className='bg-background/80 ] flex h-full shrink-0 flex-col border-r backdrop-blur-xl transition-all'>
+          {/* Global Search Area */}
+          <div className='bg-muted/5 shrink-0 p-4 pb-2'>
+            <GistSearch />
+          </div>
 
-        {filteredGists?.length > 0 && (
-          <Badge
-            variant='outline'
-            className='border-primary/10 bg-primary/5 text-primary gap-1.5 px-2 py-0.5 text-[10px]'>
-            <Layers className='h-3 w-3' />
-            <span>{filteredGists.length}</span>
-          </Badge>
-        )}
-      </div>
+          {/* Local Filter - Sticky styling */}
+          <div className='px-4 pb-2'>
+            <LocalFilterComponent />
+          </div>
 
-      {/* Global Search Area */}
-      <div className='bg-muted/5 shrink-0 p-4 pb-2'>
-        <GistSearch />
-      </div>
+          <Separator />
 
-      {/* Local Filter - Sticky styling */}
-      <div className='px-4 pb-2'>
-        <LocalFilterComponent />
-      </div>
+          {/* Filters & List - Scrollable */}
+          <div className='flex min-h-0 flex-1 flex-col overflow-hidden'>
+            {/* Active Filters Section */}
+            <AnimatePresence>
+              {(allLanguages.length > 0 || allTags.length > 0) && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className='shrink-0 overflow-hidden'>
+                  <div className='bg-muted/5 space-y-3 border-b px-4 py-3'>
+                    <div className='text-muted-foreground flex items-center gap-2 text-xs font-semibold'>
+                      <Filter className='h-3 w-3' />
+                      <span>Filtros Disponíveis</span>
+                    </div>
+                    <FiltersComponent />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-      <Separator />
-
-      {/* Filters & List - Scrollable */}
-      <div className='flex min-h-0 flex-1 flex-col overflow-hidden'>
-        {/* Active Filters Section */}
-        <AnimatePresence>
-          {(allLanguages.length > 0 || allTags.length > 0) && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className='shrink-0 overflow-hidden'>
-              <div className='bg-muted/5 space-y-3 border-b px-4 py-3'>
-                <div className='text-muted-foreground flex items-center gap-2 text-xs font-semibold'>
-                  <Filter className='h-3 w-3' />
-                  <span>Filtros Disponíveis</span>
-                </div>
-                <FiltersComponent />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* List Section */}
-        <div className='bg-background min-h-0 flex-1 overflow-hidden'>
-          <GistList />
-        </div>
-      </div>
-    </motion.div>
+            {/* List Section */}
+            <div className='bg-background min-h-0 flex-1 overflow-hidden'>
+              <GistList />
+            </div>
+          </div>
+        </motion.div>
+      </SidebarContent>
+      <SidebarFooter />
+    </Sidebar>
   )
 }
+
 const FiltersComponent = () => {
   const { allLanguages, selectedLanguages, toggleLanguage, allTags, selectedTags, toggleTag } =
     useGist()

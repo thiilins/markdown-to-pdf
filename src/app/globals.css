@@ -243,6 +243,36 @@
     background: oklch(var(--muted-foreground) / 0.4);
   }
 
+  /* Scrollbar customizada para toolbar horizontal - mais fina e elegante */
+  .toolbar-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(var(--muted-foreground) / 0.2) transparent;
+  }
+
+  .toolbar-scrollbar::-webkit-scrollbar {
+    height: 4px;
+    width: 4px;
+  }
+
+  .toolbar-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 2px;
+  }
+
+  .toolbar-scrollbar::-webkit-scrollbar-thumb {
+    background: oklch(var(--muted-foreground) / 0.2);
+    border-radius: 2px;
+    transition: background-color 0.2s ease;
+  }
+
+  .toolbar-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: oklch(var(--muted-foreground) / 0.35);
+  }
+
+  .toolbar-scrollbar::-webkit-scrollbar-thumb:active {
+    background: oklch(var(--primary) / 0.5);
+  }
+
   /* Scrollbar com cor primária */
   .scrollbar-primary {
     scrollbar-width: thin;
@@ -309,7 +339,9 @@ body {
     border-radius: 5px;
     border: 2px solid transparent;
     background-clip: padding-box;
-    transition: background-color 0.2s ease, width 0.2s ease;
+    transition:
+      background-color 0.2s ease,
+      width 0.2s ease;
   }
 
   *::-webkit-scrollbar-thumb:hover {
@@ -359,4 +391,13 @@ body {
   * {
     -webkit-overflow-scrolling: touch;
   }
+}
+/* globals.css */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }

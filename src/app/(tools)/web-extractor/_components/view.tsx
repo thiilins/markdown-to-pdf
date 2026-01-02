@@ -5,13 +5,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useWebExtractor } from '@/shared/contexts/webExtractorContext'
 import { AnimatePresence, motion } from 'framer-motion'
-import { AlertCircle, ArrowRight, Loader2, Lock, Search, X } from 'lucide-react'
+import { AlertCircle, ArrowRight, BookOpen, Loader2, Search, X } from 'lucide-react'
 import { PreviewPanel } from './preview-panel'
 
 export const WebExtractorViewComponent = () => {
   return (
     <main className='relative flex h-full w-full flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950'>
-      {/* Background Decorativo Moderno */}
+      {/* Background Decorativo */}
       <div className='pointer-events-none absolute inset-0 flex justify-center'>
         <div className='absolute inset-0 h-full w-full bg-linear-to-b from-blue-50 to-transparent dark:from-blue-950/20' />
         <div className='absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px]' />
@@ -25,7 +25,17 @@ export const WebExtractorViewComponent = () => {
 }
 
 export const WebExtractorSearchComponent = () => {
-  const { url, setUrl, isLoading, handleConvert, error, result, handleReset } = useWebExtractor()
+  const {
+    url,
+    setUrl,
+    isLoading,
+    handleConvert,
+    error,
+    result,
+    handleReset,
+    isReaderMode,
+    toggleReaderMode,
+  } = useWebExtractor()
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !isLoading && url.trim()) {
@@ -33,8 +43,7 @@ export const WebExtractorSearchComponent = () => {
     }
   }
 
-  // Estado visual: Se tiver resultado, mostramos modo "leitura", senão modo "busca"
-  const isReadingMode = !!result?.markdown
+  const hasResult = !!result?.html
 
   return (
     <div className='group relative w-full transition-all duration-300 ease-in-out'>
@@ -44,9 +53,22 @@ export const WebExtractorSearchComponent = () => {
             ? 'border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/20'
             : 'border-zinc-200 bg-white shadow-sm focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 dark:border-zinc-800 dark:bg-zinc-900'
         } `}>
-        {/* Ícone da esquerda (Lock ou Search) */}
-        <div className='flex h-6 w-6 items-center justify-center text-zinc-400'>
-          {isReadingMode ? <Lock className='h-3.5 w-3.5' /> : <Search className='h-4 w-4' />}
+        {/* Ícone da Esquerda - AGORA FUNCIONAL (Toggle Reader Mode) */}
+        <div className='flex items-center justify-center'>
+          {hasResult ? (
+            <IconButtonTooltip
+              content={isReaderMode ? 'Desativar Foco' : 'Ativar Modo Leitura'}
+              onClick={toggleReaderMode}
+              className={{
+                button: `h-6 w-6 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isReaderMode ? 'text-blue-600 dark:text-blue-400' : 'text-zinc-400'}`,
+              }}
+              icon={BookOpen}
+            />
+          ) : (
+            <div className='flex h-6 w-6 items-center justify-center text-zinc-400'>
+              <Search className='h-4 w-4' />
+            </div>
+          )}
         </div>
 
         <Input
@@ -61,7 +83,7 @@ export const WebExtractorSearchComponent = () => {
 
         {/* Ações da direita */}
         <div className='flex items-center gap-1'>
-          {isReadingMode && (
+          {hasResult && (
             <IconButtonTooltip
               content='Limpar e Voltar'
               onClick={handleReset}
@@ -71,7 +93,7 @@ export const WebExtractorSearchComponent = () => {
             />
           )}
 
-          {!isReadingMode && url.trim().length > 0 && (
+          {!hasResult && url.trim().length > 0 && (
             <Button
               size='sm'
               onClick={handleConvert}
@@ -87,7 +109,7 @@ export const WebExtractorSearchComponent = () => {
         </div>
       </div>
 
-      {/* Mensagem de Erro Flutuante */}
+      {/* Mensagem de Erro */}
       <AnimatePresence>
         {error && (
           <motion.div

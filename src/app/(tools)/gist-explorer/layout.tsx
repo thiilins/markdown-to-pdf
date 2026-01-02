@@ -1,7 +1,20 @@
 'use client'
 
-import { ToolsLayoutComponent } from '@/shared/layouts/tools'
+import { SidebarProvider } from '@/components/custom-ui/sidebar'
+import { GistExplorerSidebar } from './_components/gist-sidebar'
 
-export default function GistExplorerLayout({ children }: { children: React.ReactNode }) {
-  return <ToolsLayoutComponent>{children}</ToolsLayoutComponent>
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <SidebarProvider
+      defaultOpen={true}
+      style={
+        {
+          '--sidebar-width': '400px !important',
+          '--sidebar-width-mobile': '300px',
+        } as unknown as React.CSSProperties
+      }>
+      <GistExplorerSidebar />
+      <main className='flex-1'>{children}</main>
+    </SidebarProvider>
+  )
 }

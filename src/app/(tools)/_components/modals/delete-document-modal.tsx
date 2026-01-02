@@ -23,9 +23,9 @@ export function DeleteDocumentModal() {
 
   return (
     <Dialog open={openDeleteDocument} onOpenChange={setOpenDeleteDocument}>
-      <DialogContent className='gap-0 overflow-hidden border-none p-0 shadow-2xl sm:max-w-[420px]'>
+      <DialogContent className='max-w-[420px] gap-0 overflow-hidden border-none p-0 shadow-2xl'>
         {/* Header com gradiente de alerta sutil */}
-        <div className='from-destructive/10 flex flex-col items-center justify-center bg-gradient-to-b to-transparent pt-8 pb-4'>
+        <div className='from-destructive/10 flex flex-col items-center justify-center bg-linear-to-b to-transparent pt-8 pb-4'>
           <div className='bg-destructive/10 ring-destructive/5 mb-4 flex h-14 w-14 animate-pulse items-center justify-center rounded-full ring-8'>
             <AlertTriangle className='text-destructive h-7 w-7' />
           </div>

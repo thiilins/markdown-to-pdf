@@ -4,14 +4,16 @@ import { stripHTML } from '@/shared/utils/strip-html'
 import { isValidWebUrl } from '@/shared/utils/url-validation-web'
 import { Readability } from '@mozilla/readability'
 import { JSDOM } from 'jsdom'
-// @ts-ignore
-import { NodeHtmlMarkdown } from 'node-html-markdown'
 
-/**
- * Server Action para extrair conteúdo de uma URL e converter para Markdown
- * Otimizado para G1, Carrefour, Amazon e outros (Alta Resolução e JSON-LD)
- */
-export async function scrapeHtmlToMarkdown(url: string): Promise<ScrapeHtmlResponse> {
+export interface ScrapeHtmlResponse {
+  success: boolean
+  html?: string
+  title?: string
+  excerpt?: string
+  error?: string
+}
+
+export async function scrapperHtmlV2(url: string): Promise<ScrapeHtmlResponse> {
   try {
     const validation = isValidWebUrl(url)
     if (!validation.valid) {
@@ -19,15 +21,17 @@ export async function scrapeHtmlToMarkdown(url: string): Promise<ScrapeHtmlRespo
     }
 
     const abortController = new AbortController()
-    const timeoutId = setTimeout(() => abortController.abort(), 20000) // Aumentado para 20s para e-commerce
+    const timeoutId = setTimeout(() => abortController.abort(), 15000)
 
     let response: Response
     try {
       response = await fetch(url, {
         method: 'GET',
         headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
-          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          Referer: 'https://www.google.com/',
         },
         signal: abortController.signal,
       })
@@ -46,171 +50,100 @@ export async function scrapeHtmlToMarkdown(url: string): Promise<ScrapeHtmlRespo
 
     let html = await response.text()
 
-    // --- FIX CRÍTICO: LIMPEZA DE STRING ---
+    // --- LIMPEZA DE CHOQUE PARA EVITAR CRASH DO JSDOM ---
+    // Remove scripts, iframes e principalmente ESTILOS que causam erro no parser do JSDOM
     html = html
-      .replace(/style\s*=\s*["'][^"']*["']/gi, '')
-      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gim, '')
+      .replace(/<iframe\b[^>]*>[\s\S]*?<\/iframe>/gim, '')
+      .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gim, '') // Remove blocos CSS
+      .replace(/style\s*=\s*["'][^"']*["']/gim, '') // Remove estilos inline (Causa do erro)
 
     const dom = new JSDOM(html, { url })
-    const originalDoc = dom.window.document
+    const doc = dom.window.document
 
-    // --- LÓGICA DE CAPTURA DE DADOS ESTRUTURADOS (JSON-LD) ---
-    // Essencial para Carrefour e E-commerce: pega as imagens de alta resolução que o Google vê
-    let jsonLdImages: string[] = []
-    const jsonScripts = originalDoc.querySelectorAll('script[type="application/ld+json"]')
-    jsonScripts.forEach((script) => {
-      try {
-        const json = JSON.parse(script.textContent || '')
-        const images =
-          json.image ||
-          json.images ||
-          (json['@graph'] ? json['@graph'].map((i: any) => i.image).filter(Boolean) : [])
-        if (Array.isArray(images)) {
-          jsonLdImages.push(...images.map((img: any) => (typeof img === 'string' ? img : img.url)))
-        } else if (typeof images === 'string') {
-          jsonLdImages.push(images)
-        }
-      } catch (e) {
-        /* ignore parse errors */
-      }
-    })
+    // === 2. CAPTURA DA IMAGEM DE CAPA (METADATA) ===
+    const ogImage =
+      doc.querySelector('meta[property="og:image"]')?.getAttribute('content') ||
+      doc.querySelector('meta[name="twitter:image"]')?.getAttribute('content') ||
+      doc.querySelector('link[rel="image_src"]')?.getAttribute('href')
 
-    // Captura Meta Tags de imagem
-    const metaImage =
-      originalDoc.querySelector('meta[property="og:image:secure_url"]')?.getAttribute('content') ||
-      originalDoc.querySelector('meta[property="og:image"]')?.getAttribute('content') ||
-      originalDoc.querySelector('meta[name="twitter:image"]')?.getAttribute('content')
+    // === 3. RESGATE DE IMAGENS DO CORPO (LAZY LOAD) ===
+    doc.querySelectorAll('img').forEach((img: any) => {
+      const potentialSources = [
+        img.getAttribute('data-src'),
+        img.getAttribute('data-original'),
+        img.getAttribute('data-original-src'),
+        img.getAttribute('data-lazy-src'),
+        img.getAttribute('srcset')?.split(',')[0]?.split(' ')[0],
+      ]
 
-    if (metaImage) jsonLdImages.unshift(metaImage)
+      const bestSrc = potentialSources.find((src) => src && src.trim() !== '')
+      if (bestSrc) img.setAttribute('src', bestSrc)
 
-    // --- LÓGICA DE IMAGENS EM ALTA RESOLUÇÃO ---
-    originalDoc.querySelectorAll('img, picture source').forEach((img: any) => {
-      let bestSrc = ''
-
-      // 1. Prioriza o maior srcset
-      const srcset = img.getAttribute('srcset')
-      if (srcset) {
-        const sources = srcset.split(',').map((s: string) => s.trim().split(' '))
-        bestSrc = sources[sources.length - 1][0]
-      }
-
-      // 2. Fallbacks e Data Attributes (Comum em Carrefour/VTEX)
-      if (!bestSrc) {
-        bestSrc =
-          img.getAttribute('data-original-src') ||
-          img.getAttribute('data-src') ||
-          img.getAttribute('data-lazy') ||
-          img.getAttribute('src')
-      }
-
-      if (bestSrc && !bestSrc.startsWith('data:image')) {
-        try {
-          // Normalização de URL absoluta
-          if (!bestSrc.startsWith('http') && !bestSrc.startsWith('//')) {
-            bestSrc = new URL(bestSrc, url).href
-          } else if (bestSrc.startsWith('//')) {
-            bestSrc = new URL(url).protocol + bestSrc
-          }
-
-          // --- TRATAMENTO PARA E-COMMERCE (Carrefour/VTEX) ---
-          // Remove redimensionadores de imagem (ex: /width/height/ ou -200-200)
-          // Isso força a imagem a vir na resolução original
-          bestSrc = bestSrc
-            .replace(/\/\d+-\d+\//g, '/') // Remove /200-200/
-            .replace(/-\d+-\d+\./g, '.') // Remove -200-200.jpg
-            .replace(/\?v=\d+/, '') // Remove query strings de versão
-
-          img.setAttribute('src', bestSrc)
-
-          if (img.tagName === 'SOURCE') {
-            const parent = img.closest('picture')
-            const mainImg = parent?.querySelector('img')
-            if (mainImg) mainImg.setAttribute('src', bestSrc)
-          }
-        } catch {
-          /* ignore */
-        }
-      }
-
-      // Limpeza de lixo visual
-      img.removeAttribute('width')
-      img.removeAttribute('height')
       img.removeAttribute('srcset')
-      img.removeAttribute('sizes')
+      img.removeAttribute('loading')
+      img.style.display = 'block' // Garante visibilidade já que removemos estilos globais
+
+      const currentSrc = img.getAttribute('src')
+      if (currentSrc) {
+        try {
+          const absoluteUrl = new URL(currentSrc, url).href
+          img.setAttribute('src', absoluteUrl)
+        } catch (e) {}
+      }
     })
 
-    const reader = new Readability(originalDoc)
+    doc.querySelectorAll('a').forEach((a: any) => {
+      if (a.hasAttribute('href')) {
+        try {
+          a.setAttribute('href', new URL(a.getAttribute('href'), url).href)
+        } catch (e) {}
+      }
+      a.removeAttribute('target')
+    })
+
+    // === 4. PROCESSAMENTO READABILITY ===
+    const reader = new Readability(doc, {
+      keepClasses: false,
+      debug: false,
+    })
+
     const article = reader.parse()
 
     if (!article || !article.content) {
-      return { success: false, error: 'Não foi possível extrair o conteúdo principal.' }
-    }
-
-    const tempDom = new JSDOM(article.content)
-    const tempDoc = tempDom.window.document
-
-    // Limpeza profunda e fix para NotFoundError
-    tempDoc
-      .querySelectorAll(
-        'script, style, iframe, embed, object, noscript, .hidden, [style*="display:none"]',
-      )
-      .forEach((el) => el.remove())
-
-    const allElements = Array.from(tempDoc.querySelectorAll('*'))
-    allElements.forEach((el: any) => {
-      if (!el.isConnected) return
-      el.removeAttribute('style')
-
-      if ((el.tagName === 'DIV' || el.tagName === 'SPAN') && el.children.length === 0) {
-        const text = el.textContent?.trim()
-        if (text && text.length > 0) {
-          const p = tempDoc.createElement('p')
-          p.textContent = text
-          if (el.parentNode && el.parentNode.contains(el)) el.parentNode.replaceChild(p, el)
-        }
+      return {
+        success: true,
+        html: `<div class="raw-content-fallback">${doc.body.innerHTML}</div>`,
+        title: doc.title,
+        excerpt: '',
       }
-    })
-
-    // --- REINJEÇÃO DE IMAGENS DE ALTA RESOLUÇÃO ---
-    // Se for e-commerce, a Readability pode ter removido as fotos do produto.
-    // Nós as colocamos de volta no topo de forma organizada.
-    const uniqueImages = Array.from(new Set(jsonLdImages)).filter((img) => img.startsWith('http'))
-
-    if (uniqueImages.length > 0) {
-      // Criamos uma seção de galeria se houver muitas fotos (comum em produtos)
-      const galleryDiv = tempDoc.createElement('div')
-      uniqueImages.slice(0, 5).forEach((imgUrl) => {
-        // Verifica se a imagem já não está no conteúdo para evitar duplicatas
-        if (!tempDoc.body.innerHTML.includes(imgUrl.split('/').pop() || 'nothing')) {
-          const newImg = tempDoc.createElement('img')
-          newImg.setAttribute('src', imgUrl)
-          newImg.setAttribute('alt', article.title || '')
-          galleryDiv.appendChild(newImg)
-        }
-      })
-      tempDoc.body.prepend(galleryDiv)
     }
 
-    article.content = tempDoc.body.innerHTML
+    let finalHtml = article.content
 
-    // Conversão Final com NHM
-    const nhm = new NodeHtmlMarkdown({
-      bulletMarker: '-',
-      codeFence: '```',
-    })
+    // === 5. INJEÇÃO DA CAPA (FEATURED IMAGE) ===
+    if (ogImage) {
+      try {
+        const imageName = ogImage.split('/').pop()?.split('?')[0] || 'xyz-aleatorio'
 
-    let markdown = nhm.translate(article.content || '')
+        if (!finalHtml.includes(imageName) && !finalHtml.includes(ogImage)) {
+          const absoluteOgImage = new URL(ogImage, url).href
 
-    // Limpeza de excessos de quebra de linha e HTML residual
-    markdown = markdown
-      .replace(/\n{3,}/g, '\n\n')
-      .replace(/<(\/?)(div|span|section|header|footer)([^>]*)>/gi, '')
-      .replace(/<br\s*\/?>/gi, '\n')
-      .trim()
+          const featuredImageHtml = `
+              <figure style="margin: 0 0 2rem 0; width: 100%;">
+                <img src="${absoluteOgImage}" alt="${article.title}" style="width: 100%; height: auto; border-radius: 8px; object-fit: cover; max-height: 500px;" referrerpolicy="no-referrer" />
+              </figure>
+            `
+          finalHtml = featuredImageHtml + finalHtml
+        }
+      } catch (e) {
+        // ignore error
+      }
+    }
 
     return {
       success: true,
-      markdown: `# ${article.title || 'Produto/Artigo'}\n\n${markdown}`,
+      html: finalHtml,
       title: article.title || '',
       excerpt: stripHTML(article.excerpt || ''),
     }

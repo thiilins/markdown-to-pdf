@@ -1,8 +1,9 @@
 'use client'
 
-import { scrapeHtmlToMarkdown } from '@/app/actions/scrapper-html-v2'
+import { scrapperHtmlV2, type ScrapeHtmlResponse } from '@/app/actions/scrapper-html-v2'
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
+
 interface WebExtractorContextType {
   url: string
   setUrl: (url: string) => void
@@ -15,6 +16,9 @@ interface WebExtractorContextType {
   handleConvert: () => Promise<void>
   handleReset: () => void
   haveContent: boolean
+  // Novo estado para o Modo Leitura
+  isReaderMode: boolean
+  toggleReaderMode: () => void
 }
 
 const WebExtractorContext = createContext<WebExtractorContextType | undefined>(undefined)
@@ -24,52 +28,53 @@ export function WebExtractorProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState<ScrapeHtmlResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [isReaderMode, setIsReaderMode] = useState(true)
+
   const handleConvert = useCallback(async () => {
     if (!url.trim()) {
       setError('Por favor, insira uma URL válida')
-      toast.error('Por favor, insira uma URL válida', {
-        duration: 5000,
-        description: 'Tente novamente ou use outra URL',
-      })
+      toast.error('Por favor, insira uma URL válida')
       return
     }
 
     setIsLoading(true)
     setError(null)
     setResult(null)
+    // Força o modo leitura ao carregar novo conteúdo
+    setIsReaderMode(true)
 
     try {
-      const response = await scrapeHtmlToMarkdown(url.trim())
+      const response = await scrapperHtmlV2(url.trim())
 
-      if (response.success && response.markdown) {
+      if (response.success && response.html) {
         setResult(response)
-        toast.success('Conteúdo convertido com sucesso!')
+        toast.success('Conteúdo extraído com sucesso!')
       } else {
-        const errorMsg = response.error || 'Erro ao converter conteúdo'
+        const errorMsg = response.error || 'Erro ao extrair conteúdo'
         setError(errorMsg)
-        toast.error(errorMsg, {
-          duration: 5000,
-          description: 'Tente novamente ou use outra URL',
-        })
+        toast.error(errorMsg)
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido ao processar'
       setError(errorMessage)
-      toast.error(errorMessage, {
-        duration: 5000,
-        description: 'Verifique sua conexão e tente novamente',
-      })
+      toast.error(errorMessage)
     } finally {
       setIsLoading(false)
     }
   }, [url])
-  const haveContent = useMemo(() => !!url && !!result && !!result.markdown, [url, result])
+
+  const haveContent = useMemo(() => !!url && !!result && !!result.html, [url, result])
 
   const handleReset = useCallback(() => {
     setUrl('')
     setResult(null)
     setError(null)
   }, [])
+
+  const toggleReaderMode = useCallback(() => {
+    setIsReaderMode((prev) => !prev)
+  }, [])
+
   return (
     <WebExtractorContext.Provider
       value={{
@@ -84,6 +89,8 @@ export function WebExtractorProvider({ children }: { children: ReactNode }) {
         handleConvert,
         haveContent,
         handleReset,
+        isReaderMode,
+        toggleReaderMode,
       }}>
       {children}
     </WebExtractorContext.Provider>

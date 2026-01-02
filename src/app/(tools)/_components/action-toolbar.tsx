@@ -9,6 +9,8 @@ import { cn } from '@/lib/utils'
 import { useApp } from '@/shared/contexts/appContext'
 import { useMarkdown } from '@/shared/contexts/markdownContext'
 import {
+  ChevronLeft,
+  ChevronRight,
   CloudDownload,
   Edit,
   FileDown,
@@ -22,7 +24,7 @@ import {
   Trash,
 } from 'lucide-react'
 import { useSession } from 'next-auth/react'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { FaGithub } from 'react-icons/fa'
 import { FilesManager } from './editor-files-manager'
 import { HeaderFooterBtns } from './header-footer-btns'
@@ -35,6 +37,106 @@ import { ImportUrlButton } from './modals/import-url-modal'
 interface EnableTools {
   additional?: { component: React.ReactNode }[]
   headerFooter?: boolean
+}
+
+/**
+ * Componente profissional de toolbar com scroll horizontal
+ * - Scrollbar sutil mas visível para desktop
+ * - Botões de navegação quando há scroll disponível
+ * - Gradientes como indicadores visuais adicionais
+ * - Suporte a gestos de toque em mobile
+ */
+function ToolbarWithScrollIndicators({ children }: { children: React.ReactNode }) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
+  const [showNavigation, setShowNavigation] = useState(false)
+
+  const updateScrollState = () => {
+    if (!scrollRef.current) return
+
+    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current
+    const hasScroll = scrollWidth > clientWidth
+    const canLeft = scrollLeft > 0
+    const canRight = scrollLeft < scrollWidth - clientWidth - 1
+
+    setCanScrollLeft(canLeft)
+    setCanScrollRight(canRight)
+    setShowNavigation(hasScroll)
+  }
+
+  const scrollLeft = () => {
+    if (!scrollRef.current) return
+    const scrollAmount = scrollRef.current.clientWidth * 0.8
+    scrollRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' })
+  }
+
+  const scrollRight = () => {
+    if (!scrollRef.current) return
+    const scrollAmount = scrollRef.current.clientWidth * 0.8
+    scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    const scrollElement = scrollRef.current
+    if (!scrollElement) return
+
+    // Atualiza na montagem e redimensionamento
+    updateScrollState()
+    window.addEventListener('resize', updateScrollState)
+    scrollElement.addEventListener('scroll', updateScrollState)
+
+    // Observer para detectar mudanças no conteúdo
+    const resizeObserver = new ResizeObserver(updateScrollState)
+    resizeObserver.observe(scrollElement)
+
+    return () => {
+      window.removeEventListener('resize', updateScrollState)
+      scrollElement.removeEventListener('scroll', updateScrollState)
+      resizeObserver.disconnect()
+    }
+  }, [])
+
+  return (
+    <div className='relative flex h-14 w-full items-center'>
+      {/* Botão de navegação esquerdo */}
+      {showNavigation && canScrollLeft && (
+        <button
+          onClick={scrollLeft}
+          className='bg-background/80 hover:bg-background absolute top-1/2 left-0 z-20 -translate-y-1/2 rounded-r-md p-1.5 shadow-md backdrop-blur-sm transition-all hover:shadow-lg active:scale-95'
+          aria-label='Rolar para esquerda'>
+          <ChevronLeft className='text-foreground h-4 w-4' />
+        </button>
+      )}
+
+      {/* Gradiente esquerdo (indicador visual sutil) */}
+      {canScrollLeft && (
+        <div className='from-background/95 via-background/60 pointer-events-none absolute top-0 left-0 z-10 h-full w-8 bg-gradient-to-r to-transparent transition-opacity duration-200' />
+      )}
+
+      {/* Container com scroll (scrollbar oculta, navegação via botões) */}
+      <div
+        ref={scrollRef}
+        className='no-scrollbar flex h-full w-full touch-pan-x items-center gap-2 overflow-x-auto scroll-smooth px-3'>
+        {children}
+      </div>
+
+      {/* Gradiente direito (indicador visual sutil) */}
+      {canScrollRight && (
+        <div className='from-background/95 via-background/60 pointer-events-none absolute top-0 right-0 z-10 h-full w-8 bg-gradient-to-l to-transparent transition-opacity duration-200' />
+      )}
+
+      {/* Botão de navegação direito */}
+      {showNavigation && canScrollRight && (
+        <button
+          onClick={scrollRight}
+          className='bg-background/80 hover:bg-background absolute top-1/2 right-0 z-20 -translate-y-1/2 rounded-l-md p-1.5 shadow-md backdrop-blur-sm transition-all hover:shadow-lg active:scale-95'
+          aria-label='Rolar para direita'>
+          <ChevronRight className='text-foreground h-4 w-4' />
+        </button>
+      )}
+    </div>
+  )
 }
 
 export const ActionToolbar = ({ additional, headerFooter }: EnableTools) => {
@@ -97,8 +199,8 @@ export const ActionToolbar = ({ additional, headerFooter }: EnableTools) => {
         </div>
       )}
 
-      {/* Toolbar Principal com Scroll Horizontal */}
-      <div className='no-scrollbar flex h-14 w-full touch-pan-x items-center gap-2 overflow-x-auto scroll-smooth px-3'>
+      {/* Toolbar Principal com Scroll Horizontal e Indicadores Visuais Dinâmicos */}
+      <ToolbarWithScrollIndicators>
         {/* Grupo: Arquivos */}
         <div className='flex shrink-0 items-center gap-1'>
           <IconButtonTooltip
@@ -108,8 +210,8 @@ export const ActionToolbar = ({ additional, headerFooter }: EnableTools) => {
             content='Novo arquivo'
             className={{ button: btnClass }}
           />
-          {/* FilesManager com largura mínima controlada no mobile */}
-          <div className='xs:w-48 w-40 shrink-0 sm:w-64'>
+          {/* FilesManager com largura responsiva */}
+          <div className='min-w-[120px] shrink-0 sm:min-w-[180px] md:min-w-[240px]'>
             <FilesManager />
           </div>
           <IconButtonTooltip
@@ -223,7 +325,7 @@ export const ActionToolbar = ({ additional, headerFooter }: EnableTools) => {
             </div>
           )}
         </div>
-      </div>
+      </ToolbarWithScrollIndicators>
 
       {/* Modais */}
       <div className='hidden'>

@@ -237,9 +237,10 @@ export function GistPreviewHeader() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end' className='w-56'>
+              <FileSelector />
+              <DropdownMenuSeparator />
               <DropdownMenuLabel>Ações do Arquivo</DropdownMenuLabel>
               <DropdownMenuSeparator />
-
               <DropdownMenuGroup>
                 <DropdownMenuItem onClick={handleOpenInEditor}>
                   <FileEdit className='mr-2 h-4 w-4' />
@@ -250,9 +251,7 @@ export function GistPreviewHeader() {
                   <span>Ver no GitHub</span>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
-
               <DropdownMenuSeparator />
-
               <DropdownMenuGroup>
                 <DropdownMenuLabel className='text-muted-foreground text-xs font-normal'>
                   Downloads
@@ -287,7 +286,6 @@ export function GistPreviewHeader() {
                   <span>Imprimir</span>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
-
               {(isOwner || sessionStatus === 'authenticated') && (
                 <>
                   <DropdownMenuSeparator />

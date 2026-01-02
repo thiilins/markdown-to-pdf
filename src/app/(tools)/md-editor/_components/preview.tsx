@@ -177,7 +177,7 @@ export const PreviewComponent = forwardRef<HTMLDivElement, PreviewPanelProps>(
         </div>
 
         {/* Floating Info Pill */}
-        <div className='bg-background/80 text-muted-foreground hover:bg-background pointer-events-none absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center justify-center gap-2 rounded-full border px-4 py-1.5 text-xs font-medium shadow-sm backdrop-blur-md transition-all print:hidden'>
+        <div className='bg-background/80 text-muted-foreground hover:bg-background pointer-events-none absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center justify-center gap-2 rounded-full border px-4 py-1.5 text-[11px] font-medium shadow-sm backdrop-blur-md transition-all print:hidden'>
           <Ruler className='text-primary h-3.5 w-3.5' />
           <span>{pageConfig.size.toUpperCase()}</span>
           <span className='text-muted-foreground/40'>•</span>

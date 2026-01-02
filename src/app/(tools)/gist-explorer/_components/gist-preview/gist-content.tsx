@@ -11,26 +11,26 @@ import SyntaxHighlighter from 'react-syntax-highlighter'
 
 import { vs2015 } from 'react-syntax-highlighter/dist/cjs/styles/hljs'
 import { MdPreview } from './md-preview'
-// ============================================================================
-// COMPONENTE DE LAYOUT PADRÃO (O "PAPEL" A4)
-// ============================================================================
 interface StandardPreviewWrapperProps {
   children: ReactNode
   className?: string
+  classNameContainer?: string
   contentRef?: any
 }
 
 const StandardPreviewWrapper = ({
   children,
   className,
+  classNameContainer,
   contentRef,
 }: StandardPreviewWrapperProps) => {
   return (
-    <div className='bg-muted/10 relative flex min-h-full w-full flex-col items-center py-8 md:py-12'>
-      {/* Padrão de fundo sutil (Dot Pattern) */}
+    <div
+      className={cn(
+        'bg-muted/10 relative flex min-h-full w-full flex-col items-center py-8 md:py-12',
+        classNameContainer,
+      )}>
       <div className='pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] bg-size-[16px_16px] opacity-50 dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)]' />
-
-      {/* A Folha de Papel */}
       <div
         ref={contentRef}
         className={cn(
@@ -41,7 +41,8 @@ const StandardPreviewWrapper = ({
         )}
         style={{
           maxWidth: 'min(310mm, 100%)', // Largura A4 máxima, mas nunca mais que 100% do container
-          minHeight: '297mm', // Altura A4 mínima
+          minHeight: 'max(297mm, 100%)', // Altura A4 mínima
+          width: '100%', // Garante que ocupe toda a largura disponível
         }}>
         {children}
       </div>
@@ -76,8 +77,8 @@ const ContentComponent = ({
     if (isImage) {
       return <ContentImagePreview selectedFile={selectedFile} />
     }
-    return <ContentCodePreview content={content} language={language} />
-  }, [isMd, isImage, content, language, selectedFile])
+    return <ContentCodePreview content={content} language={language} filename={filename} />
+  }, [isMd, isImage, content, language, selectedFile, filename])
 
   return <div className='animate-in fade-in h-full w-full duration-300'>{RenderedView}</div>
 }
@@ -100,23 +101,32 @@ const ContentMdPreview = ({ content }: { content: string }) => {
 const ContentCodePreview = ({
   content,
   language,
+  filename,
 }: {
+  filename?: string
   content: string
   language?: string | null
 }) => {
   const { contentRef } = useGist()
 
   return (
-    <StandardPreviewWrapper contentRef={contentRef} className='bg-[#2b2b2b] dark:bg-[#2b2b2b]'>
-      <div className='flex shrink-0 items-center justify-between border-b border-white/10 bg-white/5 px-6 py-3'>
-        <div className='flex items-center gap-4'>
-          <div className='flex gap-1.5'>
-            <div className='h-3 w-3 rounded-full bg-red-500/80 shadow-sm' />
-            <div className='h-3 w-3 rounded-full bg-yellow-500/80 shadow-sm' />
-            <div className='h-3 w-3 rounded-full bg-green-500/80 shadow-sm' />
+    <StandardPreviewWrapper
+      contentRef={contentRef}
+      className='bg-[#2b2b2b] dark:bg-[#2b2b2b]'
+      classNameContainer='p-2 rounded-lg!'>
+      <div className='flex shrink-0 items-center justify-between border-b border-white/10 bg-white/5 px-3 py-2.5 sm:px-6 sm:py-3'>
+        <div className='flex items-center gap-2 sm:gap-4'>
+          <div className='flex gap-1 sm:gap-1.5'>
+            <div className='h-2.5 w-2.5 rounded-full bg-red-500/80 shadow-sm sm:h-3 sm:w-3' />
+            <div className='h-2.5 w-2.5 rounded-full bg-yellow-500/80 shadow-sm sm:h-3 sm:w-3' />
+            <div className='h-2.5 w-2.5 rounded-full bg-green-500/80 shadow-sm sm:h-3 sm:w-3' />
           </div>
         </div>
-        <span className='text-muted-foreground font-mono text-xs font-medium tracking-wider uppercase opacity-60'>
+
+        <span className='max-w-[120px] truncate font-mono text-[10px] font-medium tracking-wider text-white opacity-60 sm:max-w-none sm:text-xs'>
+          {filename || 'code.js'}
+        </span>
+        <span className='max-w-[120px] truncate font-mono text-[10px] font-medium tracking-wider text-white uppercase opacity-60 sm:max-w-none sm:text-xs'>
           {language || 'text'}
         </span>
       </div>
@@ -127,6 +137,7 @@ const ContentCodePreview = ({
           style={vs2015}
           showLineNumbers={true}
           wrapLines={true}
+          wrapLongLines={true}
           lineNumberStyle={{
             minWidth: '3.5em',
             paddingRight: '1.5em',
@@ -138,14 +149,48 @@ const ContentCodePreview = ({
           }}
           customStyle={{
             margin: 0,
-            padding: '2rem',
+            padding: '1rem',
             width: '100%',
             height: '100%',
             backgroundColor: 'transparent',
             fontSize: '13px',
             lineHeight: '1.6',
             fontFamily: 'var(--font-mono)',
-          }}>
+            whiteSpace: 'pre-wrap',
+            wordWrap: 'break-word',
+            overflowWrap: 'break-word',
+            wordBreak: 'break-word',
+            maxWidth: '100%',
+          }}
+          PreTag={({ children, ...props }: any) => (
+            <pre
+              {...props}
+              style={{
+                ...props.style,
+                whiteSpace: 'pre-wrap',
+                wordWrap: 'break-word',
+                overflowWrap: 'break-word',
+                wordBreak: 'break-word',
+                maxWidth: '100%',
+                overflow: 'visible',
+              }}>
+              {children}
+            </pre>
+          )}
+          CodeTag={({ children, ...props }: any) => (
+            <code
+              {...props}
+              style={{
+                ...props.style,
+                whiteSpace: 'pre-wrap',
+                wordWrap: 'break-word',
+                overflowWrap: 'break-word',
+                wordBreak: 'break-word',
+                maxWidth: '100%',
+              }}>
+              {children}
+            </code>
+          )}>
           {content}
         </SyntaxHighlighter>
       </div>
