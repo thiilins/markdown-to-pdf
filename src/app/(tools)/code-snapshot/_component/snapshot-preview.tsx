@@ -69,34 +69,25 @@ export function SnapshotPreview({
   const [zoom, setZoom] = useState(() => calculateInitialZoom())
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
-  // Posição agora representa APENAS o offset de arrasto (pan), não a centralização
+  // Posição agora representa o offset de arrasto (pan)
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [calculatedFontSize, setCalculatedFontSize] = useState(config.fontSize)
 
-  // -- CORREÇÃO 1: Simplificação do Ajuste de Posição --
-  // Removemos a tentativa de calcular o centro manualmente.
-  // Deixamos o Flexbox centralizar e zeramos o offset de arrasto quando apropriado.
   const adjustPosition = useCallback(() => {
     if (!containerRef.current || !ref.current) return
 
-    // Se voltamos ao zoom inicial ou 100%, resetamos o arrasto para o centro perfeito
+    // Se voltamos ao zoom inicial ou muito pequeno, resetamos a posição para o centro
     if (zoom === 1 || zoom <= MIN_ZOOM) {
       setPosition({ x: 0, y: 0 })
     }
-
-    // Nota: Removemos a lógica de scrollLeft/scrollTop manual.
-    // O arrasto agora é puramente via transform translate.
   }, [zoom])
 
   // Atualiza zoom quando a tela redimensiona
   useEffect(() => {
-    // Apenas recalcula se o usuário não definiu um scale manual fixo ou se é reset
     if (config.scale === 1 || !config.scale) {
       const handleResize = () => {
         const newZoom = calculateInitialZoom()
         setZoom(newZoom)
-        // Não atualizamos o config global aqui para não travar loops, apenas local
-        // updateConfig('scale', newZoom)
         setPosition({ x: 0, y: 0 }) // Reseta posição no resize
       }
       window.addEventListener('resize', handleResize)
@@ -104,7 +95,7 @@ export function SnapshotPreview({
     }
   }, [config.scale, calculateInitialZoom])
 
-  // Cálculo de Fonte (Mantido igual)
+  // Cálculo de Fonte
   useEffect(() => {
     if (finalHeight === 0 || availableCodeHeight <= 0) {
       setCalculatedFontSize(config.fontSize)
@@ -174,11 +165,6 @@ export function SnapshotPreview({
     (newZoom: number) => {
       setZoom(newZoom)
       updateConfig('scale', newZoom)
-      // Não forçamos reset de posição aqui para permitir zoom no lugar (opcional),
-      // mas para corrigir o drift, resetar o position ajuda a manter no centro visual.
-      // Se quiser zoom na direção do mouse, a lógica é bem mais complexa.
-      // Manter simples:
-      // setPosition({ x: 0, y: 0 })
     },
     [updateConfig],
   )
@@ -205,13 +191,13 @@ export function SnapshotPreview({
     }
   }, [config.scale, zoom])
 
-  // -- CORREÇÃO 2: Drag Logic Simplificada --
+  // --- Lógica de Drag (Arrastar com clique) ---
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
-      // Permite arrastar sempre que não estiver no zoom padrão ou se quiser mover livremente
-      // Removemos a restrição de "zoom !== 1" se quiser permitir pan livre
+      // Só inicia drag se for botão esquerdo
+      if (e.button !== 0) return
+
       setIsDragging(true)
-      // Registra onde o mouse estava RELATIVO à posição atual do elemento
       setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y })
     },
     [position],
@@ -233,18 +219,34 @@ export function SnapshotPreview({
     setIsDragging(false)
   }, [])
 
+  // --- Lógica de Scroll e Zoom combinados ---
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
+      // Verifica se é Zoom (Ctrl/Meta pressionado)
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault()
-        const delta = e.deltaY > 0 ? -0.05 : 0.05 // Zoom mais suave
+        // Lógica de Zoom existente
+        const delta = e.deltaY > 0 ? -0.05 : 0.05
         updateZoom(Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom + delta)))
+      } else {
+        // --- NOVA LÓGICA: PAN VIA SCROLL ---
+        // Se não estiver apertando Ctrl, o scroll move a imagem (Pan)
+        // Isso permite navegar quando está com zoom
+        e.preventDefault() // Previne scroll da página pai
+
+        // Multiplicador opcional para acelerar/desacelerar o scroll se necessário
+        const scrollSpeed = 1
+
+        // Subtraímos o delta porque scroll down (positivo) deve mover a view down (conteúdo sobe - negativo)
+        setPosition((prev) => ({
+          x: prev.x - e.deltaX * scrollSpeed,
+          y: prev.y - e.deltaY * scrollSpeed,
+        }))
       }
     },
     [zoom, updateZoom],
   )
 
-  // Define o cursor baseado no estado
   const cursorStyle = isDragging ? 'cursor-grabbing' : 'cursor-grab'
 
   return (
@@ -322,10 +324,7 @@ export function SnapshotPreview({
         </div>
       </div>
 
-      {/* -- CORREÇÃO 3: Container Principal --
-         Usamos Flexbox para centralizar.
-         Overflow hidden pois usaremos "transform" para mover (pan), não scroll nativo.
-      */}
+      {/* Container Principal */}
       <div
         ref={containerRef}
         className={cn(
@@ -336,25 +335,17 @@ export function SnapshotPreview({
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         id='preview-container'>
-        {/* Wrapper que recebe o Transform.
-           Origin: 'center center' garante que o zoom expanda para todos os lados igualmente.
-           Translate: aplica o arrasto do usuário.
-           Scale: aplica o zoom.
-        */}
+        {/* Wrapper Transform */}
         <div
           style={{
             transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${zoom})`,
-            // Mobile geralmente prefere "top center" para não esconder o cabeçalho,
-            // mas "center center" é mais matematicamente correto para zoom in/out sem drift lateral.
-            // Vamos usar center center e confiar no drag (position) para ajustes finos.
             transformOrigin: 'center center',
             willChange: 'transform',
-            // Importante: fit-content garante que o wrapper tenha o tamanho exato do conteúdo
             width: 'fit-content',
             height: 'fit-content',
-            transition: isDragging ? 'none' : 'transform 0.1s ease-out', // Transição suave exceto quando arrasta
+            transition: isDragging ? 'none' : 'transform 0.1s ease-out',
           }}>
-          {/* Conteúdo do Snippet (Mantido igual) */}
+          {/* Conteúdo do Snippet */}
           <div
             ref={ref}
             style={{
@@ -379,8 +370,7 @@ export function SnapshotPreview({
                       : 'center'
                   : 'flex-start',
             }}
-            className='relative shadow-2xl' // Adicionei shadow aqui para destaque
-          >
+            className='relative shadow-2xl'>
             <div
               className='bg-[#0d0d0d] ring-1 ring-white/10'
               style={{
@@ -408,7 +398,6 @@ export function SnapshotPreview({
                     flex: availableCodeHeight > 0 ? '1 1 0' : '0 0 auto',
                     minHeight: 0,
                   }}>
-                  {/* Styles Injection (Mantido) */}
                   <style>{`
                   .code-snapshot-syntax-wrapper pre,
                   .code-snapshot-syntax-wrapper code,
@@ -489,9 +478,9 @@ export function SnapshotPreview({
         </div>
       </div>
 
-      {/* Dica de Zoom */}
+      {/* Dica de Uso */}
       <div className='text-muted-foreground absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] font-medium opacity-40 mix-blend-difference select-none'>
-        Scroll para zoom • Arraste para mover
+        Scroll para mover • Ctrl + Scroll para Zoom
       </div>
     </div>
   )

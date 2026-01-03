@@ -15,9 +15,9 @@ import { Separator } from '@/components/ui/separator'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
+import { CODE_THEMES, FONT_FAMILIES, GRADIENTS, LANGUAGES } from '@/shared/constants/snap-code'
 import { PRESET_SIZES, useCodeSnapshot } from '@/shared/contexts/codeSnapshotContext'
 import { RotateCcw } from 'lucide-react'
-import { CODE_THEMES, FONT_FAMILIES, GRADIENTS, LANGUAGES } from './constants'
 
 export function SnapshotControls({ compact = false }: { compact?: boolean }) {
   const { config, updateConfig, resetConfig } = useCodeSnapshot()

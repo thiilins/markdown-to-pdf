@@ -1,6 +1,8 @@
 'use client'
 
-import React, { ReactNode, createContext, useContext, useState } from 'react'
+import usePersistedStateInDB from '@/hooks/use-persisted-in-db'
+import { ReactNode, createContext, useContext } from 'react'
+import { DEFAULT_CODE } from '../constants/snap-code'
 
 export const PRESET_SIZES: PresetSize[] = [
   { id: 'custom', name: 'Custom', width: 800, height: 0, description: 'Tamanho personalizado' },
@@ -46,46 +48,10 @@ interface CodeSnapshotContextType {
   code: string
   setCode: (code: string) => void
   config: SnapshotConfig
-  setConfig: React.Dispatch<React.SetStateAction<SnapshotConfig>>
+  setConfig: (config: SnapshotConfig) => void
   updateConfig: (key: keyof SnapshotConfig, value: any) => void
   resetConfig: () => void
 }
-const defaultCode = `import { useState, useCallback } from 'react'
-import { toast } from 'sonner'
-
-interface SnapshotProps {
-  code: string
-  language: 'typescript' | 'javascript' | 'python'
-  theme?: string
-}
-
-export function CodeCard({ code, language }: SnapshotProps) {
-  const [isCopied, setIsCopied] = useState(false)
-
-  const copyToClipboard = useCallback(async () => {
-    await navigator.clipboard.writeText(code)
-    setIsCopied(true)
-
-    // 📸 Feedback visual para o usuário
-    toast.success('Snippet copiado com sucesso!')
-
-    setTimeout(() => setIsCopied(false), 2000)
-  }, [code])
-
-  return (
-    <div className="rounded-xl border bg-zinc-950 p-4 shadow-2xl">
-      <div className="flex justify-between items-center mb-4">
-        <span className="text-xs text-zinc-400">{language}</span>
-        <button onClick={copyToClipboard} className="text-sm font-medium">
-          {isCopied ? 'Copiado!' : 'Copiar'}
-        </button>
-      </div>
-      <pre className="font-mono text-sm text-blue-300">
-        {code}
-      </pre>
-    </div>
-  )
-}`
 
 const defaultConfig: SnapshotConfig = {
   language: 'javascript',
@@ -119,15 +85,18 @@ const defaultConfig: SnapshotConfig = {
 const CodeSnapshotContext = createContext<CodeSnapshotContextType | undefined>(undefined)
 
 export function CodeSnapshotProvider({ children }: { children: ReactNode }) {
-  const [code, setCode] = useState(defaultCode)
-  const [config, setConfig] = useState<SnapshotConfig>(defaultConfig)
+  const [code, setCode] = usePersistedStateInDB('code-snapshot-code', DEFAULT_CODE)
+  const [config, setConfig] = usePersistedStateInDB<SnapshotConfig>(
+    'code-snapshot-config',
+    defaultConfig,
+  )
 
   const updateConfig = (key: keyof SnapshotConfig, value: any) => {
-    setConfig((prev) => ({ ...prev, [key]: value }))
+    setConfig({ ...config, [key]: value })
   }
 
   const resetConfig = () => {
-    setConfig(defaultConfig)
+    setConfig({ ...defaultConfig })
   }
 
   return (

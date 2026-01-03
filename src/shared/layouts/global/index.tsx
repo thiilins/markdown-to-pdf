@@ -7,21 +7,24 @@ import { MarkdownProvider } from '@/shared/contexts/markdownContext'
 import { SessionProvider } from 'next-auth/react'
 import { Toaster } from 'sonner'
 import { GlobalHeaderComponent } from './header'
+import { CodeSnapshotProvider } from '@/shared/contexts/codeSnapshotContext'
 export const GlobalLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <SessionProvider>
       <MarkdownProvider>
         <AppProvider>
-          <HeaderFooterProvider>
-            <GistProvider>
-              <main className='bg-background flex h-screen w-screen flex-1 flex-col bg-[url(https://picsum.photos/1920/1080)] bg-cover bg-center font-sans'>
-                <GlobalHeaderComponent />
-                <Toaster />
-                <SettingsDialog />
-                {children}
-              </main>
-            </GistProvider>
-          </HeaderFooterProvider>
+          <CodeSnapshotProvider>
+            <HeaderFooterProvider>
+              <GistProvider>
+                <main className='bg-background flex h-screen w-screen flex-1 flex-col bg-[url(https://picsum.photos/1920/1080)] bg-cover bg-center font-sans'>
+                  <GlobalHeaderComponent />
+                  <Toaster />
+                  <SettingsDialog />
+                  {children}
+                </main>
+              </GistProvider>
+            </HeaderFooterProvider>
+          </CodeSnapshotProvider>
         </AppProvider>
       </MarkdownProvider>
     </SessionProvider>

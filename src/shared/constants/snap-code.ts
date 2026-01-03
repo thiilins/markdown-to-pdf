@@ -1,4 +1,40 @@
-const GRADIENTS = [
+export const DEFAULT_CODE = `import { useState, useCallback } from 'react'
+import { toast } from 'sonner'
+
+interface SnapshotProps {
+  code: string
+  language: 'typescript' | 'javascript' | 'python'
+  theme?: string
+}
+
+export function CodeCard({ code, language }: SnapshotProps) {
+  const [isCopied, setIsCopied] = useState(false)
+
+  const copyToClipboard = useCallback(async () => {
+    await navigator.clipboard.writeText(code)
+    setIsCopied(true)
+
+    // 📸 Feedback visual para o usuário
+    toast.success('Snippet copiado com sucesso!')
+
+    setTimeout(() => setIsCopied(false), 2000)
+  }, [code])
+
+  return (
+    <div className="rounded-xl border bg-zinc-950 p-4 shadow-2xl">
+      <div className="flex justify-between items-center mb-4">
+        <span className="text-xs text-zinc-400">{language}</span>
+        <button onClick={copyToClipboard} className="text-sm font-medium">
+          {isCopied ? 'Copiado!' : 'Copiar'}
+        </button>
+      </div>
+      <pre className="font-mono text-sm text-blue-300">
+        {code}
+      </pre>
+    </div>
+  )
+}`
+export const GRADIENTS = [
   { name: 'Midnight', value: 'linear-gradient(to top, #09203f 0%, #537895 100%)' },
   { name: 'Hyper', value: 'linear-gradient(to right, #ec008c, #fc6767)' },
   { name: 'Oceanic', value: 'linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%)' },
@@ -33,6 +69,65 @@ const GRADIENTS = [
     name: 'Ocean Depth',
     value: 'linear-gradient(to right, #134e5e 0%, #71b280 50%, #134e5e 100%)',
   },
+  { name: 'Cyberpunk', value: 'linear-gradient(to right, #c31432, #240b36)' },
+  { name: 'Synthwave', value: 'linear-gradient(to right, #fc00ff, #00dbde)' },
+  { name: 'Jungle', value: 'linear-gradient(to right, #11998e, #38ef7d)' },
+  { name: 'Blue Raspberry', value: 'linear-gradient(to right, #00b09b, #96c93d)' },
+  { name: 'Flare', value: 'linear-gradient(to right, #f12711, #f5af19)' },
+  { name: 'Metapolis', value: 'linear-gradient(to right, #654ea3, #eaafc8)' },
+  { name: 'Kyoto', value: 'linear-gradient(to right, #c21500, #ffc500)' },
+  { name: 'Amethyst', value: 'linear-gradient(to right, #9d50bb, #6e48aa)' },
+
+  // --- Suaves e Pastéis (Ótimo para fundos de UI) ---
+  {
+    name: 'Cloudy Apple',
+    value: 'linear-gradient(to right, #f3e7e9 0%, #e3eeff 99%, #e3eeff 100%)',
+  },
+  { name: 'Snowy', value: 'linear-gradient(to top, #e6e9f0 0%, #eef1f5 100%)' },
+  { name: 'Pale Wood', value: 'linear-gradient(to right, #eacda3, #d6ae7b)' },
+  { name: 'Perfect White', value: 'linear-gradient(to top, #fdfbfb 0%, #ebedee 100%)' },
+  { name: 'Lemon Twist', value: 'linear-gradient(to right, #3ca55c, #b5ac49)' },
+  { name: 'Rose Water', value: 'linear-gradient(to right, #e55d87, #5fc3e4)' },
+
+  // --- Temas Escuros e Profundos ---
+  { name: 'Space Gray', value: 'linear-gradient(to right, #232526, #414345)' },
+  { name: 'Vampire', value: 'linear-gradient(to right, #870000, #190a05)' },
+  { name: 'Deep Space', value: 'linear-gradient(to right, #000000, #434343)' },
+  { name: 'Midnight Bloom', value: 'linear-gradient(to right, #2b5876, #4e4376)' },
+  { name: 'Frost', value: 'linear-gradient(to right, #000428, #004e92)' },
+  { name: 'Dark Slate', value: 'linear-gradient(to right, #434343 0%, black 100%)' },
+
+  // --- Estilos Metálicos e Luxo ---
+  {
+    name: 'Gold Luxury',
+    value: 'linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c)',
+  },
+  { name: 'Silver', value: 'linear-gradient(to right, #d7d2cc 0%, #304352 100%)' },
+  { name: 'Bronze', value: 'linear-gradient(to right, #780206, #061161)' },
+  { name: 'Titanium', value: 'linear-gradient(to right, #283048, #859398)' },
+
+  // --- Gradientes Complexos (3+ cores) ---
+  {
+    name: 'Instagram-ish',
+    value:
+      'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+  },
+  {
+    name: 'Messenger',
+    value: 'linear-gradient(to right, #00c6ff, #0072ff)',
+  },
+  {
+    name: 'Summer Games',
+    value: 'linear-gradient(to right, #92fe9d 0%, #00c9ff 100%)',
+  },
+  {
+    name: 'Rainbow Blue',
+    value: 'linear-gradient(to right, #00f260, #0575e6)',
+  },
+  {
+    name: 'Evening Sunshine',
+    value: 'linear-gradient(to right, #b92b27, #1565c0)',
+  },
   { name: 'Solid Black', value: '#000000' },
   { name: 'Solid White', value: '#ffffff' },
   { name: 'Solid Gray', value: '#1a1a1a' },
@@ -40,7 +135,7 @@ const GRADIENTS = [
   { name: 'Transparent', value: 'transparent' },
 ]
 
-const LANGUAGES = [
+export const LANGUAGES = [
   'javascript',
   'typescript',
   'python',
@@ -94,7 +189,7 @@ const LANGUAGES = [
   'objectivec',
 ]
 
-const FONT_FAMILIES = [
+export const FONT_FAMILIES = [
   'JetBrains Mono',
   'Fira Code',
   'Source Code Pro',
@@ -113,7 +208,7 @@ const FONT_FAMILIES = [
   'SF Mono',
 ]
 
-const CODE_THEMES = [
+export const CODE_THEMES = [
   { name: 'VS Code Dark+', value: 'vscDarkPlus' },
   { name: 'Dracula', value: 'dracula' },
   { name: 'One Dark', value: 'oneDark' },
@@ -154,5 +249,3 @@ const CODE_THEMES = [
   { name: 'Xonokai', value: 'xonokai' },
   { name: 'Z Touch', value: 'zTouch' },
 ]
-
-export { CODE_THEMES, FONT_FAMILIES, GRADIENTS, LANGUAGES }

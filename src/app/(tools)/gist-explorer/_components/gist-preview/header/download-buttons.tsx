@@ -4,7 +4,11 @@ import { IconButtonTooltip } from '@/components/custom-ui/tooltip'
 import { Separator } from '@/components/ui/separator'
 import { ENVIROMENT } from '@/env'
 import { cn } from '@/lib/utils'
-import { CloudDownload, Loader2, Printer } from 'lucide-react'
+import { useCodeSnapshot } from '@/shared/contexts/codeSnapshotContext'
+import { useGist } from '@/shared/contexts/gistContext'
+import { CloudDownload, ImageUp, Loader2, Printer } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useCallback } from 'react'
 import { FaMarkdown } from 'react-icons/fa'
 import { FaFilePdf } from 'react-icons/fa6'
 
@@ -27,9 +31,18 @@ export const DownloadGistButtons = ({
   handlePrint,
   className,
 }: DownloadGistButtonsProps) => {
+  const { setCode } = useCodeSnapshot()
+  const router = useRouter()
+  const { selectedFile, fileContents } = useGist()
   const btnBaseClass =
     'h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors'
 
+  const handleGenerateCodeSnapshot = useCallback(() => {
+    const code = fileContents[selectedFile?.filename ?? '']
+    if (!code) return
+    setCode(code)
+    router.push('/code-snapshot')
+  }, [fileContents, selectedFile?.filename, setCode, router])
   return (
     <div
       className={cn(
@@ -73,6 +86,21 @@ export const DownloadGistButtons = ({
         />
       )}
 
+      {!isMD && (
+        <IconButtonTooltip
+          onClick={handleGenerateCodeSnapshot}
+          content={isLoading ? 'Processando...' : 'Gerar Snapshot'}
+          disabled={isLoading}
+          icon={isLoading ? Loader2 : ImageUp}
+          className={{
+            button: cn(
+              btnBaseClass,
+              isLoading && 'animate-spin cursor-not-allowed opacity-70',
+              'hover:text-blue-500', // Destaque sutil para PDF
+            ),
+          }}
+        />
+      )}
       <IconButtonTooltip
         onClick={handlePrint}
         content='Imprimir'

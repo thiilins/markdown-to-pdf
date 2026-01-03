@@ -6,7 +6,7 @@ import { GistExplorerSidebar } from './_components/gist-sidebar'
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider
-      defaultOpen={true}
+      defaultOpen
       style={
         {
           '--sidebar-width': '400px !important',

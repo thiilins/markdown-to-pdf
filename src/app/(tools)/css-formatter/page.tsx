@@ -1,4 +1,4 @@
-import CssFormatterView from './_components/formatter-view'
+import CssFormatterView from './_components/view'
 
 export default function CssFormatterPage() {
   return <CssFormatterView />
