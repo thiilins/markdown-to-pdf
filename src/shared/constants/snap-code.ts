@@ -209,8 +209,8 @@ export const FONT_FAMILIES = [
 ]
 
 export const CODE_THEMES = [
-  { name: 'VS Code Dark+', value: 'vscDarkPlus' },
   { name: 'Dracula', value: 'dracula' },
+  { name: 'VS Code Dark+', value: 'vscDarkPlus' },
   { name: 'One Dark', value: 'oneDark' },
   { name: 'One Light', value: 'oneLight' },
   { name: 'Omni', value: 'darcula' },

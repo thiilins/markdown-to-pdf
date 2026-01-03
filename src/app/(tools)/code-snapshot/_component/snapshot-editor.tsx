@@ -1,7 +1,9 @@
 'use client'
 
+import { DEFAULT_CODE } from '@/shared/constants/snap-code'
 import { useCodeSnapshot } from '@/shared/contexts/codeSnapshotContext'
 import Editor, { OnMount } from '@monaco-editor/react'
+import { Eraser } from 'lucide-react'
 import { useCallback, useEffect, useRef } from 'react'
 
 interface SnapshotEditorProps {
@@ -98,10 +100,15 @@ export function SnapshotEditor({ onScroll, editorRef: externalEditorRef }: Snaps
           </div>
           <span className='text-[10px] font-bold tracking-widest text-zinc-400 uppercase'>
             Editor
-        </span>
+          </span>
         </div>
-        <div className='text-[10px] font-bold tracking-widest text-zinc-400 uppercase'>
+        <div className='flex items-center gap-2 text-[10px] font-bold tracking-widest text-zinc-400 uppercase'>
           {config.language}
+          <div
+            className='group cursor-pointer rounded-md border border-zinc-400 p-1 group-hover:text-black hover:bg-zinc-400'
+            onClick={() => setCode(DEFAULT_CODE)}>
+            <Eraser className='h-4 w-4 text-zinc-400 group-hover:text-black' />
+          </div>
         </div>
       </div>
       <div className='relative flex-1 overflow-hidden'>

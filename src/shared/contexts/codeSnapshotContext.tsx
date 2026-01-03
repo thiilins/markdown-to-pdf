@@ -55,7 +55,7 @@ interface CodeSnapshotContextType {
 
 const defaultConfig: SnapshotConfig = {
   language: 'javascript',
-  theme: 'draculadracula',
+  theme: 'dracula',
   background: 'linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%)',
   padding: 64,
   showLineNumbers: true,
