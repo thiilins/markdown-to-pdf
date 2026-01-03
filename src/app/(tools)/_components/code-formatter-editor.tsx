@@ -1,7 +1,7 @@
 'use client'
 
-import dynamic from 'next/dynamic'
 import { Loader2 } from 'lucide-react'
+import dynamic from 'next/dynamic'
 
 const Editor = dynamic(() => import('@monaco-editor/react'), {
   ssr: false,
@@ -29,9 +29,10 @@ const languageMap: Record<string, string> = {
 
 export function CodeFormatterEditor({ value, onChange, language }: CodeFormatterEditorProps) {
   return (
-    <div className='flex h-full w-full flex-col overflow-hidden bg-[#1e1e1e]'>
+    <div className='flex h-full! w-full flex-col overflow-hidden bg-[#1e1e1e]'>
       <Editor
         height='100%'
+        className='h-full! w-full! bg-[#1e1e1e]!'
         defaultLanguage={languageMap[language]}
         language={languageMap[language]}
         value={value}

@@ -2,12 +2,12 @@
  * Utilitários para formatação e minificação de código
  */
 
-import * as prettierPluginBabel from 'prettier/plugins/babel'
-import * as prettierPluginEstree from 'prettier/plugins/estree'
-import * as prettierPluginHtml from 'prettier/plugins/html'
-import * as prettierPluginCss from 'prettier/plugins/postcss'
-import * as prettier from 'prettier/standalone'
+import type { Plugin } from 'prettier'
+import { format } from 'prettier/standalone'
 import { formatDialect, format as formatSql, mysql, postgresql } from 'sql-formatter'
+
+// Cache de plugins carregados dinamicamente para evitar problemas de minificação no Turbopack
+const pluginCache: Record<string, Plugin> = {}
 
 export type CodeType = 'html' | 'css' | 'javascript' | 'sql'
 export type SqlDialect = 'postgresql' | 'mysql' | 'standard'
@@ -31,27 +31,43 @@ export async function formatCode(
   try {
     switch (codeType) {
       case 'html':
-        return await prettier.format(code, {
+        if (!pluginCache.html) {
+          const htmlModule = await import('prettier/plugins/html')
+          pluginCache.html = htmlModule.default
+        }
+        return await format(code, {
           parser: 'html',
-          plugins: [prettierPluginHtml as any],
+          plugins: [pluginCache.html],
           printWidth: 100,
           tabWidth: 2,
           useTabs: false,
         })
 
       case 'css':
-        return await prettier.format(code, {
+        if (!pluginCache.postcss) {
+          const postcssModule = await import('prettier/plugins/postcss')
+          pluginCache.postcss = postcssModule.default
+        }
+        return await format(code, {
           parser: 'css',
-          plugins: [prettierPluginCss as any],
+          plugins: [pluginCache.postcss],
           printWidth: 100,
           tabWidth: 2,
           useTabs: false,
         })
 
       case 'javascript':
-        return await prettier.format(code, {
+        if (!pluginCache.babel) {
+          const babelModule = await import('prettier/plugins/babel')
+          pluginCache.babel = babelModule.default
+        }
+        if (!pluginCache.estree) {
+          const estreeModule = await import('prettier/plugins/estree')
+          pluginCache.estree = estreeModule.default
+        }
+        return await format(code, {
           parser: 'babel',
-          plugins: [prettierPluginBabel as any, prettierPluginEstree as any],
+          plugins: [pluginCache.babel, pluginCache.estree],
           printWidth: 100,
           tabWidth: 2,
           useTabs: false,

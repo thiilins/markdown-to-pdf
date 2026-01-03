@@ -8,8 +8,11 @@ import { Switch } from '@/components/ui/switch'
 import { Copy, Download, FileCode, FileJson, FileType, RotateCcw } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import * as prettier from 'prettier/standalone'
-import * as prettierPluginEstree from 'prettier/plugins/estree'
+import { format } from 'prettier/standalone'
+import type { Plugin } from 'prettier'
+
+// Cache de plugin carregado dinamicamente para evitar problemas de minificação no Turbopack
+const estreePluginCache: { plugin?: Plugin } = {}
 import { CodeFormatterEditor } from '../../_components/code-formatter-editor'
 import { FormatterOutputPanel } from '../../_components/formatter-output-panel'
 import { JsonEditorToolbar } from '../../_components/json-editor-toolbar'
@@ -81,21 +84,32 @@ export default function JsonToTsView() {
 
       setIsProcessing(true)
       try {
-        const parsed = JSON.parse(json)
+        const { safeJsonParse } = await import('@/lib/security-utils')
+        const parseResult = safeJsonParse(json, { maxSize: 10 * 1024 * 1024 })
+        if (!parseResult.success) {
+          throw new Error(parseResult.error || 'Erro ao parsear JSON')
+        }
+        const parsed = parseResult.data
         let result = convertJsonToTypeScriptInterfaces(parsed, interfaceName, useExport)
 
         // Formatar o TypeScript com Prettier
         try {
-          result = await prettier.format(result, {
-            parser: 'typescript',
-            plugins: [prettierPluginEstree as any],
-            printWidth: 100,
-            tabWidth: 2,
-            useTabs: false,
-            semi: true,
-            singleQuote: true,
-            trailingComma: 'es5',
-          })
+          if (!estreePluginCache.plugin) {
+            const estreeModule = await import('prettier/plugins/estree')
+            estreePluginCache.plugin = estreeModule.default
+          }
+          if (estreePluginCache.plugin) {
+            result = await format(result, {
+              parser: 'typescript',
+              plugins: [estreePluginCache.plugin],
+              printWidth: 100,
+              tabWidth: 2,
+              useTabs: false,
+              semi: true,
+              singleQuote: true,
+              trailingComma: 'es5',
+            })
+          }
         } catch (prettierError) {
           // Se Prettier falhar, usar o resultado sem formatação
           console.warn('Erro ao formatar TypeScript com Prettier:', prettierError)

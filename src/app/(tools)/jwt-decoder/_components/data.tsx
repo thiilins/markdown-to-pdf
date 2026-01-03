@@ -1,0 +1,9 @@
+'use client'
+
+// Shadcn UI Components
+
+// Utilitários de Contexto
+
+const CURRENT_YEAR = 2026
+export const DEMO_TOKEN =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdXBlcm1lcmNhZG9fYWRtaW5fMDEiLCJuYW1lIjoiR3VpbGhlcm1lIFNpbHZhIiwicm9sZSI6InN5c3RlbV9hZG1pbiIsImlzcyI6Imh0dHBzOi8vYXV0aC5ncnVwby1tYXJraXQuY29tLmJyIiwiYXVkIjpbImNhcnRhemVzLWFwcCIsImZvbGRlci1tYWtlciJdLCJpYXQiOjE3NjczODQwMDAsImV4cCI6MTc2NzQ3MDQwMCwic3RvcmVfaWQiOiJsb2phX21hdHJpel8wNCIsInBlcm1pc3Npb25zIjpbImVkaXQ6cHJpY2VzIiwiY3JlYXRlOmZvbGRlciIsInByaW50OmNhcnRheiJdfQ.v_I7jM9P7vXp_o_X8H5-x_Z5-Y9Z_x9'

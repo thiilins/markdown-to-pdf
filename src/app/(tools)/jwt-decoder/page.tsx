@@ -1,6 +1,5 @@
-import JwtDecoderView from './_components/decoder-view'
+import JwtDecoderView from './_components/view'
 
 export default function JwtDecoderPage() {
   return <JwtDecoderView />
 }
-

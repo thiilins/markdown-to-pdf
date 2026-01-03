@@ -2,10 +2,7 @@
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
-import { Separator } from '@/components/ui/separator'
 import {
   CheckCircle2,
   Copy,
@@ -28,6 +25,7 @@ import {
   type ExtractionOptions,
   type ExtractionResult,
 } from '../../_components/data-extractor-utils'
+import { OptionSwitch } from '../../_components/option-switch'
 
 const DEFAULT_TEXT = `Contato: joao@example.com ou maria@company.com.br
 Acesse https://www.example.com e https://github.com/user/repo
@@ -125,7 +123,7 @@ export default function DataExtractorView() {
   return (
     <div className='bg-background flex h-[calc(100vh-4rem)] flex-col overflow-hidden'>
       {/* Header */}
-      <div className='from-card to-card/95 shrink-0 border-b bg-gradient-to-b shadow-sm'>
+      <div className='from-card to-card/95 shrink-0 border-b bg-linear-to-b shadow-sm'>
         <div className='px-4 py-3 sm:px-6 sm:py-4'>
           <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
             <div className='flex items-center gap-3'>
@@ -133,9 +131,7 @@ export default function DataExtractorView() {
                 <Search className='text-primary h-5 w-5 sm:h-6 sm:w-6' />
               </div>
               <div className='min-w-0 flex-1'>
-                <h1 className='text-lg font-bold tracking-tight sm:text-xl'>
-                  Extrator de Dados
-                </h1>
+                <h1 className='text-lg font-bold tracking-tight sm:text-xl'>Extrator de Dados</h1>
                 <p className='text-muted-foreground mt-0.5 text-xs sm:text-sm'>
                   Extraia emails, URLs, IPs e CPFs de textos
                 </p>
@@ -176,73 +172,38 @@ export default function DataExtractorView() {
         {/* Options */}
         <div className='bg-muted/20 border-t px-4 py-2.5 sm:px-6'>
           <div className='flex flex-wrap items-center gap-4 sm:gap-6'>
-            <div className='flex items-center gap-2'>
-              <Checkbox
-                id='extract-emails'
-                checked={options.extractEmails}
-                onCheckedChange={() => toggleOption('extractEmails')}
-              />
-              <Label htmlFor='extract-emails' className='flex cursor-pointer items-center gap-1.5'>
-                <Mail className='h-3.5 w-3.5 text-muted-foreground' />
-                <span className='text-sm font-medium'>Emails</span>
-                {extractionResult.emails.length > 0 && (
-                  <Badge variant='secondary' className='ml-1 h-5 px-1.5 text-[10px]'>
-                    {extractionResult.emails.length}
-                  </Badge>
-                )}
-              </Label>
-            </div>
-
-            <div className='flex items-center gap-2'>
-              <Checkbox
-                id='extract-urls'
-                checked={options.extractUrls}
-                onCheckedChange={() => toggleOption('extractUrls')}
-              />
-              <Label htmlFor='extract-urls' className='flex cursor-pointer items-center gap-1.5'>
-                <Globe className='h-3.5 w-3.5 text-muted-foreground' />
-                <span className='text-sm font-medium'>URLs</span>
-                {extractionResult.urls.length > 0 && (
-                  <Badge variant='secondary' className='ml-1 h-5 px-1.5 text-[10px]'>
-                    {extractionResult.urls.length}
-                  </Badge>
-                )}
-              </Label>
-            </div>
-
-            <div className='flex items-center gap-2'>
-              <Checkbox
-                id='extract-ips'
-                checked={options.extractIps}
-                onCheckedChange={() => toggleOption('extractIps')}
-              />
-              <Label htmlFor='extract-ips' className='flex cursor-pointer items-center gap-1.5'>
-                <Network className='h-3.5 w-3.5 text-muted-foreground' />
-                <span className='text-sm font-medium'>IPs</span>
-                {extractionResult.ips.length > 0 && (
-                  <Badge variant='secondary' className='ml-1 h-5 px-1.5 text-[10px]'>
-                    {extractionResult.ips.length}
-                  </Badge>
-                )}
-              </Label>
-            </div>
-
-            <div className='flex items-center gap-2'>
-              <Checkbox
-                id='extract-cpfs'
-                checked={options.extractCpfs}
-                onCheckedChange={() => toggleOption('extractCpfs')}
-              />
-              <Label htmlFor='extract-cpfs' className='flex cursor-pointer items-center gap-1.5'>
-                <User className='h-3.5 w-3.5 text-muted-foreground' />
-                <span className='text-sm font-medium'>CPFs</span>
-                {extractionResult.cpfs.length > 0 && (
-                  <Badge variant='secondary' className='ml-1 h-5 px-1.5 text-[10px]'>
-                    {extractionResult.cpfs.length}
-                  </Badge>
-                )}
-              </Label>
-            </div>
+            <OptionSwitch
+              icon={Mail}
+              id='extract-emails'
+              label='Emails'
+              description='Extrai emails de texto.'
+              checked={options.extractEmails}
+              onCheckedChange={() => toggleOption('extractEmails')}
+            />
+            <OptionSwitch
+              icon={Globe}
+              id='extract-urls'
+              label='URLs'
+              description='Extrai URLs de texto.'
+              checked={options.extractUrls}
+              onCheckedChange={() => toggleOption('extractUrls')}
+            />
+            <OptionSwitch
+              icon={Network}
+              id='extract-urls'
+              label='IPs'
+              description='Extrai IPs de texto.'
+              checked={options.extractIps}
+              onCheckedChange={() => toggleOption('extractIps')}
+            />
+            <OptionSwitch
+              icon={User}
+              id='extract-cpds'
+              label='CPFs'
+              description='Extrai CPFs de texto.'
+              checked={options.extractCpfs}
+              onCheckedChange={() => toggleOption('extractCpfs')}
+            />
           </div>
         </div>
       </div>
@@ -272,7 +233,7 @@ export default function DataExtractorView() {
 
             {mobileTab === 'input' && (
               <div className='flex flex-1 flex-col overflow-hidden'>
-                <div className='flex h-full flex-col bg-background'>
+                <div className='bg-background flex h-full flex-col'>
                   <div className='bg-muted/30 flex shrink-0 items-center justify-between border-b px-4 py-2.5'>
                     <div className='flex items-center gap-2'>
                       <FileText className='text-muted-foreground h-4 w-4' />
@@ -303,7 +264,7 @@ export default function DataExtractorView() {
         ) : (
           <ResizablePanelGroup direction='horizontal' className='h-full'>
             <ResizablePanel defaultSize={50} minSize={30}>
-              <div className='flex h-full flex-col bg-background'>
+              <div className='bg-background flex h-full flex-col'>
                 <div className='bg-muted/30 flex shrink-0 items-center justify-between border-b px-4 py-2.5'>
                   <div className='flex items-center gap-2'>
                     <FileText className='text-muted-foreground h-4 w-4' />
@@ -346,7 +307,7 @@ function ExtractionResultsPanel({
   onCopyList: () => void
 }) {
   return (
-    <div className='flex h-full flex-col bg-background'>
+    <div className='bg-background flex h-full flex-col'>
       <div className='bg-muted/30 flex shrink-0 items-center justify-between border-b px-4 py-2.5'>
         <div className='flex items-center gap-2'>
           <Search className='text-muted-foreground h-4 w-4' />
@@ -385,7 +346,7 @@ function ExtractionResultsPanel({
             <div className='text-center'>
               <Search className='text-muted-foreground/50 mx-auto mb-4 h-12 w-12' />
               <p className='text-sm font-semibold'>Nenhum dado encontrado</p>
-              <p className='text-muted-foreground/70 mt-1.5 text-xs max-w-xs'>
+              <p className='text-muted-foreground/70 mt-1.5 max-w-xs text-xs'>
                 Os dados extraídos aparecerão aqui
               </p>
             </div>
@@ -403,7 +364,7 @@ function ExtractionResultsPanel({
                     {result.emails.map((email, idx) => (
                       <div
                         key={idx}
-                        className='bg-background rounded border px-3 py-2 text-xs font-mono'>
+                        className='bg-background rounded border px-3 py-2 font-mono text-xs'>
                         {email}
                       </div>
                     ))}
@@ -423,7 +384,7 @@ function ExtractionResultsPanel({
                     {result.urls.map((url, idx) => (
                       <div
                         key={idx}
-                        className='bg-background rounded border px-3 py-2 text-xs font-mono break-all'>
+                        className='bg-background rounded border px-3 py-2 font-mono text-xs break-all'>
                         {url}
                       </div>
                     ))}
@@ -443,7 +404,7 @@ function ExtractionResultsPanel({
                     {result.ips.map((ip, idx) => (
                       <div
                         key={idx}
-                        className='bg-background rounded border px-3 py-2 text-xs font-mono'>
+                        className='bg-background rounded border px-3 py-2 font-mono text-xs'>
                         {ip}
                       </div>
                     ))}
@@ -463,7 +424,7 @@ function ExtractionResultsPanel({
                     {result.cpfs.map((cpf, idx) => (
                       <div
                         key={idx}
-                        className='bg-background rounded border px-3 py-2 text-xs font-mono'>
+                        className='bg-background rounded border px-3 py-2 font-mono text-xs'>
                         {cpf}
                       </div>
                     ))}
@@ -477,4 +438,3 @@ function ExtractionResultsPanel({
     </div>
   )
 }
-

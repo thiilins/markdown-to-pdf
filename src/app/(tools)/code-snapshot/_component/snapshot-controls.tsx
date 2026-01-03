@@ -1,7 +1,7 @@
 'use client'
 
+import { SwitchComponent } from '@/components/custom-ui/switch'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -322,21 +322,17 @@ export function SnapshotControls({ compact = false }: { compact?: boolean }) {
                       <div className='grid grid-cols-2 gap-2'>
                         {['linguagem', 'linhas', 'caracteres', 'texto'].map((option) => (
                           <div key={option} className='flex items-center gap-2'>
-                            <Checkbox
+                            <SwitchComponent
                               id={`opt-${option}`}
+                              label={option === 'texto' ? 'Texto Customizado' : option}
                               checked={config.footerOptions.includes(option)}
-                              onCheckedChange={(checked) => {
+                              onChange={(checked) => {
                                 const newOpts = checked
                                   ? [...config.footerOptions, option]
                                   : config.footerOptions.filter((o) => o !== option)
                                 updateConfig('footerOptions', newOpts)
                               }}
                             />
-                            <Label
-                              htmlFor={`opt-${option}`}
-                              className='cursor-pointer text-xs capitalize'>
-                              {option === 'texto' ? 'Custom Text' : option}
-                            </Label>
                           </div>
                         ))}
                       </div>

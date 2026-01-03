@@ -49,12 +49,16 @@ export const PreviewResultContent = () => {
 
   const safeHtmlContent = useMemo(() => {
     if (!result?.html) return ''
-    return result.html
+    const { sanitizeHtml } = require('@/lib/security-utils')
+    let sanitized = sanitizeHtml(result.html, { allowScripts: false })
+    // Aplicar ajustes adicionais após sanitização
+    sanitized = sanitized
       .replace(
         /<img /g,
         '<img referrerpolicy="no-referrer" style="max-width: 100%; height: auto; display: block; margin: 20px auto;" ',
       )
       .replace(/<a /g, '<a target="_blank" rel="noopener noreferrer" ')
+    return sanitized
   }, [result?.html])
 
   const content = useMemo(() => {

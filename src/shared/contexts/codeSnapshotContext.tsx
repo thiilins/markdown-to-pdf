@@ -89,7 +89,7 @@ export function CodeCard({ code, language }: SnapshotProps) {
 
 const defaultConfig: SnapshotConfig = {
   language: 'javascript',
-  theme: 'vscDarkPlus',
+  theme: 'draculadracula',
   background: 'linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%)',
   padding: 64,
   showLineNumbers: true,

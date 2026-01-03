@@ -4,3 +4,4 @@ export default function DataExtractorPage() {
   return <DataExtractorView />
 }
 
+

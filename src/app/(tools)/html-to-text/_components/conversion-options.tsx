@@ -1,12 +1,11 @@
 'use client'
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
-import { ChevronDown, Info, Settings2 } from 'lucide-react'
+import { ChevronDown, Settings2 } from 'lucide-react'
 import { useState } from 'react'
+import { OptionSwitch } from '../../_components/option-switch'
 
 interface ConversionOptions {
   preserveLineBreaks: boolean
@@ -78,38 +77,24 @@ export function ConversionOptions({
 }: ConversionOptionsProps) {
   const [isOpen, setIsOpen] = useState(false)
 
-  const renderOption = (option: OptionItem) => (
-    <div key={option.id} className='flex items-center justify-between'>
-      <div className='flex items-center gap-2'>
-        <Label htmlFor={option.id} className='cursor-pointer text-xs font-medium'>
-          {option.label}
-        </Label>
-        <TooltipProvider>
-          <Tooltip delayDuration={200}>
-            <TooltipTrigger asChild>
-              <Info className='text-muted-foreground h-3.5 w-3.5 shrink-0 cursor-help' />
-            </TooltipTrigger>
-            <TooltipContent side='right' className='max-w-xs px-3 py-2 text-xs'>
-              <p>{option.description}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
-      <Switch
-        id={option.id}
-        checked={options[option.id]}
-        onCheckedChange={(checked) => onOptionsChange({ [option.id]: checked })}
-      />
-    </div>
-  )
-
   return (
     <div className='flex h-full w-full flex-col'>
       <div className='bg-muted/20 shrink-0 border-b'>
         {/* Desktop: Grid de 2 colunas */}
         <div className='hidden px-4 py-3 md:block'>
           <TooltipProvider>
-            <div className='grid grid-cols-2 gap-3'>{OPTIONS.map(renderOption)}</div>
+            <div className='grid grid-cols-2 gap-3'>
+              {OPTIONS.map((option) => (
+                <OptionSwitch
+                  key={option.id}
+                  description={option.description}
+                  id={option.id}
+                  label={option.label}
+                  checked={options[option.id]}
+                  onCheckedChange={(checked) => onOptionsChange({ [option.id]: checked })}
+                />
+              ))}
+            </div>
           </TooltipProvider>
         </div>
 
@@ -132,7 +117,18 @@ export function ConversionOptions({
           </CollapsibleTrigger>
           <CollapsibleContent className='px-4 pb-3'>
             <TooltipProvider>
-              <div className='flex flex-col gap-3 border-t pt-2'>{OPTIONS.map(renderOption)}</div>
+              <div className='flex flex-col gap-3 border-t pt-2'>
+                {OPTIONS.map((option) => (
+                  <OptionSwitch
+                    key={option.id}
+                    description={option.description}
+                    id={option.id}
+                    label={option.label}
+                    checked={options[option.id]}
+                    onCheckedChange={(checked) => onOptionsChange({ [option.id]: checked })}
+                  />
+                ))}
+              </div>
             </TooltipProvider>
           </CollapsibleContent>
         </Collapsible>

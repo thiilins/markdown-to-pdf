@@ -2,11 +2,20 @@
  * Utilitários para conversão Base64
  */
 
+import { safeDecodeBase64 } from '@/lib/security-utils'
+
 /**
  * Codifica texto para Base64
  */
 export function encodeBase64(text: string): string {
   if (!text) return ''
+
+  // Validar tamanho máximo
+  const MAX_TEXT_SIZE = 10 * 1024 * 1024 // 10MB
+  if (text.length > MAX_TEXT_SIZE) {
+    throw new Error(`Texto muito grande para codificar. Máximo: ${Math.round(MAX_TEXT_SIZE / 1024 / 1024)}MB`)
+  }
+
   try {
     return btoa(unescape(encodeURIComponent(text)))
   } catch (error) {
@@ -15,15 +24,17 @@ export function encodeBase64(text: string): string {
 }
 
 /**
- * Decodifica Base64 para texto
+ * Decodifica Base64 para texto (com validações de segurança)
  */
 export function decodeBase64(base64: string): string {
   if (!base64) return ''
-  try {
-    return decodeURIComponent(escape(atob(base64)))
-  } catch (error) {
-    throw new Error('Erro ao decodificar Base64. Verifique se o texto é válido.')
+
+  const result = safeDecodeBase64(base64)
+  if (!result.success) {
+    throw new Error(result.error || 'Erro ao decodificar Base64')
   }
+
+  return result.data || ''
 }
 
 /**

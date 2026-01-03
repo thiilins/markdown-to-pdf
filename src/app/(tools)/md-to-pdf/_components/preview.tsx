@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { sanitizeHtml } from '@/lib/security-utils'
 import { THEME_PRESETS } from '@/shared/constants'
 import { useApp } from '@/shared/contexts/appContext'
 import { useHeaderFooter } from '@/shared/contexts/headerFooterContext'
@@ -246,12 +247,15 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
               ...borderStyle,
             }}
             dangerouslySetInnerHTML={{
-              __html: parseVariables(
-                slot.left || '',
-                pageNumber,
-                totalPages,
-                slot.logo?.url,
-                slot?.logo?.size || undefined,
+              __html: sanitizeHtml(
+                parseVariables(
+                  slot.left || '',
+                  pageNumber,
+                  totalPages,
+                  slot.logo?.url,
+                  slot?.logo?.size || undefined,
+                ),
+                { allowScripts: false },
               ),
             }}
           />
@@ -487,7 +491,7 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
                       className='prose dark:prose-invert h-full w-full max-w-none wrap-break-word'
                       style={typographyStyles}>
                       <PreviewStyle theme={theme} />
-                      <div dangerouslySetInnerHTML={{ __html: html }} />
+                      <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(html, { allowScripts: false }) }} />
                     </div>
 
                     {/* Footer */}

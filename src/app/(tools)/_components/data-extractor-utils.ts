@@ -2,6 +2,8 @@
  * Utilitários para extração de dados de texto
  */
 
+import { safeRegexExec } from '@/lib/security-utils'
+
 export interface ExtractionOptions {
   extractEmails: boolean
   extractUrls: boolean
@@ -15,22 +17,29 @@ export interface ExtractionResult {
   ips: string[]
   cpfs: string[]
   total: number
+  errors?: string[]
 }
 
 /**
- * Extrai emails de um texto
+ * Extrai emails de um texto (com proteção ReDoS)
  */
-function extractEmails(text: string): string[] {
+function extractEmails(text: string): { emails: string[]; error?: string } {
   const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g
-  const matches = text.match(emailRegex) || []
-  return [...new Set(matches)]
+  const result = safeRegexExec(text, emailRegex, { timeout: 2000, maxSize: 1 * 1024 * 1024 })
+
+  if (!result.success) {
+    return { emails: [], error: result.error }
+  }
+
+  return { emails: [...new Set(result.matches || [])] }
 }
 
 /**
- * Extrai URLs de um texto
+ * Extrai URLs de um texto (com proteção ReDoS)
  */
-function extractUrls(text: string): string[] {
+function extractUrls(text: string): { urls: string[]; error?: string } {
   const urls: string[] = []
+  const errors: string[] = []
   const processedIndices = new Set<number>()
 
   // Função auxiliar para limpar URL
@@ -52,111 +61,92 @@ function extractUrls(text: string): string[] {
 
   // 1. URLs completas com protocolo (https:// ou http://)
   const protocolRegex = /https?:\/\/[^\s<>"{}|\\^`\[\]()]+/gi
-  let match
-  while ((match = protocolRegex.exec(text)) !== null) {
-    const cleaned = cleanUrl(match[0])
-    if (cleaned) {
-      urls.push(cleaned)
-      // Marcar índices processados
-      for (let i = match.index; i < match.index + match[0].length; i++) {
-        processedIndices.add(i)
+  const protocolResult = safeRegexExec(text, protocolRegex, { timeout: 2000, maxSize: 1 * 1024 * 1024 })
+  if (protocolResult.success && protocolResult.matches) {
+    protocolResult.matches.forEach((match) => {
+      const cleaned = cleanUrl(match)
+      if (cleaned) {
+        urls.push(cleaned)
       }
-    }
+    })
+  } else if (protocolResult.error) {
+    errors.push(`Erro ao extrair URLs com protocolo: ${protocolResult.error}`)
   }
 
   // 2. URLs com www.
   const wwwRegex = /www\.[^\s<>"{}|\\^`\[\]()]+/gi
-  while ((match = wwwRegex.exec(text)) !== null) {
-    // Verificar se já foi processado
-    if (processedIndices.has(match.index)) continue
-
-    const cleaned = cleanUrl(match[0])
-    if (cleaned) {
-      urls.push(cleaned)
-      for (let i = match.index; i < match.index + match[0].length; i++) {
-        processedIndices.add(i)
+  const wwwResult = safeRegexExec(text, wwwRegex, { timeout: 2000, maxSize: 1 * 1024 * 1024 })
+  if (wwwResult.success && wwwResult.matches) {
+    wwwResult.matches.forEach((match) => {
+      const cleaned = cleanUrl(match)
+      if (cleaned) {
+        urls.push(cleaned)
       }
-    }
+    })
+  } else if (wwwResult.error) {
+    errors.push(`Erro ao extrair URLs com www: ${wwwResult.error}`)
   }
 
-  // 3. Domínios simples (sem www e sem protocolo)
-  // Usar regex que para em espaços e pontuação
+  // 3. Domínios simples (sem www e sem protocolo) - limitado para prevenir ReDoS
   const domainRegex = /\b([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,})(?:\/[^\s<>"{}|\\^`\[\]()]*)?/gi
-
-  while ((match = domainRegex.exec(text)) !== null) {
-    // Verificar se já foi processado
-    if (processedIndices.has(match.index)) continue
-
-    // Verificar contexto antes
-    const beforeIndex = Math.max(0, match.index - 20)
-    const before = text.substring(beforeIndex, match.index)
-
-    // Se tem @ antes, é parte de email
-    if (before.includes('@')) continue
-
-    // Verificar contexto depois para encontrar onde a URL realmente termina
-    const afterIndex = match.index + match[0].length
-    const after = text.substring(afterIndex, Math.min(text.length, afterIndex + 30))
-
-    // Encontrar onde a URL realmente termina (antes de espaço ou palavra comum)
-    let urlEnd = match[0].length
-    const spaceIndex = after.indexOf(' ')
-    if (spaceIndex !== -1) {
-      // Verificar se a palavra após o espaço é comum
-      const nextWord = after.substring(spaceIndex + 1).split(/\s+/)[0]?.toLowerCase().replace(/[.,;!?)\]}]+$/, '')
-      const commonWords = ['e', 'ou', 'de', 'da', 'do', 'em', 'para', 'com', 'sem', 'https', 'http']
-      if (nextWord && commonWords.includes(nextWord)) {
-        // A URL termina no espaço
-        urlEnd = spaceIndex
+  const domainResult = safeRegexExec(text, domainRegex, { timeout: 3000, maxSize: 1 * 1024 * 1024 })
+  if (domainResult.success && domainResult.matches) {
+    domainResult.matches.forEach((match) => {
+      const cleaned = cleanUrl(match)
+      if (cleaned) {
+        // Validar TLD
+        const parts = cleaned.split('.')
+        if (parts.length >= 2) {
+          const tld = parts[parts.length - 1]
+          if (tld.length >= 2) {
+            const commonTlds = ['e', 'ou', 'de', 'da', 'do', 'em', 'para', 'com', 'sem']
+            if (!commonTlds.includes(tld.toLowerCase())) {
+              urls.push(cleaned)
+            }
+          }
+        }
       }
-    }
-
-    let urlText = match[0].substring(0, urlEnd)
-    let cleaned = cleanUrl(urlText)
-    if (!cleaned) continue
-
-    // Validar TLD
-    const parts = cleaned.split('.')
-    if (parts.length < 2) continue
-    const tld = parts[parts.length - 1]
-    if (tld.length < 2) continue
-
-    // Verificar se o TLD não é uma palavra comum
-    const commonTlds = ['e', 'ou', 'de', 'da', 'do', 'em', 'para', 'com', 'sem']
-    if (commonTlds.includes(tld.toLowerCase())) continue
-
-    urls.push(cleaned)
-
-    // Marcar como processado
-    for (let i = match.index; i < match.index + urlEnd; i++) {
-      processedIndices.add(i)
-    }
+    })
+  } else if (domainResult.error) {
+    errors.push(`Erro ao extrair domínios: ${domainResult.error}`)
   }
 
   // Remover duplicatas e ordenar
-  return [...new Set(urls)]
+  const uniqueUrls = [...new Set(urls)]
     .map((url) => url.trim())
     .filter((url) => url.length > 0)
     .sort()
+
+  return { urls: uniqueUrls, error: errors.length > 0 ? errors.join('; ') : undefined }
 }
 
 /**
- * Extrai endereços IP de um texto
+ * Extrai endereços IP de um texto (com proteção ReDoS)
  */
-function extractIps(text: string): string[] {
+function extractIps(text: string): { ips: string[]; error?: string } {
   const ipv4Regex = /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g
-  const matches = text.match(ipv4Regex) || []
-  return [...new Set(matches)]
+  const result = safeRegexExec(text, ipv4Regex, { timeout: 2000, maxSize: 1 * 1024 * 1024 })
+
+  if (!result.success) {
+    return { ips: [], error: result.error }
+  }
+
+  return { ips: [...new Set(result.matches || [])] }
 }
 
 /**
- * Extrai CPFs de um texto
+ * Extrai CPFs de um texto (com proteção ReDoS)
  */
-function extractCpfs(text: string): string[] {
+function extractCpfs(text: string): { cpfs: string[]; error?: string } {
   // CPF com ou sem formatação: XXX.XXX.XXX-XX ou XXXXXXXXXXX
   const cpfRegex = /\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b/g
-  const matches = text.match(cpfRegex) || []
-  return [...new Set(matches)]
+  const result = safeRegexExec(text, cpfRegex, { timeout: 2000, maxSize: 1 * 1024 * 1024 })
+
+  if (!result.success) {
+    return { cpfs: [], error: result.error }
+  }
+
+  return { cpfs: [...new Set(result.matches || [])] }
 }
 
 /**
@@ -173,10 +163,23 @@ export function extractData(text: string, options: ExtractionOptions): Extractio
     }
   }
 
-  const emails = options.extractEmails ? extractEmails(text) : []
-  const urls = options.extractUrls ? extractUrls(text) : []
-  const ips = options.extractIps ? extractIps(text) : []
-  const cpfs = options.extractCpfs ? extractCpfs(text) : []
+  const errors: string[] = []
+
+  const emailsResult = options.extractEmails ? extractEmails(text) : { emails: [] }
+  const emails = emailsResult.emails
+  if (emailsResult.error) errors.push(emailsResult.error)
+
+  const urlsResult = options.extractUrls ? extractUrls(text) : { urls: [] }
+  const urls = urlsResult.urls
+  if (urlsResult.error) errors.push(urlsResult.error)
+
+  const ipsResult = options.extractIps ? extractIps(text) : { ips: [] }
+  const ips = ipsResult.ips
+  if (ipsResult.error) errors.push(ipsResult.error)
+
+  const cpfsResult = options.extractCpfs ? extractCpfs(text) : { cpfs: [] }
+  const cpfs = cpfsResult.cpfs
+  if (cpfsResult.error) errors.push(cpfsResult.error)
 
   const total = emails.length + urls.length + ips.length + cpfs.length
 
@@ -186,6 +189,7 @@ export function extractData(text: string, options: ExtractionOptions): Extractio
     ips,
     cpfs,
     total,
+    errors: errors.length > 0 ? errors : undefined,
   }
 }
 

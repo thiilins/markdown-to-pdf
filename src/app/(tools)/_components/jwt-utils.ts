@@ -2,6 +2,8 @@
  * Utilitários para decodificação de JWT
  */
 
+import { safeJsonParse } from '@/lib/security-utils'
+
 export interface JwtParts {
   header: Record<string, any>
   payload: Record<string, any>
@@ -27,6 +29,18 @@ export function decodeJwt(token: string): JwtParts {
   // Remover espaços
   const cleanToken = token.trim()
 
+  // Validar tamanho máximo do token (prevenir DoS)
+  const MAX_TOKEN_SIZE = 64 * 1024 // 64KB
+  if (cleanToken.length > MAX_TOKEN_SIZE) {
+    return {
+      header: {},
+      payload: {},
+      signature: '',
+      isValid: false,
+      error: 'Token JWT muito grande. Máximo: 64KB',
+    }
+  }
+
   // JWT tem 3 partes separadas por ponto
   const parts = cleanToken.split('.')
   if (parts.length !== 3) {
@@ -42,18 +56,36 @@ export function decodeJwt(token: string): JwtParts {
   try {
     // Decodificar header (Base64URL)
     const headerJson = base64UrlDecode(parts[0])
-    const header = JSON.parse(headerJson)
+    const headerResult = safeJsonParse<Record<string, any>>(headerJson, { maxSize: 1024 })
+    if (!headerResult.success) {
+      return {
+        header: {},
+        payload: {},
+        signature: '',
+        isValid: false,
+        error: `Erro ao decodificar header: ${headerResult.error}`,
+      }
+    }
 
     // Decodificar payload (Base64URL)
     const payloadJson = base64UrlDecode(parts[1])
-    const payload = JSON.parse(payloadJson)
+    const payloadResult = safeJsonParse<Record<string, any>>(payloadJson, { maxSize: 64 * 1024 })
+    if (!payloadResult.success) {
+      return {
+        header: headerResult.data || {},
+        payload: {},
+        signature: '',
+        isValid: false,
+        error: `Erro ao decodificar payload: ${payloadResult.error}`,
+      }
+    }
 
     // Signature (não decodificamos, apenas retornamos)
     const signature = parts[2]
 
     return {
-      header,
-      payload,
+      header: headerResult.data || {},
+      payload: payloadResult.data || {},
       signature,
       isValid: true,
     }

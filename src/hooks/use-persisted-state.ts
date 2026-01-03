@@ -1,5 +1,7 @@
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react'
 
+import { safeJsonParse } from '@/lib/security-utils'
+
 type Response<T> = [T, Dispatch<SetStateAction<T>>, boolean]
 
 function usePersistedState<T>(
@@ -15,8 +17,17 @@ function usePersistedState<T>(
     const loadData = () => {
       const storageValue = localStorage.getItem(`${prefix}:${key}`)
       if (storageValue) {
-        const parsedValue = isString ? (storageValue as unknown as T) : JSON.parse(storageValue)
-        setState(parsedValue)
+        if (isString) {
+          setState(storageValue as unknown as T)
+        } else {
+          const parseResult = safeJsonParse<T>(storageValue, { maxSize: 1024 * 1024 }) // 1MB max
+          if (parseResult.success && parseResult.data !== undefined) {
+            setState(parseResult.data)
+          } else {
+            // Se falhar ao parsear, usar valor inicial
+            console.warn(`Erro ao parsear estado persistido para ${key}:`, parseResult.error)
+          }
+        }
       }
       setLoaded(true)
     }
@@ -26,8 +37,12 @@ function usePersistedState<T>(
 
   useEffect(() => {
     if (loaded) {
-      const value = isString ? String(state) : JSON.stringify(state)
-      localStorage.setItem(`${prefix}:${key}`, value)
+      try {
+        const value = isString ? String(state) : JSON.stringify(state)
+        localStorage.setItem(`${prefix}:${key}`, value)
+      } catch (error) {
+        console.error(`Erro ao salvar estado persistido para ${key}:`, error)
+      }
     }
   }, [state, loaded, isString, key, prefix])
 
@@ -38,9 +53,13 @@ export const useGetPersistedState = <T>(key: string, prefix = '@MD_TOOLS_PRO'): 
   const value = useMemo(() => {
     const storageValue = localStorage.getItem(`${prefix}:${key}`)
     if (storageValue) {
-      return JSON.parse(storageValue)
+      const parseResult = safeJsonParse<T>(storageValue, { maxSize: 1024 * 1024 }) // 1MB max
+      if (parseResult.success && parseResult.data !== undefined) {
+        return parseResult.data
+      }
+      console.warn(`Erro ao parsear estado persistido para ${key}:`, parseResult.error)
     }
-    return null
+    return null as T
   }, [key, prefix])
   return value
 }

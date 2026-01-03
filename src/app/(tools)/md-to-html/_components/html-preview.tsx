@@ -1,8 +1,9 @@
 'use client'
 
 import { IconButtonTooltip } from '@/components/custom-ui/tooltip'
+import { sanitizeHtml } from '@/lib/security-utils'
 import { Copy, Eye } from 'lucide-react'
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 
 interface HtmlPreviewProps {
   html: string
@@ -11,6 +12,11 @@ interface HtmlPreviewProps {
 
 export function HtmlPreview({ html, onCopy }: HtmlPreviewProps) {
   const previewContainerRef = useRef<HTMLDivElement>(null)
+
+  const safeHtml = useMemo(() => {
+    if (!html) return ''
+    return sanitizeHtml(html, { allowScripts: false })
+  }, [html])
 
   return (
     <div className='flex h-full flex-col'>
@@ -33,7 +39,7 @@ export function HtmlPreview({ html, onCopy }: HtmlPreviewProps) {
         {html ? (
           <div
             className='prose prose-sm dark:prose-invert max-w-none'
-            dangerouslySetInnerHTML={{ __html: html }}
+            dangerouslySetInnerHTML={{ __html: safeHtml }}
           />
         ) : (
           <div className='text-muted-foreground flex h-full items-center justify-center text-sm'>
