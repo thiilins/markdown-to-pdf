@@ -41,3 +41,31 @@ export function SwitchComponent({
     </div>
   )
 }
+export function SwitchComponentRv({
+  id,
+  label,
+  onChange,
+  checked,
+  className,
+  disabled,
+}: SwitchComponentProps) {
+  return (
+    <div className={cn('flex w-full items-center justify-between space-x-2', className?.container)}>
+      <Label
+        htmlFor={id}
+        className={cn(
+          'text-muted-foreground cursor-pointer text-xs font-normal',
+          className?.label,
+        )}>
+        {label}
+      </Label>
+      <Switch
+        id={id}
+        checked={checked}
+        onCheckedChange={onChange}
+        className={cn('cursor-pointer', className?.switch)}
+        disabled={disabled}
+      />
+    </div>
+  )
+}

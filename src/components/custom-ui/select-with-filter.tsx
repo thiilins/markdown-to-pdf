@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
-import { Check, ChevronsUpDown, Search } from 'lucide-react'
+import { Check, ChevronsUpDown } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 
 // Tipagem aprimorada para suportar ícones
@@ -105,7 +105,6 @@ export function SelectWithFilterComponent({
         className={cn('w-[200px] p-0 shadow-lg backdrop-blur-sm', className?.content)}>
         <Command shouldFilter={false}>
           <div className='flex items-center border-b px-3' cmdk-input-wrapper=''>
-            <Search className='mr-2 h-4 w-4 shrink-0 opacity-50' />
             <CommandInput
               placeholder={placeholder}
               value={search}

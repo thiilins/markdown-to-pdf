@@ -14,10 +14,9 @@ import {
 import { FormatterEditorPanel } from '../../_components/formatter-editor-panel'
 import { FormatterHeader } from '../../_components/formatter-header'
 import { FormatterOutputPanel } from '../../_components/formatter-output-panel'
+import { DEFAULT_CSS } from './constants'
 
-const DEFAULT_CSS = `.container{width:100%;max-width:1200px;margin:0 auto;padding:20px}.header{background:#333;color:#fff;padding:1rem;display:flex;justify-content:space-between;align-items:center}.nav ul{list-style:none;display:flex;gap:2rem;margin:0;padding:0}.btn{background:#007bff;color:#fff;border:none;padding:0.75rem 1.5rem;border-radius:4px;cursor:pointer;font-size:1rem;transition:background 0.3s}.btn:hover{background:#0056b3}.card{background:#fff;border:1px solid #ddd;border-radius:8px;padding:1.5rem;box-shadow:0 2px 4px rgba(0,0,0,0.1);margin-bottom:1rem}`
-
-export default function CssFormatterView() {
+export const CssFormatterView = () => {
   const [codeInput, setCodeInput] = useState<string>(DEFAULT_CSS)
   const [formattedOutput, setFormattedOutput] = useState<string>('')
   const [formatMode, setFormatMode] = useState<'beautify' | 'minify'>('beautify')

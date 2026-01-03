@@ -1,3 +1,6 @@
+import { AlignCenter, AlignLeft, AlignRight, ListEnd, ListStart } from 'lucide-react'
+import { FaApple, FaChrome, FaCode, FaLinux, FaWindowClose, FaWindows } from 'react-icons/fa'
+
 export const DEFAULT_CODE = `import { useState, useCallback } from 'react'
 import { toast } from 'sonner'
 
@@ -132,7 +135,10 @@ export const GRADIENTS = [
   { name: 'Solid White', value: '#ffffff' },
   { name: 'Solid Gray', value: '#1a1a1a' },
   { name: 'Solid Dark Blue', value: '#0a1929' },
-  { name: 'Transparent', value: 'transparent' },
+  {
+    name: 'Transparent',
+    value: 'transparent',
+  },
 ]
 
 export const LANGUAGES = [
@@ -248,4 +254,24 @@ export const CODE_THEMES = [
   { name: 'Pojoaque', value: 'pojoaque' },
   { name: 'Xonokai', value: 'xonokai' },
   { name: 'Z Touch', value: 'zTouch' },
+]
+
+export const WINDOW_THEMES = [
+  { name: 'macOS', value: 'mac', icon: FaApple },
+  { name: 'Windows', value: 'windows', icon: FaWindows },
+  { name: 'Chrome', value: 'chrome', icon: FaChrome },
+  { name: 'Linux', value: 'linux', icon: FaLinux },
+  { name: 'VS Code', value: 'vscode', icon: FaCode },
+  { name: 'None', value: 'none', icon: FaWindowClose },
+]
+
+export const LANGUAGE_POSITIONS = [
+  { name: 'Cabeçalho', value: 'header', icon: ListStart },
+  { name: 'Rodapé', value: 'footer', icon: ListEnd },
+]
+
+export const FOOTER_POSITIONS = [
+  { name: 'Esquerda', value: 'left', icon: AlignLeft },
+  { name: 'Centro', value: 'center', icon: AlignCenter },
+  { name: 'Direita', value: 'right', icon: AlignRight },
 ]

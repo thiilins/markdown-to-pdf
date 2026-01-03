@@ -78,13 +78,14 @@ export const WindowFooter = () => {
   return (
     <div
       className={cn(
-        'border-t border-white/10 bg-[#0d0d0d]/50 px-4 py-2 select-none',
+        'e items-center border-t border-white/10 bg-[#0d0d0d]/50 px-4 py-2',
         'flex items-center gap-3 text-[10px] text-zinc-400',
         positionClasses[config.footerPosition],
       )}
       style={{
         borderBottomLeftRadius: `${borderRadius}px`,
         borderBottomRightRadius: `${borderRadius}px`,
+        height: '24px',
       }}>
       {footerItems.map((item, index) => (
         <React.Fragment key={index}>

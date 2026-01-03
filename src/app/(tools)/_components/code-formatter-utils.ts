@@ -1,3 +1,4 @@
+'use client'
 /**
  * Utilitários para formatação e minificação de código
  */

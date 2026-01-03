@@ -251,19 +251,22 @@ export function SnapshotPreview({
 
   return (
     <div
-      className='relative flex h-full w-full flex-col bg-zinc-50 dark:bg-zinc-950'
+      className='relative flex h-full w-full min-w-[40dvw] flex-col bg-zinc-50 dark:bg-zinc-950'
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}>
       <ValidateFontComponent />
 
       {/* Background Pattern */}
       <div className='pointer-events-none absolute inset-0 z-0'>
+        <div className='h-full w-full border border-gray-300 bg-[conic-gradient(#e5e7eb_25%,transparent_25%,transparent_50%,#e5e7eb_50%,#e5e7eb_75%,transparent_75%,transparent)] bg-size-[20px_20px]' />
+      </div>
+      {/* <div className='pointer-events-none absolute inset-0 z-0'>
         <div className='absolute inset-0 h-full w-full bg-linear-to-b from-blue-50 to-transparent dark:from-blue-950/20' />
         <div className='absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px]' />
-      </div>
+      </div> */}
 
       {/* Toolbar */}
-      <div className='bg-background/95 hover:bg-background border-border/50 absolute top-3 right-3 z-50 flex items-center justify-between gap-2 rounded-lg border px-3 py-2 shadow-lg backdrop-blur-md transition-all'>
+      <div className='bg-background/95 hover:bg-background border-border/50 absolute top-10 right-3 z-50 flex items-center justify-between gap-2 rounded-lg border px-3 py-2 shadow-lg backdrop-blur-md transition-all'>
         <div className='flex items-center gap-1.5'>
           <Button
             variant='ghost'
@@ -479,7 +482,7 @@ export function SnapshotPreview({
       </div>
 
       {/* Dica de Uso */}
-      <div className='text-muted-foreground absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] font-medium opacity-40 mix-blend-difference select-none'>
+      <div className='bg-primary border-primary absolute bottom-4 left-1/2 z-100 -translate-x-1/2 rounded-2xl p-2 text-[10px] font-medium text-white select-none'>
         Scroll para mover • Ctrl + Scroll para Zoom
       </div>
     </div>
