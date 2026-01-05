@@ -1,4 +1,4 @@
-const homeBreadcrumb: Breadcrumbs = {
+export const homeBreadcrumb: Breadcrumbs = {
   label: 'Home',
   href: '/',
   order: 1,
