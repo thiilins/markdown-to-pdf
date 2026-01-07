@@ -38,12 +38,13 @@ Diferenciar-se do "Carbon.now.sh" focando em precisão e contexto.
 - **Destaque de Mudanças (Code Diff):** Permitir marcar linhas como "adicionadas" ou "removidas"
   dentro do snapshot para explicar mudanças de código visualmente.
 - ✅ **Interactive Code Annotations:** Possibilidade de adicionar setas ou notas explicativas
-  flutuantes sobre partes específicas do código antes de exportar a imagem. **[IMPLEMENTADO - v0.5.2]**
+  flutuantes sobre partes específicas do código antes de exportar a imagem. **[IMPLEMENTADO -
+  v0.5.2]**
 - ✅ **Modo "Live Edit" no Preview:** Permitir pequenas edições de texto diretamente no painel de
   preview do snapshot para ajustes rápidos de última hora. **[IMPLEMENTADO - v0.5.2]**
 
-**Permitir que o tema ao alterar altere nao so as cores do editor mas o fundo da janela do editor
-com base no tema escolhido - atualmente só ta alterando as cores do conteudo (texto)**
+- ✅ **Background Dinâmico da Janela do Editor:** O tema ao alterar altera não só as cores do editor mas o fundo da janela do editor
+  com base no tema escolhido. **[IMPLEMENTADO - v0.5.1]**
 
 - Verificar quais as funcionalidades e features do https://carbon.now.sh/ podemos aproveitar e
   implementar na nossa ferramenta.
