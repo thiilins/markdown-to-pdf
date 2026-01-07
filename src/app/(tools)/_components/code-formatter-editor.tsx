@@ -31,11 +31,49 @@ const languageMap: Record<string, string> = {
   plaintext: 'plaintext',
 }
 
-export function CodeFormatterEditor({ value, onChange, language }: CodeFormatterEditorProps) {
+interface CodeFormatterEditorProps {
+  value: string
+  onChange: (value: string) => void
+  language: 'html' | 'css' | 'javascript' | 'sql' | 'json' | 'plaintext'
+  onJsonPathChange?: (path: string | null) => void // Callback para tracking de JSON Path
+}
+
+export function CodeFormatterEditor({ value, onChange, language, onJsonPathChange }: CodeFormatterEditorProps) {
   const editorRef = useRef<any | null>(null)
 
   const handleEditorDidMount: OnMount = (editor, monaco) => {
     editorRef.current = editor
+
+    // Smart JSONPath Tracking - apenas para JSON
+    if (language === 'json' && onJsonPathChange) {
+      const updateJsonPath = () => {
+        const selection = editor.getSelection()
+        if (!selection) {
+          onJsonPathChange(null)
+          return
+        }
+
+        const model = editor.getModel()
+        if (!model) {
+          onJsonPathChange(null)
+          return
+        }
+
+        const selectedText = model.getValueInRange(selection)
+        const selectionStart = model.getOffsetAt(selection.getStartPosition())
+
+        try {
+          const jsonPath = getJsonPathFromSelection(value, selectedText, selectionStart)
+          onJsonPathChange(jsonPath)
+        } catch {
+          onJsonPathChange(null)
+        }
+      }
+
+      // Atualizar quando cursor ou seleção mudar
+      editor.onDidChangeCursorPosition(updateJsonPath)
+      editor.onDidChangeCursorSelection(updateJsonPath)
+    }
 
     // Adicionar menu de contexto customizado apenas para JSON
     if (language === 'json') {

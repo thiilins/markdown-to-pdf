@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { safeJsonParse } from '@/lib/security-utils'
 import { formatJsonPath } from './json-path-utils'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 interface JsonTreeNode {
   key: string | number | null
@@ -206,10 +207,42 @@ function getValueType(value: any): JsonTreeNode['type'] {
   return typeof value as 'string' | 'number' | 'boolean'
 }
 
-function renderValue(value: any, type: JsonTreeNode['type']): string {
+function isImageUrl(str: string): boolean {
+  if (typeof str !== 'string') return false
+  const urlPattern = /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)(\?.*)?$/i
+  return urlPattern.test(str.trim())
+}
+
+function renderValue(value: any, type: JsonTreeNode['type']): React.ReactNode {
   switch (type) {
     case 'string':
-      return `"${String(value).slice(0, 50)}${String(value).length > 50 ? '...' : ''}"`
+      const stringValue = String(value)
+      const isImage = isImageUrl(stringValue)
+      const displayValue = `"${stringValue.slice(0, 50)}${stringValue.length > 50 ? '...' : ''}"`
+      
+      if (isImage) {
+        return (
+          <Popover>
+            <PopoverTrigger asChild>
+              <span className='cursor-pointer underline decoration-dotted hover:text-primary'>
+                {displayValue}
+              </span>
+            </PopoverTrigger>
+            <PopoverContent className='w-80 p-2' align='start'>
+              <img
+                src={stringValue}
+                alt='Preview'
+                className='w-full rounded border'
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none'
+                }}
+              />
+              <p className='text-muted-foreground mt-2 text-xs break-all'>{stringValue}</p>
+            </PopoverContent>
+          </Popover>
+        )
+      }
+      return displayValue
     case 'number':
       return String(value)
     case 'boolean':

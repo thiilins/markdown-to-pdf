@@ -33,6 +33,7 @@ export default function JsonFormatterView() {
   const [isDesktop, setIsDesktop] = useState(true)
   const [mobileTab, setMobileTab] = useState<'input' | 'output'>('input')
   const [outputView, setOutputView] = useState<'formatted' | 'tree'>('formatted')
+  const [currentJsonPath, setCurrentJsonPath] = useState<string | null>(null)
 
   useEffect(() => {
     const checkSize = () => setIsDesktop(window.innerWidth >= 1024)
@@ -206,6 +207,7 @@ export default function JsonFormatterView() {
                   onClear={handleClear}
                   onReset={handleReset}
                   defaultValue={DEFAULT_JSON}
+                  onJsonPathChange={setCurrentJsonPath}
                 />
               </div>
             )}
@@ -258,6 +260,7 @@ export default function JsonFormatterView() {
                 onClear={handleClear}
                 onReset={handleReset}
                 defaultValue={DEFAULT_JSON}
+                onJsonPathChange={setCurrentJsonPath}
               />
             </ResizablePanel>
 

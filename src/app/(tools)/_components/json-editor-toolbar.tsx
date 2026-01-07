@@ -9,8 +9,18 @@ import {
   RotateCcw,
   Sparkles,
   Trash2,
+  Wand2,
+  ArrowLeftRight,
 } from 'lucide-react'
-import { formatJson, minifyJson, validateJson } from './json-formatter-utils'
+import { formatJson, minifyJson, validateJson, fixJson } from './json-formatter-utils'
+import { toast } from 'sonner'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { convertFormat, type FormatType } from './format-converter-utils'
 
 interface JsonEditorToolbarProps {
   value: string
@@ -70,6 +80,36 @@ export function JsonEditorToolbar({
     }
   }
 
+  const handleFixJson = () => {
+    if (!value.trim()) {
+      return
+    }
+    try {
+      const { fixed, changes } = fixJson(value)
+      if (changes.length > 0) {
+        onValueChange(fixed)
+        toast.success(`JSON corrigido: ${changes.join(', ')}`)
+      } else {
+        toast.info('Nenhuma correção necessária')
+      }
+    } catch (error: any) {
+      toast.error(error?.message || 'Erro ao corrigir JSON')
+    }
+  }
+
+  const handleConvertFormat = async (toFormat: FormatType) => {
+    if (!value.trim()) {
+      return
+    }
+    try {
+      const converted = convertFormat(value, 'json', toFormat)
+      onValueChange(converted)
+      toast.success(`Convertido para ${toFormat.toUpperCase()}`)
+    } catch (error: any) {
+      toast.error(error?.message || `Erro ao converter para ${toFormat}`)
+    }
+  }
+
   const handleCopy = () => {
     if (onCopy) {
       onCopy()
@@ -119,6 +159,41 @@ export function JsonEditorToolbar({
             button: `h-7 w-7 ${isValid ? 'text-green-600 dark:text-green-400' : 'text-destructive'}`,
           }}
         />
+
+        {/* JSON Fixer */}
+        <IconButtonTooltip
+          variant='ghost'
+          icon={Wand2}
+          onClick={handleFixJson}
+          content='Corrigir JSON automaticamente'
+          disabled={!hasContent}
+          className={{
+            button: 'h-7 w-7',
+          }}
+        />
+
+        {/* Conversão de Formatos */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className='hover:bg-accent text-muted-foreground hover:text-foreground flex h-7 w-7 items-center justify-center rounded-md transition-colors disabled:opacity-50 disabled:pointer-events-none'
+              disabled={!hasContent || !isValid}
+              title='Converter formato'>
+              <ArrowLeftRight className='h-4 w-4' />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align='start'>
+            <DropdownMenuItem onClick={() => handleConvertFormat('xml')}>
+              Converter para XML
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleConvertFormat('yaml')}>
+              Converter para YAML
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleConvertFormat('csv')}>
+              Converter para CSV
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <Separator orientation='vertical' className='mx-1 h-5' />
 

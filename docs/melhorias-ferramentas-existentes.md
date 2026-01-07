@@ -42,7 +42,10 @@ Diferenciar-se do "Carbon.now.sh" focando em precisão e contexto.
 - **Modo "Live Edit" no Preview:** Permitir pequenas edições de texto diretamente no painel de
   preview do snapshot para ajustes rápidos de última hora.
 
-### 4. Formatadores (JSON, SQL, JS, CSS)
+**Permitir que o tema ao alterar altere nao so as cores do editor mas o fundo da janela do editor
+com base - atualmente só ta alterando as cores do conteudo (texto)**
+
+### 4. Formatadores (JSON, SQL, JS, CSS) [FINISHED]
 
 Sair da simples indentação para utilitários de produtividade.
 
@@ -79,7 +82,7 @@ Sair da simples indentação para utilitários de produtividade.
   pode ser expandida com um "Live Preview" específico para os diagramas, permitindo editar o código
   Mermaid e ver o gráfico atualizar-se isoladamente.
 
-### 7. Code Snapshot (Code to Image)
+### 7. Code Snapshot (Code to Image) [FINISHED]
 
 - **Modo "Diff" no Snapshot:** Permitir que o utilizador cole um diff de código e a ferramenta
   formate automaticamente as linhas verdes (adições) e vermelhas (remoções) com o estilo do editor.

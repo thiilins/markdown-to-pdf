@@ -1,7 +1,7 @@
 'use client'
 
 import { AlertCircle, Code2 } from 'lucide-react'
-import { ReactNode } from 'react'
+import React, { ReactNode, useState } from 'react'
 import { CodeFormatterEditor } from './code-formatter-editor'
 import { JsonEditorToolbar } from './json-editor-toolbar'
 
@@ -22,6 +22,7 @@ interface FormatterEditorPanelProps {
   onClear?: () => void
   onReset?: () => void
   defaultValue?: string
+  onJsonPathChange?: (path: string | null) => void
 }
 
 export function FormatterEditorPanel({
@@ -37,7 +38,15 @@ export function FormatterEditorPanel({
   onClear,
   onReset,
   defaultValue,
+  onJsonPathChange,
 }: FormatterEditorPanelProps) {
+  const [currentJsonPath, setCurrentJsonPath] = useState<string | null>(null)
+
+  const handleJsonPathChange = (path: string | null) => {
+    setCurrentJsonPath(path)
+    onJsonPathChange?.(path)
+  }
+
   return (
     <div className='bg-background flex h-full flex-col'>
       {/* Editor Header */}
@@ -46,13 +55,22 @@ export function FormatterEditorPanel({
           <Icon className='text-muted-foreground h-4 w-4' />
           <span className='text-sm font-semibold'>{label}</span>
         </div>
-        {value.trim() && (
-          <div className='text-muted-foreground flex items-center gap-2 text-xs'>
-            <span>{value.split('\n').length} linhas</span>
-            <span className='text-muted-foreground/50'>•</span>
-            <span>{value.length.toLocaleString()} caracteres</span>
-          </div>
-        )}
+        <div className='flex items-center gap-3'>
+          {/* JSON Path Tracking */}
+          {language === 'json' && currentJsonPath && (
+            <div className='text-muted-foreground flex items-center gap-2 font-mono text-xs'>
+              <span className='text-muted-foreground/50'>Path:</span>
+              <span className='text-primary font-semibold'>{currentJsonPath}</span>
+            </div>
+          )}
+          {value.trim() && (
+            <div className='text-muted-foreground flex items-center gap-2 text-xs'>
+              <span>{value.split('\n').length} linhas</span>
+              <span className='text-muted-foreground/50'>•</span>
+              <span>{value.length.toLocaleString()} caracteres</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* JSON Toolbar */}
@@ -70,7 +88,12 @@ export function FormatterEditorPanel({
 
       {/* Editor */}
       <div className='flex-1 overflow-hidden'>
-        <CodeFormatterEditor value={value} onChange={onChange} language={language} />
+        <CodeFormatterEditor
+          value={value}
+          onChange={onChange}
+          language={language}
+          onJsonPathChange={handleJsonPathChange}
+        />
       </div>
 
       {/* Validation Errors */}

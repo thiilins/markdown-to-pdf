@@ -5,6 +5,59 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto
 adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.5.0] - 2025-01-XX
+
+### 🚀 Adicionado
+
+#### JSON Formatter - Features Avançadas
+
+**JSON Fixer Inteligente:**
+- **Correção automática** de erros comuns em JSONs:
+  - Aspas simples → aspas duplas
+  - Vírgulas sobrando (antes de `}` ou `]`)
+  - Falta de aspas em chaves
+  - Literais em caixa alta (`TRUE`, `FALSE`, `NULL`) → `true`, `false`, `null`
+- Botão "Corrigir JSON" no toolbar com feedback visual das correções aplicadas
+
+**Visualização de Imagens em Tree View:**
+- **Preview de imagens** ao passar o mouse sobre URLs de imagem no Tree View
+- Detecção automática de URLs de imagem (jpg, png, gif, webp, svg, bmp, ico)
+- Popover com preview da imagem e URL completa
+- Interface intuitiva com underline pontilhado indicando URLs clicáveis
+
+**Smart JSONPath Tracking:**
+- **Exibição em tempo real** do caminho JSON (JSONPath) da chave onde o cursor está posicionado
+- Atualização automática ao mover o cursor ou selecionar texto
+- Display no header do editor mostrando o path atual
+- Facilita navegação em arquivos JSON grandes
+
+**Conversão Cruzada Entre Formatos:**
+- **Conversão instantânea** entre JSON, XML, YAML e CSV
+- Menu dropdown no toolbar com opções de conversão
+- Preservação da estrutura de dados durante conversão
+- Feedback visual com toast notifications
+- Suporte para:
+  - JSON → XML (com formatação adequada)
+  - JSON → YAML (com indentação correta)
+  - JSON → CSV (para arrays de objetos ou objetos simples)
+  - XML → JSON (parsing básico)
+  - CSV → JSON (detecção automática de headers)
+
+### 🔧 Melhorado
+
+- **JsonEditorToolbar:** Adicionados botões para JSON Fixer e conversão de formatos
+- **FormatterEditorPanel:** Suporte para callback de JSON Path tracking
+- **CodeFormatterEditor:** Integração de eventos de cursor para tracking em tempo real
+- **JsonTreeView:** Preview de imagens com Popover component
+
+### 📝 Documentado
+
+- Utilitários de conversão de formatos (`format-converter-utils.ts`)
+- Função `fixJson` com detecção e correção de erros comuns
+- Sistema de tracking de JSON Path em tempo real
+
+---
+
 ## [0.4.0] - 2025-01-XX
 
 ### 🚀 Adicionado
@@ -12,15 +65,18 @@ adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 #### Code Snapshot - Modo Diff e Line Highlighting
 
 **Modo Diff:**
+
 - **Detecção automática** de diffs no formato git diff
 - **Parsing inteligente** de linhas adicionadas (+), removidas (-) e headers
 - **Estilos visuais diferenciados:**
   - Linhas adicionadas: fundo verde com borda esquerda verde (`rgba(46, 160, 67)`)
-  - Linhas removidas: fundo vermelho com borda esquerda vermelha e opacidade reduzida (`rgba(248, 81, 73)`)
+  - Linhas removidas: fundo vermelho com borda esquerda vermelha e opacidade reduzida
+    (`rgba(248, 81, 73)`)
   - Headers de diff: fundo cinza com texto em negrito
 - **Ativação automática** quando um diff é detectado no código
 
 **Line Highlighting Contextual:**
+
 - **Clique em números de linha** para adicionar comentários explicativos
 - **Popover modal** para editar comentários com:
   - Campo de texto para adicionar/editar comentários
@@ -32,6 +88,7 @@ adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - **Suporte completo** para modo diff + highlights combinados
 
 **Preset Terminal Retro:**
+
 - Novo preset de mockup de janela "Terminal Retro"
 - Estilo retro minimalista com:
   - Fundo preto (`#0a0a0a`)
