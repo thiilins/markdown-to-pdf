@@ -1,4 +1,4 @@
-interface SnapshotConfig {
+export interface SnapshotConfig {
   language: string
   theme: string // Nome do tema do SyntaxHighlighter (ex: 'vscDarkPlus', 'dracula', 'oneDark')
   background: string
@@ -29,6 +29,11 @@ interface SnapshotConfig {
   diffMode: boolean // Ativar modo diff (detecção automática)
   // Line Highlights
   lineHighlights: Record<number, { comment?: string; highlighted?: boolean }> // Comentários e highlights por linha
+  // Code Annotations
+  annotations: CodeAnnotation[] // Anotações flutuantes (setas e notas) sobre o código
+  annotationMode: boolean // Modo para adicionar anotações (clique no código)
+  // Live Edit Mode
+  liveEditMode: boolean // Permitir editar código diretamente no preview
 }
 type BackgroundType = 'solid' | 'gradient' | 'image'
 type WindowThemeType = 'mac' | 'windows' | 'linux' | 'chrome' | 'vscode' | 'retro' | 'none'
@@ -37,10 +42,21 @@ type LanguagePosition = 'header' | 'footer'
 type ContentVerticalAlign = 'top' | 'center' | 'bottom'
 
 // Tamanhos pré-definidos para redes sociais e documentos
-interface PresetSize {
+export interface PresetSize {
   id: string
   name: string
   width: number
   height: number
   description?: string
+}
+
+// Anotação flutuante sobre o código
+export interface CodeAnnotation {
+  id: string
+  type: 'arrow' | 'note' // Tipo de anotação
+  x: number // Posição X em pixels relativos ao código
+  y: number // Posição Y em pixels relativos ao código
+  text?: string // Texto da nota (opcional para setas)
+  targetLine?: number // Linha alvo (para setas apontando para linhas específicas)
+  color?: string // Cor da anotação (padrão: amarelo)
 }

@@ -2,12 +2,11 @@
 import { PRESET_SIZES } from '@/shared/contexts/codeSnapshotContext'
 import { toast } from 'sonner'
 import * as themes from 'react-syntax-highlighter/dist/esm/styles/prism'
+import type { SnapshotConfig } from './types'
 
 // Constantes de zoom
 export const MAX_ZOOM = 1.5
 export const MIN_ZOOM = 0.3
-
-// SnapshotConfig está definido em types.d.ts como declaração global
 
 /**
  * Calcula as dimensões finais baseado no preset selecionado

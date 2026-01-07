@@ -23,6 +23,8 @@ import {
 import { ValidateFontComponent } from './validate-font-component'
 import { isDiffCode, parseDiff, type ParsedDiff, type DiffLine } from './diff-utils'
 import { LineCommentPopover } from './line-comment-popover'
+import { CodeAnnotationComponent } from './code-annotation'
+import type { CodeAnnotation } from './types'
 
 interface SnapshotPreviewProps {
   previewContainerRef?: React.RefObject<HTMLDivElement | null>
@@ -35,7 +37,7 @@ export function SnapshotPreview({
   onPreviewScroll,
   isSyncingFromEditor,
 }: SnapshotPreviewProps) {
-  const { code, config, updateConfig } = useCodeSnapshot()
+  const { code, setCode, config, updateConfig } = useCodeSnapshot()
   const ref = useRef<HTMLDivElement>(null)
   const codeContentRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -98,6 +100,60 @@ export function SnapshotPreview({
       updateConfig('lineHighlights', newHighlights)
     },
     [config.lineHighlights, updateConfig],
+  )
+
+  // Handlers para annotations
+  const handleAddAnnotation = useCallback(
+    (type: 'arrow' | 'note', x: number, y: number, targetLine?: number) => {
+      const newAnnotation: CodeAnnotation = {
+        id: `annotation-${Date.now()}`,
+        type,
+        x: x - (ref.current?.offsetLeft || 0),
+        y: y - (ref.current?.offsetTop || 0),
+        targetLine,
+        color: '#fbbf24',
+      }
+      updateConfig('annotations', [...(config.annotations || []), newAnnotation])
+    },
+    [config.annotations, updateConfig],
+  )
+
+  const handleUpdateAnnotation = useCallback(
+    (id: string, updates: Partial<CodeAnnotation>) => {
+      const updatedAnnotations = (config.annotations || []).map((ann: CodeAnnotation) =>
+        ann.id === id ? { ...ann, ...updates } : ann,
+      )
+      updateConfig('annotations', updatedAnnotations)
+    },
+    [config.annotations, updateConfig],
+  )
+
+  const handleDeleteAnnotation = useCallback(
+    (id: string) => {
+      const filteredAnnotations = (config.annotations || []).filter((ann: CodeAnnotation) => ann.id !== id)
+      updateConfig('annotations', filteredAnnotations)
+    },
+    [config.annotations, updateConfig],
+  )
+
+  // Handler para clique no código para adicionar anotação
+  const handleCodeClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (!config.annotationMode) return
+      e.stopPropagation()
+      const rect = codeContentRef.current?.getBoundingClientRect()
+      if (!rect) return
+
+      const x = e.clientX - rect.left
+      const y = e.clientY - rect.top
+
+      // Calcular linha aproximada baseado na posição Y
+      const lineHeight = calculatedFontSize * 1.6
+      const lineNumber = Math.floor(y / lineHeight) + 1
+
+      handleAddAnnotation('note', x, y, lineNumber)
+    },
+    [config.annotationMode, calculatedFontSize, handleAddAnnotation],
   )
 
   const handleRemoveComment = useCallback(
@@ -517,7 +573,7 @@ export function SnapshotPreview({
                 transition: 'background-color 0.3s ease',
               }}>
               <PreviewCustomLayout>
-                <div
+                  <div
                   ref={codeContentRef}
                   className='code-snapshot-syntax-wrapper relative'
                   style={{
@@ -528,7 +584,8 @@ export function SnapshotPreview({
                       availableCodeHeight > 0 ? `${availableCodeHeight - headerHeight}px` : 'none',
                     flex: availableCodeHeight > 0 ? '1 1 0' : '0 0 auto',
                     minHeight: 0,
-                  }}>
+                  }}
+                  onClick={config.liveEditMode ? undefined : handleCodeClick}>
                   <style>{`
                   .code-snapshot-syntax-wrapper pre,
                   .code-snapshot-syntax-wrapper code,
@@ -540,78 +597,102 @@ export function SnapshotPreview({
                     font-size: ${calculatedFontSize}px !important;
                   }
                 `}</style>
-                  <SyntaxHighlighter
-                    language={config.language}
-                    style={(themes as any)[config.theme] || themes.vscDarkPlus}
-                    customStyle={{
-                      margin: 0,
-                      padding: '1.5rem',
-                      background: 'transparent',
-                      fontSize: `${calculatedFontSize}px`,
-                      fontFamily: `"${config.fontFamily}", 'Courier New', Courier, monospace`,
-                      lineHeight: '1.6',
-                      whiteSpace: 'pre-wrap',
-                      wordWrap: 'break-word',
-                      overflowWrap: 'break-word',
-                      wordBreak: 'break-word',
-                      overflow: availableCodeHeight > 0 ? 'hidden' : 'visible',
-                      maxWidth: '100%',
-                      width: '100%',
-                      maxHeight:
-                        availableCodeHeight > 0
-                          ? `${availableCodeHeight - headerHeight}px`
-                          : 'none',
-                    }}
-                    wrapLines={true}
-                    wrapLongLines={true}
-                    PreTag={({ children, ...props }: any) => (
-                      <pre
-                        {...props}
-                        style={{
-                          ...props.style,
-                          fontSize: `${calculatedFontSize}px !important`,
-                          fontFamily: `"${config.fontFamily}", 'Courier New', Courier, monospace !important`,
-                          overflow: availableCodeHeight > 0 ? 'hidden' : 'visible',
-                          maxHeight:
-                            availableCodeHeight > 0
-                              ? `${availableCodeHeight - headerHeight}px`
-                              : 'none',
-                        }}>
-                        {children}
-                      </pre>
-                    )}
-                    CodeTag={({ children, ...props }: any) => (
-                      <code
-                        {...props}
-                        style={{
-                          ...props.style,
-                          fontSize: `${calculatedFontSize}px !important`,
-                          fontFamily: `"${config.fontFamily}", 'Courier New', Courier, monospace !important`,
-                        }}>
-                        {children}
-                      </code>
-                    )}
-                    showLineNumbers={config.showLineNumbers}
-                    lineNumberStyle={{
-                      minWidth: '2.5em',
-                      paddingRight: '1em',
-                      color: '#6e7681',
-                      textAlign: 'right',
-                      fontSize: `${calculatedFontSize}px`,
-                      fontFamily: `"${config.fontFamily}", 'Courier New', Courier, monospace`,
-                      cursor: config.diffMode || Object.keys(config.lineHighlights).length > 0 ? 'pointer' : 'default',
-                    }}
-                    lineProps={getLineProps}
-                    lineNumberProps={(lineNumber: number) => ({
-                      onClick: () => {
-                        setSelectedLineForComment(lineNumber)
-                      },
-                      style: {
-                        cursor: config.diffMode || config.lineHighlights[lineNumber] ? 'pointer' : 'default',
-                      },
-                    })}>
-                    {codeForHighlighting || ' '}
-                  </SyntaxHighlighter>
+                  {config.liveEditMode ? (
+                    <textarea
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      className='w-full h-full resize-none border-none outline-none bg-transparent text-inherit font-mono'
+                      style={{
+                        fontSize: `${calculatedFontSize}px`,
+                        fontFamily: `"${config.fontFamily}", 'Courier New', Courier, monospace`,
+                        lineHeight: '1.6',
+                        padding: '1.5rem',
+                        color: 'inherit',
+                        whiteSpace: 'pre-wrap',
+                        wordWrap: 'break-word',
+                        overflowWrap: 'break-word',
+                        overflow: availableCodeHeight > 0 ? 'auto' : 'visible',
+                        maxHeight:
+                          availableCodeHeight > 0
+                            ? `${availableCodeHeight - headerHeight}px`
+                            : 'none',
+                      }}
+                      spellCheck={false}
+                    />
+                  ) : (
+                    <SyntaxHighlighter
+                      language={config.language}
+                      style={(themes as any)[config.theme] || themes.vscDarkPlus}
+                      customStyle={{
+                        margin: 0,
+                        padding: '1.5rem',
+                        background: 'transparent',
+                        fontSize: `${calculatedFontSize}px`,
+                        fontFamily: `"${config.fontFamily}", 'Courier New', Courier, monospace`,
+                        lineHeight: '1.6',
+                        whiteSpace: 'pre-wrap',
+                        wordWrap: 'break-word',
+                        overflowWrap: 'break-word',
+                        wordBreak: 'break-word',
+                        overflow: availableCodeHeight > 0 ? 'hidden' : 'visible',
+                        maxWidth: '100%',
+                        width: '100%',
+                        maxHeight:
+                          availableCodeHeight > 0
+                            ? `${availableCodeHeight - headerHeight}px`
+                            : 'none',
+                      }}
+                      wrapLines={true}
+                      wrapLongLines={true}
+                      PreTag={({ children, ...props }: any) => (
+                        <pre
+                          {...props}
+                          style={{
+                            ...props.style,
+                            fontSize: `${calculatedFontSize}px !important`,
+                            fontFamily: `"${config.fontFamily}", 'Courier New', Courier, monospace !important`,
+                            overflow: availableCodeHeight > 0 ? 'hidden' : 'visible',
+                            maxHeight:
+                              availableCodeHeight > 0
+                                ? `${availableCodeHeight - headerHeight}px`
+                                : 'none',
+                          }}>
+                          {children}
+                        </pre>
+                      )}
+                      CodeTag={({ children, ...props }: any) => (
+                        <code
+                          {...props}
+                          style={{
+                            ...props.style,
+                            fontSize: `${calculatedFontSize}px !important`,
+                            fontFamily: `"${config.fontFamily}", 'Courier New', Courier, monospace !important`,
+                          }}>
+                          {children}
+                        </code>
+                      )}
+                      showLineNumbers={config.showLineNumbers}
+                      lineNumberStyle={{
+                        minWidth: '2.5em',
+                        paddingRight: '1em',
+                        color: '#6e7681',
+                        textAlign: 'right',
+                        fontSize: `${calculatedFontSize}px`,
+                        fontFamily: `"${config.fontFamily}", 'Courier New', Courier, monospace`,
+                        cursor: config.diffMode || Object.keys(config.lineHighlights).length > 0 ? 'pointer' : 'default',
+                      }}
+                      lineProps={getLineProps}
+                      lineNumberProps={(lineNumber: number) => ({
+                        onClick: () => {
+                          setSelectedLineForComment(lineNumber)
+                        },
+                        style: {
+                          cursor: config.diffMode || config.lineHighlights[lineNumber] ? 'pointer' : 'default',
+                        },
+                      })}>
+                      {codeForHighlighting || ' '}
+                    </SyntaxHighlighter>
+                  )}
                   {/* Overlay para comentários */}
                   {selectedLineForComment !== null && (
                     <div
@@ -632,6 +713,17 @@ export function SnapshotPreview({
                       </div>
                     </div>
                   )}
+
+                  {/* Anotações flutuantes */}
+                  {!config.liveEditMode && (config.annotations || []).map((annotation: CodeAnnotation) => (
+                    <CodeAnnotationComponent
+                      key={annotation.id}
+                      annotation={annotation}
+                      onUpdate={handleUpdateAnnotation}
+                      onDelete={handleDeleteAnnotation}
+                      scale={zoom}
+                    />
+                  ))}
                 </div>
               </PreviewCustomLayout>
             </div>

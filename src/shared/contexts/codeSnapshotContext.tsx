@@ -3,6 +3,7 @@
 import usePersistedStateInDB from '@/hooks/use-persisted-in-db'
 import { ReactNode, createContext, useContext } from 'react'
 import { DEFAULT_CODE } from '../constants/snap-code'
+import type { PresetSize, SnapshotConfig } from '@/app/(tools)/code-snapshot/_component/types'
 
 export const PRESET_SIZES: PresetSize[] = [
   { id: 'custom', name: 'Custom', width: 800, height: 0, description: 'Tamanho personalizado' },
@@ -84,6 +85,11 @@ const defaultConfig: SnapshotConfig = {
   diffMode: false, // Modo diff desativado por padrão
   // Line Highlights
   lineHighlights: {}, // Sem highlights por padrão
+  // Code Annotations
+  annotations: [], // Sem anotações por padrão
+  annotationMode: false, // Modo de adicionar anotações desativado por padrão
+  // Live Edit Mode
+  liveEditMode: false, // Modo live edit desativado por padrão
 }
 
 const CodeSnapshotContext = createContext<CodeSnapshotContextType | undefined>(undefined)

@@ -5,6 +5,40 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto
 adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.5.2] - 2025-01-XX
+
+### 🚀 Adicionado
+
+#### Code Snapshot - Features Interativas
+
+- **Interactive Code Annotations:**
+  - Sistema completo de anotações flutuantes sobre o código
+  - Dois tipos de anotações: setas (apontando para linhas) e notas (texto flutuante)
+  - Clique no código para adicionar anotações quando o modo estiver ativo
+  - Edição inline de anotações com popover
+  - Cores customizáveis (padrão: amarelo)
+  - Anotações são exportadas junto com a imagem do snapshot
+
+- **Modo "Live Edit" no Preview:**
+  - Edição direta do código no painel de preview
+  - Textarea editável substitui o SyntaxHighlighter quando ativo
+  - Ajustes rápidos de última hora sem precisar voltar ao editor
+  - Mantém formatação e estilo do código
+  - Sincronização automática com o código principal
+
+### 🔧 Melhorado
+
+- **Code Snapshot Controls:**
+  - Adicionados switches para ativar/desativar Live Edit e Annotation Mode
+  - Contador de anotações ativas
+  - Botão para remover todas as anotações de uma vez
+
+### 🐛 Corrigido
+
+- Correção de tipos TypeScript em vários componentes
+- Exportação correta de tipos SnapshotConfig e PresetSize
+- Correção de tipos implícitos em callbacks e map functions
+
 ## [0.5.1] - 2025-01-XX
 
 ### 🚀 Adicionado

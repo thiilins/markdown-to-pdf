@@ -272,7 +272,7 @@ export function SnapshotControls({ compact = false }: { compact?: boolean }) {
                             onChange={(checked) => {
                               const newOpts = checked
                                 ? [...config.footerOptions, option]
-                                : config.footerOptions.filter((o) => o !== option)
+                                : config.footerOptions.filter((o: string) => o !== option)
                               updateConfig('footerOptions', newOpts)
                             }}
                           />
@@ -470,7 +470,55 @@ export function SnapshotControls({ compact = false }: { compact?: boolean }) {
             </section>
             <Separator />
 
-            <section className='space-y-4'></section>
+            <section className='space-y-4'>
+              <div className='border-primary/50 bg-primary/20 space-y-3 rounded-lg border p-3'>
+                <ControlLabel>Modo de Edição</ControlLabel>
+                <div className='flex items-center justify-between'>
+                  <div className='space-y-0.5'>
+                    <Label className='text-sm font-medium'>Live Edit no Preview</Label>
+                    <p className='text-muted-foreground text-xs'>
+                      Edite o código diretamente no preview
+                    </p>
+                  </div>
+                  <Switch
+                    checked={config.liveEditMode || false}
+                    onCheckedChange={(checked) => updateConfig('liveEditMode', checked)}
+                  />
+                </div>
+              </div>
+
+              <div className='border-primary/50 bg-primary/20 space-y-3 rounded-lg border p-3'>
+                <ControlLabel>Anotações Interativas</ControlLabel>
+                <div className='space-y-2'>
+                  <div className='flex items-center justify-between'>
+                    <div className='space-y-0.5'>
+                      <Label className='text-sm font-medium'>Modo Adicionar Anotação</Label>
+                      <p className='text-muted-foreground text-xs'>
+                        Clique no código para adicionar notas ou setas
+                      </p>
+                    </div>
+                    <Switch
+                      checked={config.annotationMode || false}
+                      onCheckedChange={(checked) => updateConfig('annotationMode', checked)}
+                    />
+                  </div>
+                  {config.annotations && config.annotations.length > 0 && (
+                    <div className='mt-2 space-y-1'>
+                      <Label className='text-xs font-medium'>
+                        {config.annotations.length} anotação(ões)
+                      </Label>
+                      <Button
+                        variant='outline'
+                        size='sm'
+                        className='w-full h-8 text-xs'
+                        onClick={() => updateConfig('annotations', [])}>
+                        Remover Todas
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
           </div>
         </div>
       </div>

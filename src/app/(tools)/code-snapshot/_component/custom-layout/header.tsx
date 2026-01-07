@@ -290,6 +290,6 @@ export const WindowHeader = () => {
   }
 
   if (config.windowTheme !== 'none') {
-    return options[config.windowTheme]
+    return options[config.windowTheme as keyof typeof options]
   }
 }

@@ -26,7 +26,7 @@ export const WindowFooter = () => {
 
   // Processa opções do footer (só se showFooter estiver ativo)
   if (config.showFooter) {
-    config.footerOptions.forEach((option) => {
+    config.footerOptions.forEach((option: string) => {
       switch (option) {
         case 'linguagem':
           // Só adiciona se não estiver já adicionada por languagePosition
@@ -67,7 +67,7 @@ export const WindowFooter = () => {
 
   if (footerItems.length === 0) return null
 
-  const positionClasses = {
+  const positionClasses: Record<string, string> = {
     left: 'justify-start',
     center: 'justify-center',
     right: 'justify-end',
@@ -80,7 +80,7 @@ export const WindowFooter = () => {
       className={cn(
         'e items-center border-t border-white/10 bg-[#0d0d0d]/50 px-4 py-2',
         'flex items-center gap-3 text-[10px] text-zinc-400',
-        positionClasses[config.footerPosition],
+        positionClasses[config.footerPosition] || positionClasses.right,
       )}
       style={{
         borderBottomLeftRadius: `${borderRadius}px`,
