@@ -43,11 +43,18 @@ Diferenciar-se do "Carbon.now.sh" focando em precisão e contexto.
 - ✅ **Modo "Live Edit" no Preview:** Permitir pequenas edições de texto diretamente no painel de
   preview do snapshot para ajustes rápidos de última hora. **[IMPLEMENTADO - v0.5.2]**
 
-- ✅ **Background Dinâmico da Janela do Editor:** O tema ao alterar altera não só as cores do editor mas o fundo da janela do editor
-  com base no tema escolhido. **[IMPLEMENTADO - v0.5.1]**
+- ✅ **Background Dinâmico da Janela do Editor:** O tema ao alterar altera não só as cores do editor
+  mas o fundo da janela do editor com base no tema escolhido. **[IMPLEMENTADO - v0.5.1]**
 
-- Verificar quais as funcionalidades e features do https://carbon.now.sh/ podemos aproveitar e
-  implementar na nossa ferramenta.
+- ✅ **Análise Comparativa com Carbon.now.sh:** Documento criado com análise detalhada das features.
+  **[ANÁLISE COMPLETA - Ver `docs/carbon-comparison-analysis.md`]**
+
+#### Features do Carbon Recomendadas para Implementar:
+
+- ⏳ **Compartilhamento via URL:** Permitir compartilhar snippets via URL com estado codificado. **[PENDENTE - Alta Prioridade]**
+- ⏳ **Importação de GitHub Gist:** Importar código diretamente de GitHub Gists. **[PENDENTE - Alta Prioridade]**
+- ⏳ **Exportação em SVG:** Adicionar opção de exportar em SVG além de PNG. **[PENDENTE - Média Prioridade]**
+- ⏳ **Atalhos de Teclado:** Implementar atalhos para ações comuns (Cmd+S, Cmd+C, etc). **[PENDENTE - Média Prioridade]**
 
 ### 4. Formatadores (JSON, SQL, JS, CSS) [FINISHED]
 
