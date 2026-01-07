@@ -61,7 +61,10 @@ function extractUrls(text: string): { urls: string[]; error?: string } {
 
   // 1. URLs completas com protocolo (https:// ou http://)
   const protocolRegex = /https?:\/\/[^\s<>"{}|\\^`\[\]()]+/gi
-  const protocolResult = safeRegexExec(text, protocolRegex, { timeout: 2000, maxSize: 1 * 1024 * 1024 })
+  const protocolResult = safeRegexExec(text, protocolRegex, {
+    timeout: 2000,
+    maxSize: 1 * 1024 * 1024,
+  })
   if (protocolResult.success && protocolResult.matches) {
     protocolResult.matches.forEach((match) => {
       const cleaned = cleanUrl(match)
@@ -88,7 +91,8 @@ function extractUrls(text: string): { urls: string[]; error?: string } {
   }
 
   // 3. Domínios simples (sem www e sem protocolo) - limitado para prevenir ReDoS
-  const domainRegex = /\b([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,})(?:\/[^\s<>"{}|\\^`\[\]()]*)?/gi
+  const domainRegex =
+    /\b([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,})(?:\/[^\s<>"{}|\\^`\[\]()]*)?/gi
   const domainResult = safeRegexExec(text, domainRegex, { timeout: 3000, maxSize: 1 * 1024 * 1024 })
   if (domainResult.success && domainResult.matches) {
     domainResult.matches.forEach((match) => {
@@ -124,7 +128,8 @@ function extractUrls(text: string): { urls: string[]; error?: string } {
  * Extrai endereços IP de um texto (com proteção ReDoS)
  */
 function extractIps(text: string): { ips: string[]; error?: string } {
-  const ipv4Regex = /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g
+  const ipv4Regex =
+    /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g
   const result = safeRegexExec(text, ipv4Regex, { timeout: 2000, maxSize: 1 * 1024 * 1024 })
 
   if (!result.success) {
@@ -257,4 +262,3 @@ export function formatAsList(result: ExtractionResult): string {
 
   return items.join('\n').trim()
 }
-

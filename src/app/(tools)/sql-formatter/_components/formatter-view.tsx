@@ -2,7 +2,13 @@
 
 import { Label } from '@/components/ui/label'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Database, FileCode } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
@@ -123,7 +129,7 @@ export default function SqlFormatterView() {
   }, [])
 
   return (
-    <div className='flex h-[calc(100vh-4rem)] flex-col overflow-hidden bg-background'>
+    <div className='bg-background flex h-[calc(100vh-4rem)] flex-col overflow-hidden'>
       <FormatterHeader
         icon={Database}
         title='Formatador SQL'
@@ -139,8 +145,8 @@ export default function SqlFormatterView() {
         canCopy={!!formattedOutput}
         canDownload={!!formattedOutput}
         extraActions={
-          <div className='flex items-center gap-2 border-l pl-2 ml-2'>
-            <Label htmlFor='sql-dialect' className='text-xs font-medium text-muted-foreground'>
+          <div className='ml-2 flex items-center gap-2 border-l pl-2'>
+            <Label htmlFor='sql-dialect' className='text-muted-foreground text-xs font-medium'>
               Dialeto:
             </Label>
             <Select value={sqlDialect} onValueChange={(v) => setSqlDialect(v as any)}>

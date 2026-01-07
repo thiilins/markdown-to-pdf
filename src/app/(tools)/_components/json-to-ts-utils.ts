@@ -76,7 +76,12 @@ export function convertJsonToTypeScript(
         const nestedName = capitalizeFirst(key)
         const nestedInterface = convertJsonToTypeScript(value, nestedName, depth + 1)
         nestedInterfaces.push(`export interface ${nestedName} ${nestedInterface}\n`)
-      } else if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object' && value[0] !== null) {
+      } else if (
+        Array.isArray(value) &&
+        value.length > 0 &&
+        typeof value[0] === 'object' &&
+        value[0] !== null
+      ) {
         const nestedName = capitalizeFirst(key) + 'Item'
         const nestedInterface = convertJsonToTypeScript(value[0], nestedName, depth + 1)
         nestedInterfaces.push(`export interface ${nestedName} ${nestedInterface}\n`)
@@ -238,4 +243,3 @@ export function convertJsonToTypeScriptInterfaces(
 
   return allInterfaces.join('\n') + rootTypeLine
 }
-

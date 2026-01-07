@@ -103,16 +103,13 @@ export function formatText(text: string): string {
 
   // Adicionar quebra de linha após pontos finais, exclamação e interrogação (se não houver)
   // Mas apenas se não for um número decimal ou abreviação comum
-  formatted = formatted.replace(
-    /([.!?])\s+([A-ZÀÁÂÃÉÊÍÓÔÕÚÇ])/g,
-    (match, punct, next) => {
-      // Verificar se não é um número decimal ou abreviação
-      const before = formatted.substring(0, formatted.indexOf(match))
-      const lastChar = before.trim().slice(-1)
-      if (/\d/.test(lastChar)) return match // É um número, não adicionar quebra
-      return `${punct}\n\n${next}`
-    },
-  )
+  formatted = formatted.replace(/([.!?])\s+([A-ZÀÁÂÃÉÊÍÓÔÕÚÇ])/g, (match, punct, next) => {
+    // Verificar se não é um número decimal ou abreviação
+    const before = formatted.substring(0, formatted.indexOf(match))
+    const lastChar = before.trim().slice(-1)
+    if (/\d/.test(lastChar)) return match // É um número, não adicionar quebra
+    return `${punct}\n\n${next}`
+  })
 
   // Adicionar quebra de linha após dois pontos seguidos de letra maiúscula
   formatted = formatted.replace(/:\s+([A-ZÀÁÂÃÉÊÍÓÔÕÚÇ][a-zàáâãéêíóôõúç])/g, ':\n\n$1')
@@ -171,4 +168,3 @@ export function calculateStats(text: string): { lines: number; chars: number; wo
   const words = text.trim().split(/\s+/).filter(Boolean).length
   return { lines, chars, words }
 }
-

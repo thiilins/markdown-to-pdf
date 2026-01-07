@@ -1,8 +1,7 @@
 'use client'
-import { PRESET_SIZES } from '@/shared/contexts/codeSnapshotContext'
-import { toast } from 'sonner'
+import { PRESET_SIZES } from '@/shared/constants/snap-code'
 import * as themes from 'react-syntax-highlighter/dist/esm/styles/prism'
-import type { SnapshotConfig } from './types'
+import { toast } from 'sonner'
 
 // Constantes de zoom
 export const MAX_ZOOM = 1.5
@@ -369,4 +368,69 @@ export function getThemeBackground(themeName: string): string {
   }
 
   return themeBackgrounds[themeName] || '#0d0d0d'
+}
+
+/**
+ * Obtém a cor do texto do tema atual do react-syntax-highlighter
+ * Retorna a cor de texto apropriada baseada no tema selecionado
+ */
+export function getThemeTextColor(themeName: string): string {
+  // Importa os temas dinamicamente
+  const currentTheme = (themes as any)[themeName] || themes.vscDarkPlus
+
+  // Tenta extrair a cor do texto do tema
+  const codeSelector = currentTheme?.['code[class*="language-"]'] || currentTheme?.code
+  const preSelector = currentTheme?.['pre[class*="language-"]'] || currentTheme?.pre
+
+  if (codeSelector?.color) {
+    return codeSelector.color
+  }
+  if (preSelector?.color) {
+    return preSelector.color
+  }
+
+  // Fallback: cores de texto comuns baseadas no tema conhecido
+  const themeTextColors: Record<string, string> = {
+    dracula: '#f8f8f2',
+    vscDarkPlus: '#d4d4d4',
+    oneDark: '#abb2bf',
+    oneLight: '#383a42',
+    darcula: '#a9b7c6',
+    materialDark: '#eeffff',
+    materialOceanic: '#c3cee3',
+    nightOwl: '#d6deeb',
+    nord: '#d8dee9',
+    gruvboxDark: '#ebdbb2',
+    gruvboxLight: '#3c3836',
+    synthwave84: '#f92aad',
+    shadesOfPurple: '#a599e9',
+    lucario: '#e0e0e0',
+    coldarkDark: '#c7d2fe',
+    coldarkCold: '#111b27',
+    a11yDark: '#f8f8f2',
+    atomDark: '#c5c8c6',
+    duotoneDark: '#b29762',
+    duotoneSpace: '#6c6783',
+    duotoneEarth: '#6c6b5a',
+    duotoneForest: '#687d68',
+    duotoneSea: '#5f8a83',
+    holiTheme: '#d4d4d4',
+    hopscotch: '#c5b3e3',
+    twilight: '#c7c7c7',
+    tomorrow: '#4d4d4c',
+    solarizedDarkAtom: '#839496',
+    solarizedlight: '#586e75',
+    vsDark: '#d4d4d4',
+    vs: '#000000',
+    dark: '#f8f8f2',
+    okaidia: '#f8f8f2',
+    coy: '#4d4d4c',
+    coyWithoutShadows: '#4d4d4c',
+    funky: '#ffffff',
+    pojoaque: '#dccf8f',
+    xonokai: '#e6e1dc',
+    zTouch: '#000000',
+  }
+
+  return themeTextColors[themeName] || '#d4d4d4'
 }

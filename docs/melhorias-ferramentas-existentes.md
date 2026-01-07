@@ -28,7 +28,7 @@ Otimizar a qualidade da extração para que o resultado seja "pronto para uso".
 - **Agregador de URLs:** Possibilidade de inserir uma lista de URLs e gerar um único arquivo
   Markdown combinado, mantendo a hierarquia de headers para cada página extraída.
 
-### 3. Code Snapshot (Code to Image) [FINISHED]
+### 3. Code Snapshot (Code to Image)
 
 Diferenciar-se do "Carbon.now.sh" focando em precisão e contexto.
 
@@ -37,30 +37,12 @@ Diferenciar-se do "Carbon.now.sh" focando em precisão e contexto.
   centralizado.
 - **Destaque de Mudanças (Code Diff):** Permitir marcar linhas como "adicionadas" ou "removidas"
   dentro do snapshot para explicar mudanças de código visualmente.
-- ✅ **Interactive Code Annotations:** Possibilidade de adicionar setas ou notas explicativas
-  flutuantes sobre partes específicas do código antes de exportar a imagem. **[IMPLEMENTADO -
-  v0.5.2]**
-- ✅ **Modo "Live Edit" no Preview:** Permitir pequenas edições de texto diretamente no painel de
-  preview do snapshot para ajustes rápidos de última hora. **[IMPLEMENTADO - v0.5.2]**
+- **Interactive Code Annotations:** Possibilidade de adicionar setas ou notas explicativas
+  flutuantes sobre partes específicas do código antes de exportar a imagem.
+- **Modo "Live Edit" no Preview:** Permitir pequenas edições de texto diretamente no painel de
+  preview do snapshot para ajustes rápidos de última hora.
 
-- ✅ **Background Dinâmico da Janela do Editor:** O tema ao alterar altera não só as cores do editor
-  mas o fundo da janela do editor com base no tema escolhido. **[IMPLEMENTADO - v0.5.1]**
-
-- ✅ **Análise Comparativa com Carbon.now.sh:** Documento criado com análise detalhada das features.
-  **[ANÁLISE COMPLETA - Ver `docs/carbon-comparison-analysis.md`]**
-
-#### Features do Carbon Recomendadas para Implementar:
-
-- ⏳ **Compartilhamento via URL:** Permitir compartilhar snippets via URL com estado codificado.
-  **[PENDENTE - Alta Prioridade]**
-- ⏳ **Importação de GitHub Gist:** Importar código diretamente de GitHub Gists. **[PENDENTE - Alta
-  Prioridade]**
-- ⏳ **Exportação em SVG:** Adicionar opção de exportar em SVG além de PNG. **[PENDENTE - Média
-  Prioridade]**
-- ⏳ **Atalhos de Teclado:** Implementar atalhos para ações comuns (Cmd+S, Cmd+C, etc). **[PENDENTE
-  - Média Prioridade]**
-
-### 4. Formatadores (JSON, SQL, JS, CSS) [FINISHED]
+### 4. Formatadores (JSON, SQL, JS, CSS)
 
 Sair da simples indentação para utilitários de produtividade.
 
@@ -97,17 +79,16 @@ Sair da simples indentação para utilitários de produtividade.
   pode ser expandida com um "Live Preview" específico para os diagramas, permitindo editar o código
   Mermaid e ver o gráfico atualizar-se isoladamente.
 
-### 7. Code Snapshot (Code to Image) [FINISHED]
+### 7. Code Snapshot (Code to Image)
 
 - **Modo "Diff" no Snapshot:** Permitir que o utilizador cole um diff de código e a ferramenta
   formate automaticamente as linhas verdes (adições) e vermelhas (remoções) com o estilo do editor.
 - **Line Highlighting Contextual:** Possibilidade de clicar num número de linha para a destacar e
   adicionar um pequeno "popover" de comentário que será exportado na imagem.
-
 - **Presets de Mockup de Janela:** Adicionar molduras que simulam o aspeto do macOS (botões de
   semáforo), Windows ou um terminal "Retro", mantendo o design limpo e minimalista.
 
-### 8. Formatadores de Dados (JSON, SQL, JS) [FINISHED]
+### 8. Formatadores de Dados (JSON, SQL, JS)
 
 - **JSON Tree Graph:** Para além da visualização em texto, oferecer uma visualização em grafo/árvore
   onde o utilizador pode colapsar nós visualmente e ver a hierarquia de objetos complexos.
@@ -118,7 +99,7 @@ Sair da simples indentação para utilitários de produtividade.
   exato (ex: `data.users[0].profile.name`), o que é extremamente útil para desenvolvedores que
   trabalham com integração de APIs.
 
-### 9. JWT Decoder [FINISHED]
+### 9. JWT Decoder
 
 - **Simulador de Modificação:** Permitir que o utilizador edite o payload do JWT e veja como o token
   seria gerado (mesmo sem a assinatura ser válida, é útil para depurar estruturas de dados).

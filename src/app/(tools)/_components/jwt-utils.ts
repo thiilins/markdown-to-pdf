@@ -133,10 +133,7 @@ export function formatJson(obj: Record<string, any>): string {
  * Codifica string para Base64URL (usado em JWT)
  */
 function base64UrlEncode(str: string): string {
-  return btoa(str)
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '')
+  return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
 }
 
 /**
@@ -156,4 +153,3 @@ export function generateJwtToken(
 
   return `${headerEncoded}.${payloadEncoded}.${sig}`
 }
-

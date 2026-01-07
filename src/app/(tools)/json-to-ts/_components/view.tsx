@@ -205,9 +205,7 @@ export default function JsonToTsView() {
                 <FileType className='text-primary h-5 w-5 sm:h-6 sm:w-6' />
               </div>
               <div className='min-w-0 flex-1'>
-                <h1 className='text-lg font-bold tracking-tight sm:text-xl'>
-                  JSON to TypeScript
-                </h1>
+                <h1 className='text-lg font-bold tracking-tight sm:text-xl'>JSON to TypeScript</h1>
                 <p className='text-muted-foreground mt-0.5 text-xs sm:text-sm'>
                   Converta JSON para interfaces TypeScript automaticamente
                 </p>
@@ -272,7 +270,7 @@ export default function JsonToTsView() {
                 value={interfaceName}
                 onChange={(e) => setInterfaceName(e.target.value)}
                 placeholder='Root'
-                className='bg-background border-input ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring h-8 w-[200px] rounded-md border px-3 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
+                className='bg-background border-input ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring h-8 w-[200px] rounded-md border px-3 text-xs focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50'
               />
             </div>
             <div className='flex items-center gap-3'>
@@ -280,15 +278,9 @@ export default function JsonToTsView() {
                 <Label htmlFor='use-export' className='text-sm font-medium'>
                   Usar export
                 </Label>
-                <Switch
-                  id='use-export'
-                  checked={useExport}
-                  onCheckedChange={setUseExport}
-                />
+                <Switch id='use-export' checked={useExport} onCheckedChange={setUseExport} />
               </div>
-              <span className='text-muted-foreground text-xs'>
-                {useExport ? '.ts' : '.d.ts'}
-              </span>
+              <span className='text-muted-foreground text-xs'>{useExport ? '.ts' : '.d.ts'}</span>
             </div>
           </div>
         </div>
@@ -319,8 +311,8 @@ export default function JsonToTsView() {
 
             {mobileTab === 'input' && (
               <div className='flex flex-1 flex-col overflow-hidden'>
-                <div className='flex h-full flex-col bg-background'>
-                  <div className='bg-muted/30 border-b shrink-0 flex items-center justify-between px-4 py-2.5'>
+                <div className='bg-background flex h-full flex-col'>
+                  <div className='bg-muted/30 flex shrink-0 items-center justify-between border-b px-4 py-2.5'>
                     <div className='flex items-center gap-2'>
                       <FileJson className='text-muted-foreground h-4 w-4' />
                       <span className='text-sm font-semibold'>JSON</span>
@@ -347,8 +339,8 @@ export default function JsonToTsView() {
                       <div className='px-4 py-3'>
                         <div className='flex items-start gap-2.5'>
                           <FileCode className='text-destructive mt-0.5 h-4 w-4 shrink-0' />
-                          <div className='flex-1 min-w-0'>
-                            <p className='text-destructive text-xs font-semibold mb-1.5'>
+                          <div className='min-w-0 flex-1'>
+                            <p className='text-destructive mb-1.5 text-xs font-semibold'>
                               {validation.errors.length} erro(s) encontrado(s)
                             </p>
                             <ul className='text-destructive/90 space-y-1 text-xs'>
@@ -382,8 +374,8 @@ export default function JsonToTsView() {
         ) : (
           <ResizablePanelGroup direction='horizontal' className='h-full'>
             <ResizablePanel defaultSize={50} minSize={30}>
-              <div className='flex h-full flex-col bg-background'>
-                <div className='bg-muted/30 border-b shrink-0 flex items-center justify-between px-4 py-2.5'>
+              <div className='bg-background flex h-full flex-col'>
+                <div className='bg-muted/30 flex shrink-0 items-center justify-between border-b px-4 py-2.5'>
                   <div className='flex items-center gap-2'>
                     <FileJson className='text-muted-foreground h-4 w-4' />
                     <span className='text-sm font-semibold'>JSON</span>
@@ -399,19 +391,15 @@ export default function JsonToTsView() {
                   validation={validation}
                 />
                 <div className='flex-1 overflow-hidden'>
-                  <CodeFormatterEditor
-                    value={jsonInput}
-                    onChange={setJsonInput}
-                    language='json'
-                  />
+                  <CodeFormatterEditor value={jsonInput} onChange={setJsonInput} language='json' />
                 </div>
                 {validation.errors.length > 0 && (
                   <div className='bg-destructive/10 border-destructive/20 shrink-0 border-t'>
                     <div className='px-4 py-3'>
                       <div className='flex items-start gap-2.5'>
                         <FileCode className='text-destructive mt-0.5 h-4 w-4 shrink-0' />
-                        <div className='flex-1 min-w-0'>
-                          <p className='text-destructive text-xs font-semibold mb-1.5'>
+                        <div className='min-w-0 flex-1'>
+                          <p className='text-destructive mb-1.5 text-xs font-semibold'>
                             {validation.errors.length} erro(s) encontrado(s)
                           </p>
                           <ul className='text-destructive/90 space-y-1 text-xs'>
@@ -446,4 +434,3 @@ export default function JsonToTsView() {
     </div>
   )
 }
-

@@ -65,10 +65,9 @@ const fieldMappings: Record<string, string> = {
   footerPosition: 'fp',
   contentVerticalAlign: 'cva',
   diffMode: 'dm',
-  lineHighlights: 'lh',
+  highlightedLines: 'hl',
   annotations: 'ann',
   annotationMode: 'am',
-  liveEditMode: 'lem',
   // Código
   code: 'c',
 }
@@ -204,7 +203,9 @@ export function getUrlState(searchParams: URLSearchParams): Record<string, any> 
  */
 export function createShareableUrl(
   state: Record<string, any>,
-  baseUrl: string = typeof window !== 'undefined' ? window.location.origin + window.location.pathname : '',
+  baseUrl: string = typeof window !== 'undefined'
+    ? window.location.origin + window.location.pathname
+    : '',
   useSerialized: boolean = false,
 ): string {
   if (useSerialized) {
@@ -225,4 +226,3 @@ export function createShareableUrl(
     return queryString ? `${baseUrl}?${queryString}` : baseUrl
   }
 }
-

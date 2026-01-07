@@ -28,9 +28,7 @@ export function TextOutput({ text, onCopy }: TextOutputProps) {
       </div>
       <div className='custom-scrollbar flex-1 overflow-auto p-6'>
         {text ? (
-          <pre className='whitespace-pre-wrap break-words font-mono text-sm'>
-            {text}
-          </pre>
+          <pre className='font-mono text-sm break-words whitespace-pre-wrap'>{text}</pre>
         ) : (
           <div className='text-muted-foreground flex h-full items-center justify-center text-sm'>
             O texto extraído aparecerá aqui
@@ -40,7 +38,3 @@ export function TextOutput({ text, onCopy }: TextOutputProps) {
     </div>
   )
 }
-
-
-
-

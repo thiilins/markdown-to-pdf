@@ -276,3 +276,43 @@ export const FOOTER_POSITIONS = [
   { name: 'Centro', value: 'center', icon: AlignCenter },
   { name: 'Direita', value: 'right', icon: AlignRight },
 ]
+
+export const PRESET_SIZES: PresetSize[] = [
+  { id: 'custom', name: 'Custom', width: 800, height: 0, description: 'Tamanho personalizado' },
+  { id: 'facebook-post', name: 'Facebook Post', width: 1200, height: 630, description: '1:1.91' },
+  { id: 'facebook-story', name: 'Facebook Story', width: 1080, height: 1920, description: '9:16' },
+  { id: 'instagram-post', name: 'Instagram Post', width: 1080, height: 1080, description: '1:1' },
+  {
+    id: 'instagram-story',
+    name: 'Instagram Story',
+    width: 1080,
+    height: 1920,
+    description: '9:16',
+  },
+  { id: 'instagram-reel', name: 'Instagram Reel', width: 1080, height: 1920, description: '9:16' },
+  { id: 'tiktok', name: 'TikTok', width: 1080, height: 1920, description: '9:16' },
+  { id: 'linkedin-post', name: 'LinkedIn Post', width: 1200, height: 627, description: '1.91:1' },
+  {
+    id: 'linkedin-article',
+    name: 'LinkedIn Article',
+    width: 1200,
+    height: 627,
+    description: '1.91:1',
+  },
+  { id: 'twitter-post', name: 'Twitter/X Post', width: 1200, height: 675, description: '16:9' },
+  {
+    id: 'youtube-thumbnail',
+    name: 'YouTube Thumbnail',
+    width: 1280,
+    height: 720,
+    description: '16:9',
+  },
+  { id: 'a4', name: 'A4 Document', width: 1123, height: 1587, description: 'A4 (300 DPI)' },
+  {
+    id: 'a4-landscape',
+    name: 'A4 Landscape',
+    width: 1587,
+    height: 1123,
+    description: 'A4 Horizontal',
+  },
+]

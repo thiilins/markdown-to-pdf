@@ -164,7 +164,10 @@ export default function Base64ConverterView() {
       {/* Main Content */}
       <div className='flex flex-1 overflow-hidden'>
         {!isDesktop ? (
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'text' | 'image')} className='flex h-full w-full flex-col'>
+          <Tabs
+            value={activeTab}
+            onValueChange={(v) => setActiveTab(v as 'text' | 'image')}
+            className='flex h-full w-full flex-col'>
             <div className='bg-muted/30 shrink-0 border-b p-1'>
               <TabsList className='grid w-full grid-cols-2'>
                 <TabsTrigger value='text' className='gap-2'>
@@ -202,7 +205,10 @@ export default function Base64ConverterView() {
         ) : (
           <ResizablePanelGroup direction='horizontal' className='h-full'>
             <ResizablePanel defaultSize={50} minSize={30}>
-              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'text' | 'image')} className='flex h-full flex-col'>
+              <Tabs
+                value={activeTab}
+                onValueChange={(v) => setActiveTab(v as 'text' | 'image')}
+                className='flex h-full flex-col'>
                 <div className='bg-muted/30 shrink-0 border-b p-1'>
                   <TabsList className='grid w-full grid-cols-2'>
                     <TabsTrigger value='text' className='gap-2'>
@@ -262,7 +268,7 @@ export default function Base64ConverterView() {
 
             <ResizablePanel defaultSize={50} minSize={30}>
               {activeTab === 'text' ? (
-                <div className='flex h-full flex-col bg-background'>
+                <div className='bg-background flex h-full flex-col'>
                   <div className='bg-muted/30 flex shrink-0 items-center justify-between border-b px-4 py-2.5'>
                     <div className='flex items-center gap-2'>
                       <FileText className='text-muted-foreground h-4 w-4' />
@@ -291,7 +297,7 @@ export default function Base64ConverterView() {
                   </div>
                 </div>
               ) : (
-                <div className='flex h-full flex-col bg-background'>
+                <div className='bg-background flex h-full flex-col'>
                   <div className='bg-muted/30 flex shrink-0 items-center justify-between border-b px-4 py-2.5'>
                     <div className='flex items-center gap-2'>
                       <FileImage className='text-muted-foreground h-4 w-4' />
@@ -450,15 +456,11 @@ function ImageConverter({
         <div className='flex flex-col gap-2'>
           <div className='flex items-center justify-between'>
             <Label className='text-sm font-semibold'>Base64</Label>
-            <Button
-              variant='ghost'
-              size='sm'
-              onClick={onCopy}
-              className='h-7 gap-1.5 px-2 text-xs'>
+            <Button variant='ghost' size='sm' onClick={onCopy} className='h-7 gap-1.5 px-2 text-xs'>
               Copiar
             </Button>
           </div>
-          <div className='custom-scrollbar max-h-32 overflow-auto rounded-lg border bg-muted/30 p-3 font-mono text-xs break-all'>
+          <div className='custom-scrollbar bg-muted/30 max-h-32 overflow-auto rounded-lg border p-3 font-mono text-xs break-all'>
             {imageBase64}
           </div>
         </div>
@@ -466,4 +468,3 @@ function ImageConverter({
     </div>
   )
 }
-

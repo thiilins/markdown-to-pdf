@@ -180,4 +180,3 @@ export function fixJson(json: string): { fixed: string; changes: string[] } {
 
   return { fixed, changes }
 }
-

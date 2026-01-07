@@ -1,14 +1,22 @@
-Sim, a mudança é perfeitamente possível e, para um projeto de nível "Pro", o ideal é criar um **novo módulo ou uma lógica especializada** em vez de forçar o `Readability` a ler um e-commerce.
+Sim, a mudança é perfeitamente possível e, para um projeto de nível "Pro", o ideal é criar um **novo
+módulo ou uma lógica especializada** em vez de forçar o `Readability` a ler um e-commerce.
 
-O motivo técnico é que o `Readability` foi projetado para encontrar blocos de texto longo (artigos). Em um site como o Carrefour, ele pode ignorar o preço por ser um elemento curto ou "lixo visual". Para capturar preços e dados de produtos de forma estável sem usar Puppeteer, a técnica correta é extrair o **JSON-LD (Dados Estruturados)**.
+O motivo técnico é que o `Readability` foi projetado para encontrar blocos de texto longo (artigos).
+Em um site como o Carrefour, ele pode ignorar o preço por ser um elemento curto ou "lixo visual".
+Para capturar preços e dados de produtos de forma estável sem usar Puppeteer, a técnica correta é
+extrair o **JSON-LD (Dados Estruturados)**.
 
 ### Por que usar JSON-LD?
 
-Grandes e-commerces (Carrefour, Amazon, Magalu) inserem um bloco de script do tipo `application/ld+json` no HTML para que o Google entenda o preço, a moeda e a disponibilidade do produto. Isso é muito mais estável do que tentar adivinhar a classe CSS do preço, que muda constantemente.
+Grandes e-commerces (Carrefour, Amazon, Magalu) inserem um bloco de script do tipo
+`application/ld+json` no HTML para que o Google entenda o preço, a moeda e a disponibilidade do
+produto. Isso é muito mais estável do que tentar adivinhar a classe CSS do preço, que muda
+constantemente.
 
 ### Nova Server Action sugerida: `scrape-product.ts`
 
-Abaixo, apresento o código completo para uma nova Action focada em produtos, integrada à sua estrutura:
+Abaixo, apresento o código completo para uma nova Action focada em produtos, integrada à sua
+estrutura:
 
 ```typescript
 'use server'
@@ -43,7 +51,7 @@ export async function scrapeProductToMarkdown(url: string): Promise<ProductData>
         'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
         Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       },
-      next: { revalidate: 3600 }
+      next: { revalidate: 3600 },
     })
 
     if (!response.ok) {
@@ -64,12 +72,15 @@ export async function scrapeProductToMarkdown(url: string): Promise<ProductData>
         // O JSON-LD pode ser o objeto direto ou uma lista (@graph)
         const items = Array.isArray(json) ? json : json['@graph'] || [json]
 
-        const found = items.find((item: any) =>
-          item['@type'] === 'Product' || item['@type'] === 'http://schema.org/Product'
+        const found = items.find(
+          (item: any) =>
+            item['@type'] === 'Product' || item['@type'] === 'http://schema.org/Product',
         )
 
         if (found) productInfo = found
-      } catch (e) { /* ignore parse errors */ }
+      } catch (e) {
+        /* ignore parse errors */
+      }
     })
 
     if (!productInfo) {
@@ -110,21 +121,27 @@ ${description}
       currency,
       image,
       description,
-      markdown
+      markdown,
     }
-
   } catch (error) {
     console.error('Erro no Scraper de Produto:', error)
     return { success: false, error: 'Erro ao processar dados do produto.' }
   }
 }
-
 ```
 
 ### Roadmap de Implementação para Preços:
 
-1. **Detecção de Tipo:** No seu frontend (`web-to-markdown`), você pode verificar se a URL contém palavras como `/p` (comum no Carrefour/VTEX) ou se o primeiro scraper falhou em encontrar conteúdo longo, e então disparar o `scrapeProductToMarkdown`.
-2. **Fallback de API:** Se o preço não estiver no HTML estático (carregado via JS dinâmico), o seu servidor (Action) pode monitorar as requisições de rede para encontrar a API interna do Carrefour (geralmente uma URL como `carrefour.com.br/api/catalog_system/...`). Como você não usa Puppeteer, você precisaria mapear essas URLs manualmente para cada grande loja.
-3. **Conversão de Moeda:** No futuro, você pode adaptar o módulo para capturar o valor bruto e formatar usando o `Intl.NumberFormat` do JavaScript para exibir o preço bonitinho no PDF.
+1. **Detecção de Tipo:** No seu frontend (`web-to-markdown`), você pode verificar se a URL contém
+   palavras como `/p` (comum no Carrefour/VTEX) ou se o primeiro scraper falhou em encontrar
+   conteúdo longo, e então disparar o `scrapeProductToMarkdown`.
+2. **Fallback de API:** Se o preço não estiver no HTML estático (carregado via JS dinâmico), o seu
+   servidor (Action) pode monitorar as requisições de rede para encontrar a API interna do Carrefour
+   (geralmente uma URL como `carrefour.com.br/api/catalog_system/...`). Como você não usa Puppeteer,
+   você precisaria mapear essas URLs manualmente para cada grande loja.
+3. **Conversão de Moeda:** No futuro, você pode adaptar o módulo para capturar o valor bruto e
+   formatar usando o `Intl.NumberFormat` do JavaScript para exibir o preço bonitinho no PDF.
 
-**Dica "Pro":** O Carrefour e outros sites usam a plataforma VTEX. Quase todos os sites VTEX seguem exatamente esse padrão de JSON-LD. Ao implementar isso, você ganha suporte automático a centenas de outras lojas brasileiras.
+**Dica "Pro":** O Carrefour e outros sites usam a plataforma VTEX. Quase todos os sites VTEX seguem
+exatamente esse padrão de JSON-LD. Ao implementar isso, você ganha suporte automático a centenas de
+outras lojas brasileiras.

@@ -5,19 +5,55 @@
 
 import type { Plugin } from 'prettier'
 import { format } from 'prettier/standalone'
-// Imports estáticos para evitar problemas de minificação no build da Vercel
-// Usar import * as para garantir que os plugins sejam incluídos no bundle
-import * as babelPluginModule from 'prettier/plugins/babel'
-import * as estreePluginModule from 'prettier/plugins/estree'
-import * as htmlPluginModule from 'prettier/plugins/html'
-import * as postcssPluginModule from 'prettier/plugins/postcss'
 import { formatDialect, format as formatSql, mysql, postgresql } from 'sql-formatter'
 
-// Extrair plugins dos módulos (alguns podem exportar como default, outros como named)
-const babelPlugin = (babelPluginModule as any).default || babelPluginModule
-const estreePlugin = (estreePluginModule as any).default || estreePluginModule
-const htmlPlugin = (htmlPluginModule as any).default || htmlPluginModule
-const postcssPlugin = (postcssPluginModule as any).default || postcssPluginModule
+// Cache de plugins carregados dinamicamente para evitar problemas de minificação no Turbopack
+const pluginCache: Record<string, Plugin | any> = {}
+
+// Função auxiliar para carregar plugins de forma mais segura
+async function loadPlugin(modulePath: string, cacheKey: string): Promise<Plugin> {
+  if (pluginCache[cacheKey]) {
+    return pluginCache[cacheKey]
+  }
+
+  try {
+    // Usar import dinâmico com tratamento de erro mais robusto
+    // No Turbopack, pode ser necessário usar uma forma diferente de import
+    let module: any
+    try {
+      module = await import(modulePath)
+    } catch (importError) {
+      // Tentar com caminho alternativo se disponível
+      console.warn(`Tentativa de import falhou para ${modulePath}, tentando alternativa...`)
+      throw importError
+    }
+
+    // Tentar diferentes formas de acessar o plugin
+    let plugin = module.default
+    if (!plugin && typeof module === 'object') {
+      // Se default não existir, tentar pegar a primeira exportação
+      const keys = Object.keys(module)
+      if (keys.length > 0) {
+        plugin = module[keys[0]]
+      }
+    }
+    if (!plugin) {
+      plugin = module
+    }
+
+    if (!plugin || (typeof plugin !== 'object' && typeof plugin !== 'function')) {
+      throw new Error(`Plugin inválido em ${modulePath}`)
+    }
+
+    pluginCache[cacheKey] = plugin
+    return plugin
+  } catch (error: any) {
+    console.error(`Erro ao carregar plugin ${modulePath}:`, error)
+    // Limpar cache em caso de erro para permitir nova tentativa
+    delete pluginCache[cacheKey]
+    throw new Error(`Falha ao carregar plugin: ${modulePath}. ${error?.message || String(error)}`)
+  }
+}
 
 export type CodeType = 'html' | 'css' | 'javascript' | 'sql'
 export type SqlDialect = 'postgresql' | 'mysql' | 'standard'
@@ -41,37 +77,70 @@ export async function formatCode(
   try {
     switch (codeType) {
       case 'html':
-        // Usar plugin importado estaticamente para evitar problemas de minificação
+        if (!pluginCache.html) {
+          const htmlModule = await import('prettier/plugins/html')
+          pluginCache.html = htmlModule.default
+        }
         return await format(code, {
           parser: 'html',
-          plugins: [htmlPlugin],
+          plugins: [pluginCache.html],
           printWidth: 100,
           tabWidth: 2,
           useTabs: false,
         })
 
       case 'css':
-        // Usar plugin importado estaticamente para evitar problemas de minificação
+        if (!pluginCache.postcss) {
+          const postcssModule = await import('prettier/plugins/postcss')
+          pluginCache.postcss = postcssModule.default
+        }
         return await format(code, {
           parser: 'css',
-          plugins: [postcssPlugin],
+          plugins: [pluginCache.postcss],
           printWidth: 100,
           tabWidth: 2,
           useTabs: false,
         })
 
       case 'javascript':
-        // Usar plugins importados estaticamente para evitar problemas com Turbopack/Vercel
-        return await format(code, {
-          parser: 'babel',
-          plugins: [babelPlugin, estreePlugin],
-          printWidth: 100,
-          tabWidth: 2,
-          useTabs: false,
-          semi: true,
-          singleQuote: true,
-          trailingComma: 'es5',
-        })
+        try {
+          // Carregar plugins de forma mais robusta
+          const babelPlugin = await loadPlugin('prettier/plugins/babel', 'babel')
+          const estreePlugin = await loadPlugin('prettier/plugins/estree', 'estree')
+
+          return await format(code, {
+            parser: 'babel',
+            plugins: [babelPlugin, estreePlugin],
+            printWidth: 100,
+            tabWidth: 2,
+            useTabs: false,
+            semi: true,
+            singleQuote: true,
+            trailingComma: 'es5',
+          })
+        } catch (error: any) {
+          // Se houver erro, tentar recarregar os plugins
+          console.warn('Erro ao formatar JavaScript, tentando recarregar plugins:', error)
+          delete pluginCache.babel
+          delete pluginCache.estree
+
+          // Aguardar um pouco antes de tentar novamente
+          await new Promise((resolve) => setTimeout(resolve, 100))
+
+          const babelPlugin = await loadPlugin('prettier/plugins/babel', 'babel')
+          const estreePlugin = await loadPlugin('prettier/plugins/estree', 'estree')
+
+          return await format(code, {
+            parser: 'babel',
+            plugins: [babelPlugin, estreePlugin],
+            printWidth: 100,
+            tabWidth: 2,
+            useTabs: false,
+            semi: true,
+            singleQuote: true,
+            trailingComma: 'es5',
+          })
+        }
 
       case 'sql':
         if (sqlDialect === 'postgresql') {
@@ -230,7 +299,6 @@ export function validateCode(code: string, codeType: CodeType): ValidationResult
         break
 
       case 'sql':
-        // Validação de parênteses
         const sqlOpenParens = (code.match(/\(/g) || []).length
         const sqlCloseParens = (code.match(/\)/g) || []).length
 
@@ -240,73 +308,17 @@ export function validateCode(code: string, codeType: CodeType): ValidationResult
           )
         }
 
-        // Validação de vírgulas duplicadas ou sobrando
-        const trailingCommas = code.match(/,\s*,/g)
-        if (trailingCommas) {
-          errors.push(`Vírgulas duplicadas encontradas (${trailingCommas.length} ocorrência(s))`)
-        }
-
-        const commaBeforeFrom = code.match(/,\s*FROM\b/i)
-        if (commaBeforeFrom) {
-          errors.push('Vírgula antes de FROM encontrada. Remova a vírgula extra.')
-        }
-
-        // Validação de SELECT
         const hasSelect = code.match(/\bSELECT\b/i)
         const hasFrom = code.match(/\bFROM\b/i)
-
         if (hasSelect && !hasFrom) {
           warnings.push('SELECT encontrado sem FROM. Verifique a sintaxe da consulta')
         }
 
-        // Validação de SELECT *
         if (code.match(/\bSELECT\s+\*/i) && !code.match(/\bWHERE\b/i)) {
           warnings.push(
             'SELECT * sem WHERE pode retornar muitos resultados. Considere especificar colunas',
           )
         }
-
-        // Validação de JOIN sem ON
-        const hasJoin = code.match(/\b(INNER|LEFT|RIGHT|FULL)?\s*JOIN\b/i)
-        const hasOn = code.match(/\bON\b/i)
-        if (hasJoin && !hasOn) {
-          errors.push('JOIN encontrado sem cláusula ON. JOINs requerem condição ON')
-        }
-
-        // Validação de GROUP BY sem agregação
-        const hasGroupBy = code.match(/\bGROUP\s+BY\b/i)
-        const hasAggregation = code.match(/\b(COUNT|SUM|AVG|MAX|MIN)\s*\(/i)
-        if (hasGroupBy && !hasAggregation && hasSelect) {
-          warnings.push(
-            'GROUP BY encontrado sem funções de agregação. Verifique se é necessário',
-          )
-        }
-
-        // Validação de HAVING sem GROUP BY
-        const hasHaving = code.match(/\bHAVING\b/i)
-        if (hasHaving && !hasGroupBy) {
-          errors.push('HAVING encontrado sem GROUP BY. HAVING requer GROUP BY')
-        }
-
-        // Validação de ORDER BY sem SELECT
-        const hasOrderBy = code.match(/\bORDER\s+BY\b/i)
-        if (hasOrderBy && !hasSelect) {
-          warnings.push('ORDER BY encontrado sem SELECT. Verifique a sintaxe')
-        }
-
-        // Validação de aspas não fechadas em strings
-        const singleQuotes = (code.match(/'/g) || []).length
-        if (singleQuotes % 2 !== 0) {
-          errors.push('Aspas simples não fechadas encontradas')
-        }
-
-        // Validação de chaves desbalanceadas (para blocos PL/SQL)
-        const sqlOpenBraces = (code.match(/{/g) || []).length
-        const sqlCloseBraces = (code.match(/}/g) || []).length
-        if (sqlOpenBraces !== sqlCloseBraces) {
-          warnings.push(`Chaves desbalanceadas: ${sqlOpenBraces} abertas, ${sqlCloseBraces} fechadas`)
-        }
-
         break
     }
   } catch (error) {

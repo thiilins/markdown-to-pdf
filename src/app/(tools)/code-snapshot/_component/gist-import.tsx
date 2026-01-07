@@ -82,33 +82,33 @@ export function GistImport() {
       if (firstFile.language) {
         // Mapeia linguagem do GitHub para nosso formato
         const languageMap: Record<string, string> = {
-          'JavaScript': 'javascript',
-          'TypeScript': 'typescript',
-          'Python': 'python',
-          'Java': 'java',
+          JavaScript: 'javascript',
+          TypeScript: 'typescript',
+          Python: 'python',
+          Java: 'java',
           'C++': 'cpp',
-          'C': 'c',
+          C: 'c',
           'C#': 'csharp',
-          'Go': 'go',
-          'Rust': 'rust',
-          'Ruby': 'ruby',
-          'PHP': 'php',
-          'Swift': 'swift',
-          'Kotlin': 'kotlin',
-          'Dart': 'dart',
-          'HTML': 'html',
-          'CSS': 'css',
-          'SCSS': 'scss',
-          'JSON': 'json',
-          'YAML': 'yaml',
-          'Markdown': 'markdown',
-          'Shell': 'bash',
-          'PowerShell': 'powershell',
-          'SQL': 'sql',
-          'R': 'r',
-          'MATLAB': 'matlab',
-          'Dockerfile': 'dockerfile',
-          'Makefile': 'makefile',
+          Go: 'go',
+          Rust: 'rust',
+          Ruby: 'ruby',
+          PHP: 'php',
+          Swift: 'swift',
+          Kotlin: 'kotlin',
+          Dart: 'dart',
+          HTML: 'html',
+          CSS: 'css',
+          SCSS: 'scss',
+          JSON: 'json',
+          YAML: 'yaml',
+          Markdown: 'markdown',
+          Shell: 'bash',
+          PowerShell: 'powershell',
+          SQL: 'sql',
+          R: 'r',
+          MATLAB: 'matlab',
+          Dockerfile: 'dockerfile',
+          Makefile: 'makefile',
         }
 
         const mappedLanguage = languageMap[firstFile.language] || firstFile.language.toLowerCase()
@@ -125,15 +125,15 @@ export function GistImport() {
   }
 
   return (
-    <div className="space-y-2">
-      <Label htmlFor="gist-url">Importar do GitHub Gist</Label>
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <Github className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+    <div className='space-y-2'>
+      <Label htmlFor='gist-url'>Importar do GitHub Gist</Label>
+      <div className='flex gap-2'>
+        <div className='relative flex-1'>
+          <Github className='text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2' />
           <Input
-            id="gist-url"
-            type="text"
-            placeholder="Cole a URL ou ID do Gist (ex: https://gist.github.com/user/abc123...)"
+            id='gist-url'
+            type='text'
+            placeholder='Cole a URL ou ID do Gist (ex: https://gist.github.com/user/abc123...)'
             value={gistUrl}
             onChange={(e) => setGistUrl(e.target.value)}
             onKeyDown={(e) => {
@@ -141,14 +141,14 @@ export function GistImport() {
                 handleImport()
               }
             }}
-            className="pl-9"
+            className='pl-9'
             disabled={loading}
           />
         </div>
         <Button onClick={handleImport} disabled={loading || !gistUrl.trim()}>
           {loading ? (
             <>
-              <Loader2 className="mr-2 size-4 animate-spin" />
+              <Loader2 className='mr-2 size-4 animate-spin' />
               Importando...
             </>
           ) : (
@@ -156,10 +156,9 @@ export function GistImport() {
           )}
         </Button>
       </div>
-      <p className="text-muted-foreground text-xs">
+      <p className='text-muted-foreground text-xs'>
         Cole a URL completa do Gist ou apenas o ID. O primeiro arquivo será importado.
       </p>
     </div>
   )
 }
-

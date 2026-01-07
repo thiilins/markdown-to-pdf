@@ -5,6 +5,64 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto
 adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.5.5] - 2025-01-07
+
+### 🚀 Adicionado
+
+#### Code Snapshot - Line Highlighting Avançado
+
+- **Destaque de linhas customizável:**
+  - Clique nos números de linha para destacar/remover destaque
+  - Cor do highlight personalizável (8 cores pré-definidas)
+  - Opacidade ajustável (10% a 50%) para facilitar leitura
+  - Destaque visual completo na linha (fundo, borda lateral, sombra)
+  - Lista de linhas destacadas com opção de limpar todas
+
+#### Code Snapshot - Anotações Melhoradas
+
+- **Escolha de ícones para anotações:**
+  - 10 ícones disponíveis: Nota, Info, Alerta, Check, Estrela, Coração, Ideia, Bug, Código, Rápido
+  
+- **Drag and drop para reposicionar:**
+  - Clique e arraste na anotação para mover livremente
+  - Animação suave com Framer Motion
+  - Cursor visual indica modo de arraste
+
+- **Visual modernizado do editor de anotações:**
+  - Layout inspirado no padrão de modais do projeto
+  - Header com ícone e gradiente
+  - Organização em grid para ícones e cores
+  - Footer com seletor de estilo e ações
+
+### 🔧 Melhorado
+
+- **Anotações:** Remoção do grip visual desnecessário - arraste direto na nota
+- **Anotações:** Atualização em tempo real das propriedades (sem necessidade de salvar)
+- **Highlight:** Integração com diff mode - highlights só aplicam em linhas unchanged
+
+## [0.5.4] - 2025-01-XX
+
+### 🔧 Melhorado
+
+#### Code Snapshot - Simplificação do Contexto
+
+- **Refatoração do `CodeSnapshotContext`:**
+  - Removidas funções de URL sharing do contexto (`getShareableUrl`, `copyShareableUrl`)
+  - Lógica de compartilhamento movida para `snapshot-controls.tsx` onde é realmente usada
+  - Contexto agora focado apenas no estado essencial (code, config)
+  - Mantida compatibilidade total com outras ferramentas que usam `setCode` (ex: gist-explorer)
+
+- **Limpeza de código:**
+  - Removido hook `use-url-state.ts` não utilizado
+  - Removidos imports não utilizados do contexto
+  - Corrigidos imports de `PRESET_SIZES` (agora vem de `snap-code.ts`)
+  - Removidos imports de tipos globais desnecessários
+
+### 🐛 Corrigido
+
+- **Code Snapshot:** Corrigido erro de build ao importar `PRESET_SIZES` do contexto
+- **Code Snapshot:** Corrigido erro de TypeScript ao importar tipos globais de `.d.ts`
+
 ## [0.5.3] - 2025-01-XX
 
 ### 🚀 Adicionado
@@ -31,14 +89,16 @@ adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ### 🐛 Corrigido
 
-- **Formatters (HTML/CSS/JavaScript/SQL):** Corrigido erro de minificação na Vercel (`Kr is not defined`)
+- **Formatters (HTML/CSS/JavaScript/SQL):** Corrigido erro de minificação na Vercel
+  (`Kr is not defined`)
   - Convertidos imports dinâmicos dos plugins do Prettier para imports estáticos
   - Resolvido problema de tree-shaking que causava referências não definidas no build de produção
   - Melhorada compatibilidade com diferentes formas de exportação dos plugins
 
 - **Code Snapshot:** Corrigido erro de importação duplicada do componente `Separator`
 - **Code Snapshot:** Corrigido erro de tipo TypeScript ao aplicar estado da URL
-- **Code Snapshot:** Ajustado hook `useUrlState` para evitar necessidade de Suspense boundary (usa `window.location` diretamente)
+- **Code Snapshot:** Ajustado hook `useUrlState` para evitar necessidade de Suspense boundary (usa
+  `window.location` diretamente)
 
 ### 🔧 Melhorado
 

@@ -8,7 +8,10 @@ import * as themes from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useCodeSnapshot } from '@/shared/contexts/codeSnapshotContext'
+import { Change, diffLines } from 'diff'
+import { CodeAnnotationComponent } from './code-annotation'
 import { PreviewCustomLayout } from './custom-layout'
+import { CustomLineNumbers } from './custom-line-numbers'
 import {
   MAX_ZOOM,
   MIN_ZOOM,
@@ -16,15 +19,20 @@ import {
   calculateFontSize,
   calculateInitialZoom as calculateInitialZoomUtil,
   generateContentConfig,
+  getThemeBackground,
+  getThemeTextColor,
   onCopyImage,
   onDownload,
-  getThemeBackground,
 } from './utils'
 import { ValidateFontComponent } from './validate-font-component'
-import { isDiffCode, parseDiff, type ParsedDiff, type DiffLine } from './diff-utils'
-import { LineCommentPopover } from './line-comment-popover'
-import { CodeAnnotationComponent } from './code-annotation'
-import type { CodeAnnotation } from './types'
+
+// Helper para converter hex para rgba
+const hexToRgba = (hex: string, alpha: number): string => {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
 
 interface SnapshotPreviewProps {
   previewContainerRef?: React.RefObject<HTMLDivElement | null>
@@ -55,6 +63,10 @@ export function SnapshotPreview({
     [config],
   )
 
+  // Obtém a cor do texto do tema atual
+  const themeTextColor = useMemo(() => getThemeTextColor(config.theme), [config.theme])
+  const themeBackground = useMemo(() => getThemeBackground(config.theme), [config.theme])
+
   const calculateInitialZoom = useCallback(
     (forceReset = false) => {
       if (typeof window === 'undefined') return 1
@@ -77,41 +89,81 @@ export function SnapshotPreview({
   // Posição agora representa o offset de arrasto (pan)
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [calculatedFontSize, setCalculatedFontSize] = useState(config.fontSize)
-  const [selectedLineForComment, setSelectedLineForComment] = useState<number | null>(null)
 
-  // Detecção automática de diff
-  const parsedDiff = useMemo(() => {
-    if (!code) return { isDiff: false, lines: [] }
-    return parseDiff(code)
-  }, [code])
+  // Calcula diff entre original e modificado quando diffMode está ativo
+  const calculatedDiff = useMemo(() => {
+    if (!config.diffMode) return null
 
-  // Atualiza diffMode automaticamente quando detecta diff
-  useEffect(() => {
-    if (parsedDiff.isDiff !== config.diffMode) {
-      updateConfig('diffMode', parsedDiff.isDiff)
-    }
-  }, [parsedDiff.isDiff, config.diffMode, updateConfig])
+    const original = config.diffOriginalCode || ''
+    const modified = code || ''
 
-  // Handlers para line highlights e comentários
-  const handleLineCommentChange = useCallback(
-    (lineNumber: number, comment: string) => {
-      const newHighlights = { ...config.lineHighlights }
-      newHighlights[lineNumber] = { ...newHighlights[lineNumber], comment, highlighted: true }
-      updateConfig('lineHighlights', newHighlights)
+    // Calcula as diferenças linha a linha
+    const changes = diffLines(original, modified)
+
+    // Gera linhas com tipos para colorização
+    const lines: Array<{ content: string; type: 'added' | 'removed' | 'unchanged' }> = []
+
+    changes.forEach((change: Change) => {
+      const changeLines = change.value.split('\n')
+      // Remove linha vazia no final se existir
+      if (changeLines[changeLines.length - 1] === '') {
+        changeLines.pop()
+      }
+
+      changeLines.forEach((line) => {
+        if (change.added) {
+          lines.push({ content: line, type: 'added' })
+        } else if (change.removed) {
+          lines.push({ content: line, type: 'removed' })
+        } else {
+          lines.push({ content: line, type: 'unchanged' })
+        }
+      })
+    })
+
+    return lines
+  }, [config.diffMode, config.diffOriginalCode, code])
+
+  // Cor e opacidade do highlight
+  const highlightColor = config.highlightColor || '#facc15'
+  const highlightOpacity = config.highlightOpacity || 0.25
+
+  // Handler para toggle de linha destacada
+  const handleToggleLineHighlight = useCallback(
+    (lineNumber: number) => {
+      const currentHighlights = config.highlightedLines || []
+      const isHighlighted = currentHighlights.includes(lineNumber)
+
+      if (isHighlighted) {
+        // Remove o destaque
+        updateConfig(
+          'highlightedLines',
+          currentHighlights.filter((l) => l !== lineNumber),
+        )
+      } else {
+        // Adiciona o destaque
+        updateConfig('highlightedLines', [...currentHighlights, lineNumber])
+      }
     },
-    [config.lineHighlights, updateConfig],
+    [config.highlightedLines, updateConfig],
   )
 
   // Handlers para annotations
   const handleAddAnnotation = useCallback(
     (type: 'arrow' | 'note', x: number, y: number, targetLine?: number) => {
+      // x e y já vêm como coordenadas relativas ao container principal (ref.current)
+      // já considerando zoom e padding do handleCodeClick
       const newAnnotation: CodeAnnotation = {
-        id: `annotation-${Date.now()}`,
+        id: `annotation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         type,
-        x: x - (ref.current?.offsetLeft || 0),
-        y: y - (ref.current?.offsetTop || 0),
+        x,
+        y,
         targetLine,
         color: '#fbbf24',
+        text: type === 'note' ? '' : undefined,
+        fontSize: 14,
+        opacity: 1,
+        style: 'card',
       }
       updateConfig('annotations', [...(config.annotations || []), newAnnotation])
     },
@@ -130,7 +182,9 @@ export function SnapshotPreview({
 
   const handleDeleteAnnotation = useCallback(
     (id: string) => {
-      const filteredAnnotations = (config.annotations || []).filter((ann: CodeAnnotation) => ann.id !== id)
+      const filteredAnnotations = (config.annotations || []).filter(
+        (ann: CodeAnnotation) => ann.id !== id,
+      )
       updateConfig('annotations', filteredAnnotations)
     },
     [config.annotations, updateConfig],
@@ -139,117 +193,130 @@ export function SnapshotPreview({
   // Handler para clique no código para adicionar anotação
   const handleCodeClick = useCallback(
     (e: React.MouseEvent) => {
+      // Só funciona se o modo de anotação estiver ativo
       if (!config.annotationMode) return
+
       e.stopPropagation()
-      const rect = codeContentRef.current?.getBoundingClientRect()
-      if (!rect) return
+      e.preventDefault()
 
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
+      const containerRect = ref.current?.getBoundingClientRect()
+      const codeRect = codeContentRef.current?.getBoundingClientRect()
 
-      // Calcular linha aproximada baseado na posição Y
+      if (!containerRect || !codeRect) return
+
+      // Posição do clique relativa ao viewport
+      const clickX = e.clientX
+      const clickY = e.clientY
+
+      // Posição relativa ao container principal (ref), considerando o zoom
+      // As anotações são renderizadas dentro do container principal com position: relative
+      // Então precisamos coordenadas relativas a ele, já considerando o zoom
+      const relativeX = (clickX - containerRect.left) / zoom
+      const relativeY = (clickY - containerRect.top) / zoom
+
+      // Calcular linha aproximada baseado na posição Y dentro do código
+      const codeRelativeY = clickY - codeRect.top
+      const paddingTop = 24 // padding do código (1.5rem)
       const lineHeight = calculatedFontSize * 1.6
-      const lineNumber = Math.floor(y / lineHeight) + 1
+      const lineNumber = Math.max(1, Math.floor((codeRelativeY - paddingTop) / lineHeight) + 1)
 
-      handleAddAnnotation('note', x, y, lineNumber)
+      // Adiciona anotação na posição clicada (usando coordenadas relativas ao container principal)
+      handleAddAnnotation('note', relativeX, relativeY, lineNumber)
     },
-    [config.annotationMode, calculatedFontSize, handleAddAnnotation],
+    [config.annotationMode, calculatedFontSize, handleAddAnnotation, zoom],
   )
 
-  const handleRemoveComment = useCallback(
-    (lineNumber: number) => {
-      const newHighlights = { ...config.lineHighlights }
-      delete newHighlights[lineNumber]
-      updateConfig('lineHighlights', newHighlights)
-    },
-    [config.lineHighlights, updateConfig],
-  )
-
-  // Prepara código para syntax highlighting (remove marcadores de diff se necessário)
+  // Prepara código para syntax highlighting
   const codeForHighlighting = useMemo(() => {
-    if (config.diffMode && parsedDiff.isDiff) {
-      // Remove marcadores de diff mas mantém estrutura para mapeamento
-      return parsedDiff.lines
-        .filter((line) => line.type !== 'header')
-        .map((line) => line.content)
-        .join('\n')
+    if (config.diffMode && calculatedDiff) {
+      // Junta todas as linhas do diff para exibição
+      return calculatedDiff.map((line) => line.content).join('\n')
     }
     return code
-  }, [code, config.diffMode, parsedDiff])
+  }, [code, config.diffMode, calculatedDiff])
 
-  // Mapeamento de linhas do código processado para linhas do diff original
-  const lineMapping = useMemo(() => {
-    if (!config.diffMode || !parsedDiff.isDiff) return {}
-    const mapping: Record<number, DiffLine> = {}
-    let processedLineNumber = 0
-    parsedDiff.lines.forEach((line) => {
-      if (line.type !== 'header') {
-        processedLineNumber++
-        mapping[processedLineNumber] = line
-      }
+  // Conta o número de linhas do código
+  const totalLines = useMemo(() => {
+    return (codeForHighlighting || '').split('\n').length
+  }, [codeForHighlighting])
+
+  // Handler para clique no número da linha (toggle highlight)
+  const handleLineNumberClick = useCallback(
+    (lineNumber: number) => {
+      if (config.annotationMode) return
+      handleToggleLineHighlight(lineNumber)
+    },
+    [config.annotationMode, handleToggleLineHighlight],
+  )
+
+  // Mapeamento de linhas para diff
+  const diffLineMapping = useMemo(() => {
+    if (!config.diffMode || !calculatedDiff) return {}
+    const mapping: Record<number, { type: 'added' | 'removed' | 'unchanged' }> = {}
+    calculatedDiff.forEach((line, index) => {
+      mapping[index + 1] = { type: line.type }
     })
     return mapping
-  }, [config.diffMode, parsedDiff])
+  }, [config.diffMode, calculatedDiff])
 
   // Prepara lineProps para SyntaxHighlighter (estilos de diff e highlights)
+  // A função recebe um objeto com lineNumber e deve retornar props para o span da linha
   const getLineProps = useCallback(
-    (lineNumber: number) => {
-      // Mapeia linha processada para linha original do diff
-      const diffLine = config.diffMode && parsedDiff.isDiff
-        ? lineMapping[lineNumber]
-        : null
+    (lineNumberObj: number | { lineNumber: number }) => {
+      // react-syntax-highlighter pode passar número direto ou objeto
+      const lineNumber =
+        typeof lineNumberObj === 'number' ? lineNumberObj : lineNumberObj.lineNumber
 
-      const lineProps: any = {
-        style: {
-          display: 'block',
-          width: '100%',
-          cursor: config.diffMode || config.lineHighlights[lineNumber] ? 'pointer' : 'default',
-          position: 'relative' as const,
-        },
-        onClick: (e: React.MouseEvent) => {
-          e.stopPropagation()
-          setSelectedLineForComment(lineNumber)
-        },
-        'data-line-number': lineNumber.toString(),
+      // Pega o tipo da linha do diff calculado
+      const diffLine = config.diffMode ? diffLineMapping[lineNumber] : null
+      const isHighlighted = (config.highlightedLines || []).includes(lineNumber)
+
+      const style: React.CSSProperties = {
+        display: 'block',
+        width: '100%',
+        position: 'relative',
       }
 
-      // Estilos de diff
-      if (config.diffMode && parsedDiff.isDiff && diffLine) {
+      // Estilos de diff baseado no calculatedDiff
+      if (config.diffMode && diffLine) {
         if (diffLine.type === 'added') {
-          lineProps.style.backgroundColor = 'rgba(46, 160, 67, 0.15)'
-          lineProps.style.borderLeft = '3px solid rgba(46, 160, 67, 0.8)'
-          lineProps.style.paddingLeft = 'calc(1.5rem - 3px)'
+          style.backgroundColor = 'rgba(46, 160, 67, 0.25)'
+          style.borderLeft = '4px solid #2ea043'
+          style.paddingLeft = 'calc(1.5rem - 4px)'
+          style.marginLeft = '-1.5rem'
+          style.marginRight = '-1.5rem'
+          style.paddingRight = '1.5rem'
         } else if (diffLine.type === 'removed') {
-          lineProps.style.backgroundColor = 'rgba(248, 81, 73, 0.15)'
-          lineProps.style.borderLeft = '3px solid rgba(248, 81, 73, 0.8)'
-          lineProps.style.paddingLeft = 'calc(1.5rem - 3px)'
-          lineProps.style.opacity = '0.7'
-        } else if (diffLine.type === 'header') {
-          lineProps.style.backgroundColor = 'rgba(106, 115, 125, 0.1)'
-          lineProps.style.fontWeight = 'bold'
-          lineProps.style.color = '#8b949e'
+          style.backgroundColor = 'rgba(248, 81, 73, 0.25)'
+          style.borderLeft = '4px solid #f85149'
+          style.paddingLeft = 'calc(1.5rem - 4px)'
+          style.marginLeft = '-1.5rem'
+          style.marginRight = '-1.5rem'
+          style.paddingRight = '1.5rem'
+          style.textDecoration = 'line-through'
+          style.opacity = 0.7
         }
+        // unchanged não precisa de estilo especial
       }
 
-      // Estilos de highlight
-      const highlight = config.lineHighlights[lineNumber]
-      if (highlight?.highlighted) {
-        lineProps.style.backgroundColor = lineProps.style.backgroundColor
-          ? lineProps.style.backgroundColor
-          : 'rgba(255, 235, 59, 0.2)'
-        lineProps.style.borderLeft = lineProps.style.borderLeft || '3px solid rgba(255, 235, 59, 0.8)'
-        lineProps.style.paddingLeft = lineProps.style.paddingLeft || 'calc(1.5rem - 3px)'
+      // Estilos de highlight (linha destacada) - destaca a linha TODA
+      // Só aplica se não estiver em diff mode ou se a linha for unchanged
+      if (isHighlighted && (!config.diffMode || !diffLine || diffLine.type === 'unchanged')) {
+        style.backgroundColor = hexToRgba(highlightColor, highlightOpacity)
+        style.borderLeft = `4px solid ${highlightColor}`
+        style.paddingLeft = 'calc(1.5rem - 4px)'
+        style.marginLeft = '-1.5rem'
+        style.marginRight = '-1.5rem'
+        style.paddingRight = '1.5rem'
+        style.boxShadow = `inset 0 1px 0 ${hexToRgba(highlightColor, highlightOpacity * 0.6)}, inset 0 -1px 0 ${hexToRgba(highlightColor, highlightOpacity * 0.6)}`
       }
 
-      // Adiciona indicador visual de comentário
-      if (highlight?.comment) {
-        lineProps.style.position = 'relative'
-        lineProps['data-has-comment'] = 'true'
+      return {
+        style,
+        'data-line-number': lineNumber?.toString(),
       }
-
-      return lineProps
     },
-    [config.diffMode, config.lineHighlights, parsedDiff, lineMapping],
+    [config.diffMode, config.highlightedLines, diffLineMapping, highlightColor, highlightOpacity],
   )
 
   const adjustPosition = useCallback(() => {
@@ -428,9 +495,6 @@ export function SnapshotPreview({
 
   const cursorStyle = isDragging ? 'cursor-grabbing' : 'cursor-grab'
 
-  // Obtém o background do tema atual
-  const themeBackground = useMemo(() => getThemeBackground(config.theme), [config.theme])
-
   return (
     <div
       className='relative flex h-full w-full min-w-[40dvw] flex-col bg-zinc-50 dark:bg-zinc-950'
@@ -534,6 +598,7 @@ export function SnapshotPreview({
           <div
             ref={ref}
             style={{
+              position: 'relative',
               background: config.background,
               padding: `${config.padding}px`,
               borderRadius: `${config.borderRadius}px`,
@@ -573,9 +638,9 @@ export function SnapshotPreview({
                 transition: 'background-color 0.3s ease',
               }}>
               <PreviewCustomLayout>
-                  <div
+                <div
                   ref={codeContentRef}
-                  className='code-snapshot-syntax-wrapper relative'
+                  className='code-snapshot-syntax-wrapper relative flex h-full w-full flex-col'
                   style={{
                     fontSize: `${calculatedFontSize}px`,
                     fontFamily: `"${config.fontFamily}", 'Courier New', Courier, monospace`,
@@ -584,8 +649,17 @@ export function SnapshotPreview({
                       availableCodeHeight > 0 ? `${availableCodeHeight - headerHeight}px` : 'none',
                     flex: availableCodeHeight > 0 ? '1 1 0' : '0 0 auto',
                     minHeight: 0,
+                    width: '100%',
+                    height: '100%',
+                    cursor: config.annotationMode ? 'crosshair' : 'default',
                   }}
-                  onClick={config.liveEditMode ? undefined : handleCodeClick}>
+                  onClick={handleCodeClick}
+                  onMouseDown={(e) => {
+                    // Previne seleção de texto quando em modo de anotação
+                    if (config.annotationMode) {
+                      e.preventDefault()
+                    }
+                  }}>
                   <style>{`
                   .code-snapshot-syntax-wrapper pre,
                   .code-snapshot-syntax-wrapper code,
@@ -597,136 +671,190 @@ export function SnapshotPreview({
                     font-size: ${calculatedFontSize}px !important;
                   }
                 `}</style>
-                  {config.liveEditMode ? (
-                    <textarea
-                      value={code}
-                      onChange={(e) => setCode(e.target.value)}
-                      className='w-full h-full resize-none border-none outline-none bg-transparent text-inherit font-mono'
-                      style={{
-                        fontSize: `${calculatedFontSize}px`,
-                        fontFamily: `"${config.fontFamily}", 'Courier New', Courier, monospace`,
-                        lineHeight: '1.6',
-                        padding: '1.5rem',
-                        color: 'inherit',
-                        whiteSpace: 'pre-wrap',
-                        wordWrap: 'break-word',
-                        overflowWrap: 'break-word',
-                        overflow: availableCodeHeight > 0 ? 'auto' : 'visible',
-                        maxHeight:
-                          availableCodeHeight > 0
-                            ? `${availableCodeHeight - headerHeight}px`
-                            : 'none',
-                      }}
-                      spellCheck={false}
-                    />
-                  ) : (
-                    <SyntaxHighlighter
-                      language={config.language}
-                      style={(themes as any)[config.theme] || themes.vscDarkPlus}
-                      customStyle={{
-                        margin: 0,
-                        padding: '1.5rem',
-                        background: 'transparent',
-                        fontSize: `${calculatedFontSize}px`,
-                        fontFamily: `"${config.fontFamily}", 'Courier New', Courier, monospace`,
-                        lineHeight: '1.6',
-                        whiteSpace: 'pre-wrap',
-                        wordWrap: 'break-word',
-                        overflowWrap: 'break-word',
-                        wordBreak: 'break-word',
-                        overflow: availableCodeHeight > 0 ? 'hidden' : 'visible',
-                        maxWidth: '100%',
-                        width: '100%',
-                        maxHeight:
-                          availableCodeHeight > 0
-                            ? `${availableCodeHeight - headerHeight}px`
-                            : 'none',
-                      }}
-                      wrapLines={true}
-                      wrapLongLines={true}
-                      PreTag={({ children, ...props }: any) => (
-                        <pre
-                          {...props}
+                  {/* Wrapper com números de linha customizados */}
+                  <div className='relative flex'>
+                    {/* Números de linha customizados */}
+                    {config.showLineNumbers && (
+                      <CustomLineNumbers
+                        totalLines={totalLines}
+                        fontSize={calculatedFontSize}
+                        fontFamily={config.fontFamily}
+                        highlightedLines={config.highlightedLines || []}
+                        highlightColor={highlightColor}
+                        highlightOpacity={highlightOpacity}
+                        onLineClick={handleLineNumberClick}
+                        disabled={config.annotationMode}
+                      />
+                    )}
+
+                    {/* Código com syntax highlighting */}
+                    <div className='min-w-0 flex-1'>
+                      {config.diffMode && calculatedDiff ? (
+                        // Modo Diff: renderiza linha por linha com estilos
+                        <div
                           style={{
-                            ...props.style,
-                            fontSize: `${calculatedFontSize}px !important`,
-                            fontFamily: `"${config.fontFamily}", 'Courier New', Courier, monospace !important`,
+                            margin: 0,
+                            padding: '1.5rem',
+                            background: 'transparent',
+                            fontSize: `${calculatedFontSize}px`,
+                            fontFamily: `"${config.fontFamily}", 'Courier New', Courier, monospace`,
+                            lineHeight: '1.6',
+                            whiteSpace: 'pre-wrap',
+                            wordWrap: 'break-word',
                             overflow: availableCodeHeight > 0 ? 'hidden' : 'visible',
                             maxHeight:
                               availableCodeHeight > 0
                                 ? `${availableCodeHeight - headerHeight}px`
                                 : 'none',
                           }}>
-                          {children}
-                        </pre>
-                      )}
-                      CodeTag={({ children, ...props }: any) => (
-                        <code
-                          {...props}
-                          style={{
-                            ...props.style,
-                            fontSize: `${calculatedFontSize}px !important`,
-                            fontFamily: `"${config.fontFamily}", 'Courier New', Courier, monospace !important`,
-                          }}>
-                          {children}
-                        </code>
-                      )}
-                      showLineNumbers={config.showLineNumbers}
-                      lineNumberStyle={{
-                        minWidth: '2.5em',
-                        paddingRight: '1em',
-                        color: '#6e7681',
-                        textAlign: 'right',
-                        fontSize: `${calculatedFontSize}px`,
-                        fontFamily: `"${config.fontFamily}", 'Courier New', Courier, monospace`,
-                        cursor: config.diffMode || Object.keys(config.lineHighlights).length > 0 ? 'pointer' : 'default',
-                      }}
-                      lineProps={getLineProps}
-                      lineNumberProps={(lineNumber: number) => ({
-                        onClick: () => {
-                          setSelectedLineForComment(lineNumber)
-                        },
-                        style: {
-                          cursor: config.diffMode || config.lineHighlights[lineNumber] ? 'pointer' : 'default',
-                        },
-                      })}>
-                      {codeForHighlighting || ' '}
-                    </SyntaxHighlighter>
-                  )}
-                  {/* Overlay para comentários */}
-                  {selectedLineForComment !== null && (
-                    <div
-                      className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'
-                      onClick={() => setSelectedLineForComment(null)}>
-                      <div onClick={(e) => e.stopPropagation()}>
-                        <LineCommentPopover
-                          lineNumber={selectedLineForComment}
-                          comment={config.lineHighlights[selectedLineForComment]?.comment}
-                          onCommentChange={(lineNum, comment) => {
-                            handleLineCommentChange(lineNum, comment)
-                          }}
-                          onRemoveComment={(lineNum) => {
-                            handleRemoveComment(lineNum)
-                          }}
-                          onClose={() => setSelectedLineForComment(null)}
-                        />
-                      </div>
-                    </div>
-                  )}
+                          {calculatedDiff.map((line, index) => {
+                            const lineNumber = index + 1
+                            const isHighlighted = (config.highlightedLines || []).includes(
+                              lineNumber,
+                            )
 
-                  {/* Anotações flutuantes */}
-                  {!config.liveEditMode && (config.annotations || []).map((annotation: CodeAnnotation) => (
-                    <CodeAnnotationComponent
-                      key={annotation.id}
-                      annotation={annotation}
-                      onUpdate={handleUpdateAnnotation}
-                      onDelete={handleDeleteAnnotation}
-                      scale={zoom}
-                    />
-                  ))}
+                            let lineStyle: React.CSSProperties = {
+                              display: 'block',
+                              width: '100%',
+                              position: 'relative',
+                            }
+
+                            // Estilos de diff
+                            if (line.type === 'added') {
+                              lineStyle.backgroundColor = 'rgba(46, 160, 67, 0.25)'
+                              lineStyle.borderLeft = '4px solid #2ea043'
+                              lineStyle.paddingLeft = 'calc(1.5rem - 4px)'
+                              lineStyle.marginLeft = '-1.5rem'
+                              lineStyle.marginRight = '-1.5rem'
+                              lineStyle.paddingRight = '1.5rem'
+                            } else if (line.type === 'removed') {
+                              lineStyle.backgroundColor = 'rgba(248, 81, 73, 0.25)'
+                              lineStyle.borderLeft = '4px solid #f85149'
+                              lineStyle.paddingLeft = 'calc(1.5rem - 4px)'
+                              lineStyle.marginLeft = '-1.5rem'
+                              lineStyle.marginRight = '-1.5rem'
+                              lineStyle.paddingRight = '1.5rem'
+                              lineStyle.textDecoration = 'line-through'
+                              lineStyle.opacity = 0.7
+                            }
+
+                            // Highlight sobrepõe apenas linhas unchanged
+                            if (isHighlighted && line.type === 'unchanged') {
+                              lineStyle.backgroundColor = hexToRgba(
+                                highlightColor,
+                                highlightOpacity,
+                              )
+                              lineStyle.borderLeft = `4px solid ${highlightColor}`
+                              lineStyle.paddingLeft = 'calc(1.5rem - 4px)'
+                              lineStyle.marginLeft = '-1.5rem'
+                              lineStyle.marginRight = '-1.5rem'
+                              lineStyle.paddingRight = '1.5rem'
+                            }
+
+                            return (
+                              <SyntaxHighlighter
+                                key={index}
+                                language={config.language}
+                                style={(themes as any)[config.theme] || themes.vscDarkPlus}
+                                customStyle={{
+                                  margin: 0,
+                                  padding: 0,
+                                  background: 'transparent',
+                                  fontSize: `${calculatedFontSize}px`,
+                                  fontFamily: `"${config.fontFamily}", 'Courier New', Courier, monospace`,
+                                  lineHeight: '1.6',
+                                  ...lineStyle,
+                                }}
+                                PreTag='span'
+                                CodeTag='span'>
+                                {line.content || ' '}
+                              </SyntaxHighlighter>
+                            )
+                          })}
+                        </div>
+                      ) : (
+                        // Modo Normal: renderiza linha por linha para suportar highlights
+                        <div
+                          style={{
+                            margin: 0,
+                            padding: '1.5rem',
+                            background: 'transparent',
+                            fontSize: `${calculatedFontSize}px`,
+                            fontFamily: `"${config.fontFamily}", 'Courier New', Courier, monospace`,
+                            lineHeight: '1.6',
+                            whiteSpace: 'pre-wrap',
+                            wordWrap: 'break-word',
+                            overflow: availableCodeHeight > 0 ? 'hidden' : 'visible',
+                            maxHeight:
+                              availableCodeHeight > 0
+                                ? `${availableCodeHeight - headerHeight}px`
+                                : 'none',
+                            pointerEvents: config.annotationMode ? 'none' : 'auto',
+                          }}>
+                          {(codeForHighlighting || ' ').split('\n').map((line, index) => {
+                            const lineNumber = index + 1
+                            const isHighlighted = (config.highlightedLines || []).includes(
+                              lineNumber,
+                            )
+
+                            let lineStyle: React.CSSProperties = {
+                              display: 'block',
+                              width: '100%',
+                              position: 'relative',
+                            }
+
+                            // Estilos de highlight (linha destacada) - destaca a linha TODA
+                            if (isHighlighted) {
+                              lineStyle.backgroundColor = hexToRgba(
+                                highlightColor,
+                                highlightOpacity,
+                              )
+                              lineStyle.borderLeft = `4px solid ${highlightColor}`
+                              lineStyle.paddingLeft = 'calc(1.5rem - 4px)'
+                              lineStyle.marginLeft = '-1.5rem'
+                              lineStyle.marginRight = '-1.5rem'
+                              lineStyle.paddingRight = '1.5rem'
+                              lineStyle.boxShadow = `inset 0 1px 0 ${hexToRgba(highlightColor, highlightOpacity * 0.6)}, inset 0 -1px 0 ${hexToRgba(highlightColor, highlightOpacity * 0.6)}`
+                            }
+
+                            return (
+                              <SyntaxHighlighter
+                                key={index}
+                                language={config.language}
+                                style={(themes as any)[config.theme] || themes.vscDarkPlus}
+                                customStyle={{
+                                  margin: 0,
+                                  padding: 0,
+                                  background: 'transparent',
+                                  fontSize: `${calculatedFontSize}px`,
+                                  fontFamily: `"${config.fontFamily}", 'Courier New', Courier, monospace`,
+                                  lineHeight: '1.6',
+                                  ...lineStyle,
+                                }}
+                                PreTag='span'
+                                CodeTag='span'>
+                                {line || ' '}
+                              </SyntaxHighlighter>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </PreviewCustomLayout>
             </div>
+
+            {/* Anotações flutuantes - renderizadas no container principal para posicionamento correto */}
+            {(config.annotations || []).map((annotation: CodeAnnotation) => (
+              <CodeAnnotationComponent
+                key={annotation.id}
+                annotation={annotation}
+                onUpdate={handleUpdateAnnotation}
+                onDelete={handleDeleteAnnotation}
+                scale={zoom}
+              />
+            ))}
           </div>
         </div>
       </div>

@@ -27,9 +27,9 @@ export function CodeFormatterOutput({
 }: CodeFormatterOutputProps) {
   return (
     <div className='flex h-full flex-col'>
-      <div className='bg-muted/30 border-b shrink-0 flex items-center justify-between px-4 py-2.5'>
+      <div className='bg-muted/30 flex shrink-0 items-center justify-between border-b px-4 py-2.5'>
         <div className='flex items-center gap-2'>
-          <FileCode className='h-4 w-4 text-muted-foreground' />
+          <FileCode className='text-muted-foreground h-4 w-4' />
           <span className='text-sm font-medium'>Código Formatado</span>
           {isProcessing && <Loader2 className='text-primary h-3.5 w-3.5 animate-spin' />}
         </div>
@@ -78,7 +78,3 @@ export function CodeFormatterOutput({
     </div>
   )
 }
-
-
-
-

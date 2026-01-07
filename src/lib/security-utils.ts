@@ -17,7 +17,10 @@ export function safeJsonParse<T = any>(
   // Validar tamanho máximo (prevenir DoS)
   const MAX_JSON_SIZE = options?.maxSize || 10 * 1024 * 1024 // 10MB padrão
   if (json.length > MAX_JSON_SIZE) {
-    return { success: false, error: `JSON muito grande. Máximo: ${Math.round(MAX_JSON_SIZE / 1024 / 1024)}MB` }
+    return {
+      success: false,
+      error: `JSON muito grande. Máximo: ${Math.round(MAX_JSON_SIZE / 1024 / 1024)}MB`,
+    }
   }
 
   try {
@@ -89,7 +92,11 @@ export function sanitizeHtml(html: string, options?: { allowScripts?: boolean })
 /**
  * Valida e decodifica Base64 com proteções de segurança
  */
-export function safeDecodeBase64(base64: string): { success: boolean; data?: string; error?: string } {
+export function safeDecodeBase64(base64: string): {
+  success: boolean
+  data?: string
+  error?: string
+} {
   if (!base64 || typeof base64 !== 'string') {
     return { success: false, error: 'Base64 inválido: entrada vazia ou não é uma string' }
   }
@@ -97,20 +104,30 @@ export function safeDecodeBase64(base64: string): { success: boolean; data?: str
   // Validar tamanho máximo
   const MAX_BASE64_SIZE = 10 * 1024 * 1024 // 10MB
   if (base64.length > MAX_BASE64_SIZE) {
-    return { success: false, error: `Base64 muito grande. Máximo: ${Math.round(MAX_BASE64_SIZE / 1024 / 1024)}MB` }
+    return {
+      success: false,
+      error: `Base64 muito grande. Máximo: ${Math.round(MAX_BASE64_SIZE / 1024 / 1024)}MB`,
+    }
   }
 
   try {
     const decoded = decodeURIComponent(escape(atob(base64)))
 
     // Validar se não contém scripts
-    if (decoded.includes('<script') || decoded.includes('javascript:') || decoded.includes('data:text/html')) {
+    if (
+      decoded.includes('<script') ||
+      decoded.includes('javascript:') ||
+      decoded.includes('data:text/html')
+    ) {
       return { success: false, error: 'Conteúdo potencialmente perigoso detectado (scripts)' }
     }
 
     // Validar event handlers
     if (/on\w+\s*=/i.test(decoded)) {
-      return { success: false, error: 'Conteúdo potencialmente perigoso detectado (event handlers)' }
+      return {
+        success: false,
+        error: 'Conteúdo potencialmente perigoso detectado (event handlers)',
+      }
     }
 
     return { success: true, data: decoded }
@@ -179,4 +196,3 @@ export function safeRegexExec(
     }
   }
 }
-

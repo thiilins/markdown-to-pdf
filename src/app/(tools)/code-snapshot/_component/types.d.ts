@@ -1,4 +1,4 @@
-export interface SnapshotConfig {
+interface SnapshotConfig {
   language: string
   theme: string // Nome do tema do SyntaxHighlighter (ex: 'vscDarkPlus', 'dracula', 'oneDark')
   background: string
@@ -26,14 +26,15 @@ export interface SnapshotConfig {
   // Posicionamento do Conteúdo
   contentVerticalAlign: ContentVerticalAlign // Alinhamento vertical do conteúdo quando não cabe (top, center, bottom)
   // Diff Mode
-  diffMode: boolean // Ativar modo diff (detecção automática)
+  diffMode: boolean // Ativar modo diff (split vertical)
+  diffOriginalCode: string // Código original para comparação no diff
   // Line Highlights
-  lineHighlights: Record<number, { comment?: string; highlighted?: boolean }> // Comentários e highlights por linha
+  highlightedLines: number[] // Array de linhas destacadas
+  highlightColor: string // Cor do highlight (hex)
+  highlightOpacity: number // Opacidade do highlight (0.1 a 0.5)
   // Code Annotations
   annotations: CodeAnnotation[] // Anotações flutuantes (setas e notas) sobre o código
   annotationMode: boolean // Modo para adicionar anotações (clique no código)
-  // Live Edit Mode
-  liveEditMode: boolean // Permitir editar código diretamente no preview
 }
 type BackgroundType = 'solid' | 'gradient' | 'image'
 type WindowThemeType = 'mac' | 'windows' | 'linux' | 'chrome' | 'vscode' | 'retro' | 'none'
@@ -42,7 +43,7 @@ type LanguagePosition = 'header' | 'footer'
 type ContentVerticalAlign = 'top' | 'center' | 'bottom'
 
 // Tamanhos pré-definidos para redes sociais e documentos
-export interface PresetSize {
+interface PresetSize {
   id: string
   name: string
   width: number
@@ -51,7 +52,7 @@ export interface PresetSize {
 }
 
 // Anotação flutuante sobre o código
-export interface CodeAnnotation {
+interface CodeAnnotation {
   id: string
   type: 'arrow' | 'note' // Tipo de anotação
   x: number // Posição X em pixels relativos ao código
@@ -59,4 +60,21 @@ export interface CodeAnnotation {
   text?: string // Texto da nota (opcional para setas)
   targetLine?: number // Linha alvo (para setas apontando para linhas específicas)
   color?: string // Cor da anotação (padrão: amarelo)
+  fontSize?: number // Tamanho da fonte (padrão: 14)
+  opacity?: number // Opacidade (0-1, padrão: 1)
+  style?: 'badge' | 'card' | 'minimal' // Estilo visual da anotação
+  icon?: AnnotationIconType // Ícone da anotação
 }
+
+// Tipos de ícones disponíveis para anotações
+type AnnotationIconType =
+  | 'message'
+  | 'info'
+  | 'alert'
+  | 'check'
+  | 'star'
+  | 'heart'
+  | 'lightbulb'
+  | 'bug'
+  | 'code'
+  | 'zap'

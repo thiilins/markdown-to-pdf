@@ -26,7 +26,9 @@ export function isDiffCode(code: string): boolean {
   // - Linhas começando com +++, ---, @@
   // - Linhas começando com + ou - (mas não apenas espaços)
   const hasDiffMarkers =
-    lines.some((line) => line.startsWith('+++') || line.startsWith('---') || line.startsWith('@@')) ||
+    lines.some(
+      (line) => line.startsWith('+++') || line.startsWith('---') || line.startsWith('@@'),
+    ) ||
     lines.some((line) => {
       const trimmed = line.trim()
       return (trimmed.startsWith('+') || trimmed.startsWith('-')) && trimmed.length > 1
@@ -129,4 +131,3 @@ export function extractCodeFromDiff(parsedDiff: ParsedDiff): string {
     .map((line) => line.content)
     .join('\n')
 }
-

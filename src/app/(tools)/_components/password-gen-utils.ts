@@ -142,4 +142,3 @@ export function calculatePasswordStrength(password: string): {
   if (score <= 5) return { score, label: 'Forte', color: 'text-green-500' }
   return { score, label: 'Muito Forte', color: 'text-emerald-500' }
 }
-

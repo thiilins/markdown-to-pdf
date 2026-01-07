@@ -432,7 +432,9 @@ export function ToolShell({
             className='mt-0 flex-1 overflow-hidden data-[state=active]:flex'>
             <div className='flex h-full w-full flex-col'>
               {renderInputHeader()}
-              <div className={cn('flex-1 w-full overflow-auto', inputClassName)}>{inputComponent}</div>
+              <div className={cn('w-full flex-1 overflow-auto', inputClassName)}>
+                {inputComponent}
+              </div>
             </div>
           </TabsContent>
 
@@ -441,7 +443,9 @@ export function ToolShell({
             className='mt-0 flex-1 overflow-hidden data-[state=active]:flex'>
             <div className='flex h-full w-full flex-col'>
               {renderOutputHeader()}
-              <div className={cn('flex-1 w-full overflow-auto', outputClassName)}>{outputComponent}</div>
+              <div className={cn('w-full flex-1 overflow-auto', outputClassName)}>
+                {outputComponent}
+              </div>
             </div>
           </TabsContent>
         </Tabs>

@@ -3,8 +3,8 @@
 import { stripHTML } from '@/shared/utils/strip-html'
 import { isValidWebUrl } from '@/shared/utils/url-validation-web'
 import { Readability } from '@mozilla/readability'
-import { JSDOM } from 'jsdom'
 import * as cheerio from 'cheerio'
+import { JSDOM } from 'jsdom'
 
 export interface ScrapeHtmlResponse {
   success: boolean

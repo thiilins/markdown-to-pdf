@@ -13,7 +13,9 @@ export function encodeBase64(text: string): string {
   // Validar tamanho máximo
   const MAX_TEXT_SIZE = 10 * 1024 * 1024 // 10MB
   if (text.length > MAX_TEXT_SIZE) {
-    throw new Error(`Texto muito grande para codificar. Máximo: ${Math.round(MAX_TEXT_SIZE / 1024 / 1024)}MB`)
+    throw new Error(
+      `Texto muito grande para codificar. Máximo: ${Math.round(MAX_TEXT_SIZE / 1024 / 1024)}MB`,
+    )
   }
 
   try {
@@ -69,4 +71,3 @@ export function isValidBase64(str: string): boolean {
     return false
   }
 }
-

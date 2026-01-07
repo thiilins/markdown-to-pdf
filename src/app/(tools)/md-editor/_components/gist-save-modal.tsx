@@ -233,8 +233,8 @@ export function GistSaveModal({
                   ? 'Crie uma cópia deste gist com suas alterações.'
                   : 'Atualize o gist existente com suas alterações.'
                 : 'Sincronize seu documento com sua conta do GitHub de forma rápida.'}
-          </DialogDescription>
-        </DialogHeader>
+            </DialogDescription>
+          </DialogHeader>
         </div>
 
         <div className='custom-scrollbar max-h-[60vh] space-y-6 overflow-y-auto px-6 py-6'>
@@ -271,39 +271,39 @@ export function GistSaveModal({
           <div className='grid gap-4'>
             {/* Nome do arquivo (ao criar novo ou ao duplicar) */}
             {(!existingGist || createAsNew) && (
-          <div className='space-y-2'>
+              <div className='space-y-2'>
                 <Label htmlFor='filename' className='flex items-center gap-2 text-sm font-semibold'>
                   <FileCode className='text-primary h-3.5 w-3.5' /> Nome do Arquivo
                 </Label>
-            <Input
-              id='filename'
+                <Input
+                  id='filename'
                   placeholder='documento.md'
-              value={filename}
-              onChange={(e) => setFilename(e.target.value)}
+                  value={filename}
+                  onChange={(e) => setFilename(e.target.value)}
                   className='focus-visible:ring-primary h-10'
-            />
+                />
                 {createAsNew && existingGist && (
                   <p className='text-muted-foreground text-[11px] italic'>
                     Você pode alterar o nome do arquivo ao duplicar o gist.
-            </p>
+                  </p>
                 )}
-          </div>
+              </div>
             )}
 
-          <div className='space-y-2'>
+            <div className='space-y-2'>
               <Label
                 htmlFor='description'
                 className='flex items-center gap-2 text-sm font-semibold'>
                 <TextQuote className='text-primary h-3.5 w-3.5' /> Descrição
               </Label>
-            <Textarea
-              id='description'
+              <Textarea
+                id='description'
                 placeholder='Sobre o que é este documento?'
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
                 rows={3}
                 className='focus-visible:ring-primary resize-none'
-            />
+              />
             </div>
           </div>
 
@@ -314,37 +314,37 @@ export function GistSaveModal({
             </Label>
             <div className='bg-muted/20 space-y-3 rounded-xl border p-3'>
               <div className='flex min-h-[32px] flex-wrap gap-1.5'>
-              {tags.length > 0 ? (
-                tags.map((tag) => (
+                {tags.length > 0 ? (
+                  tags.map((tag) => (
                     <Badge
                       key={tag}
                       variant='secondary'
                       className='hover:bg-secondary/80 gap-1 py-1 pr-1 pl-2 transition-all'>
                       <span className='text-[11px] font-medium'>#{tag}</span>
-                    <button
-                      onClick={() => handleRemoveTag(tag)}
+                      <button
+                        onClick={() => handleRemoveTag(tag)}
                         className='hover:bg-destructive/20 text-muted-foreground hover:text-destructive rounded-full p-0.5 transition-colors'>
-                      <X className='h-3 w-3' />
-                    </button>
-                  </Badge>
-                ))
-              ) : (
+                        <X className='h-3 w-3' />
+                      </button>
+                    </Badge>
+                  ))
+                ) : (
                   <span className='text-muted-foreground px-1 text-[11px] italic'>
                     Nenhuma tag adicionada...
                   </span>
-              )}
-            </div>
-            <div className='flex gap-2'>
-              <Input
+                )}
+              </div>
+              <div className='flex gap-2'>
+                <Input
                   placeholder='Adicionar tag...'
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
                   className='bg-background h-8 text-xs'
-              />
+                />
                 <Button size='sm' variant='outline' onClick={handleAddTag} className='h-8 px-3'>
                   <Plus className='mr-1 h-3.5 w-3.5' /> Add
-              </Button>
+                </Button>
               </div>
             </div>
           </div>

@@ -491,7 +491,11 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
                       className='prose dark:prose-invert h-full w-full max-w-none wrap-break-word'
                       style={typographyStyles}>
                       <PreviewStyle theme={theme} />
-                      <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(html, { allowScripts: false }) }} />
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: sanitizeHtml(html, { allowScripts: false }),
+                        }}
+                      />
                     </div>
 
                     {/* Footer */}

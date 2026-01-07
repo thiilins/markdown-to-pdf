@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
+import { createShareableUrl } from '@/lib/routing'
 import { cn } from '@/lib/utils'
 import {
   CODE_THEMES,
@@ -18,24 +19,41 @@ import {
   GRADIENTS,
   LANGUAGES,
   LANGUAGE_POSITIONS,
+  PRESET_SIZES,
   WINDOW_THEMES,
 } from '@/shared/constants/snap-code'
-import { PRESET_SIZES, useCodeSnapshot } from '@/shared/contexts/codeSnapshotContext'
-import { Github, MonitorCog, RotateCcw, Share2 } from 'lucide-react'
+import { useCodeSnapshot } from '@/shared/contexts/codeSnapshotContext'
+import {
+  GitCompare,
+  Github,
+  Highlighter,
+  Info,
+  MonitorCog,
+  RotateCcw,
+  Share2,
+  Trash2,
+} from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { GistImport } from './gist-import'
 
 export function SnapshotControls({ compact = false }: { compact?: boolean }) {
-  const { config, updateConfig, resetConfig, copyShareableUrl } = useCodeSnapshot()
+  const { code, config, updateConfig, resetConfig } = useCodeSnapshot()
   const [showGistImport, setShowGistImport] = useState(false)
 
   const handleShare = async () => {
-    const result = await copyShareableUrl(false) // Usa query params curtos por padrão
-    if (result.success) {
+    try {
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin + '/code-snapshot' : ''
+      const state = { code, ...config }
+
+      // Para conteúdo extenso, sempre usa serialização base64
+      const useSerialized = code.length > 500
+      const url = createShareableUrl(state, baseUrl, useSerialized)
+
+      await navigator.clipboard.writeText(url)
       toast.success('URL copiada para a área de transferência!')
-    } else {
-      toast.error(result.error || 'Erro ao copiar URL')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erro ao copiar URL')
     }
   }
   // Componente auxiliar para Labels padronizados
@@ -56,9 +74,9 @@ export function SnapshotControls({ compact = false }: { compact?: boolean }) {
   )
 
   return (
-    <aside className='flex w-full min-w-[400px] transition-all duration-300'>
-      <div className='bg-card flex h-full flex-col'>
-        <div className='flex items-center justify-between border-b p-2'>
+    <aside className='flex h-full w-full max-w-[390px] min-w-[390px] transition-all duration-300'>
+      <div className='bg-card flex h-full w-full flex-col overflow-hidden'>
+        <div className='flex shrink-0 items-center justify-between border-b p-2'>
           <div className='bg-muted/30 flex-none px-4 py-3'>
             <div className='flex items-center gap-2'>
               <div className='cursor-pointer p-2 hover:border-violet-700'>
@@ -102,8 +120,8 @@ export function SnapshotControls({ compact = false }: { compact?: boolean }) {
           </div>
         </div>
 
-        <div className='flex-1 overflow-y-auto'>
-          <div className={cn('space-y-4 px-2')}>
+        <div className='min-h-0 flex-1 overflow-x-hidden overflow-y-auto'>
+          <div className={cn('space-y-4 px-2 pb-4')}>
             {/* Seção de Importar Gist */}
             {showGistImport && (
               <section className='border-primary/20 bg-primary/5 gap-4 space-y-4 rounded-lg border p-4'>
@@ -291,7 +309,7 @@ export function SnapshotControls({ compact = false }: { compact?: boolean }) {
                   </div>
                 </div>
               </div>
-              <div className='border-primary/50 bg-primary/20 text-primary flexf flex-col items-center justify-between rounded-lg border p-2'>
+              <div className='border-primary/50 bg-primary/20 text-primary flex flex-col items-center justify-between rounded-lg border p-2'>
                 <div className='flex w-full items-center justify-between'>
                   <ControlLabel>Rodapé (Footer)</ControlLabel>
                   <Switch
@@ -476,6 +494,7 @@ export function SnapshotControls({ compact = false }: { compact?: boolean }) {
                     if (grad.value === 'transparent') {
                       return (
                         <div
+                          key={i}
                           onClick={() => updateConfig('background', grad.value)}
                           className={cn(
                             'h-full w-full cursor-pointer rounded-full border border-violet-900 bg-[conic-gradient(#e5e7eb_25%,transparent_25%,transparent_50%,#e5e7eb_50%,#e5e7eb_75%,transparent_75%,transparent)] bg-size-[20px_20px] ring-black',
@@ -510,23 +529,155 @@ export function SnapshotControls({ compact = false }: { compact?: boolean }) {
             </section>
             <Separator />
 
+            {/* Seção: Modo Diff */}
             <section className='space-y-4'>
               <div className='border-primary/50 bg-primary/20 space-y-3 rounded-lg border p-3'>
-                <ControlLabel>Modo de Edição</ControlLabel>
-                <div className='flex items-center justify-between'>
-                  <div className='space-y-0.5'>
-                    <Label className='text-sm font-medium'>Live Edit no Preview</Label>
-                    <p className='text-muted-foreground text-xs'>
-                      Edite o código diretamente no preview
-                    </p>
+                <div className='flex items-center gap-2'>
+                  <GitCompare className='h-4 w-4' />
+                  <ControlLabel>Modo Diff (Git)</ControlLabel>
+                </div>
+                <div className='space-y-2'>
+                  <div className='flex items-center justify-between'>
+                    <div className='space-y-0.5'>
+                      <Label className='text-sm font-medium'>Ativar Diff</Label>
+                      <p className='text-muted-foreground text-xs'>
+                        Cole um diff do Git para colorir automaticamente
+                      </p>
+                    </div>
+                    <Switch
+                      checked={config.diffMode || false}
+                      onCheckedChange={(checked) => {
+                        console.log('checked', checked, config.diffMode)
+                        return updateConfig('diffMode', checked)
+                      }}
+                    />
                   </div>
-                  <Switch
-                    checked={config.liveEditMode || false}
-                    onCheckedChange={(checked) => updateConfig('liveEditMode', checked)}
-                  />
+                  {config.diffMode && (
+                    <div className='bg-muted/50 rounded-md p-2 text-xs'>
+                      <div className='mb-1 flex items-center gap-2'>
+                        <Info className='h-3 w-3' />
+                        <span className='font-medium'>Exemplo de diff:</span>
+                      </div>
+                      <pre className='text-muted-foreground text-[10px] leading-relaxed'>
+                        {`- linha removida
++ linha adicionada
+  linha sem alteração`}
+                      </pre>
+                    </div>
+                  )}
                 </div>
               </div>
+            </section>
+            <Separator />
 
+            {/* Seção: Destacar Linhas */}
+            <section className='space-y-4'>
+              <div className='border-primary/50 bg-primary/20 space-y-3 rounded-lg border p-3'>
+                <div className='flex items-center gap-2'>
+                  <Highlighter className='h-4 w-4' />
+                  <ControlLabel>Destacar Linhas</ControlLabel>
+                </div>
+                <div className='space-y-2'>
+                  <div className='bg-muted/50 rounded-md p-2'>
+                    <div className='mb-1 flex items-center gap-2'>
+                      <Info className='h-3 w-3' />
+                      <span className='text-xs font-medium'>Como usar:</span>
+                    </div>
+                    <p className='text-muted-foreground text-xs'>
+                      Clique no número de uma linha no preview para destacá-la.
+                    </p>
+                  </div>
+
+                  {/* Cor do Highlight */}
+                  <div className='space-y-2'>
+                    <Label className='text-xs font-medium'>Cor do marca-texto</Label>
+                    <div className='flex flex-wrap gap-1.5'>
+                      {[
+                        { color: '#facc15', name: 'Amarelo' },
+                        { color: '#4ade80', name: 'Verde' },
+                        { color: '#60a5fa', name: 'Azul' },
+                        { color: '#f472b6', name: 'Rosa' },
+                        { color: '#fb923c', name: 'Laranja' },
+                        { color: '#a78bfa', name: 'Roxo' },
+                        { color: '#f87171', name: 'Vermelho' },
+                        { color: '#2dd4bf', name: 'Ciano' },
+                      ].map((item) => (
+                        <button
+                          key={item.color}
+                          onClick={() => updateConfig('highlightColor', item.color)}
+                          className={cn(
+                            'h-7 w-7 cursor-pointer rounded-md border-2 transition-all hover:scale-110',
+                            config.highlightColor === item.color
+                              ? 'ring-primary border-white ring-2 ring-offset-2'
+                              : 'border-transparent',
+                          )}
+                          style={{ backgroundColor: item.color }}
+                          title={item.name}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Opacidade do Highlight */}
+                  <div className='space-y-2'>
+                    <div className='flex items-center justify-between'>
+                      <Label className='text-xs font-medium'>Opacidade</Label>
+                      <span className='text-muted-foreground font-mono text-xs'>
+                        {Math.round((config.highlightOpacity || 0.25) * 100)}%
+                      </span>
+                    </div>
+                    <Slider
+                      value={[(config.highlightOpacity || 0.25) * 100]}
+                      min={10}
+                      max={50}
+                      step={5}
+                      onValueChange={(val) => updateConfig('highlightOpacity', val[0] / 100)}
+                    />
+                  </div>
+
+                  {config.highlightedLines && config.highlightedLines.length > 0 && (
+                    <div className='space-y-2'>
+                      <div className='flex items-center justify-between'>
+                        <Label className='text-xs font-medium'>
+                          {config.highlightedLines.length} linha(s) destacada(s)
+                        </Label>
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          className='text-destructive hover:text-destructive h-7 text-xs'
+                          onClick={() => updateConfig('highlightedLines', [])}>
+                          <Trash2 className='mr-1 h-3 w-3' />
+                          Limpar
+                        </Button>
+                      </div>
+                      <div className='flex flex-wrap gap-1'>
+                        {config.highlightedLines
+                          .sort((a, b) => a - b)
+                          .map((line) => (
+                            <Badge
+                              key={line}
+                              variant='secondary'
+                              className='hover:bg-destructive/20 cursor-pointer text-xs'
+                              onClick={() => {
+                                updateConfig(
+                                  'highlightedLines',
+                                  config.highlightedLines.filter((l) => l !== line),
+                                )
+                              }}
+                              title='Clique para remover'>
+                              L{line}
+                            </Badge>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+            <Separator />
+
+            {/* Seção: Anotações Interativas */}
+            <section className='space-y-4'>
               <div className='border-primary/50 bg-primary/20 space-y-3 rounded-lg border p-3'>
                 <ControlLabel>Anotações Interativas</ControlLabel>
                 <div className='space-y-2'>
@@ -534,7 +685,7 @@ export function SnapshotControls({ compact = false }: { compact?: boolean }) {
                     <div className='space-y-0.5'>
                       <Label className='text-sm font-medium'>Modo Adicionar Anotação</Label>
                       <p className='text-muted-foreground text-xs'>
-                        Clique no código para adicionar notas ou setas
+                        Clique no código para adicionar notas
                       </p>
                     </div>
                     <Switch

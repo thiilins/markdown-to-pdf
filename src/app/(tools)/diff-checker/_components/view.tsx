@@ -79,7 +79,8 @@ export default function DiffCheckerView() {
 
   // Cálculo otimizado do diff
   const { changes, stats, filteredChanges } = useMemo(() => {
-    if (!isMounted) return { changes: [], stats: { added: 0, removed: 0, unchanged: 0 }, filteredChanges: [] }
+    if (!isMounted)
+      return { changes: [], stats: { added: 0, removed: 0, unchanged: 0 }, filteredChanges: [] }
 
     let original = originalText
     let modified = newText
@@ -90,7 +91,9 @@ export default function DiffCheckerView() {
     }
 
     const calculatedChanges: Change[] =
-      diffMode === 'words' ? diffWords(original, modified) : diffLines(original, modified, { ignoreWhitespace })
+      diffMode === 'words'
+        ? diffWords(original, modified)
+        : diffLines(original, modified, { ignoreWhitespace })
 
     const stats = calculatedChanges.reduce(
       (acc, curr) => {
@@ -120,7 +123,10 @@ export default function DiffCheckerView() {
 
   const hasChanges = changes.some((c) => c.added || c.removed)
   const totalChanges = stats.added + stats.removed
-  const similarity = totalChanges > 0 ? Math.round((stats.unchanged / (stats.added + stats.removed + stats.unchanged)) * 100) : 100
+  const similarity =
+    totalChanges > 0
+      ? Math.round((stats.unchanged / (stats.added + stats.removed + stats.unchanged)) * 100)
+      : 100
 
   const handleSwap = useCallback(() => {
     setOriginalText(newText)
@@ -195,11 +201,11 @@ ${filteredChanges.map((c) => (c.added ? `+${c.value}` : c.removed ? `-${c.value}
   return (
     <div className='bg-background flex h-[calc(100vh-4rem)] flex-col overflow-hidden'>
       {/* Header Moderno */}
-      <header className='bg-gradient-to-r from-background via-muted/20 to-background border-b p-4 shadow-sm supports-backdrop-filter:bg-background/60'>
+      <header className='from-background via-muted/20 to-background supports-backdrop-filter:bg-background/60 border-b bg-gradient-to-r p-4 shadow-sm'>
         <div className='mx-auto flex max-w-[1800px] flex-col gap-4 lg:flex-row lg:items-center lg:justify-between'>
           {/* Title Section */}
           <div className='flex items-center gap-3'>
-            <div className='bg-primary/10 text-primary ring-primary/20 flex h-11 w-11 items-center justify-center rounded-xl ring-2 shadow-lg'>
+            <div className='bg-primary/10 text-primary ring-primary/20 flex h-11 w-11 items-center justify-center rounded-xl shadow-lg ring-2'>
               <GitCompare className='h-6 w-6' />
             </div>
             <div>
@@ -217,21 +223,23 @@ ${filteredChanges.map((c) => (c.added ? `+${c.value}` : c.removed ? `-${c.value}
             {hasChanges && (
               <div className='bg-muted/50 flex items-center gap-3 rounded-lg border px-3 py-1.5'>
                 <div className='flex items-center gap-1.5'>
-                  <div className='bg-green-500/20 text-green-600 flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold'>
+                  <div className='flex h-6 w-6 items-center justify-center rounded-full bg-green-500/20 text-xs font-bold text-green-600'>
                     <Plus className='h-3 w-3' />
                   </div>
                   <span className='font-mono text-xs font-semibold'>{stats.added}</span>
                 </div>
                 <Separator orientation='vertical' className='h-4' />
                 <div className='flex items-center gap-1.5'>
-                  <div className='bg-red-500/20 text-red-600 flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold'>
+                  <div className='flex h-6 w-6 items-center justify-center rounded-full bg-red-500/20 text-xs font-bold text-red-600'>
                     <Minus className='h-3 w-3' />
                   </div>
                   <span className='font-mono text-xs font-semibold'>{stats.removed}</span>
                 </div>
                 <Separator orientation='vertical' className='h-4' />
                 <div className='flex items-center gap-1.5'>
-                  <span className='text-muted-foreground text-[10px] font-medium'>Similaridade</span>
+                  <span className='text-muted-foreground text-[10px] font-medium'>
+                    Similaridade
+                  </span>
                   <Badge variant='secondary' className='h-5 px-2 text-xs font-bold'>
                     {similarity}%
                   </Badge>
@@ -272,8 +280,10 @@ ${filteredChanges.map((c) => (c.added ? `+${c.value}` : c.removed ? `-${c.value}
                 <PopoverContent className='w-64' align='end'>
                   <div className='space-y-4'>
                     <div>
-                      <h4 className='font-semibold text-sm'>Configurações de Comparação</h4>
-                      <p className='text-muted-foreground text-xs'>Ajuste como as diferenças são detectadas</p>
+                      <h4 className='text-sm font-semibold'>Configurações de Comparação</h4>
+                      <p className='text-muted-foreground text-xs'>
+                        Ajuste como as diferenças são detectadas
+                      </p>
                     </div>
                     <div className='space-y-3'>
                       <div className='flex items-center justify-between'>
@@ -290,7 +300,11 @@ ${filteredChanges.map((c) => (c.added ? `+${c.value}` : c.removed ? `-${c.value}
                         <Label htmlFor='case-sensitive' className='text-xs font-medium'>
                           Sensível a Maiúsculas
                         </Label>
-                        <Switch id='case-sensitive' checked={caseSensitive} onCheckedChange={setCaseSensitive} />
+                        <Switch
+                          id='case-sensitive'
+                          checked={caseSensitive}
+                          onCheckedChange={setCaseSensitive}
+                        />
                       </div>
                     </div>
                   </div>
@@ -310,19 +324,39 @@ ${filteredChanges.map((c) => (c.added ? `+${c.value}` : c.removed ? `-${c.value}
                   <DropdownMenuLabel>Filtrar Diferenças</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => setDiffFilter('all')}>
-                    <div className={cn('mr-2 h-2 w-2 rounded-full', diffFilter === 'all' && 'bg-primary')} />
+                    <div
+                      className={cn(
+                        'mr-2 h-2 w-2 rounded-full',
+                        diffFilter === 'all' && 'bg-primary',
+                      )}
+                    />
                     Todos
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setDiffFilter('added')}>
-                    <div className={cn('mr-2 h-2 w-2 rounded-full bg-green-500', diffFilter === 'added' && 'ring-2 ring-green-500')} />
+                    <div
+                      className={cn(
+                        'mr-2 h-2 w-2 rounded-full bg-green-500',
+                        diffFilter === 'added' && 'ring-2 ring-green-500',
+                      )}
+                    />
                     Apenas Adições
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setDiffFilter('removed')}>
-                    <div className={cn('mr-2 h-2 w-2 rounded-full bg-red-500', diffFilter === 'removed' && 'ring-2 ring-red-500')} />
+                    <div
+                      className={cn(
+                        'mr-2 h-2 w-2 rounded-full bg-red-500',
+                        diffFilter === 'removed' && 'ring-2 ring-red-500',
+                      )}
+                    />
                     Apenas Remoções
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setDiffFilter('unchanged')}>
-                    <div className={cn('mr-2 h-2 w-2 rounded-full bg-muted-foreground', diffFilter === 'unchanged' && 'ring-2')} />
+                    <div
+                      className={cn(
+                        'bg-muted-foreground mr-2 h-2 w-2 rounded-full',
+                        diffFilter === 'unchanged' && 'ring-2',
+                      )}
+                    />
                     Apenas Iguais
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -331,7 +365,12 @@ ${filteredChanges.map((c) => (c.added ? `+${c.value}` : c.removed ? `-${c.value}
               <Separator orientation='vertical' className='h-6' />
 
               {/* Ações Rápidas */}
-              <Button variant='outline' size='sm' onClick={handleSwap} className='h-9 gap-2' title='Trocar textos'>
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={handleSwap}
+                className='h-9 gap-2'
+                title='Trocar textos'>
                 <ArrowLeftRight className='h-4 w-4' />
                 <span className='hidden sm:inline'>Trocar</span>
               </Button>
@@ -389,7 +428,10 @@ ${filteredChanges.map((c) => (c.added ? `+${c.value}` : c.removed ? `-${c.value}
                   />
                 </ResizablePanel>
 
-                <ResizableHandle withHandle className='bg-border hover:bg-primary/20 transition-colors' />
+                <ResizableHandle
+                  withHandle
+                  className='bg-border hover:bg-primary/20 transition-colors'
+                />
 
                 <ResizablePanel defaultSize={50} minSize={20}>
                   <EditorPanel
@@ -404,7 +446,10 @@ ${filteredChanges.map((c) => (c.added ? `+${c.value}` : c.removed ? `-${c.value}
               </ResizablePanelGroup>
             </ResizablePanel>
 
-            <ResizableHandle withHandle className='bg-border hover:bg-primary/20 transition-colors' />
+            <ResizableHandle
+              withHandle
+              className='bg-border hover:bg-primary/20 transition-colors'
+            />
 
             {/* Painel Inferior: Resultado */}
             <ResizablePanel defaultSize={55} minSize={30}>
@@ -449,7 +494,7 @@ function EditorPanel({
 
   return (
     <Card className='flex h-full flex-col overflow-hidden border-none shadow-sm'>
-      <CardHeader className='flex flex-row items-center justify-between space-y-0 border-b bg-muted/30 py-3'>
+      <CardHeader className='bg-muted/30 flex flex-row items-center justify-between space-y-0 border-b py-3'>
         <div className='flex items-center gap-3'>
           <div
             className={cn(
@@ -460,7 +505,7 @@ function EditorPanel({
           </div>
           <div>
             <CardTitle className='text-sm font-semibold'>{title}</CardTitle>
-            <div className='flex items-center gap-2 text-xs text-muted-foreground'>
+            <div className='text-muted-foreground flex items-center gap-2 text-xs'>
               <span>{lines} linhas</span>
               <span>•</span>
               <span>{words} palavras</span>
@@ -504,19 +549,22 @@ function DiffOutputPanel({
 }) {
   return (
     <Card className='flex h-full flex-col overflow-hidden border-none shadow-sm'>
-      <CardHeader className='flex flex-row items-center justify-between space-y-0 border-b bg-gradient-to-r from-muted/30 to-muted/20 py-3'>
+      <CardHeader className='from-muted/30 to-muted/20 flex flex-row items-center justify-between space-y-0 border-b bg-gradient-to-r py-3'>
         <div className='flex items-center gap-3'>
           <div className='bg-primary/10 text-primary flex h-8 w-8 items-center justify-center rounded-lg'>
             <GitCompare className='h-4 w-4' />
           </div>
           <div>
             <CardTitle className='text-sm font-semibold'>Resultado da Comparação</CardTitle>
-            <div className='flex items-center gap-2 text-xs text-muted-foreground'>
+            <div className='text-muted-foreground flex items-center gap-2 text-xs'>
               <span>Modo: {mode === 'lines' ? 'Linhas' : 'Palavras'}</span>
               {filter !== 'all' && (
                 <>
                   <span>•</span>
-                  <span>Filtro: {filter === 'added' ? 'Adições' : filter === 'removed' ? 'Remoções' : 'Iguais'}</span>
+                  <span>
+                    Filtro:{' '}
+                    {filter === 'added' ? 'Adições' : filter === 'removed' ? 'Remoções' : 'Iguais'}
+                  </span>
                 </>
               )}
             </div>
@@ -525,11 +573,15 @@ function DiffOutputPanel({
 
         {hasChanges && (
           <div className='flex items-center gap-2'>
-            <Badge variant='outline' className='border-green-500/30 bg-green-500/10 text-green-700 dark:text-green-400'>
+            <Badge
+              variant='outline'
+              className='border-green-500/30 bg-green-500/10 text-green-700 dark:text-green-400'>
               <Plus className='mr-1 h-3 w-3' />
               {stats.added}
             </Badge>
-            <Badge variant='outline' className='border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-400'>
+            <Badge
+              variant='outline'
+              className='border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-400'>
               <Minus className='mr-1 h-3 w-3' />
               {stats.removed}
             </Badge>
@@ -544,7 +596,7 @@ function DiffOutputPanel({
       <CardContent className='flex-1 overflow-auto p-0'>
         {!hasChanges ? (
           <div className='text-muted-foreground flex h-full flex-col items-center justify-center p-8'>
-            <div className='bg-green-500/10 mb-4 rounded-full p-6'>
+            <div className='mb-4 rounded-full bg-green-500/10 p-6'>
               <CheckCircle2 className='h-12 w-12 text-green-600' />
             </div>
             <h3 className='mb-2 text-lg font-semibold'>Textos Idênticos</h3>
@@ -580,10 +632,10 @@ function LineDiffRow({ change }: { change: Change }) {
   if (change.added) {
     return (
       <div className='group flex border-l-4 border-green-500 bg-green-500/10 transition-colors hover:bg-green-500/15 dark:bg-green-500/5'>
-        <div className='bg-green-500/20 text-green-700 flex w-12 shrink-0 items-center justify-center border-r border-green-500/30 py-2 text-xs font-bold dark:text-green-400'>
+        <div className='flex w-12 shrink-0 items-center justify-center border-r border-green-500/30 bg-green-500/20 py-2 text-xs font-bold text-green-700 dark:text-green-400'>
           +
         </div>
-        <div className='text-green-900 flex-1 py-2 pl-4 break-all font-medium dark:text-green-100'>
+        <div className='flex-1 py-2 pl-4 font-medium break-all text-green-900 dark:text-green-100'>
           {change.value}
         </div>
       </div>
@@ -592,10 +644,10 @@ function LineDiffRow({ change }: { change: Change }) {
   if (change.removed) {
     return (
       <div className='group flex border-l-4 border-red-500 bg-red-500/10 transition-colors hover:bg-red-500/15 dark:bg-red-500/5'>
-        <div className='bg-red-500/20 text-red-700 flex w-12 shrink-0 items-center justify-center border-r border-red-500/30 py-2 text-xs font-bold dark:text-red-400'>
+        <div className='flex w-12 shrink-0 items-center justify-center border-r border-red-500/30 bg-red-500/20 py-2 text-xs font-bold text-red-700 dark:text-red-400'>
           −
         </div>
-        <div className='text-red-900 flex-1 py-2 pl-4 break-all font-medium line-through decoration-red-600/50 dark:text-red-100'>
+        <div className='flex-1 py-2 pl-4 font-medium break-all text-red-900 line-through decoration-red-600/50 dark:text-red-100'>
           {change.value}
         </div>
       </div>
@@ -614,14 +666,14 @@ function LineDiffRow({ change }: { change: Change }) {
 function WordDiffSpan({ change }: { change: Change }) {
   if (change.added) {
     return (
-      <span className='bg-green-500/20 text-green-800 mx-0.5 rounded px-1 py-0.5 font-semibold underline decoration-green-600 decoration-2 underline-offset-2 dark:bg-green-500/30 dark:text-green-200'>
+      <span className='mx-0.5 rounded bg-green-500/20 px-1 py-0.5 font-semibold text-green-800 underline decoration-green-600 decoration-2 underline-offset-2 dark:bg-green-500/30 dark:text-green-200'>
         {change.value}
       </span>
     )
   }
   if (change.removed) {
     return (
-      <span className='bg-red-500/20 text-red-800 mx-0.5 rounded px-1 py-0.5 font-semibold line-through decoration-red-600/60 dark:bg-red-500/30 dark:text-red-200'>
+      <span className='mx-0.5 rounded bg-red-500/20 px-1 py-0.5 font-semibold text-red-800 line-through decoration-red-600/60 dark:bg-red-500/30 dark:text-red-200'>
         {change.value}
       </span>
     )
@@ -656,7 +708,10 @@ function DiffMobileView({
 
   return (
     <div className='flex h-full flex-col'>
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className='flex h-full flex-col'>
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => setActiveTab(v as typeof activeTab)}
+        className='flex h-full flex-col'>
         <div className='bg-muted/30 border-b px-4 py-2'>
           <TabsList className='grid w-full grid-cols-3'>
             <TabsTrigger value='original' className='text-xs'>
@@ -703,7 +758,13 @@ function DiffMobileView({
               mode={mode}
               stats={stats}
               hasChanges={changes.some((c) => c.added || c.removed)}
-              similarity={stats.added + stats.removed > 0 ? Math.round((stats.unchanged / (stats.added + stats.removed + stats.unchanged)) * 100) : 100}
+              similarity={
+                stats.added + stats.removed > 0
+                  ? Math.round(
+                      (stats.unchanged / (stats.added + stats.removed + stats.unchanged)) * 100,
+                    )
+                  : 100
+              }
               filter='all'
             />
           </TabsContent>

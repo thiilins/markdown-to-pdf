@@ -2,15 +2,7 @@
 
 import { IconButtonTooltip } from '@/components/custom-ui/tooltip'
 import { Separator } from '@/components/ui/separator'
-import {
-  CheckCircle2,
-  Copy,
-  FileCode,
-  RotateCcw,
-  Sparkles,
-  Trash2,
-  Wand2,
-} from 'lucide-react'
+import { CheckCircle2, Copy, FileCode, RotateCcw, Sparkles, Trash2, Wand2 } from 'lucide-react'
 import { formatJson, minifyJson, validateJson, fixJson } from './json-formatter-utils'
 import { toast } from 'sonner'
 
@@ -101,7 +93,7 @@ export function JsonEditorToolbar({
   const isValid = validation?.isValid ?? true
 
   return (
-    <div className='bg-muted/30 border-b shrink-0 flex items-center justify-between px-3 py-1.5'>
+    <div className='bg-muted/30 flex shrink-0 items-center justify-between border-b px-3 py-1.5'>
       <div className='flex items-center gap-1'>
         {/* Formatar */}
         <IconButtonTooltip
@@ -176,7 +168,7 @@ export function JsonEditorToolbar({
             content='Limpar editor'
             disabled={!hasContent}
             className={{
-              button: 'h-7 w-7 text-destructive hover:text-destructive',
+              button: 'text-destructive hover:text-destructive h-7 w-7',
             }}
           />
         )}
@@ -199,9 +191,7 @@ export function JsonEditorToolbar({
       {hasContent && validation && (
         <div className='flex items-center gap-2'>
           {validation.isValid ? (
-            <span className='text-green-600 text-xs font-medium dark:text-green-400'>
-              ✓ Válido
-            </span>
+            <span className='text-xs font-medium text-green-600 dark:text-green-400'>✓ Válido</span>
           ) : (
             <span className='text-destructive text-xs font-medium'>
               ✗ {validation.errors.length} erro(s)
@@ -212,4 +202,3 @@ export function JsonEditorToolbar({
     </div>
   )
 }
-

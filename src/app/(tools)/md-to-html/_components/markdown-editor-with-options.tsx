@@ -36,6 +36,3 @@ export function MarkdownEditorWithOptions({
     </div>
   )
 }
-
-
-

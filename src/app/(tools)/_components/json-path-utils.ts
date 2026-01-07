@@ -70,7 +70,11 @@ function findPathAtChar(obj: any, jsonText: string, charPosition: number): strin
 /**
  * Encontra o caminho até uma chave específica no objeto
  */
-function findKeyPath(obj: any, targetKey: string, currentPath: (string | number)[]): (string | number)[] | null {
+function findKeyPath(
+  obj: any,
+  targetKey: string,
+  currentPath: (string | number)[],
+): (string | number)[] | null {
   if (obj === null || typeof obj !== 'object') {
     return null
   }
@@ -181,11 +185,7 @@ export function getJsonPathFromSelection(
 /**
  * Constrói um caminho usando índices de array
  */
-function buildPathWithIndices(
-  obj: any,
-  indices: number[],
-  lastKey: string | null,
-): string | null {
+function buildPathWithIndices(obj: any, indices: number[], lastKey: string | null): string | null {
   let current: any = obj
   const path: (string | number)[] = []
 
@@ -209,4 +209,3 @@ function buildPathWithIndices(
 
   return path.length > 0 ? formatJsonPath(path) : null
 }
-

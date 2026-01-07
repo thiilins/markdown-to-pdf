@@ -44,7 +44,8 @@ export async function GET(request: Request) {
 
     try {
       const res = await fetch(`https://api.github.com/gists/${gistId}`, { headers })
-      if (!res.ok) return NextResponse.json({ error: 'Gist não encontrado' }, { status: res.status })
+      if (!res.ok)
+        return NextResponse.json({ error: 'Gist não encontrado' }, { status: res.status })
 
       const gist = await res.json()
       // Sanitiza a resposta

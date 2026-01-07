@@ -11,14 +11,17 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
+import { useCodeSnapshot } from '@/shared/contexts/codeSnapshotContext'
 import { ChevronLeft, ChevronRight, Code2, Image as ImageIcon, Settings } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { SnapshotControls } from './snapshot-controls'
+import { SnapshotDiffEditor } from './snapshot-diff-editor'
 import { SnapshotEditor } from './snapshot-editor'
 import { SnapshotPreview } from './snapshot-preview'
 
 // Componente Wrapper para detectar tamanho da tela (simplificado)
 export const CodeSnapshotView = () => {
+  const { config } = useCodeSnapshot()
   const [isDesktop, setIsDesktop] = useState(true)
   const [showEditor, setShowEditor] = useState(true)
   const [showControls, setShowControls] = useState(true)
@@ -96,7 +99,11 @@ export const CodeSnapshotView = () => {
             <TabsContent
               value='editor'
               className='mt-0 h-full border-none data-[state=active]:flex'>
-              <SnapshotEditor onScroll={handleEditorScroll} editorRef={editorRef} />
+              {config.diffMode ? (
+                <SnapshotDiffEditor onScroll={handleEditorScroll} editorRef={editorRef} />
+              ) : (
+                <SnapshotEditor onScroll={handleEditorScroll} editorRef={editorRef} />
+              )}
             </TabsContent>
 
             <TabsContent
@@ -242,7 +249,11 @@ export const CodeSnapshotView = () => {
                 'h-full overflow-hidden transition-opacity duration-300',
                 showEditor ? 'opacity-100' : 'opacity-0',
               )}>
-              <SnapshotEditor onScroll={handleEditorScroll} editorRef={editorRef} />
+              {config.diffMode ? (
+                <SnapshotDiffEditor onScroll={handleEditorScroll} editorRef={editorRef} />
+              ) : (
+                <SnapshotEditor onScroll={handleEditorScroll} editorRef={editorRef} />
+              )}
             </div>
           </div>
 
@@ -289,7 +300,7 @@ export const CodeSnapshotView = () => {
               <TooltipTrigger asChild>
                 <button
                   onClick={() => setShowControls(false)}
-                  className='bg-primary/90 hover:bg-primary absolute top-2 right-[350px] z-50 flex h-7 w-6 cursor-pointer items-center justify-center rounded-l-md text-white shadow-lg transition-all hover:scale-110 hover:shadow-xl'>
+                  className='bg-primary/90 hover:bg-primary absolute top-2 right-[390px] z-50 flex h-7 w-6 cursor-pointer items-center justify-center rounded-l-md text-white shadow-lg transition-all hover:scale-110 hover:shadow-xl'>
                   <ChevronLeft className='h-3.5 w-3.5' />
                 </button>
               </TooltipTrigger>
@@ -316,11 +327,13 @@ export const CodeSnapshotView = () => {
           <div
             className={cn(
               'shrink-0 border-l transition-all duration-300 ease-in-out',
-              showControls ? 'max-w-[350px] opacity-100' : 'max-w-0 overflow-hidden opacity-0',
+              showControls
+                ? 'w-[390px] max-w-[390px] opacity-100'
+                : 'w-0 max-w-0 overflow-hidden opacity-0',
             )}>
             <div
               className={cn(
-                'h-full overflow-hidden transition-opacity duration-300',
+                'h-full w-full overflow-hidden transition-opacity duration-300',
                 showControls ? 'opacity-100' : 'opacity-0',
               )}>
               <SnapshotControls />
