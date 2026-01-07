@@ -4,6 +4,7 @@ import { stripHTML } from '@/shared/utils/strip-html'
 import { isValidWebUrl } from '@/shared/utils/url-validation-web'
 import { Readability } from '@mozilla/readability'
 import { JSDOM } from 'jsdom'
+import * as cheerio from 'cheerio'
 
 export interface ScrapeHtmlResponse {
   success: boolean
@@ -21,7 +22,8 @@ export async function scrapperHtmlV2(url: string): Promise<ScrapeHtmlResponse> {
     }
 
     const abortController = new AbortController()
-    const timeoutId = setTimeout(() => abortController.abort(), 15000)
+    // Reduzido para 8.5s para evitar timeout da Vercel (limite de 10s)
+    const timeoutId = setTimeout(() => abortController.abort(), 8500)
 
     let response: Response
     try {
@@ -50,59 +52,79 @@ export async function scrapperHtmlV2(url: string): Promise<ScrapeHtmlResponse> {
 
     let html = await response.text()
 
-    // --- LIMPEZA DE CHOQUE PARA EVITAR CRASH DO JSDOM ---
-    // Remove scripts, iframes e principalmente ESTILOS que causam erro no parser do JSDOM
-    html = html
-      .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gim, '')
-      .replace(/<iframe\b[^>]*>[\s\S]*?<\/iframe>/gim, '')
-      .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gim, '') // Remove blocos CSS
-      .replace(/style\s*=\s*["'][^"']*["']/gim, '') // Remove estilos inline (Causa do erro)
+    // === 1. PROCESSAMENTO INICIAL COM CHEERIO (MUITO MAIS LEVE QUE JSDOM) ===
+    // Cheerio é ~10x mais rápido e usa menos memória que JSDOM
+    const $ = cheerio.load(html, {
+      decodeEntities: true,
+      xmlMode: false,
+    })
 
-    const dom = new JSDOM(html, { url })
-    const doc = dom.window.document
+    // Remove scripts, iframes e estilos (mais eficiente com Cheerio)
+    $('script').remove()
+    $('iframe').remove()
+    $('style').remove()
+    // Remove estilos inline
+    $('[style]').removeAttr('style')
 
-    // === 2. CAPTURA DA IMAGEM DE CAPA (METADATA) ===
+    // === 2. CAPTURA DA IMAGEM DE CAPA (METADATA) COM CHEERIO ===
     const ogImage =
-      doc.querySelector('meta[property="og:image"]')?.getAttribute('content') ||
-      doc.querySelector('meta[name="twitter:image"]')?.getAttribute('content') ||
-      doc.querySelector('link[rel="image_src"]')?.getAttribute('href')
+      $('meta[property="og:image"]').attr('content') ||
+      $('meta[name="twitter:image"]').attr('content') ||
+      $('link[rel="image_src"]').attr('href') ||
+      null
 
-    // === 3. RESGATE DE IMAGENS DO CORPO (LAZY LOAD) ===
-    doc.querySelectorAll('img').forEach((img: any) => {
+    // === 3. RESGATE DE IMAGENS DO CORPO (LAZY LOAD) COM CHEERIO ===
+    $('img').each((_, img) => {
+      const $img = $(img)
       const potentialSources = [
-        img.getAttribute('data-src'),
-        img.getAttribute('data-original'),
-        img.getAttribute('data-original-src'),
-        img.getAttribute('data-lazy-src'),
-        img.getAttribute('srcset')?.split(',')[0]?.split(' ')[0],
+        $img.attr('data-src'),
+        $img.attr('data-original'),
+        $img.attr('data-original-src'),
+        $img.attr('data-lazy-src'),
+        $img.attr('srcset')?.split(',')[0]?.split(' ')[0],
       ]
 
       const bestSrc = potentialSources.find((src) => src && src.trim() !== '')
-      if (bestSrc) img.setAttribute('src', bestSrc)
+      if (bestSrc) {
+        $img.attr('src', bestSrc)
+      }
 
-      img.removeAttribute('srcset')
-      img.removeAttribute('loading')
-      img.style.display = 'block' // Garante visibilidade já que removemos estilos globais
+      $img.removeAttr('srcset').removeAttr('loading')
 
-      const currentSrc = img.getAttribute('src')
+      const currentSrc = $img.attr('src')
       if (currentSrc) {
         try {
           const absoluteUrl = new URL(currentSrc, url).href
-          img.setAttribute('src', absoluteUrl)
-        } catch (e) {}
+          $img.attr('src', absoluteUrl)
+        } catch (e) {
+          // Ignora erros de URL inválida
+        }
       }
     })
 
-    doc.querySelectorAll('a').forEach((a: any) => {
-      if (a.hasAttribute('href')) {
+    // === 4. PROCESSAMENTO DE LINKS COM CHEERIO ===
+    $('a').each((_, link) => {
+      const $link = $(link)
+      const href = $link.attr('href')
+      if (href) {
         try {
-          a.setAttribute('href', new URL(a.getAttribute('href'), url).href)
-        } catch (e) {}
+          $link.attr('href', new URL(href, url).href)
+        } catch (e) {
+          // Ignora erros de URL inválida
+        }
       }
-      a.removeAttribute('target')
+      $link.removeAttr('target')
     })
 
-    // === 4. PROCESSAMENTO READABILITY ===
+    // === 5. EXTRAIR TÍTULO COM CHEERIO ===
+    const title = $('title').text() || $('meta[property="og:title"]').attr('content') || ''
+
+    // === 6. PROCESSAMENTO READABILITY (PRECISA DE DOM REAL) ===
+    // Cria JSDOM apenas com o HTML já processado pelo Cheerio (muito mais leve)
+    const processedHtml = $.html()
+    const dom = new JSDOM(processedHtml, { url })
+    const doc = dom.window.document
+
     const reader = new Readability(doc, {
       keepClasses: false,
       debug: false,
@@ -111,17 +133,19 @@ export async function scrapperHtmlV2(url: string): Promise<ScrapeHtmlResponse> {
     const article = reader.parse()
 
     if (!article || !article.content) {
+      // Fallback: usa o body processado pelo Cheerio
+      const bodyHtml = $('body').html() || $('html').html() || ''
       return {
         success: true,
-        html: `<div class="raw-content-fallback">${doc.body.innerHTML}</div>`,
-        title: doc.title,
+        html: `<div class="raw-content-fallback">${bodyHtml}</div>`,
+        title: title,
         excerpt: '',
       }
     }
 
     let finalHtml = article.content
 
-    // === 5. INJEÇÃO DA CAPA (FEATURED IMAGE) ===
+    // === 7. INJEÇÃO DA CAPA (FEATURED IMAGE) ===
     if (ogImage) {
       try {
         const imageName = ogImage.split('/').pop()?.split('?')[0] || 'xyz-aleatorio'
@@ -144,7 +168,7 @@ export async function scrapperHtmlV2(url: string): Promise<ScrapeHtmlResponse> {
     return {
       success: true,
       html: finalHtml,
-      title: article.title || '',
+      title: article.title || title,
       excerpt: stripHTML(article.excerpt || ''),
     }
   } catch (error) {

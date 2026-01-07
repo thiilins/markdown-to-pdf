@@ -1,108 +1,98 @@
-# 📄 Markdown to PDF Pro
+# 🛠️ MD Tools Pro - Suite Completa de Ferramentas para Desenvolvedores
 
-Uma aplicação web moderna e completa para converter documentos Markdown em PDFs profissionais com
-preview em tempo real, editor avançado e configurações personalizáveis.
+Uma plataforma web moderna e completa com **19+ ferramentas** essenciais para desenvolvedores,
+incluindo formatadores, conversores, editores de código e utilitários de segurança. Focada em
+produtividade, com interface intuitiva e recursos avançados.
 
 ![Next.js](https://img.shields.io/badge/Next.js-16.0.6-black?style=flat-square&logo=next.js)
 ![React](https://img.shields.io/badge/React-19.2.0-blue?style=flat-square&logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38bdf8?style=flat-square&logo=tailwind-css)
+![19+ Tools](https://img.shields.io/badge/Tools-19+-green?style=flat-square)
 
-## ✨ Características
+## ✨ Categorias de Ferramentas
 
-### 🎨 Editor Markdown Avançado
+### 📝 Markdown & Documentação (5 ferramentas)
 
-- **Editor Monaco** com syntax highlighting
-- **Barra de ferramentas completa** com formatação rápida:
-  - Cabeçalhos (H1-H6)
-  - Formatação de texto (negrito, itálico, riscado)
-  - Links e imagens
-  - Listas (ordenadas, não ordenadas, checkboxes)
-  - Citações, blocos de código, tabelas
-  - Quebra de página
-  - Desfazer/Refazer
-  - **Formatação automática com Prettier** ✨
-- Suporte a temas (claro, escuro, automático)
-- Configurações personalizáveis (tamanho da fonte, numeração de linhas, minimap)
+- **MD Editor** - Editor Markdown com visualização em tempo real
+- **MD to PDF** - Converta documentos Markdown para PDF profissional com configurações avançadas
+- **MD to HTML** - Transforme Markdown em HTML puro e limpo
+- **Web Extractor** - Extraia artigos de sites e converta para Markdown
+- **Code Snapshot** - Crie imagens estéticas de trechos de código com syntax highlighting
 
-### 📊 Preview em Tempo Real
+### 🎨 Formatadores de Código (5 ferramentas)
 
-- **Preview realista** do documento final
-- Visualização contínua com quebras de página respeitadas na impressão
-- Zoom ajustável (70% - 150%)
-- Suporte a quebras de página manuais
-- Espaçamento fixo entre páginas independente do zoom
+- **JSON Formatter** - Valide, visualize e formate objetos JSON com tree view
+- **SQL Formatter** - Beautifier para consultas SQL complexas
+- **HTML Formatter** - Indente e organize código HTML
+- **CSS Formatter** - Organize e padronize folhas de estilo
+- **JavaScript Formatter** - Formate e verifique sintaxe JavaScript/TypeScript
 
-### ⚙️ Configurações Avançadas
+### 🔄 Conversores & Utilitários (6 ferramentas)
 
-#### 📐 Configuração de Página
+- **JSON to TypeScript** - Gere interfaces TypeScript automaticamente a partir de JSON
+- **Diff Checker** - Compare textos linha a linha e encontre diferenças
+- **Base64 Converter** - Codifique e decodifique Base64 (texto e arquivos)
+- **HTML to Text** - Extraia texto puro removendo tags HTML
+- **Data Extractor** - Busque Emails, CPFs, URLs e outros padrões em textos
+- **Gist Explorer** - Busque, visualize e gerencie Gists do GitHub
 
-- **Tamanhos padrão**: A4, A3, Letter, Legal, Tabloid
-- Orientação (retrato/paisagem)
-- **Unidade de medida global** (mm/cm/px) com conversão automática
-- Margens personalizáveis com presets:
-  - Mínima (5mm) - padrão
-  - Estreita (10mm) - **padrão aplicado automaticamente**
-  - Normal (20mm)
-  - Larga (30mm)
-  - Personalizada
-- Padding configurável
+### 🔐 Segurança & Acesso (2 ferramentas)
 
-#### 🎨 Tipografia e Temas
+- **Password Generator** - Crie senhas fortes e aleatórias com configurações personalizadas
+- **JWT Decoder** - Decodifique e inspecione tokens JWT para debugging
 
-- **Fontes personalizáveis**:
-  - Fontes para títulos
-  - Fontes para corpo do texto
-  - Fontes para código
-  - Fontes para citações
-- **Tamanhos configuráveis**:
-  - Tamanho base
-  - Tamanhos de H1, H2, H3
-  - Altura da linha
-- **Presets de tema**:
-  - Classic (clássico)
-  - Modern (moderno)
-  - Dark (escuro)
-  - Minimalist (minimalista)
-  - Warm (quente)
-  - Cold (frio)
-  - Custom (personalizado)
-- Cores personalizáveis para:
-  - Texto, fundo, títulos
-  - Blocos de código
-  - Links, citações, bordas
-- **Preview visual** das cores selecionadas
+## 🌟 Destaques Técnicos
 
-#### 💻 Configuração do Editor
+### 🎨 Editor Monaco Avançado
 
-- Tema (claro, escuro, automático)
-- Tamanho da fonte (10px - 20px)
-- Quebra de linha
-- Minimap (ativado/desativado)
-- Números de linha (on, off, relative, interval)
+Várias ferramentas utilizam o poderoso **Monaco Editor** (o mesmo do VS Code):
 
-### 📤 Exportação
+- Syntax highlighting para múltiplas linguagens
+- IntelliSense e autocompletar
+- Temas personalizáveis (claro, escuro, automático)
+- Configurações avançadas (tamanho da fonte, numeração de linhas, minimap)
+- Formatação automática com Prettier
 
-- **Imprimir**: Abre o diálogo de impressão do navegador
-- **Baixar PDF**: Gera PDF via Server Action (Next.js 16+) com segurança aprimorada
-  - Execução no servidor mantém URL e token da API seguros
-  - Token enviado via header `x-api-key` (não exposto no frontend)
-  - Suporte a timeout e tratamento de erros robusto
-- Suporte a múltiplas páginas
-- Preserva formatação e cores (suporta cores modernas: oklch, lab)
-- Qualidade de impressão otimizada
+### 📐 Markdown to PDF - Recurso Premium
 
-### 🔧 Funcionalidades Técnicas
+Nossa ferramenta principal com recursos profissionais:
 
-- Suporte completo a **GitHub Flavored Markdown (GFM)**
-- Renderização de tabelas, listas de tarefas, código com syntax highlighting
-- Quebra de linha inteligente em blocos de código
-- Suporte a HTML no Markdown (para quebras de página)
-- **Formatação automática com Prettier** para Markdown
-- **Server Actions** (Next.js 16+) para geração segura de PDF
-- Persistência de configurações no `localStorage`
-- Interface responsiva e moderna com design system consistente
-- **Segurança**: Credenciais de API mantidas no servidor, nunca expostas no frontend
+- **Preview em tempo real** realista do documento final
+- **Configuração de página**:
+  - Tamanhos: A4, A3, Letter, Legal, Tabloid
+  - Orientação (retrato/paisagem)
+  - Margens com presets (mínima, estreita, normal, larga)
+  - Unidade de medida global (mm/cm/px)
+- **Tipografia avançada**:
+  - Fontes personalizáveis (títulos, corpo, código, citações)
+  - Tamanhos configuráveis para H1, H2, H3
+  - Altura da linha ajustável
+- **26+ Temas de cores** (Classic, Modern, Dark, Minimalist, etc.)
+- **Exportação profissional**:
+  - Imprimir via navegador
+  - Geração de PDF via Server Action (seguro)
+  - Múltiplas páginas com quebras respeitadas
+- **Barra de ferramentas completa** com formatação rápida
+
+### 🎯 Formatadores Inteligentes
+
+Todos os formatadores incluem:
+
+- **Validação em tempo real** com mensagens de erro claras
+- **Minificação e beautify** com um clique
+- **Tree view** para JSON (visualização hierárquica)
+- **Syntax highlighting** específico para cada linguagem
+- **Copiar resultado** com feedback visual
+- **Temas claro/escuro** sincronizados
+
+### 🔒 Segurança e Privacidade
+
+- **Server Actions** (Next.js 16+) para operações sensíveis
+- **Credenciais nunca expostas** no frontend
+- **Processamento local** sempre que possível
+- **Sem armazenamento em nuvem** - seus dados ficam no navegador
+- **IndexedDB** para persistência local segura
 
 ## 🚀 Instalação
 
@@ -157,42 +147,39 @@ preview em tempo real, editor avançado e configurações personalizáveis.
    yarn dev
    ```
 
-5. **Acesse a aplicação** Abra [http://localhost:3000](http://localhost:3000) no seu navegador.
+5. **Acesse a aplicação**
+
+   Abra [http://localhost:3000](http://localhost:3000) no seu navegador.
 
 ## 📖 Como Usar
 
-### 1. Escreva seu Markdown
+### Navegação
 
-Use o editor à esquerda para escrever ou colar seu conteúdo Markdown. A barra de ferramentas
-facilita a formatação sem precisar digitar a sintaxe manualmente.
+A página inicial apresenta todas as ferramentas organizadas por categoria. Clique em qualquer
+ferramenta para começar a usar.
 
-### 2. Formate seu Documento
+### Ferramentas de Formatação
 
-Use o botão de formatação (✨) na barra de ferramentas para formatar automaticamente o Markdown
-usando Prettier. Isso garante consistência e legibilidade do código.
+1. Cole ou digite seu código no editor
+2. Clique em "Formatar" ou "Beautify"
+3. Copie o resultado formatado
+4. Para minificar, use o botão "Minify"
 
-### 3. Configure o Documento
+### Markdown to PDF
 
-Clique no ícone de configurações (⚙️) no cabeçalho para acessar o painel lateral de configurações:
+1. Escreva seu Markdown no editor à esquerda
+2. Configure o documento no painel de configurações (⚙️):
+   - Tamanho da página e margens
+   - Fontes e tipografia
+   - Tema de cores
+3. Visualize o preview em tempo real
+4. Exporte como PDF ou imprima
 
-- **Página**: Tamanho, orientação, margens (com unidade global), padding
-- **Tipografia**: Fontes, tamanhos e altura da linha
-- **Editor**: Tema, tamanho da fonte, opções de visualização
-- **Tema**: Cores e estilo visual com preview
+### Conversores
 
-### 4. Visualize o Preview
-
-O painel direito mostra uma pré-visualização realista do documento. As quebras de página são
-respeitadas durante a impressão/exportação.
-
-### 5. Exporte
-
-- **Imprimir**: Clique em "Exportar" → "Imprimir" para abrir o diálogo de impressão
-- **Baixar PDF**: Clique em "Exportar" → "Baixar PDF" para gerar o arquivo PDF
-
-### 6. Quebra de Página
-
-Use o botão de quebra de página na barra de ferramentas para forçar uma nova página no documento.
+1. Cole o conteúdo de origem
+2. A conversão acontece automaticamente
+3. Copie ou baixe o resultado
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -209,6 +196,7 @@ Use o botão de quebra de página na barra de ferramentas para forçar uma nova 
 - **[shadcn/ui](https://ui.shadcn.com/)** - Componentes UI
 - **[Radix UI](https://www.radix-ui.com/)** - Componentes primitivos acessíveis
 - **[Lucide React](https://lucide.dev/)** - Ícones
+- **[Framer Motion](https://www.framer.com/motion/)** - Animações
 
 ### Editor e Markdown
 
@@ -220,8 +208,7 @@ Use o botão de quebra de página na barra de ferramentas para forçar uma nova 
 
 ### PDF e Impressão
 
-- **[html2canvas-pro](https://github.com/yorickshan/html2canvas-pro)** - Captura de tela (suporta
-  cores modernas)
+- **[html2canvas-pro](https://github.com/yorickshan/html2canvas-pro)** - Captura de tela
 - **[jsPDF](https://github.com/parallax/jsPDF)** - Geração de PDF no cliente
 - **[react-to-print](https://github.com/gregnb/react-to-print)** - Impressão do navegador
 - **Server Actions (Next.js 16+)** - Geração segura de PDF via API externa
@@ -231,238 +218,156 @@ Use o botão de quebra de página na barra de ferramentas para forçar uma nova 
 - **[react-resizable-panels](https://github.com/bvaughn/react-resizable-panels)** - Painéis
   redimensionáveis
 - **[zod](https://zod.dev/)** - Validação de esquemas
+- **[@mozilla/readability](https://github.com/mozilla/readability)** - Extração de conteúdo web
+- **[jsdom](https://github.com/jsdom/jsdom)** - Manipulação DOM no servidor
 
 ## 📁 Estrutura do Projeto
 
 ```text
-md-to-pdf-pro/
+md-tools-pro/
 ├── src/
 │   ├── app/
-│   │   ├── (home)/              # Grupo de rotas home
-│   │   ├── (tools)/             # Grupo de rotas tools
+│   │   ├── (home)/              # Landing page
+│   │   ├── (tools)/             # Todas as 19 ferramentas
+│   │   │   ├── md-to-pdf/       # Ferramenta principal
+│   │   │   ├── json-formatter/
+│   │   │   ├── sql-formatter/
+│   │   │   ├── diff-checker/
+│   │   │   └── ...              # Outras ferramentas
 │   │   ├── actions/             # Server Actions
-│   │   │   └── pdf.ts           # Server Action para geração de PDF
-│   │   ├── _components/         # Componentes da aplicação
-│   │   │   ├── app-header.tsx   # Cabeçalho com controles
-│   │   │   ├── markdown-editor.tsx  # Editor Monaco
-│   │   │   ├── markdown-toolbar.tsx # Barra de ferramentas
-│   │   │   ├── preview-panel.tsx    # Preview do documento
-│   │   │   ├── preview-style.tsx    # Estilos do preview
-│   │   │   ├── print-style.tsx      # Estilos de impressão
-│   │   │   ├── settings/            # Componentes de configuração
-│   │   │   │   ├── index.tsx        # Painel lateral (Sheet)
-│   │   │   │   ├── page-size.tsx    # Configuração de página
-│   │   │   │   ├── typography.tsx   # Configuração de tipografia
-│   │   │   │   ├── theme.tsx        # Configuração de tema
-│   │   │   │   └── editor.tsx       # Configuração do editor
-│   │   │   └── view.tsx             # Componente principal
-│   │   ├── globals.css          # Estilos globais
-│   │   ├── layout.tsx           # Layout da aplicação
-│   │   └── page.tsx             # Página inicial
-│   ├── components/              # Componentes reutilizáveis
-│   │   ├── ui/                  # Componentes shadcn/ui
-│   │   └── custom-ui/           # Componentes customizados
+│   │   │   ├── pdf.ts           # Geração de PDF
+│   │   │   └── scrapper-html-v2.ts
+│   │   └── api/                 # API Routes
+│   ├── components/
+│   │   ├── custom-ui/           # Componentes customizados
+│   │   ├── layout-components/   # Componentes de layout
+│   │   ├── markdown-editor/     # Editor Monaco
+│   │   ├── settings-modal/      # Modais de configuração
+│   │   └── ui/                  # Componentes shadcn/ui
 │   ├── hooks/                   # React Hooks customizados
-│   │   └── use-config.ts        # Hook de configuração
-│   ├── lib/                     # Utilitários e helpers
-│   │   ├── pdf-utils.ts         # Utilitários de PDF (cliente)
-│   │   └── utils.ts             # Utilitários gerais
-│   ├── shared/                  # Código compartilhado
-│   │   └── contexts/            # React Contexts
-│   │       ├── mdToPdfContext.tsx  # Contexto principal
-│   │       └── configContext.tsx    # Contexto de configuração
-│   ├── types/                   # Definições de tipos TypeScript
-│   │   └── global.d.ts         # Tipos globais
-│   └── env.ts                   # Configuração de variáveis de ambiente
+│   │   ├── use-persisted-in-db.tsx
+│   │   └── use-persisted-state.ts
+│   ├── lib/                     # Utilitários
+│   ├── services/                # Serviços externos
+│   │   ├── gistService.ts
+│   │   ├── pdfService.ts
+│   │   └── importUrlService.ts
+│   ├── shared/
+│   │   ├── @types/              # Tipos globais
+│   │   ├── constants/           # Constantes (lista de ferramentas)
+│   │   ├── contexts/            # React Contexts
+│   │   ├── layouts/             # Layouts compartilhados
+│   │   ├── styles/              # Estilos globais
+│   │   └── utils/               # Utilitários compartilhados
+│   └── env.ts                   # Configuração de ambiente
 ├── public/                      # Arquivos estáticos
-├── components.json              # Configuração shadcn/ui
-├── env.tpl                      # Template de variáveis de ambiente
-├── .env.local                   # Variáveis de ambiente (não versionado)
+├── docs/                        # Documentação
+│   ├── features-novas-v2.md
+│   ├── roadmap-features.md
+│   └── documentacao.md          # Documentação comercial
 └── package.json
-```
-
-## ⚙️ Configurações Disponíveis
-
-### Tamanhos de Página
-
-- A4 (210mm × 297mm)
-- A3 (297mm × 420mm)
-- Letter (8.5" × 11")
-- Legal (8.5" × 14")
-- Tabloid (11" × 17")
-
-### Presets de Margem
-
-- **Mínima**: 5mm em todos os lados
-- **Estreita**: 10mm em todos os lados (padrão)
-- **Normal**: 20mm em todos os lados
-- **Larga**: 30mm em todos os lados
-- **Personalizada**: Configure individualmente
-
-### Unidades de Medida
-
-- **Milímetros (mm)** - Padrão para documentos
-- **Centímetros (cm)** - Alternativa ao mm
-- **Pixels (px)** - Para design web
-
-A unidade selecionada é aplicada globalmente a todas as margens e ao padding, com conversão
-automática entre unidades.
-
-### Presets de Tema
-
-Cada preset inclui cores pré-configuradas para:
-
-- Texto e fundo
-- Títulos
-- Blocos de código
-- Links
-- Citações
-- Bordas
-
-## 🎯 Exemplos de Uso
-
-### Markdown Básico
-
-```markdown
-# Meu Documento
-
-Este é um parágrafo com **texto em negrito** e _texto em itálico_.
-
-## Lista
-
-- Item 1
-- Item 2
-- Item 3
-```
-
-### Tabela
-
-```markdown
-| Coluna 1 | Coluna 2 | Coluna 3 |
-| -------- | -------- | -------- |
-| Dados    | Dados    | Dados    |
-```
-
-### Código
-
-````markdown
-```javascript
-function exemplo() {
-  return 'Olá, mundo!'
-}
-```
-````
-
-### Quebra de Página
-
-```markdown
-Conteúdo da primeira página...
-
-<div class="page-break"></div>
-
-Conteúdo da segunda página...
 ```
 
 ## 🔐 Segurança
 
 A aplicação implementa práticas de segurança para proteger credenciais:
 
-- **Server Actions**: A geração de PDF via API externa é feita através de Server Actions do Next.js
-  16+
-- **Variáveis de Servidor**: `PDF_GENERATE_URL` e `PDF_GENERATE_TOKEN` são variáveis de servidor
-  (sem `NEXT_PUBLIC_`)
-- **Token no Header**: O token é enviado via header `x-api-key`, nunca exposto no código do cliente
-- **Validação no Servidor**: Todas as validações e chamadas à API são feitas no servidor
+- **Server Actions**: Operações sensíveis executadas no servidor
+- **Variáveis de Servidor**: Credenciais nunca expostas no cliente
+- **Token no Header**: Autenticação via header `x-api-key`
+- **Validação no Servidor**: Todas as chamadas à API validadas
+- **IndexedDB**: Dados do usuário armazenados localmente, nunca na nuvem
 
 > **⚠️ Importante**: Nunca adicione o prefixo `NEXT_PUBLIC_` às variáveis que contêm credenciais ou
 > URLs sensíveis.
 
 ## 🐛 Solução de Problemas
 
-### PDF não está gerando corretamente
+### Ferramentas não carregam
 
-- Verifique se o conteúdo não excede muito o tamanho da página
-- Tente reduzir o zoom antes de gerar o PDF
-- Certifique-se de que as imagens estão carregadas
-- Verifique se as variáveis de ambiente `PDF_GENERATE_URL` e `PDF_GENERATE_TOKEN` estão configuradas
-  corretamente
-- Verifique o console do navegador e os logs do servidor para erros
-
-### Preview não mostra múltiplas páginas
-
-- O preview mostra uma visualização contínua
-- As quebras de página são respeitadas na impressão/PDF
-- Ajuste as margens se necessário
-
-### Cores não aparecem no PDF
-
-- O `html2canvas-pro` suporta cores modernas (oklch/lab)
-- Se ainda houver problemas, verifique o console do navegador
-
-### Formatação Prettier não funciona
-
-- Certifique-se de que o Prettier está instalado (`pnpm install`)
+- Limpe o cache do navegador (Ctrl + Shift + Delete)
+- Reinicie o servidor de desenvolvimento
 - Verifique o console do navegador para erros
-- O Prettier formata apenas Markdown válido
 
-### Erro ao gerar PDF via Server Action
+### PDF não gera corretamente
 
-- Verifique se `PDF_GENERATE_URL` está configurada no `.env.local`
-- Verifique se `PDF_GENERATE_TOKEN` está configurada corretamente (se necessário)
+- Verifique se `PDF_GENERATE_URL` e `PDF_GENERATE_TOKEN` estão configuradas
 - Certifique-se de que as variáveis **não** têm o prefixo `NEXT_PUBLIC_`
-- Reinicie o servidor de desenvolvimento após alterar variáveis de ambiente
-- Verifique se a API externa está acessível e retornando o formato esperado
+- Reinicie o servidor após alterar variáveis de ambiente
+- Verifique se a API externa está acessível
+
+### Formatador apresenta erro
+
+- Verifique se o código de entrada é válido
+- Alguns formatadores têm limites de tamanho
+- Tente minificar antes de formatar códigos muito grandes
+
+### Monaco Editor não aparece
+
+- Aguarde o carregamento completo da página
+- Verifique sua conexão com a internet (CDN do Monaco)
+- Limpe o cache do navegador
 
 ## 🎨 Design System
 
 A aplicação utiliza um design system moderno e consistente:
 
-- **Cards coloridos** com gradientes para cada seção de configuração
-- **Badges informativos** mostrando valores atuais
+- **Cards com gradientes** para cada categoria
+- **Animações suaves** com Framer Motion
 - **Ícones contextuais** para melhor identificação
-- **Layout responsivo** com painéis redimensionáveis
+- **Layout responsivo** adaptável a todos os dispositivos
 - **Temas claro/escuro** com suporte automático
-
-## 🤝 Contribuindo
-
-Contribuições são bem-vindas! Sinta-se à vontade para:
-
-1. Fazer fork do projeto
-2. Criar uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abrir um Pull Request
+- **Feedback visual** em todas as ações
 
 ## 📝 Variáveis de Ambiente
 
 ### Variáveis Públicas (Frontend)
 
-Variáveis com prefixo `NEXT_PUBLIC_` são expostas no código do cliente:
-
-- `NEXT_PUBLIC_API_URL` - URL da API (se necessário para outras funcionalidades)
+```bash
+NEXT_PUBLIC_API_URL='https://api.exemplo.com'
+```
 
 ### Variáveis de Servidor (Backend)
 
-Variáveis **sem** o prefixo `NEXT_PUBLIC_` permanecem seguras no servidor:
-
-- `PDF_GENERATE_URL` - URL da API de geração de PDF (obrigatória)
-- `PDF_GENERATE_TOKEN` - Token de autenticação da API (opcional, enviado via header `x-api-key`)
-
-### Exemplo de `.env.local`
-
 ```bash
-# Variáveis públicas
-NEXT_PUBLIC_API_URL='https://api.exemplo.com'
-
-# Variáveis de servidor (seguras)
 PDF_GENERATE_URL='https://api-pdf.exemplo.com/gerar-pdf'
 PDF_GENERATE_TOKEN='seu-token-secreto-aqui'
 ```
 
-## Correções Necessárias
+## 🗺️ Roadmap
 
-- Renderizacao imediata ao trocar tema/configs
-- Correção de Carregamento de Fontes
+### Em Desenvolvimento
+
+- ✅ Suite com 19+ ferramentas funcionais
+- ✅ Editor Monaco integrado
+- ✅ Sistema de temas
+- 🚧 Suporte a Mermaid.js para diagramas
+- 🚧 Suporte a LaTeX/KaTeX para equações
+- 🚧 Header/footer com imagens/logos
+
+### Planejado
+
+- 📋 Templates prontos para Markdown
+- 📋 Histórico de documentos
+- 📋 Exportação em batch
+- 📋 Plugins customizados
+- 📋 API pública
+
+## 🤝 Contribuindo
+
+Contribuições são bem-vindas! Para contribuir:
+
+1. Faça fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/NovaFeature`)
+3. Commit suas mudanças (`git commit -m 'Adiciona NovaFeature'`)
+4. Push para a branch (`git push origin feature/NovaFeature`)
+5. Abra um Pull Request
+
+## 📄 Documentação Adicional
+
+- [Documentação Comercial Completa](./docs/documentacao.md) - Guia detalhado de todas as ferramentas
+- [Roadmap de Features](./docs/roadmap-features.md) - Planejamento futuro
+- [Análise de Features](./docs/features-novas-v2.md) - Análise técnica
 
 ## 📝 Licença
 
@@ -471,11 +376,10 @@ Este projeto é privado. Todos os direitos reservados.
 ## 🙏 Agradecimentos
 
 - [shadcn](https://ui.shadcn.com/) pelos componentes UI
-- [Monaco Editor](https://microsoft.github.io/monaco-editor/) pelo editor
-- [html2canvas-pro](https://github.com/yorickshan/html2canvas-pro) pelo suporte a cores modernas
-- [Prettier](https://prettier.io/) pela formatação de código
-- Todos os mantenedores das bibliotecas utilizadas
+- [Monaco Editor](https://microsoft.github.io/monaco-editor/) pelo editor de código
+- [Vercel](https://vercel.com/) pela plataforma Next.js
+- Todos os mantenedores das bibliotecas open source utilizadas
 
 ---
 
-Desenvolvido com ❤️ usando Next.js e React
+Desenvolvido com ❤️ usando Next.js 16 e React 19

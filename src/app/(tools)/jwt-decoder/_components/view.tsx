@@ -8,6 +8,7 @@ import {
   Clock,
   Copy,
   Database,
+  Edit,
   FileCode2,
   Fingerprint,
   Info,
@@ -33,27 +34,75 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 
 import { CodeFormatterEditor } from '../../_components/code-formatter-editor'
-import { decodeJwt, formatJson, type JwtParts } from '../../_components/jwt-utils'
+import { decodeJwt, formatJson, generateJwtToken, type JwtParts } from '../../_components/jwt-utils'
 
 // Token de exemplo padrão
 const DEMO_TOKEN =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE3Mjc4NzEwMjIsImlzcyI6Imh0dHBzOi8vZXhhbXBsZS5jb20iLCJhdWQiOiJodHRwczovL2V4YW1wbGUuY29tIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
 
-// Mapeamento de claims padrão JWT
-const STANDARD_CLAIMS: Record<string, string> = {
-  sub: 'Subject - Identificador único do usuário',
-  iss: 'Issuer - Emissor do token',
-  aud: 'Audience - Público-alvo do token',
-  exp: 'Expiration Time - Data de expiração',
-  nbf: 'Not Before - Não válido antes de',
-  iat: 'Issued At - Data de emissão',
-  jti: 'JWT ID - Identificador único do token',
-  typ: 'Type - Tipo do token',
-  alg: 'Algorithm - Algoritmo de assinatura',
-  kid: 'Key ID - Identificador da chave',
+// Mapeamento de claims padrão JWT com descrições detalhadas
+const STANDARD_CLAIMS: Record<
+  string,
+  { short: string; description: string; format?: (value: any) => string }
+> = {
+  sub: {
+    short: 'Subject',
+    description: 'Identificador único do usuário ou entidade para o qual o token foi emitido',
+  },
+  iss: {
+    short: 'Issuer',
+    description: 'Identifica o serviço ou aplicação que emitiu o token (geralmente uma URL)',
+  },
+  aud: {
+    short: 'Audience',
+    description:
+      'Identifica os destinatários para os quais o token é destinado (pode ser uma string ou array)',
+  },
+  exp: {
+    short: 'Expiration Time',
+    description: 'Timestamp Unix (em segundos) indicando quando o token expira',
+    format: (value: number) => {
+      const date = new Date(value * 1000)
+      return `${value} (${date.toLocaleString('pt-BR')})`
+    },
+  },
+  nbf: {
+    short: 'Not Before',
+    description:
+      'Timestamp Unix indicando quando o token se torna válido (não aceito antes desta data)',
+    format: (value: number) => {
+      const date = new Date(value * 1000)
+      return `${value} (${date.toLocaleString('pt-BR')})`
+    },
+  },
+  iat: {
+    short: 'Issued At',
+    description: 'Timestamp Unix indicando quando o token foi emitido/criado',
+    format: (value: number) => {
+      const date = new Date(value * 1000)
+      return `${value} (${date.toLocaleString('pt-BR')})`
+    },
+  },
+  jti: {
+    short: 'JWT ID',
+    description: 'Identificador único do token (usado para prevenir replay attacks)',
+  },
+  typ: {
+    short: 'Type',
+    description: 'Tipo do token (geralmente "JWT")',
+  },
+  alg: {
+    short: 'Algorithm',
+    description: 'Algoritmo de assinatura usado (ex: HS256, RS256, ES256)',
+  },
+  kid: {
+    short: 'Key ID',
+    description: 'Identificador da chave usada para assinar o token (usado em rotação de chaves)',
+  },
 }
 
 export default function JwtDecoderView() {
@@ -65,6 +114,9 @@ export default function JwtDecoderView() {
     isValid: false,
   })
   const [mounted, setMounted] = useState(false)
+  // Estado para simulador de modificação
+  const [editedPayload, setEditedPayload] = useState<string>('')
+  const [isEditingPayload, setIsEditingPayload] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -75,6 +127,10 @@ export default function JwtDecoderView() {
       try {
         const decoded = decodeJwt(tokenInput)
         setJwtParts(decoded)
+        // Sincroniza o payload editado quando o token muda
+        if (decoded.isValid && !isEditingPayload) {
+          setEditedPayload(formatJson(decoded.payload))
+        }
       } catch (e) {
         setJwtParts((prev) => ({ ...prev, isValid: false }))
       }
@@ -85,8 +141,9 @@ export default function JwtDecoderView() {
         signature: '',
         isValid: false,
       })
+      setEditedPayload('')
     }
-  }, [tokenInput])
+  }, [tokenInput, isEditingPayload])
 
   // Métricas do token
   const tokenMetrics = useMemo(() => {
@@ -133,11 +190,16 @@ export default function JwtDecoderView() {
     if (!jwtParts.payload || Object.keys(jwtParts.payload).length === 0) return []
 
     return Object.entries(jwtParts.payload).map(([key, value]) => {
-      const description = STANDARD_CLAIMS[key] || 'Claim customizada'
+      const claimInfo = STANDARD_CLAIMS[key]
+      const description = claimInfo
+        ? `${claimInfo.short} - ${claimInfo.description}`
+        : 'Claim customizada'
       let displayValue = value
 
-      // Formatar valores especiais
-      if (key === 'exp' || key === 'iat' || key === 'nbf') {
+      // Formatar valores especiais usando a função de formatação se disponível
+      if (claimInfo?.format) {
+        displayValue = claimInfo.format(value)
+      } else if (key === 'exp' || key === 'iat' || key === 'nbf') {
         const date = new Date(Number(value) * 1000)
         displayValue = `${value} (${date.toLocaleString('pt-BR')})`
       } else if (typeof value === 'object') {
@@ -150,10 +212,25 @@ export default function JwtDecoderView() {
         key,
         value: displayValue,
         description,
-        isStandard: !!STANDARD_CLAIMS[key],
+        shortDescription: claimInfo?.short || key,
+        fullDescription: claimInfo?.description || 'Claim customizada',
+        isStandard: !!claimInfo,
       }
     })
   }, [jwtParts.payload])
+
+  // Token gerado a partir do payload editado
+  const generatedToken = useMemo(() => {
+    if (!isEditingPayload || !editedPayload.trim()) return null
+
+    try {
+      const parsedPayload = JSON.parse(editedPayload)
+      const newToken = generateJwtToken(jwtParts.header, parsedPayload, jwtParts.signature)
+      return newToken
+    } catch {
+      return null
+    }
+  }, [editedPayload, isEditingPayload, jwtParts.header, jwtParts.signature])
 
   if (!mounted) return null
 
@@ -401,7 +478,7 @@ export default function JwtDecoderView() {
               {/* Tabs de conteúdo */}
               <Tabs defaultValue='payload' className='flex flex-1 flex-col overflow-hidden'>
                 <div className='border-b px-4 pt-3'>
-                  <TabsList className='grid w-full grid-cols-2 gap-1 sm:grid-cols-4'>
+                  <TabsList className='grid w-full grid-cols-2 gap-1 sm:grid-cols-5'>
                     <TabsTrigger value='payload' className='text-xs'>
                       Payload
                     </TabsTrigger>
@@ -410,6 +487,9 @@ export default function JwtDecoderView() {
                     </TabsTrigger>
                     <TabsTrigger value='claims' className='text-xs'>
                       Claims
+                    </TabsTrigger>
+                    <TabsTrigger value='simulator' className='text-xs'>
+                      Simulador
                     </TabsTrigger>
                     <TabsTrigger value='signature' className='text-xs'>
                       Assinatura
@@ -483,18 +563,56 @@ export default function JwtDecoderView() {
                             <TableRow key={claim.key}>
                               <TableCell>
                                 <div className='flex items-center gap-2'>
-                                  <code className='bg-muted text-primary rounded px-1.5 py-0.5 font-mono text-xs font-semibold'>
-                                    {claim.key}
-                                  </code>
+                                  {claim.isStandard ? (
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <code className='bg-muted text-primary cursor-help rounded px-1.5 py-0.5 font-mono text-xs font-semibold'>
+                                          {claim.key}
+                                        </code>
+                                      </TooltipTrigger>
+                                      <TooltipContent className='max-w-xs'>
+                                        <div className='space-y-1'>
+                                          <p className='font-semibold'>{claim.shortDescription}</p>
+                                          <p className='text-xs'>{claim.fullDescription}</p>
+                                        </div>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  ) : (
+                                    <code className='bg-muted text-primary rounded px-1.5 py-0.5 font-mono text-xs font-semibold'>
+                                      {claim.key}
+                                    </code>
+                                  )}
                                   {claim.isStandard && (
-                                    <Badge variant='outline' className='h-4 text-[9px]'>
-                                      Padrão
-                                    </Badge>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <Badge
+                                          variant='outline'
+                                          className='h-4 cursor-help text-[9px]'>
+                                          Padrão
+                                        </Badge>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p className='text-xs'>Claim padrão do JWT (RFC 7519)</p>
+                                      </TooltipContent>
+                                    </Tooltip>
                                   )}
                                 </div>
                               </TableCell>
                               <TableCell className='text-muted-foreground text-sm'>
-                                {claim.description}
+                                {claim.isStandard ? (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span className='cursor-help underline decoration-dotted'>
+                                        {claim.shortDescription}
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent className='max-w-xs'>
+                                      <p className='text-xs'>{claim.fullDescription}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                ) : (
+                                  claim.description
+                                )}
                               </TableCell>
                               <TableCell className='text-right'>
                                 <code className='bg-muted ml-auto block max-w-[300px] truncate rounded px-2 py-1 font-mono text-xs'>
@@ -506,6 +624,103 @@ export default function JwtDecoderView() {
                         )}
                       </TableBody>
                     </Table>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value='simulator' className='m-0 flex-1 overflow-hidden p-0'>
+                  <div className='flex h-full flex-col'>
+                    {/* Header do Simulador */}
+                    <div className='bg-muted/30 border-b p-4'>
+                      <div className='mb-2 flex items-center gap-2'>
+                        <Edit className='text-primary h-4 w-4' />
+                        <h3 className='font-semibold'>Simulador de Modificação</h3>
+                      </div>
+                      <p className='text-muted-foreground text-xs'>
+                        Edite o payload abaixo para ver como o token seria gerado. A assinatura não
+                        será válida, mas útil para depurar estruturas de dados.
+                      </p>
+                    </div>
+
+                    {/* Editor de Payload */}
+                    <div className='relative flex-1'>
+                      <div className='absolute top-4 right-4 z-10 flex gap-2'>
+                        <Button
+                          variant='outline'
+                          size='sm'
+                          onClick={() => {
+                            setEditedPayload(formatJson(jwtParts.payload))
+                            setIsEditingPayload(true)
+                            toast.success('Payload carregado para edição')
+                          }}
+                          className='h-8 gap-1.5 text-xs'>
+                          <Copy className='h-3 w-3' />
+                          Resetar
+                        </Button>
+                        <Button
+                          variant='outline'
+                          size='sm'
+                          onClick={() => {
+                            try {
+                              const parsed = JSON.parse(editedPayload)
+                              setJwtParts((prev) => ({ ...prev, payload: parsed }))
+                              setIsEditingPayload(false)
+                              toast.success('Payload atualizado')
+                            } catch (e) {
+                              toast.error('JSON inválido. Verifique a sintaxe.')
+                            }
+                          }}
+                          disabled={!isEditingPayload}
+                          className='h-8 gap-1.5 text-xs'>
+                          <CheckCircle2 className='h-3 w-3' />
+                          Aplicar
+                        </Button>
+                      </div>
+                      <CodeFormatterEditor
+                        value={editedPayload || formatJson(jwtParts.payload)}
+                        onChange={(value) => {
+                          setEditedPayload(value)
+                          setIsEditingPayload(true)
+                        }}
+                        language='json'
+                      />
+                    </div>
+
+                    {/* Token Gerado */}
+                    {generatedToken && (
+                      <div className='bg-muted/30 border-t p-4'>
+                        <div className='mb-2 flex items-center justify-between'>
+                          <div className='flex items-center gap-2'>
+                            <Key className='text-primary h-4 w-4' />
+                            <span className='text-sm font-semibold'>Token Gerado</span>
+                            <Badge variant='outline' className='text-[10px]'>
+                              Assinatura inválida (apenas visualização)
+                            </Badge>
+                          </div>
+                          <Button
+                            variant='outline'
+                            size='sm'
+                            onClick={() => {
+                              navigator.clipboard.writeText(generatedToken)
+                              toast.success('Token gerado copiado')
+                            }}
+                            className='h-7 gap-1.5 text-xs'>
+                            <Copy className='h-3 w-3' />
+                            Copiar
+                          </Button>
+                        </div>
+                        <div className='bg-muted/50 relative h-[120px] rounded border'>
+                          <CodeFormatterEditor
+                            value={generatedToken}
+                            onChange={() => {}}
+                            language='plaintext'
+                          />
+                        </div>
+                        <p className='text-muted-foreground mt-2 text-[10px]'>
+                          ⚠️ Este token não possui assinatura válida. Use apenas para depuração de
+                          estrutura de dados.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
 

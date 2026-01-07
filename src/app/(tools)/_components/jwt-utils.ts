@@ -129,3 +129,31 @@ export function formatJson(obj: Record<string, any>): string {
   return JSON.stringify(obj, null, 2)
 }
 
+/**
+ * Codifica string para Base64URL (usado em JWT)
+ */
+function base64UrlEncode(str: string): string {
+  return btoa(str)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '')
+}
+
+/**
+ * Gera um token JWT a partir de header e payload
+ * NOTA: A assinatura gerada não será válida (apenas para visualização)
+ */
+export function generateJwtToken(
+  header: Record<string, any>,
+  payload: Record<string, any>,
+  signature?: string,
+): string {
+  const headerEncoded = base64UrlEncode(JSON.stringify(header))
+  const payloadEncoded = base64UrlEncode(JSON.stringify(payload))
+
+  // Se uma assinatura foi fornecida, usa ela. Caso contrário, usa uma assinatura placeholder
+  const sig = signature || 'SIGNATURE_PLACEHOLDER'
+
+  return `${headerEncoded}.${payloadEncoded}.${sig}`
+}
+

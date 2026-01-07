@@ -1,9 +1,14 @@
 'use server'
 
 /**
- * Server Action para gerar PDF
+ * @deprecated Esta Server Action está deprecated. Use a API Route `/api/pdf` que faz streaming direto.
+ *
+ * Server Action para gerar PDF (LEGADO - NÃO USADO)
  * Esta função executa no servidor e faz a chamada à API de geração de PDF
  * Mantém a URL e token seguros no servidor
+ *
+ * PROBLEMA: Converte PDF para Base64, dobrando o consumo de memória no servidor
+ * SOLUÇÃO: Use `PdfService.generate()` que usa `/api/pdf` com streaming
  */
 export async function generatePDF(html: string, config: AppConfig) {
   const PDF_GENERATE_URL = process.env.PDF_GENERATE_URL
