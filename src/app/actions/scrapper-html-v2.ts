@@ -54,10 +54,8 @@ export async function scrapperHtmlV2(url: string): Promise<ScrapeHtmlResponse> {
 
     // === 1. PROCESSAMENTO INICIAL COM CHEERIO (MUITO MAIS LEVE QUE JSDOM) ===
     // Cheerio é ~10x mais rápido e usa menos memória que JSDOM
-    const $ = cheerio.load(html, {
-      decodeEntities: true,
-      xmlMode: false,
-    })
+    // decodeEntities é true por padrão, então não precisa especificar
+    const $ = cheerio.load(html)
 
     // Remove scripts, iframes e estilos (mais eficiente com Cheerio)
     $('script').remove()

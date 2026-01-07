@@ -18,10 +18,12 @@ async function loadPlugin(modulePath: string, cacheKey: string): Promise<Plugin>
 
   try {
     // Usar import dinâmico com tratamento de erro mais robusto
-    // No Turbopack, pode ser necessário usar uma forma diferente de import
+    // No Turbopack, precisa usar strings literais para análise estática
     let module: any
     try {
-      module = await import(modulePath)
+      // Usar eval para permitir import dinâmico com variável (necessário para Turbopack)
+      // eslint-disable-next-line @typescript-eslint/no-implied-eval
+      module = await Function(`return import("${modulePath}")`)()
     } catch (importError) {
       // Tentar com caminho alternativo se disponível
       console.warn(`Tentativa de import falhou para ${modulePath}, tentando alternativa...`)
@@ -299,6 +301,7 @@ export function validateCode(code: string, codeType: CodeType): ValidationResult
         break
 
       case 'sql':
+        // Validação de parênteses
         const sqlOpenParens = (code.match(/\(/g) || []).length
         const sqlCloseParens = (code.match(/\)/g) || []).length
 
@@ -308,17 +311,73 @@ export function validateCode(code: string, codeType: CodeType): ValidationResult
           )
         }
 
+        // Validação de vírgulas duplicadas ou sobrando
+        const trailingCommas = code.match(/,\s*,/g)
+        if (trailingCommas) {
+          errors.push(`Vírgulas duplicadas encontradas (${trailingCommas.length} ocorrência(s))`)
+        }
+
+        const commaBeforeFrom = code.match(/,\s*FROM\b/i)
+        if (commaBeforeFrom) {
+          errors.push('Vírgula antes de FROM encontrada. Remova a vírgula extra.')
+        }
+
+        // Validação de SELECT
         const hasSelect = code.match(/\bSELECT\b/i)
         const hasFrom = code.match(/\bFROM\b/i)
+
         if (hasSelect && !hasFrom) {
           warnings.push('SELECT encontrado sem FROM. Verifique a sintaxe da consulta')
         }
 
+        // Validação de SELECT *
         if (code.match(/\bSELECT\s+\*/i) && !code.match(/\bWHERE\b/i)) {
           warnings.push(
             'SELECT * sem WHERE pode retornar muitos resultados. Considere especificar colunas',
           )
         }
+
+        // Validação de JOIN sem ON
+        const hasJoin = code.match(/\b(INNER|LEFT|RIGHT|FULL)?\s*JOIN\b/i)
+        const hasOn = code.match(/\bON\b/i)
+        if (hasJoin && !hasOn) {
+          errors.push('JOIN encontrado sem cláusula ON. JOINs requerem condição ON')
+        }
+
+        // Validação de GROUP BY sem agregação
+        const hasGroupBy = code.match(/\bGROUP\s+BY\b/i)
+        const hasAggregation = code.match(/\b(COUNT|SUM|AVG|MAX|MIN)\s*\(/i)
+        if (hasGroupBy && !hasAggregation && hasSelect) {
+          warnings.push(
+            'GROUP BY encontrado sem funções de agregação. Verifique se é necessário',
+          )
+        }
+
+        // Validação de HAVING sem GROUP BY
+        const hasHaving = code.match(/\bHAVING\b/i)
+        if (hasHaving && !hasGroupBy) {
+          errors.push('HAVING encontrado sem GROUP BY. HAVING requer GROUP BY')
+        }
+
+        // Validação de ORDER BY sem SELECT
+        const hasOrderBy = code.match(/\bORDER\s+BY\b/i)
+        if (hasOrderBy && !hasSelect) {
+          warnings.push('ORDER BY encontrado sem SELECT. Verifique a sintaxe')
+        }
+
+        // Validação de aspas não fechadas em strings
+        const singleQuotes = (code.match(/'/g) || []).length
+        if (singleQuotes % 2 !== 0) {
+          errors.push('Aspas simples não fechadas encontradas')
+        }
+
+        // Validação de chaves desbalanceadas (para blocos PL/SQL)
+        const sqlOpenBraces = (code.match(/{/g) || []).length
+        const sqlCloseBraces = (code.match(/}/g) || []).length
+        if (sqlOpenBraces !== sqlCloseBraces) {
+          warnings.push(`Chaves desbalanceadas: ${sqlOpenBraces} abertas, ${sqlCloseBraces} fechadas`)
+        }
+
         break
     }
   } catch (error) {

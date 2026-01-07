@@ -14,6 +14,8 @@ import {
 import { FormatterEditorPanel } from '../../_components/formatter-editor-panel'
 import { FormatterHeader } from '../../_components/formatter-header'
 import { FormatterOutputPanel } from '../../_components/formatter-output-panel'
+import { JsonTreeView } from '../../_components/json-tree-view'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 const DEFAULT_JSON = `{"users":[{"id":1,"name":"João","email":"joao@example.com","active":true,"roles":["admin","user"],"metadata":{"createdAt":"2024-01-15","lastLogin":"2024-01-20"}},{"id":2,"name":"Maria","email":"maria@example.com","active":false,"roles":["user"],"metadata":{"createdAt":"2024-01-10","lastLogin":null}}],"total":2,"page":1,"limit":10}`
 
@@ -30,6 +32,7 @@ export default function JsonFormatterView() {
   const [stats, setStats] = useState({ lines: 0, chars: 0, charsFormatted: 0 })
   const [isDesktop, setIsDesktop] = useState(true)
   const [mobileTab, setMobileTab] = useState<'input' | 'output'>('input')
+  const [outputView, setOutputView] = useState<'formatted' | 'tree'>('formatted')
 
   useEffect(() => {
     const checkSize = () => setIsDesktop(window.innerWidth >= 1024)
@@ -209,13 +212,30 @@ export default function JsonFormatterView() {
 
             {mobileTab === 'output' && (
               <div className='flex flex-1 flex-col overflow-hidden'>
-                <FormatterOutputPanel
-                  code={formattedOutput}
-                  language='json'
-                  isProcessing={isProcessing}
-                  onCopy={handleCopy}
-                  stats={stats}
-                />
+                <Tabs value={outputView} onValueChange={(v) => setOutputView(v as any)} className='flex h-full flex-col'>
+                  <div className='bg-muted/30 border-b px-4 pt-3'>
+                    <TabsList className='grid w-full grid-cols-2'>
+                      <TabsTrigger value='formatted' className='text-xs'>
+                        Formatado
+                      </TabsTrigger>
+                      <TabsTrigger value='tree' className='text-xs' disabled={!validation.isValid}>
+                        Tree View
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
+                  <TabsContent value='formatted' className='m-0 flex-1 overflow-hidden'>
+                    <FormatterOutputPanel
+                      code={formattedOutput}
+                      language='json'
+                      isProcessing={isProcessing}
+                      onCopy={handleCopy}
+                      stats={stats}
+                    />
+                  </TabsContent>
+                  <TabsContent value='tree' className='m-0 flex-1 overflow-hidden'>
+                    <JsonTreeView jsonText={codeInput} />
+                  </TabsContent>
+                </Tabs>
               </div>
             )}
           </div>
@@ -244,13 +264,32 @@ export default function JsonFormatterView() {
             <ResizableHandle withHandle />
 
             <ResizablePanel defaultSize={50} minSize={30}>
-              <FormatterOutputPanel
-                code={formattedOutput}
-                language='json'
-                isProcessing={isProcessing}
-                onCopy={handleCopy}
-                stats={stats}
-              />
+              <div className='flex h-full flex-col'>
+                <Tabs value={outputView} onValueChange={(v) => setOutputView(v as any)} className='flex h-full flex-col'>
+                  <div className='bg-muted/30 border-b px-4 pt-3'>
+                    <TabsList className='grid w-full grid-cols-2'>
+                      <TabsTrigger value='formatted' className='text-xs'>
+                        Formatado
+                      </TabsTrigger>
+                      <TabsTrigger value='tree' className='text-xs' disabled={!validation.isValid}>
+                        Tree View
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
+                  <TabsContent value='formatted' className='m-0 flex-1 overflow-hidden'>
+                    <FormatterOutputPanel
+                      code={formattedOutput}
+                      language='json'
+                      isProcessing={isProcessing}
+                      onCopy={handleCopy}
+                      stats={stats}
+                    />
+                  </TabsContent>
+                  <TabsContent value='tree' className='m-0 flex-1 overflow-hidden'>
+                    <JsonTreeView jsonText={codeInput} />
+                  </TabsContent>
+                </Tabs>
+              </div>
             </ResizablePanel>
           </ResizablePanelGroup>
         )}
