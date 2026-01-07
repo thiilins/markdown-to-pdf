@@ -25,9 +25,13 @@ interface SnapshotConfig {
   footerPosition: FooterPosition // Posição do conteúdo do footer (left, center, right)
   // Posicionamento do Conteúdo
   contentVerticalAlign: ContentVerticalAlign // Alinhamento vertical do conteúdo quando não cabe (top, center, bottom)
+  // Diff Mode
+  diffMode: boolean // Ativar modo diff (detecção automática)
+  // Line Highlights
+  lineHighlights: Record<number, { comment?: string; highlighted?: boolean }> // Comentários e highlights por linha
 }
 type BackgroundType = 'solid' | 'gradient' | 'image'
-type WindowThemeType = 'mac' | 'windows' | 'linux' | 'chrome' | 'vscode' | 'none'
+type WindowThemeType = 'mac' | 'windows' | 'linux' | 'chrome' | 'vscode' | 'retro' | 'none'
 type FooterPosition = 'left' | 'center' | 'right'
 type LanguagePosition = 'header' | 'footer'
 type ContentVerticalAlign = 'top' | 'center' | 'bottom'

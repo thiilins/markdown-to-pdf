@@ -5,6 +5,54 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto
 adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.4.0] - 2025-01-XX
+
+### 🚀 Adicionado
+
+#### Code Snapshot - Modo Diff e Line Highlighting
+
+**Modo Diff:**
+- **Detecção automática** de diffs no formato git diff
+- **Parsing inteligente** de linhas adicionadas (+), removidas (-) e headers
+- **Estilos visuais diferenciados:**
+  - Linhas adicionadas: fundo verde com borda esquerda verde (`rgba(46, 160, 67)`)
+  - Linhas removidas: fundo vermelho com borda esquerda vermelha e opacidade reduzida (`rgba(248, 81, 73)`)
+  - Headers de diff: fundo cinza com texto em negrito
+- **Ativação automática** quando um diff é detectado no código
+
+**Line Highlighting Contextual:**
+- **Clique em números de linha** para adicionar comentários explicativos
+- **Popover modal** para editar comentários com:
+  - Campo de texto para adicionar/editar comentários
+  - Botão para remover comentários
+  - Atalho `Ctrl+Enter` / `Cmd+Enter` para salvar rapidamente
+  - Atalho `Escape` para cancelar
+- **Highlights visuais** (borda amarela) para linhas com comentários
+- **Persistência** de comentários no estado da configuração
+- **Suporte completo** para modo diff + highlights combinados
+
+**Preset Terminal Retro:**
+- Novo preset de mockup de janela "Terminal Retro"
+- Estilo retro minimalista com:
+  - Fundo preto (`#0a0a0a`)
+  - Texto verde terminal (`#00ff41`)
+  - Prompt `$` com cursor piscante
+  - Badge `[RETRO]` no canto direito
+  - Fonte monoespaçada
+
+### 🔧 Melhorado
+
+- **Code Snapshot Context:** Adicionados campos `diffMode` e `lineHighlights` ao config
+- **Sistema de tipos:** Expandido `WindowThemeType` para incluir `'retro'`
+- **Integração:** Modo diff e line highlighting totalmente integrados ao preview
+
+### 📝 Documentado
+
+- Utilitários de diff (`diff-utils.ts`) com funções de detecção e parsing
+- Componente de comentários (`line-comment-popover.tsx`) reutilizável
+
+---
+
 ## [0.3.0] - 2025-01-XX
 
 ### 🚀 Adicionado
@@ -12,7 +60,9 @@ adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 #### Formatadores de Dados - Melhorias Avançadas
 
 **JSON Formatter:**
-- **Copy JSON Path:** Menu de contexto e atalho de teclado (`Ctrl+Shift+P` / `Cmd+Shift+P`) para copiar o caminho JSON exato (ex: `data.users[0].profile.name`)
+
+- **Copy JSON Path:** Menu de contexto e atalho de teclado (`Ctrl+Shift+P` / `Cmd+Shift+P`) para
+  copiar o caminho JSON exato (ex: `data.users[0].profile.name`)
 - **JSON Tree View:** Visualização em árvore do JSON com:
   - Colapso/expansão de nós interativo
   - Cores diferenciadas por tipo de dado (string, number, boolean, object, array, null)
@@ -21,6 +71,7 @@ adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
   - Aba "Tree View" no formatador JSON
 
 **SQL Formatter:**
+
 - **SQL Linter Integrado:** Validações avançadas de sintaxe SQL:
   - Detecção de vírgulas duplicadas ou sobrando
   - Validação de vírgula antes de FROM
@@ -38,7 +89,8 @@ adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ### 🐛 Corrigido
 
-- **Cheerio Options:** Removidas opções não suportadas (`decodeEntities`, `xmlMode`) - Cheerio já decodifica entidades por padrão
+- **Cheerio Options:** Removidas opções não suportadas (`decodeEntities`, `xmlMode`) - Cheerio já
+  decodifica entidades por padrão
 - **Variáveis Duplicadas:** Corrigido conflito de nomes de variáveis no SQL Linter
 - **Build:** Corrigido problema de import dinâmico no Turbopack
 

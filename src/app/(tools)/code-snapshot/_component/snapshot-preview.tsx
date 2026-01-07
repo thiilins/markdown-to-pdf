@@ -20,6 +20,8 @@ import {
   onDownload,
 } from './utils'
 import { ValidateFontComponent } from './validate-font-component'
+import { isDiffCode, parseDiff, type ParsedDiff, type DiffLine } from './diff-utils'
+import { LineCommentPopover } from './line-comment-popover'
 
 interface SnapshotPreviewProps {
   previewContainerRef?: React.RefObject<HTMLDivElement | null>
@@ -72,6 +74,126 @@ export function SnapshotPreview({
   // Posição agora representa o offset de arrasto (pan)
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [calculatedFontSize, setCalculatedFontSize] = useState(config.fontSize)
+  const [selectedLineForComment, setSelectedLineForComment] = useState<number | null>(null)
+
+  // Detecção automática de diff
+  const parsedDiff = useMemo(() => {
+    if (!code) return { isDiff: false, lines: [] }
+    return parseDiff(code)
+  }, [code])
+
+  // Atualiza diffMode automaticamente quando detecta diff
+  useEffect(() => {
+    if (parsedDiff.isDiff !== config.diffMode) {
+      updateConfig('diffMode', parsedDiff.isDiff)
+    }
+  }, [parsedDiff.isDiff, config.diffMode, updateConfig])
+
+  // Handlers para line highlights e comentários
+  const handleLineCommentChange = useCallback(
+    (lineNumber: number, comment: string) => {
+      const newHighlights = { ...config.lineHighlights }
+      newHighlights[lineNumber] = { ...newHighlights[lineNumber], comment, highlighted: true }
+      updateConfig('lineHighlights', newHighlights)
+    },
+    [config.lineHighlights, updateConfig],
+  )
+
+  const handleRemoveComment = useCallback(
+    (lineNumber: number) => {
+      const newHighlights = { ...config.lineHighlights }
+      delete newHighlights[lineNumber]
+      updateConfig('lineHighlights', newHighlights)
+    },
+    [config.lineHighlights, updateConfig],
+  )
+
+  // Prepara código para syntax highlighting (remove marcadores de diff se necessário)
+  const codeForHighlighting = useMemo(() => {
+    if (config.diffMode && parsedDiff.isDiff) {
+      // Remove marcadores de diff mas mantém estrutura para mapeamento
+      return parsedDiff.lines
+        .filter((line) => line.type !== 'header')
+        .map((line) => line.content)
+        .join('\n')
+    }
+    return code
+  }, [code, config.diffMode, parsedDiff])
+
+  // Mapeamento de linhas do código processado para linhas do diff original
+  const lineMapping = useMemo(() => {
+    if (!config.diffMode || !parsedDiff.isDiff) return {}
+    const mapping: Record<number, DiffLine> = {}
+    let processedLineNumber = 0
+    parsedDiff.lines.forEach((line) => {
+      if (line.type !== 'header') {
+        processedLineNumber++
+        mapping[processedLineNumber] = line
+      }
+    })
+    return mapping
+  }, [config.diffMode, parsedDiff])
+
+  // Prepara lineProps para SyntaxHighlighter (estilos de diff e highlights)
+  const getLineProps = useCallback(
+    (lineNumber: number) => {
+      // Mapeia linha processada para linha original do diff
+      const diffLine = config.diffMode && parsedDiff.isDiff
+        ? lineMapping[lineNumber]
+        : null
+
+      const lineProps: any = {
+        style: {
+          display: 'block',
+          width: '100%',
+          cursor: config.diffMode || config.lineHighlights[lineNumber] ? 'pointer' : 'default',
+          position: 'relative' as const,
+        },
+        onClick: (e: React.MouseEvent) => {
+          e.stopPropagation()
+          setSelectedLineForComment(lineNumber)
+        },
+        'data-line-number': lineNumber.toString(),
+      }
+
+      // Estilos de diff
+      if (config.diffMode && parsedDiff.isDiff && diffLine) {
+        if (diffLine.type === 'added') {
+          lineProps.style.backgroundColor = 'rgba(46, 160, 67, 0.15)'
+          lineProps.style.borderLeft = '3px solid rgba(46, 160, 67, 0.8)'
+          lineProps.style.paddingLeft = 'calc(1.5rem - 3px)'
+        } else if (diffLine.type === 'removed') {
+          lineProps.style.backgroundColor = 'rgba(248, 81, 73, 0.15)'
+          lineProps.style.borderLeft = '3px solid rgba(248, 81, 73, 0.8)'
+          lineProps.style.paddingLeft = 'calc(1.5rem - 3px)'
+          lineProps.style.opacity = '0.7'
+        } else if (diffLine.type === 'header') {
+          lineProps.style.backgroundColor = 'rgba(106, 115, 125, 0.1)'
+          lineProps.style.fontWeight = 'bold'
+          lineProps.style.color = '#8b949e'
+        }
+      }
+
+      // Estilos de highlight
+      const highlight = config.lineHighlights[lineNumber]
+      if (highlight?.highlighted) {
+        lineProps.style.backgroundColor = lineProps.style.backgroundColor
+          ? lineProps.style.backgroundColor
+          : 'rgba(255, 235, 59, 0.2)'
+        lineProps.style.borderLeft = lineProps.style.borderLeft || '3px solid rgba(255, 235, 59, 0.8)'
+        lineProps.style.paddingLeft = lineProps.style.paddingLeft || 'calc(1.5rem - 3px)'
+      }
+
+      // Adiciona indicador visual de comentário
+      if (highlight?.comment) {
+        lineProps.style.position = 'relative'
+        lineProps['data-has-comment'] = 'true'
+      }
+
+      return lineProps
+    },
+    [config.diffMode, config.lineHighlights, parsedDiff, lineMapping],
+  )
 
   const adjustPosition = useCallback(() => {
     if (!containerRef.current || !ref.current) return
@@ -471,9 +593,39 @@ export function SnapshotPreview({
                       textAlign: 'right',
                       fontSize: `${calculatedFontSize}px`,
                       fontFamily: `"${config.fontFamily}", 'Courier New', Courier, monospace`,
-                    }}>
-                    {code || ' '}
+                      cursor: config.diffMode || Object.keys(config.lineHighlights).length > 0 ? 'pointer' : 'default',
+                    }}
+                    lineProps={getLineProps}
+                    lineNumberProps={(lineNumber: number) => ({
+                      onClick: () => {
+                        setSelectedLineForComment(lineNumber)
+                      },
+                      style: {
+                        cursor: config.diffMode || config.lineHighlights[lineNumber] ? 'pointer' : 'default',
+                      },
+                    })}>
+                    {codeForHighlighting || ' '}
                   </SyntaxHighlighter>
+                  {/* Overlay para comentários */}
+                  {selectedLineForComment !== null && (
+                    <div
+                      className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'
+                      onClick={() => setSelectedLineForComment(null)}>
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <LineCommentPopover
+                          lineNumber={selectedLineForComment}
+                          comment={config.lineHighlights[selectedLineForComment]?.comment}
+                          onCommentChange={(lineNum, comment) => {
+                            handleLineCommentChange(lineNum, comment)
+                          }}
+                          onRemoveComment={(lineNum) => {
+                            handleRemoveComment(lineNum)
+                          }}
+                          onClose={() => setSelectedLineForComment(null)}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </PreviewCustomLayout>
             </div>

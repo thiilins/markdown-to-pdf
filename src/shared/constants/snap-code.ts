@@ -1,4 +1,4 @@
-import { AlignCenter, AlignLeft, AlignRight, ListEnd, ListStart } from 'lucide-react'
+import { AlignCenter, AlignLeft, AlignRight, ListEnd, ListStart, Terminal } from 'lucide-react'
 import { FaApple, FaChrome, FaCode, FaLinux, FaWindowClose, FaWindows } from 'react-icons/fa'
 
 export const DEFAULT_CODE = `import { useState, useCallback } from 'react'
@@ -262,6 +262,7 @@ export const WINDOW_THEMES = [
   { name: 'Chrome', value: 'chrome', icon: FaChrome },
   { name: 'Linux', value: 'linux', icon: FaLinux },
   { name: 'VS Code', value: 'vscode', icon: FaCode },
+  { name: 'Terminal Retro', value: 'retro', icon: Terminal },
   { name: 'None', value: 'none', icon: FaWindowClose },
 ]
 

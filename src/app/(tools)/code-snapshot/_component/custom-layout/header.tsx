@@ -238,6 +238,46 @@ export const VscodeHeader = () => {
   )
 }
 
+export const RetroTerminalHeader = () => {
+  const { config } = useCodeSnapshot()
+  const languageDisplay = config.language.charAt(0).toUpperCase() + config.language.slice(1)
+  const showLanguageInHeader = config.languagePosition === 'header'
+  const hasContent = config.showHeaderTitle || showLanguageInHeader
+  const borderRadius = config.borderRadius - 4
+
+  return (
+    <div
+      className='flex items-center justify-between border-b border-[#00ff41]/20 bg-[#0a0a0a] px-3 py-2 font-mono select-none'
+      style={{
+        borderTopLeftRadius: `${borderRadius}px`,
+        borderTopRightRadius: `${borderRadius}px`,
+      }}>
+      <div className='flex items-center gap-3'>
+        <div className='flex items-center gap-1.5'>
+          <span className='text-xs font-bold text-[#00ff41]'>$</span>
+          <span className='animate-pulse text-[8px] text-[#00ff41]/60'>▊</span>
+        </div>
+        {hasContent && (
+          <div className='flex items-center gap-2 text-[10px] text-[#00ff41]/80'>
+            {config.showHeaderTitle && (
+              <span className='font-medium text-[#00ff41]'>{config.headerTitle || 'code.ts'}</span>
+            )}
+            {config.showHeaderTitle && showLanguageInHeader && (
+              <span className='text-[#00ff41]/40'>•</span>
+            )}
+            {showLanguageInHeader && (
+              <span className='tracking-wider text-[#00ff41]/70 uppercase'>{languageDisplay}</span>
+            )}
+          </div>
+        )}
+      </div>
+      <div className='flex items-center gap-1 font-mono text-[10px] text-[#00ff41]/40'>
+        <span className='text-[#00ff41]/30'>[RETRO]</span>
+      </div>
+    </div>
+  )
+}
+
 export const WindowHeader = () => {
   const { config } = useCodeSnapshot()
   const options = {
@@ -246,6 +286,7 @@ export const WindowHeader = () => {
     linux: <LinuxHeader />,
     chrome: <ChromeHeader />,
     vscode: <VscodeHeader />,
+    retro: <RetroTerminalHeader />,
   }
 
   if (config.windowTheme !== 'none') {

@@ -80,6 +80,10 @@ const defaultConfig: SnapshotConfig = {
   footerPosition: 'right', // Footer alinhado à direita por padrão
   // Posicionamento do Conteúdo
   contentVerticalAlign: 'center', // Alinhamento vertical padrão: centro
+  // Diff Mode
+  diffMode: false, // Modo diff desativado por padrão
+  // Line Highlights
+  lineHighlights: {}, // Sem highlights por padrão
 }
 
 const CodeSnapshotContext = createContext<CodeSnapshotContextType | undefined>(undefined)

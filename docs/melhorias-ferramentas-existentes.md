@@ -85,10 +85,11 @@ Sair da simples indentação para utilitários de produtividade.
   formate automaticamente as linhas verdes (adições) e vermelhas (remoções) com o estilo do editor.
 - **Line Highlighting Contextual:** Possibilidade de clicar num número de linha para a destacar e
   adicionar um pequeno "popover" de comentário que será exportado na imagem.
+
 - **Presets de Mockup de Janela:** Adicionar molduras que simulam o aspeto do macOS (botões de
   semáforo), Windows ou um terminal "Retro", mantendo o design limpo e minimalista.
 
-### 8. Formatadores de Dados (JSON, SQL, JS) []
+### 8. Formatadores de Dados (JSON, SQL, JS) [FINISHED]
 
 - **JSON Tree Graph:** Para além da visualização em texto, oferecer uma visualização em grafo/árvore
   onde o utilizador pode colapsar nós visualmente e ver a hierarquia de objetos complexos.
