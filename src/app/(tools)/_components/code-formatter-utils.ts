@@ -5,12 +5,19 @@
 
 import type { Plugin } from 'prettier'
 import { format } from 'prettier/standalone'
-import babelPlugin from 'prettier/plugins/babel'
-import estreePlugin from 'prettier/plugins/estree'
+// Imports estáticos para evitar problemas de minificação no build da Vercel
+// Usar import * as para garantir que os plugins sejam incluídos no bundle
+import * as babelPluginModule from 'prettier/plugins/babel'
+import * as estreePluginModule from 'prettier/plugins/estree'
+import * as htmlPluginModule from 'prettier/plugins/html'
+import * as postcssPluginModule from 'prettier/plugins/postcss'
 import { formatDialect, format as formatSql, mysql, postgresql } from 'sql-formatter'
 
-// Cache de plugins carregados dinamicamente para evitar problemas de minificação no Turbopack
-const pluginCache: Record<string, Plugin | any> = {}
+// Extrair plugins dos módulos (alguns podem exportar como default, outros como named)
+const babelPlugin = (babelPluginModule as any).default || babelPluginModule
+const estreePlugin = (estreePluginModule as any).default || estreePluginModule
+const htmlPlugin = (htmlPluginModule as any).default || htmlPluginModule
+const postcssPlugin = (postcssPluginModule as any).default || postcssPluginModule
 
 export type CodeType = 'html' | 'css' | 'javascript' | 'sql'
 export type SqlDialect = 'postgresql' | 'mysql' | 'standard'
@@ -34,33 +41,27 @@ export async function formatCode(
   try {
     switch (codeType) {
       case 'html':
-        if (!pluginCache.html) {
-          const htmlModule = await import('prettier/plugins/html')
-          pluginCache.html = htmlModule.default
-        }
+        // Usar plugin importado estaticamente para evitar problemas de minificação
         return await format(code, {
           parser: 'html',
-          plugins: [pluginCache.html],
+          plugins: [htmlPlugin],
           printWidth: 100,
           tabWidth: 2,
           useTabs: false,
         })
 
       case 'css':
-        if (!pluginCache.postcss) {
-          const postcssModule = await import('prettier/plugins/postcss')
-          pluginCache.postcss = postcssModule.default
-        }
+        // Usar plugin importado estaticamente para evitar problemas de minificação
         return await format(code, {
           parser: 'css',
-          plugins: [pluginCache.postcss],
+          plugins: [postcssPlugin],
           printWidth: 100,
           tabWidth: 2,
           useTabs: false,
         })
 
       case 'javascript':
-        // Usar plugins importados estaticamente para evitar problemas com Turbopack
+        // Usar plugins importados estaticamente para evitar problemas com Turbopack/Vercel
         return await format(code, {
           parser: 'babel',
           plugins: [babelPlugin, estreePlugin],

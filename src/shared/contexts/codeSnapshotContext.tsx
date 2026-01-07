@@ -1,9 +1,10 @@
 'use client'
 
 import usePersistedStateInDB from '@/hooks/use-persisted-in-db'
-import { ReactNode, createContext, useContext } from 'react'
+import { ReactNode, createContext, useContext, useEffect, useRef } from 'react'
 import { DEFAULT_CODE } from '../constants/snap-code'
 import type { PresetSize, SnapshotConfig } from '@/app/(tools)/code-snapshot/_component/types'
+import { useUrlState } from '@/hooks/use-url-state'
 
 export const PRESET_SIZES: PresetSize[] = [
   { id: 'custom', name: 'Custom', width: 800, height: 0, description: 'Tamanho personalizado' },
@@ -52,6 +53,8 @@ interface CodeSnapshotContextType {
   setConfig: (config: SnapshotConfig) => void
   updateConfig: (key: keyof SnapshotConfig, value: any) => void
   resetConfig: () => void
+  getShareableUrl: (useSerialized?: boolean) => string
+  copyShareableUrl: (useSerialized?: boolean) => Promise<{ success: boolean; url?: string; error?: string }>
 }
 
 const defaultConfig: SnapshotConfig = {
@@ -101,6 +104,44 @@ export function CodeSnapshotProvider({ children }: { children: ReactNode }) {
     defaultConfig,
   )
 
+  // Flag para evitar aplicar estado da URL múltiplas vezes
+  const hasAppliedUrlState = useRef(false)
+
+  // Integração com URL state
+  const { getShareableUrl, copyShareableUrl } = useUrlState(
+    { code, ...config },
+    (urlState) => {
+      // Aplica estado da URL apenas uma vez no carregamento inicial
+      if (!hasAppliedUrlState.current && Object.keys(urlState).length > 0) {
+        hasAppliedUrlState.current = true
+
+        // Aplica código se presente
+        if (urlState.code !== undefined && urlState.code !== code) {
+          setCode(urlState.code as string)
+        }
+
+        // Aplica configurações da URL
+        const configUpdates: Partial<SnapshotConfig> = {}
+        Object.keys(defaultConfig).forEach((key) => {
+          const configKey = key as keyof SnapshotConfig
+          const urlValue = urlState[configKey]
+          if (urlValue !== undefined && urlValue !== config[configKey]) {
+            // Type assertion necessário porque urlState vem da URL e pode ter tipos diferentes
+            ;(configUpdates as any)[configKey] = urlValue
+          }
+        })
+
+        if (Object.keys(configUpdates).length > 0) {
+          setConfig({ ...config, ...configUpdates })
+        }
+      }
+    },
+    {
+      syncToUrl: true, // Sempre sincroniza (o hook gerencia quando não atualizar)
+      debounceMs: 500,
+    },
+  )
+
   const updateConfig = (key: keyof SnapshotConfig, value: any) => {
     setConfig({ ...config, [key]: value })
   }
@@ -111,7 +152,16 @@ export function CodeSnapshotProvider({ children }: { children: ReactNode }) {
 
   return (
     <CodeSnapshotContext.Provider
-      value={{ code, setCode, config, setConfig, updateConfig, resetConfig }}>
+      value={{
+        code,
+        setCode,
+        config,
+        setConfig,
+        updateConfig,
+        resetConfig,
+        getShareableUrl,
+        copyShareableUrl,
+      }}>
       {children}
     </CodeSnapshotContext.Provider>
   )

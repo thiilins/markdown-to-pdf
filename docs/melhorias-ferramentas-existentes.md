@@ -51,10 +51,14 @@ Diferenciar-se do "Carbon.now.sh" focando em precisão e contexto.
 
 #### Features do Carbon Recomendadas para Implementar:
 
-- ⏳ **Compartilhamento via URL:** Permitir compartilhar snippets via URL com estado codificado. **[PENDENTE - Alta Prioridade]**
-- ⏳ **Importação de GitHub Gist:** Importar código diretamente de GitHub Gists. **[PENDENTE - Alta Prioridade]**
-- ⏳ **Exportação em SVG:** Adicionar opção de exportar em SVG além de PNG. **[PENDENTE - Média Prioridade]**
-- ⏳ **Atalhos de Teclado:** Implementar atalhos para ações comuns (Cmd+S, Cmd+C, etc). **[PENDENTE - Média Prioridade]**
+- ⏳ **Compartilhamento via URL:** Permitir compartilhar snippets via URL com estado codificado.
+  **[PENDENTE - Alta Prioridade]**
+- ⏳ **Importação de GitHub Gist:** Importar código diretamente de GitHub Gists. **[PENDENTE - Alta
+  Prioridade]**
+- ⏳ **Exportação em SVG:** Adicionar opção de exportar em SVG além de PNG. **[PENDENTE - Média
+  Prioridade]**
+- ⏳ **Atalhos de Teclado:** Implementar atalhos para ações comuns (Cmd+S, Cmd+C, etc). **[PENDENTE
+  - Média Prioridade]**
 
 ### 4. Formatadores (JSON, SQL, JS, CSS) [FINISHED]
 

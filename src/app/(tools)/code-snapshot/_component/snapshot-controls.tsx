@@ -21,12 +21,23 @@ import {
   WINDOW_THEMES,
 } from '@/shared/constants/snap-code'
 import { PRESET_SIZES, useCodeSnapshot } from '@/shared/contexts/codeSnapshotContext'
-import { MonitorCog, RotateCcw } from 'lucide-react'
+import { Github, MonitorCog, RotateCcw, Share2 } from 'lucide-react'
 import { useState } from 'react'
+import { toast } from 'sonner'
+import { GistImport } from './gist-import'
 
 export function SnapshotControls({ compact = false }: { compact?: boolean }) {
-  const { config, updateConfig, resetConfig } = useCodeSnapshot()
-  const [isOpen, setIsOpen] = useState(true)
+  const { config, updateConfig, resetConfig, copyShareableUrl } = useCodeSnapshot()
+  const [showGistImport, setShowGistImport] = useState(false)
+
+  const handleShare = async () => {
+    const result = await copyShareableUrl(false) // Usa query params curtos por padrão
+    if (result.success) {
+      toast.success('URL copiada para a área de transferência!')
+    } else {
+      toast.error(result.error || 'Erro ao copiar URL')
+    }
+  }
   // Componente auxiliar para Labels padronizados
   const ControlLabel = ({
     children,
@@ -60,19 +71,48 @@ export function SnapshotControls({ compact = false }: { compact?: boolean }) {
             </div>
           </div>
 
-          <IconButtonTooltip
-            content='Resetar Configurações'
-            onClick={resetConfig}
-            icon={RotateCcw}
-            className={{
-              button:
-                'bg-primary hover:bg-primary/90 h-10 w-10 text-xs text-white hover:text-white',
-            }}
-          />
+          <div className='flex items-center gap-2'>
+            <IconButtonTooltip
+              content={showGistImport ? 'Ocultar Importar Gist' : 'Importar do GitHub Gist'}
+              onClick={() => setShowGistImport(!showGistImport)}
+              icon={Github}
+              className={{
+                button:
+                  'bg-secondary hover:bg-secondary/90 text-foreground hover:text-foreground h-10 w-10 text-xs',
+              }}
+            />
+            <IconButtonTooltip
+              content='Compartilhar via URL'
+              onClick={handleShare}
+              icon={Share2}
+              className={{
+                button:
+                  'bg-primary hover:bg-primary/90 h-10 w-10 text-xs text-white hover:text-white',
+              }}
+            />
+            <IconButtonTooltip
+              content='Resetar Configurações'
+              onClick={resetConfig}
+              icon={RotateCcw}
+              className={{
+                button:
+                  'bg-primary hover:bg-primary/90 h-10 w-10 text-xs text-white hover:text-white',
+              }}
+            />
+          </div>
         </div>
 
         <div className='flex-1 overflow-y-auto'>
           <div className={cn('space-y-4 px-2')}>
+            {/* Seção de Importar Gist */}
+            {showGistImport && (
+              <section className='border-primary/20 bg-primary/5 gap-4 space-y-4 rounded-lg border p-4'>
+                <GistImport />
+              </section>
+            )}
+
+            {showGistImport && <Separator />}
+
             <section className='gap-4 space-y-4 rounded-lg p-4'>
               <div className='border-primary/50 bg-primary/10 space-y-2 rounded-lg border p-2'>
                 <ControlLabel>Tamanho do Canvas</ControlLabel>
@@ -510,7 +550,7 @@ export function SnapshotControls({ compact = false }: { compact?: boolean }) {
                       <Button
                         variant='outline'
                         size='sm'
-                        className='w-full h-8 text-xs'
+                        className='h-8 w-full text-xs'
                         onClick={() => updateConfig('annotations', [])}>
                         Remover Todas
                       </Button>

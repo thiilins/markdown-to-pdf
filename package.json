@@ -1,6 +1,6 @@
 {
   "name": "md-to-pdf-pro",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "private": true,
   "scripts": {
     "prebuild": "rimraf .next",

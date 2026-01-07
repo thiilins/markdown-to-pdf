@@ -5,6 +5,49 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto
 adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.5.3] - 2025-01-XX
+
+### 🚀 Adicionado
+
+#### Code Snapshot - Compartilhamento via URL
+
+- **Sistema completo de compartilhamento de snapshots via URL:**
+  - Serialização/deserialização de estado completo em base64
+  - Mapeamento de campos curtos para URLs mais curtas (ex: `bg` → `backgroundColor`)
+  - Sincronização automática de estado com URL
+  - Botão "Compartilhar" que copia URL para clipboard
+  - Suporte a query params curtos e estado serializado completo
+  - Baseado na implementação do Carbon.now.sh
+
+#### Code Snapshot - Importação de GitHub Gist
+
+- **Funcionalidade para importar código diretamente de Gists:**
+  - Campo de input para URL ou ID do Gist
+  - Extração automática do ID da URL do Gist
+  - Busca e carregamento do conteúdo via GitHub API
+  - Detecção automática de linguagem baseada no arquivo do Gist
+  - Botão GitHub no header dos controles para mostrar/ocultar importação
+  - Feedback visual com loading e toasts
+
+### 🐛 Corrigido
+
+- **Formatters (HTML/CSS/JavaScript/SQL):** Corrigido erro de minificação na Vercel (`Kr is not defined`)
+  - Convertidos imports dinâmicos dos plugins do Prettier para imports estáticos
+  - Resolvido problema de tree-shaking que causava referências não definidas no build de produção
+  - Melhorada compatibilidade com diferentes formas de exportação dos plugins
+
+- **Code Snapshot:** Corrigido erro de importação duplicada do componente `Separator`
+- **Code Snapshot:** Corrigido erro de tipo TypeScript ao aplicar estado da URL
+- **Code Snapshot:** Ajustado hook `useUrlState` para evitar necessidade de Suspense boundary (usa `window.location` diretamente)
+
+### 🔧 Melhorado
+
+- Criado `lib/routing.ts` com funções de serialização baseadas no Carbon.now.sh
+- Criado hook `use-url-state.ts` para gerenciar estado na URL
+- Integrado sistema de URL state no `CodeSnapshotContext`
+- Criado componente `gist-import.tsx` para importação de Gists
+- Adicionado Suspense boundary na página do Code Snapshot
+
 ## [0.5.2] - 2025-01-XX
 
 ### 🚀 Adicionado
