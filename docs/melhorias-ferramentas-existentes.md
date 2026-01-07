@@ -32,18 +32,19 @@ Otimizar a qualidade da extração para que o resultado seja "pronto para uso".
 
 Diferenciar-se do "Carbon.now.sh" focando em precisão e contexto.
 
-- **Presets de Redes Sociais com Preview Real:** Botões com dimensões exatas para LinkedIn, Twitter
+- ✅ **Presets de Redes Sociais com Preview Real:** Botões com dimensões exatas para LinkedIn, Twitter
   e Instagram, com ajuste automático de padding para garantir que o código esteja sempre
-  centralizado.
-- **Destaque de Mudanças (Code Diff):** Permitir marcar linhas como "adicionadas" ou "removidas"
-  dentro do snapshot para explicar mudanças de código visualmente.
-- **Interactive Code Annotations:** Possibilidade de adicionar setas ou notas explicativas
-  flutuantes sobre partes específicas do código antes de exportar a imagem.
-- **Modo "Live Edit" no Preview:** Permitir pequenas edições de texto diretamente no painel de
-  preview do snapshot para ajustes rápidos de última hora.
-
-**Permitir que o tema ao alterar altere nao so as cores do editor mas o fundo da janela do editor
-com base no tema escolhido - atualmente só ta alterando as cores do conteudo (texto)**
+  centralizado. **[IMPLEMENTADO]**
+- ✅ **Destaque de Mudanças (Code Diff):** Permitir marcar linhas como "adicionadas" ou "removidas"
+  dentro do snapshot para explicar mudanças de código visualmente. **[IMPLEMENTADO]**
+- ✅ **Line Highlighting Contextual:** Possibilidade de clicar num número de linha para a destacar e
+  adicionar um pequeno "popover" de comentário que será exportado na imagem. **[IMPLEMENTADO]**
+- ✅ **Background Dinâmico do Editor:** O tema ao alterar altera não só as cores do editor mas o fundo da janela do editor
+  com base no tema escolhido. **[IMPLEMENTADO - v0.5.1]**
+- ⏳ **Interactive Code Annotations:** Possibilidade de adicionar setas ou notas explicativas
+  flutuantes sobre partes específicas do código antes de exportar a imagem. **[PENDENTE]**
+- ⏳ **Modo "Live Edit" no Preview:** Permitir pequenas edições de texto diretamente no painel de
+  preview do snapshot para ajustes rápidos de última hora. **[PENDENTE]**
 
 - Verificar quais as funcionalidades e features do https://carbon.now.sh/ podemos aproveitar e
   implementar na nossa ferramenta.
