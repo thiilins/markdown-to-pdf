@@ -38,7 +38,12 @@ interface CodeFormatterEditorProps {
   onJsonPathChange?: (path: string | null) => void // Callback para tracking de JSON Path
 }
 
-export function CodeFormatterEditor({ value, onChange, language, onJsonPathChange }: CodeFormatterEditorProps) {
+export function CodeFormatterEditor({
+  value,
+  onChange,
+  language,
+  onJsonPathChange,
+}: CodeFormatterEditorProps) {
   const editorRef = useRef<any | null>(null)
 
   const handleEditorDidMount: OnMount = (editor, monaco) => {

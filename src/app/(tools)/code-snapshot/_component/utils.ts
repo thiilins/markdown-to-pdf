@@ -1,6 +1,7 @@
 'use client'
 import { PRESET_SIZES } from '@/shared/contexts/codeSnapshotContext'
 import { toast } from 'sonner'
+import * as themes from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 // Constantes de zoom
 export const MAX_ZOOM = 1.5
@@ -309,4 +310,64 @@ export const generateContentConfig = (config: SnapshotConfig) => {
     headerHeight,
     footerHeight,
   }
+}
+
+/**
+ * Obtém o background do tema atual do react-syntax-highlighter
+ * Retorna a cor de fundo apropriada baseada no tema selecionado
+ */
+export function getThemeBackground(themeName: string): string {
+  const currentTheme = (themes as any)[themeName] || themes.vscDarkPlus
+
+  // Tenta extrair o background do tema
+  const preSelector = currentTheme?.['pre[class*="language-"]'] || currentTheme?.pre
+
+  if (preSelector?.background) {
+    return preSelector.background
+  }
+
+  // Fallback: cores comuns baseadas no tema conhecido
+  const themeBackgrounds: Record<string, string> = {
+    dracula: '#282a36',
+    vscDarkPlus: '#1e1e1e',
+    oneDark: '#282c34',
+    oneLight: '#fafafa',
+    darcula: '#2b2b2b',
+    materialDark: '#263238',
+    materialOceanic: '#0f111a',
+    nightOwl: '#011627',
+    nord: '#2e3440',
+    gruvboxDark: '#282828',
+    gruvboxLight: '#fbf1c7',
+    synthwave84: '#2d1b69',
+    shadesOfPurple: '#2d2b55',
+    lucario: '#2b3e50',
+    coldarkDark: '#111b27',
+    coldarkCold: '#e3eaf2',
+    a11yDark: '#2b2b2b',
+    atomDark: '#272b35',
+    duotoneDark: '#2a2734',
+    duotoneSpace: '#24242e',
+    duotoneEarth: '#292824',
+    duotoneForest: '#2a2520',
+    duotoneSea: '#1a252f',
+    holiTheme: '#0d0d0d',
+    hopscotch: '#322931',
+    twilight: '#141414',
+    tomorrow: '#ffffff',
+    solarizedDarkAtom: '#002b36',
+    solarizedlight: '#fdf6e3',
+    vsDark: '#1e1e1e',
+    vs: '#ffffff',
+    dark: '#2b2b2b',
+    okaidia: '#272822',
+    coy: '#fdfdfd',
+    coyWithoutShadows: '#fdfdfd',
+    funky: '#000000',
+    pojoaque: '#181914',
+    xonokai: '#2a2a2a',
+    zTouch: '#ffffff',
+  }
+
+  return themeBackgrounds[themeName] || '#0d0d0d'
 }

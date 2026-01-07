@@ -24,6 +24,10 @@ const languageMap: Record<string, string> = {
   javascript: 'javascript',
   sql: 'sql',
   json: 'json',
+  xml: 'xml',
+  yaml: 'yaml',
+  csv: 'plaintext',
+  toml: 'ini', // TOML não é suportado diretamente, usar INI como fallback
 }
 
 export function FormatterOutputPanel({
@@ -34,14 +38,33 @@ export function FormatterOutputPanel({
   stats,
 }: FormatterOutputPanelProps) {
   const hasCode = code.trim().length > 0
-  const reduction = stats && stats.chars > 0
-    ? Math.round(((stats.chars - stats.charsFormatted) / stats.chars) * 100)
-    : 0
+  const reduction =
+    stats && stats.chars > 0
+      ? Math.round(((stats.chars - stats.charsFormatted) / stats.chars) * 100)
+      : 0
+
+  // Detectar o formato atual do código para syntax highlighting
+  const detectFormat = (code: string): string => {
+    const trimmed = code.trim()
+    if (trimmed.startsWith('<?xml') || trimmed.startsWith('<')) return 'xml'
+    if (trimmed.startsWith('---') || /^[a-zA-Z_][a-zA-Z0-9_]*:\s/.test(trimmed)) return 'yaml'
+    if (/^[^,]+,[^,]+/.test(trimmed.split('\n')[0])) return 'plaintext' // CSV
+    if (
+      /^\[\[?[a-zA-Z_][a-zA-Z0-9_]*\]?\]/.test(trimmed) ||
+      /^[a-zA-Z_][a-zA-Z0-9_]*\s*=/.test(trimmed)
+    )
+      return 'ini' // TOML
+    // TOON: formato similar a JSON mas mais compacto, chaves podem não ter aspas
+    if (/^[a-zA-Z_][a-zA-Z0-9_]*:\s/.test(trimmed) && !trimmed.includes('---')) return 'json' // TOON usa syntax similar
+    return languageMap[language] || 'json'
+  }
+
+  const displayLanguage = detectFormat(code)
 
   return (
-    <div className='flex h-full flex-col bg-background'>
+    <div className='bg-background flex h-full flex-col'>
       {/* Output Header */}
-      <div className='bg-muted/30 border-b shrink-0 flex items-center justify-between px-4 py-2.5'>
+      <div className='bg-muted/30 flex shrink-0 items-center justify-between border-b px-4 py-2.5'>
         <div className='flex items-center gap-2.5'>
           <div className='bg-primary/10 flex h-7 w-7 items-center justify-center rounded-lg'>
             <Sparkles className='text-primary h-3.5 w-3.5' />
@@ -83,7 +106,7 @@ export function FormatterOutputPanel({
       <div className='custom-scrollbar flex-1 overflow-auto bg-[#1e1e1e]'>
         {hasCode ? (
           <SyntaxHighlighter
-            language={languageMap[language]}
+            language={displayLanguage}
             style={darcula}
             customStyle={{
               margin: 0,
@@ -105,7 +128,7 @@ export function FormatterOutputPanel({
                 <FileCode className='text-muted-foreground/50 h-8 w-8' />
               </div>
               <p className='text-sm font-semibold'>Aguardando código...</p>
-              <p className='text-muted-foreground/70 mt-1.5 text-xs max-w-xs'>
+              <p className='text-muted-foreground/70 mt-1.5 max-w-xs text-xs'>
                 O código formatado aparecerá aqui após você inserir código no editor
               </p>
             </div>
@@ -115,4 +138,3 @@ export function FormatterOutputPanel({
     </div>
   )
 }
-

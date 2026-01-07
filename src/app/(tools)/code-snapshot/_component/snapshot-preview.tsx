@@ -18,6 +18,7 @@ import {
   generateContentConfig,
   onCopyImage,
   onDownload,
+  getThemeBackground,
 } from './utils'
 import { ValidateFontComponent } from './validate-font-component'
 import { isDiffCode, parseDiff, type ParsedDiff, type DiffLine } from './diff-utils'
@@ -371,6 +372,9 @@ export function SnapshotPreview({
 
   const cursorStyle = isDragging ? 'cursor-grabbing' : 'cursor-grab'
 
+  // Obtém o background do tema atual
+  const themeBackground = useMemo(() => getThemeBackground(config.theme), [config.theme])
+
   return (
     <div
       className='relative flex h-full w-full min-w-[40dvw] flex-col bg-zinc-50 dark:bg-zinc-950'
@@ -497,9 +501,10 @@ export function SnapshotPreview({
             }}
             className='relative shadow-2xl'>
             <div
-              className='bg-[#0d0d0d] ring-1 ring-white/10'
+              className='ring-1 ring-white/10'
               style={{
                 fontFamily: config.fontFamily,
+                backgroundColor: themeBackground,
                 borderRadius: `${config.borderRadius - 4}px`,
                 boxShadow: `0 ${config.shadowIntensity}px ${config.shadowIntensity * 1.5}px -${config.shadowIntensity / 2}px rgba(0,0,0,${Math.min(0.5, config.shadowIntensity / 200)})`,
                 height: availableCodeHeight > 0 ? `${availableCodeHeight}px` : 'auto',
@@ -509,6 +514,7 @@ export function SnapshotPreview({
                 display: 'flex',
                 flexDirection: 'column',
                 flexShrink: 0,
+                transition: 'background-color 0.3s ease',
               }}>
               <PreviewCustomLayout>
                 <div

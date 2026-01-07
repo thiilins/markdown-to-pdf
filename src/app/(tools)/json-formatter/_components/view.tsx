@@ -2,20 +2,21 @@
 
 import { Button } from '@/components/ui/button'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { FileCode, FileJson } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { convertFormat } from '../../_components/format-converter-utils'
+import { FormatterEditorPanel } from '../../_components/formatter-editor-panel'
+import { FormatterHeader } from '../../_components/formatter-header'
+import { FormatterOutputPanel } from '../../_components/formatter-output-panel'
 import {
   formatJson,
   minifyJson,
   validateJson,
   type JsonValidationResult,
 } from '../../_components/json-formatter-utils'
-import { FormatterEditorPanel } from '../../_components/formatter-editor-panel'
-import { FormatterHeader } from '../../_components/formatter-header'
-import { FormatterOutputPanel } from '../../_components/formatter-output-panel'
 import { JsonTreeView } from '../../_components/json-tree-view'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 const DEFAULT_JSON = `{"users":[{"id":1,"name":"João","email":"joao@example.com","active":true,"roles":["admin","user"],"metadata":{"createdAt":"2024-01-15","lastLogin":"2024-01-20"}},{"id":2,"name":"Maria","email":"maria@example.com","active":false,"roles":["user"],"metadata":{"createdAt":"2024-01-10","lastLogin":null}}],"total":2,"page":1,"limit":10}`
 
@@ -34,6 +35,10 @@ export default function JsonFormatterView() {
   const [mobileTab, setMobileTab] = useState<'input' | 'output'>('input')
   const [outputView, setOutputView] = useState<'formatted' | 'tree'>('formatted')
   const [currentJsonPath, setCurrentJsonPath] = useState<string | null>(null)
+  const [convertedOutput, setConvertedOutput] = useState<string>('')
+  const [currentFormat, setCurrentFormat] = useState<
+    'json' | 'xml' | 'yaml' | 'csv' | 'toml' | 'toon'
+  >('json')
 
   useEffect(() => {
     const checkSize = () => setIsDesktop(window.innerWidth >= 1024)
@@ -82,11 +87,34 @@ export default function JsonFormatterView() {
     validateInput(codeInput)
     if (validation.isValid) {
       processCode(codeInput)
+      // Resetar output convertido quando o input muda
+      setConvertedOutput('')
+      setCurrentFormat('json')
     } else {
       setFormattedOutput('')
+      setConvertedOutput('')
+      setCurrentFormat('json')
       setStats({ lines: 0, chars: 0, charsFormatted: 0 })
     }
   }, [codeInput, processCode, validateInput, validation.isValid])
+
+  const handleConvertFormat = useCallback(
+    (toFormat: 'xml' | 'yaml' | 'csv' | 'toml' | 'toon') => {
+      if (!formattedOutput.trim() || !validation.isValid) {
+        toast.error('JSON válido necessário para conversão')
+        return
+      }
+      try {
+        const converted = convertFormat(formattedOutput, 'json', toFormat)
+        setConvertedOutput(converted)
+        setCurrentFormat(toFormat)
+        toast.success(`Convertido para ${toFormat.toUpperCase()}`)
+      } catch (error: any) {
+        toast.error(error?.message || `Erro ao converter para ${toFormat}`)
+      }
+    },
+    [formattedOutput, validation.isValid],
+  )
 
   const handleCopy = useCallback(async () => {
     if (!formattedOutput) {
@@ -165,6 +193,8 @@ export default function JsonFormatterView() {
         onClear={handleClear}
         canCopy={!!formattedOutput && validation.isValid}
         canDownload={!!formattedOutput && validation.isValid}
+        onConvertFormat={handleConvertFormat}
+        canConvert={!!formattedOutput && validation.isValid}
       />
 
       <div className='flex flex-1 overflow-hidden'>
@@ -214,7 +244,10 @@ export default function JsonFormatterView() {
 
             {mobileTab === 'output' && (
               <div className='flex flex-1 flex-col overflow-hidden'>
-                <Tabs value={outputView} onValueChange={(v) => setOutputView(v as any)} className='flex h-full flex-col'>
+                <Tabs
+                  value={outputView}
+                  onValueChange={(v) => setOutputView(v as any)}
+                  className='flex h-full flex-col'>
                   <div className='bg-muted/30 border-b px-4 pt-3'>
                     <TabsList className='grid w-full grid-cols-2'>
                       <TabsTrigger value='formatted' className='text-xs'>
@@ -227,7 +260,7 @@ export default function JsonFormatterView() {
                   </div>
                   <TabsContent value='formatted' className='m-0 flex-1 overflow-hidden'>
                     <FormatterOutputPanel
-                      code={formattedOutput}
+                      code={convertedOutput || formattedOutput}
                       language='json'
                       isProcessing={isProcessing}
                       onCopy={handleCopy}
@@ -268,7 +301,10 @@ export default function JsonFormatterView() {
 
             <ResizablePanel defaultSize={50} minSize={30}>
               <div className='flex h-full flex-col'>
-                <Tabs value={outputView} onValueChange={(v) => setOutputView(v as any)} className='flex h-full flex-col'>
+                <Tabs
+                  value={outputView}
+                  onValueChange={(v) => setOutputView(v as any)}
+                  className='flex h-full flex-col'>
                   <div className='bg-muted/30 border-b px-4 pt-3'>
                     <TabsList className='grid w-full grid-cols-2'>
                       <TabsTrigger value='formatted' className='text-xs'>
@@ -281,7 +317,7 @@ export default function JsonFormatterView() {
                   </div>
                   <TabsContent value='formatted' className='m-0 flex-1 overflow-hidden'>
                     <FormatterOutputPanel
-                      code={formattedOutput}
+                      code={convertedOutput || formattedOutput}
                       language='json'
                       isProcessing={isProcessing}
                       onCopy={handleCopy}
@@ -300,4 +336,3 @@ export default function JsonFormatterView() {
     </div>
   )
 }
-

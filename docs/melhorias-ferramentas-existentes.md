@@ -43,7 +43,10 @@ Diferenciar-se do "Carbon.now.sh" focando em precisão e contexto.
   preview do snapshot para ajustes rápidos de última hora.
 
 **Permitir que o tema ao alterar altere nao so as cores do editor mas o fundo da janela do editor
-com base - atualmente só ta alterando as cores do conteudo (texto)**
+com base no tema escolhido - atualmente só ta alterando as cores do conteudo (texto)**
+
+- Verificar quais as funcionalidades e features do https://carbon.now.sh/ podemos aproveitar e
+  implementar na nossa ferramenta.
 
 ### 4. Formatadores (JSON, SQL, JS, CSS) [FINISHED]
 

@@ -5,57 +5,12 @@
 
 import type { Plugin } from 'prettier'
 import { format } from 'prettier/standalone'
+import babelPlugin from 'prettier/plugins/babel'
+import estreePlugin from 'prettier/plugins/estree'
 import { formatDialect, format as formatSql, mysql, postgresql } from 'sql-formatter'
 
 // Cache de plugins carregados dinamicamente para evitar problemas de minificação no Turbopack
 const pluginCache: Record<string, Plugin | any> = {}
-
-// Função auxiliar para carregar plugins de forma mais segura
-async function loadPlugin(modulePath: string, cacheKey: string): Promise<Plugin> {
-  if (pluginCache[cacheKey]) {
-    return pluginCache[cacheKey]
-  }
-
-  try {
-    // Usar import dinâmico com tratamento de erro mais robusto
-    // No Turbopack, precisa usar strings literais para análise estática
-    let module: any
-    try {
-      // Usar eval para permitir import dinâmico com variável (necessário para Turbopack)
-      // eslint-disable-next-line @typescript-eslint/no-implied-eval
-      module = await Function(`return import("${modulePath}")`)()
-    } catch (importError) {
-      // Tentar com caminho alternativo se disponível
-      console.warn(`Tentativa de import falhou para ${modulePath}, tentando alternativa...`)
-      throw importError
-    }
-
-    // Tentar diferentes formas de acessar o plugin
-    let plugin = module.default
-    if (!plugin && typeof module === 'object') {
-      // Se default não existir, tentar pegar a primeira exportação
-      const keys = Object.keys(module)
-      if (keys.length > 0) {
-        plugin = module[keys[0]]
-      }
-    }
-    if (!plugin) {
-      plugin = module
-    }
-
-    if (!plugin || (typeof plugin !== 'object' && typeof plugin !== 'function')) {
-      throw new Error(`Plugin inválido em ${modulePath}`)
-    }
-
-    pluginCache[cacheKey] = plugin
-    return plugin
-  } catch (error: any) {
-    console.error(`Erro ao carregar plugin ${modulePath}:`, error)
-    // Limpar cache em caso de erro para permitir nova tentativa
-    delete pluginCache[cacheKey]
-    throw new Error(`Falha ao carregar plugin: ${modulePath}. ${error?.message || String(error)}`)
-  }
-}
 
 export type CodeType = 'html' | 'css' | 'javascript' | 'sql'
 export type SqlDialect = 'postgresql' | 'mysql' | 'standard'
@@ -105,44 +60,17 @@ export async function formatCode(
         })
 
       case 'javascript':
-        try {
-          // Carregar plugins de forma mais robusta
-          const babelPlugin = await loadPlugin('prettier/plugins/babel', 'babel')
-          const estreePlugin = await loadPlugin('prettier/plugins/estree', 'estree')
-
-          return await format(code, {
-            parser: 'babel',
-            plugins: [babelPlugin, estreePlugin],
-            printWidth: 100,
-            tabWidth: 2,
-            useTabs: false,
-            semi: true,
-            singleQuote: true,
-            trailingComma: 'es5',
-          })
-        } catch (error: any) {
-          // Se houver erro, tentar recarregar os plugins
-          console.warn('Erro ao formatar JavaScript, tentando recarregar plugins:', error)
-          delete pluginCache.babel
-          delete pluginCache.estree
-
-          // Aguardar um pouco antes de tentar novamente
-          await new Promise((resolve) => setTimeout(resolve, 100))
-
-          const babelPlugin = await loadPlugin('prettier/plugins/babel', 'babel')
-          const estreePlugin = await loadPlugin('prettier/plugins/estree', 'estree')
-
-          return await format(code, {
-            parser: 'babel',
-            plugins: [babelPlugin, estreePlugin],
-            printWidth: 100,
-            tabWidth: 2,
-            useTabs: false,
-            semi: true,
-            singleQuote: true,
-            trailingComma: 'es5',
-          })
-        }
+        // Usar plugins importados estaticamente para evitar problemas com Turbopack
+        return await format(code, {
+          parser: 'babel',
+          plugins: [babelPlugin, estreePlugin],
+          printWidth: 100,
+          tabWidth: 2,
+          useTabs: false,
+          semi: true,
+          singleQuote: true,
+          trailingComma: 'es5',
+        })
 
       case 'sql':
         if (sqlDialect === 'postgresql') {

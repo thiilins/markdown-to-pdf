@@ -5,7 +5,8 @@ import { DEFAULT_CODE } from '@/shared/constants/snap-code'
 import { useCodeSnapshot } from '@/shared/contexts/codeSnapshotContext'
 import Editor, { OnMount } from '@monaco-editor/react'
 import { Eraser } from 'lucide-react'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { getThemeBackground } from './utils'
 
 interface SnapshotEditorProps {
   onScroll?: (percentage: number) => void
@@ -82,6 +83,9 @@ export function SnapshotEditor({ onScroll, editorRef: externalEditorRef }: Snaps
     }
   }
 
+  // Obtém o background do tema atual
+  const themeBackground = useMemo(() => getThemeBackground(config.theme), [config.theme])
+
   // Atualizar ligaduras quando a configuração mudar
   useEffect(() => {
     if (internalEditorRef.current) {
@@ -92,8 +96,10 @@ export function SnapshotEditor({ onScroll, editorRef: externalEditorRef }: Snaps
   }, [config.fontLigatures])
 
   return (
-    <div className={cn('flex h-full w-full min-w-[40dvw] flex-col items-center bg-[#09090b]')}>
-      <div className='flex h-full w-full flex-col bg-[#09090b]'>
+    <div
+      className={cn('flex h-full w-full min-w-[40dvw] flex-col items-center')}
+      style={{ backgroundColor: themeBackground, transition: 'background-color 0.3s ease' }}>
+      <div className='flex h-full w-full flex-col' style={{ backgroundColor: themeBackground }}>
         <div className='flex h-11 shrink-0 items-center justify-between border-b border-white/5 bg-zinc-950/80 px-4 backdrop-blur-sm'>
           <div className='flex items-center gap-2'>
             <div className='bg-primary/20 border-primary/30 flex h-5 w-5 items-center justify-center rounded border'>

@@ -5,6 +5,55 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto
 adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.5.1] - 2025-01-XX
+
+### 🚀 Adicionado
+
+#### JSON Formatter - Novos Formatos de Conversão
+
+- **Suporte para TOML (Tom's Obvious Minimal Language):**
+  - Conversão JSON ↔ TOML com suporte completo
+  - Suporte a tabelas, arrays de tabelas e valores complexos
+  - Detecção automática de formato TOML no output panel
+
+- **Suporte para TOON (Token-Oriented Object Notation):**
+  - Conversão JSON ↔ TOON otimizada para LLMs
+  - Formato compacto com chaves sem aspas quando possível
+  - Redução de tokens mantendo legibilidade
+
+#### JSON Tree View - Melhorias de UX
+
+- **Tree View inicia expandida por padrão:**
+  - Todos os nós expandidos automaticamente ao carregar JSON
+  - Atualização automática quando o JSON muda
+  - Usuário ainda pode colapsar/expandir manualmente
+
+### 🔧 Melhorado
+
+- **Conversão de Formatos:**
+  - Botões de conversão movidos para o header, ao lado de "Embelezar" e "Minificar"
+  - Conversão agora aplicada no output formatado (mais lógico)
+  - Melhor detecção automática de formato no output panel
+  - Syntax highlighting apropriado para cada formato (XML, YAML, CSV, TOML, TOON)
+
+- **JSON Tree View - Tema Dracula:**
+  - Visual completamente redesenhado com tema Dracula
+  - Ícones específicos para cada tipo de dado (objetos, arrays, strings, números, booleanos, null)
+  - Hierarquia visual com linhas de conexão verticais
+  - Cores temáticas para diferentes tipos de dados
+  - Hover effects aprimorados com transições suaves
+  - Badges de tipo estilizados com cores Dracula
+
+- **Code Snapshot:**
+  - Background do editor muda dinamicamente conforme o tema selecionado
+  - Consistência visual entre preview e editor
+
+### 🐛 Corrigido
+
+- Erro de validação JSON ao converter para outros formatos (YAML, XML, CSV)
+- Validação agora só executa quando o input é JSON válido
+- Correção de tipos TypeScript nos plugins do Prettier
+
 ## [0.5.0] - 2025-01-XX
 
 ### 🚀 Adicionado
@@ -12,6 +61,7 @@ adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 #### JSON Formatter - Features Avançadas
 
 **JSON Fixer Inteligente:**
+
 - **Correção automática** de erros comuns em JSONs:
   - Aspas simples → aspas duplas
   - Vírgulas sobrando (antes de `}` ou `]`)
@@ -20,18 +70,21 @@ adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - Botão "Corrigir JSON" no toolbar com feedback visual das correções aplicadas
 
 **Visualização de Imagens em Tree View:**
+
 - **Preview de imagens** ao passar o mouse sobre URLs de imagem no Tree View
 - Detecção automática de URLs de imagem (jpg, png, gif, webp, svg, bmp, ico)
 - Popover com preview da imagem e URL completa
 - Interface intuitiva com underline pontilhado indicando URLs clicáveis
 
 **Smart JSONPath Tracking:**
+
 - **Exibição em tempo real** do caminho JSON (JSONPath) da chave onde o cursor está posicionado
 - Atualização automática ao mover o cursor ou selecionar texto
 - Display no header do editor mostrando o path atual
 - Facilita navegação em arquivos JSON grandes
 
 **Conversão Cruzada Entre Formatos:**
+
 - **Conversão instantânea** entre JSON, XML, YAML e CSV
 - Menu dropdown no toolbar com opções de conversão
 - Preservação da estrutura de dados durante conversão

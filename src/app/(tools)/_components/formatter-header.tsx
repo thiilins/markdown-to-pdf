@@ -2,9 +2,16 @@
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Separator } from '@/components/ui/separator'
 import {
   AlertCircle,
+  ArrowLeftRight,
   CheckCircle2,
   Copy,
   Download,
@@ -37,6 +44,8 @@ interface FormatterHeaderProps {
   canCopy?: boolean
   canDownload?: boolean
   extraActions?: ReactNode
+  onConvertFormat?: (format: 'xml' | 'yaml' | 'csv' | 'toml' | 'toon') => void
+  canConvert?: boolean
 }
 
 export function FormatterHeader({
@@ -54,11 +63,13 @@ export function FormatterHeader({
   canCopy = false,
   canDownload = false,
   extraActions,
+  onConvertFormat,
+  canConvert = false,
 }: FormatterHeaderProps) {
   const hasCode = stats && stats.lines > 0
 
   return (
-    <div className='from-card to-card/95 shrink-0 border-b bg-gradient-to-b shadow-sm'>
+    <div className='from-card to-card/95 shrink-0 border-b bg-linear-to-b shadow-sm'>
       {/* Main Header */}
       <div className='px-4 py-3 sm:px-6 sm:py-4'>
         <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
@@ -152,7 +163,7 @@ export function FormatterHeader({
             <Sparkles className='text-muted-foreground h-4 w-4' />
             <span className='text-sm font-medium'>Modo de Formatação</span>
           </div>
-          <div className='flex gap-2'>
+          <div className='flex items-center gap-2'>
             <Button
               variant={formatMode === 'beautify' ? 'default' : 'outline'}
               size='sm'
@@ -171,6 +182,45 @@ export function FormatterHeader({
               <FileCode className='h-3.5 w-3.5' />
               Minificar
             </Button>
+            {onConvertFormat && canConvert && (
+              <>
+                <Separator orientation='vertical' className='h-5' />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      className='h-8 gap-1.5 px-3 text-xs font-medium'
+                      disabled={isProcessing}>
+                      <ArrowLeftRight className='h-3.5 w-3.5' />
+                      Converter
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align='end'>
+                    <DropdownMenuItem onClick={() => onConvertFormat('xml')}>
+                      <FileCode className='mr-2 h-4 w-4' />
+                      Converter para XML
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onConvertFormat('yaml')}>
+                      <FileCode className='mr-2 h-4 w-4' />
+                      Converter para YAML
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onConvertFormat('csv')}>
+                      <FileCode className='mr-2 h-4 w-4' />
+                      Converter para CSV
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onConvertFormat('toml')}>
+                      <FileCode className='mr-2 h-4 w-4' />
+                      Converter para TOML
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onConvertFormat('toon')}>
+                      <FileCode className='mr-2 h-4 w-4' />
+                      Converter para TOON
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            )}
           </div>
         </div>
       </div>
