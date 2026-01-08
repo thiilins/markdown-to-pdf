@@ -26,7 +26,10 @@ Você pode combinar estilos para dar ênfase ao conteúdo:
 - **Negrito** para destaque forte.
 - *Itálico* para ênfase sutil.
 - ~~Texto riscado~~ para itens obsoletos.
-- \`Código inline\` para termos técnicos ou atalhos.
+- \`Código inline\` para termos técnicos ou variáveis.
+- Use <kbd>Ctrl</kbd> + <kbd>C</kbd> para copiar e <kbd>Ctrl</kbd> + <kbd>V</kbd> para colar.
+
+---
 
 ## 3. Gestão de Tarefas
 Acompanhe o progresso do seu projeto diretamente no documento:
@@ -71,10 +74,15 @@ export function Counter() {
 \`\`\`
 
 ## 6. Citações e Referências
+Use \`>\` para criar blocos de citação elegantes:
 
 > "A simplicidade é o grau máximo de sofisticação."
 >
 > — *Leonardo da Vinci*
+
+> "O código é como humor. Quando você tem que explicá-lo, é ruim."
+>
+> — *Cory House*
 
 ## 7. Diagramas Mermaid
 Crie diagramas interativos diretamente no Markdown:
@@ -108,24 +116,90 @@ sequenceDiagram
     F-->>U: "Documento salvo!"
 \`\`\`
 
-## 8. Links
- Temos validadores de links para você testar.
+## 8. Listas Estilizadas
 
-### Links Válidos
+### Lista Não Ordenada
+- 🎨 Design moderno e responsivo
+- ⚡ Performance otimizada
+- 🔒 Segurança em primeiro lugar
+- 📱 Suporte mobile nativo
+- 🌐 Internacionalização completa
+
+### Lista Ordenada
+1. Planeje sua arquitetura
+2. Implemente os componentes base
+3. Adicione testes unitários
+4. Configure CI/CD
+5. Deploy em produção
+
+### Lista de Tarefas
+- [x] Configurar ambiente de desenvolvimento
+- [x] Criar estrutura de pastas
+- [x] Implementar componentes principais
+- [ ] Escrever documentação
+- [ ] Realizar testes de integração
+
+## 9. Imagens Responsivas
+As imagens são exibidas com controles interativos:
+
+![Exemplo de Imagem](https://placehold.co/800x400/6366f1/ffffff?text=Imagem+Responsiva&font=roboto)
+
+## 10. Links Estilizados
+O editor detecta automaticamente o tipo de link e aplica cores e ícones específicos:
+
+### 🌐 Links Externos
+- [Documentação Next.js](https://nextjs.org)
+- [GitHub](https://github.com)
 - [Google](https://google.com)
-- [Seção Abaixo](#links-quebrados)
 
-### Links Quebrados
+### 🔗 Âncoras Internas
+- [Ir para Admonitions](#1-admonitions-callouts)
+- [Ver Tabelas](#4-tabelas-ricas)
+- [Voltar ao Topo](#-bem-vindo-ao-md-editor)
+
+### 📧 E-mail
+- [contato@exemplo.com](mailto:contato@exemplo.com)
+- [suporte@empresa.com](mailto:suporte@empresa.com)
+
+### Links Quebrados (Para Teste de Validação)
 - [Link Morto](https://este-site-nao-existe-123456789.com)
 - [Âncora Inválida](#secao-que-nao-existe)
+
 ---
 
-### Próximos Passos
-1. Tente selecionar este texto e usar a toolbar flutuante.
-2. Exporte este documento clicando no ícone de **PDF** na barra superior.
-3. Importe um arquivo externo via URL para testar o parser.
+## 11. Elementos Especiais
 
-![Banner](https://placehold.co/800x200/6d28d9/ffffff?text=Markdown+Editor+Pro&font=roboto)
+### Código Inline
+Use \`const variable = 'value'\` para destacar código no meio do texto.
+
+### Atalhos de Teclado
+- Salvar: <kbd>Ctrl</kbd> + <kbd>S</kbd>
+- Desfazer: <kbd>Ctrl</kbd> + <kbd>Z</kbd>
+- Refazer: <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd>
+
+---
+
+## 12. Resumo de Componentes Disponíveis
+
+- ✅ **Admonitions** - 5 tipos (Note, Tip, Important, Warning, Caution)
+- ✅ **Formatação** - Negrito, itálico, riscado, código inline
+- ✅ **Listas** - Ordenadas, não ordenadas, tarefas (checkboxes)
+- ✅ **Tabelas** - Com alinhamento e bordas estilizadas
+- ✅ **Código** - Syntax highlighting + Mermaid diagrams
+- ✅ **Citações** - Blockquotes elegantes
+- ✅ **Imagens** - Responsivas com caption
+- ✅ **Links** - Externos, internos, e-mail (com ícones)
+- ✅ **Kbd** - Atalhos de teclado com visual 3D
+- ✅ **Separadores** - Linhas horizontais com gradiente
+
+---
+
+### 🚀 Próximos Passos
+1. Tente selecionar texto e usar a **toolbar flutuante**
+2. Exporte para **PDF** clicando no ícone na barra superior
+3. Use o **TOC interativo** para navegar entre seções
+4. Teste a **validação de links** para encontrar URLs quebradas
+5. Experimente criar **diagramas Mermaid** personalizados
 `
 export const DEFAULT_MARKDOWN_ITEM = [
   {

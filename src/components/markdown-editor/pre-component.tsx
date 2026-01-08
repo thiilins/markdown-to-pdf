@@ -2,24 +2,33 @@
 
 import { Button } from '@/components/ui/button'
 import { useCopyToClipboard } from '@/hooks/use-clipboard'
+import { cn } from '@/lib/utils'
 import { mapLanguage } from '@/shared/utils'
-import { Copy } from 'lucide-react' // Adicionei Check para feedback visual
-import { useCallback } from 'react' // Adicionado useState e useEffect
+import { Check, Copy, Terminal } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { darcula } from 'react-syntax-highlighter/dist/esm/styles/hljs'
 import { toast } from 'sonner'
 
 export const PreComponent = ({ node, children, ...props }: any) => {
   const [, copy] = useCopyToClipboard()
+  const [copied, setCopied] = useState(false)
+
+  // Reset do ícone de cópia após 2 segundos
+  useEffect(() => {
+    if (copied) {
+      const timeout = setTimeout(() => setCopied(false), 2000)
+      return () => clearTimeout(timeout)
+    }
+  }, [copied])
+
   const extractLanguageFromChildren = useCallback((children: any): string | null => {
-    // Se children é um objeto React (componente code)
     if (children?.props?.className) {
       const className = children.props.className
       const match = className.match(/language-(\w+)/)
       if (match) return match[1]
     }
 
-    // Se children é um array, procura o primeiro elemento code
     if (Array.isArray(children)) {
       for (const child of children) {
         if (child?.props?.className) {
@@ -27,23 +36,17 @@ export const PreComponent = ({ node, children, ...props }: any) => {
           const match = className.match(/language-(\w+)/)
           if (match) return match[1]
         }
-        // Recursão para elementos aninhados
         if (child?.props?.children) {
           const lang = extractLanguageFromChildren(child.props.children)
           if (lang) return lang
         }
       }
     }
-
     return null
   }, [])
 
-  // IMPORTANTE: Detecta se é Mermaid e deixa passar (não renderiza como código)
   const extractCodeText = useCallback((children: any): string => {
-    if (typeof children === 'string') {
-      return children
-    }
-
+    if (typeof children === 'string') return children
     if (Array.isArray(children)) {
       return children
         .map((child: any) => {
@@ -53,11 +56,7 @@ export const PreComponent = ({ node, children, ...props }: any) => {
         })
         .join('')
     }
-
-    if (children?.props?.children) {
-      return extractCodeText(children.props.children)
-    }
-
+    if (children?.props?.children) return extractCodeText(children.props.children)
     return ''
   }, [])
 
@@ -65,16 +64,12 @@ export const PreComponent = ({ node, children, ...props }: any) => {
     async (children: any) => {
       try {
         const textToCopy = extractCodeText(children)
-
-        if (!textToCopy) {
-          console.warn('Estrutura de código complexa, tentando extração forçada.')
-          return
-        }
+        if (!textToCopy) return
 
         await copy(textToCopy)
+        setCopied(true)
         toast.success('Código copiado!')
       } catch (error) {
-        console.error('Erro ao copiar', error)
         toast.error('Erro ao copiar código')
       }
     },
@@ -83,30 +78,44 @@ export const PreComponent = ({ node, children, ...props }: any) => {
 
   const codeText = extractCodeText(children)
   const language = extractLanguageFromChildren(children)
+
+  // ESCAPE PARA MERMAID: Mantido conforme solicitado
   if (language === 'mermaid') {
-    // Retorna um pre simples para o Mermaid processar
     return (
-      <pre {...props} style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
+      <pre
+        {...props}
+        className='mermaid-raw'
+        style={{
+          whiteSpace: 'pre-wrap',
+          wordWrap: 'break-word',
+          backgroundColor: 'transparent',
+          margin: 0,
+        }}>
         {children}
       </pre>
     )
   }
 
   return (
-    <div className='group not-prose relative my-6 overflow-hidden rounded-lg border bg-zinc-950 shadow-sm dark:bg-zinc-900'>
-      {/* Header do Código */}
-      <div className='flex items-center justify-between border-b border-white/10 bg-white/5 px-4 py-2'>
-        <div className='flex items-center gap-3'>
-          <div className='flex gap-1.5'>
-            <div className='h-2.5 w-2.5 rounded-full bg-red-500/80' />
-            <div className='h-2.5 w-2.5 rounded-full bg-yellow-500/80' />
-            <div className='h-2.5 w-2.5 rounded-full bg-green-500/80' />
+    <div className='group not-prose relative my-8 overflow-hidden rounded-xl border border-slate-800 bg-slate-950 shadow-2xl'>
+      {/* Header do Código: Melhor contraste e tipografia */}
+      <div className='flex items-center justify-between border-b border-white/5 bg-slate-900/50 px-4 py-2.5'>
+        <div className='flex items-center gap-4'>
+          {/* Traffic Lights Estilizados */}
+          <div className='flex gap-2'>
+            <div className='h-3 w-3 rounded-full bg-[#FF5F56] shadow-inner' />
+            <div className='h-3 w-3 rounded-full bg-[#FFBD2E] shadow-inner' />
+            <div className='h-3 w-3 rounded-full bg-[#27C93F] shadow-inner' />
           </div>
-          {language && (
-            <span className='font-mono text-[10px] font-medium tracking-wider text-white uppercase opacity-60'>
-              {language}
-            </span>
-          )}
+
+          <div className='flex items-center gap-2 border-l border-white/10 pl-4'>
+            <Terminal className='h-3.5 w-3.5 text-slate-500' />
+            {language && (
+              <span className='font-mono text-[11px] font-bold tracking-widest text-indigo-400 uppercase'>
+                {language}
+              </span>
+            )}
+          </div>
         </div>
 
         <Button
@@ -114,34 +123,48 @@ export const PreComponent = ({ node, children, ...props }: any) => {
             e.stopPropagation()
             handleCopyCode(children)
           }}
-          className='flex items-center gap-1.5 rounded-md bg-transparent px-2 py-1 text-[10px] font-medium text-zinc-400 transition-colors hover:bg-white/10 hover:text-white'
-          title='Copiar código'>
-          <Copy className='h-3 w-3' />
-          <span>Copiar</span>
+          variant='ghost'
+          size='sm'
+          className={cn(
+            'h-8 gap-2 rounded-lg px-3 text-[11px] font-bold transition-all print:hidden',
+            copied
+              ? 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
+              : 'text-slate-400 hover:bg-white/5 hover:text-white',
+          )}>
+          {copied ? <Check className='h-3.5 w-3.5' /> : <Copy className='h-3.5 w-3.5' />}
+          <span>{copied ? 'Copiado' : 'Copiar'}</span>
         </Button>
       </div>
 
-      <SyntaxHighlighter
-        language={mapLanguage(language || 'text')}
-        style={darcula}
-        showLineNumbers={false}
-        wrapLines={true}
-        wrapLongLines={true}
-        customStyle={{
-          margin: 0,
-          padding: '2rem',
-          width: '100%',
-          height: '100%',
-          backgroundColor: 'transparent',
-          fontSize: '13px',
-          lineHeight: '1.6',
-          fontFamily: 'var(--font-mono)',
-          whiteSpace: 'pre-wrap',
-          wordWrap: 'break-word',
-          overflowWrap: 'break-word',
-        }}>
-        {codeText}
-      </SyntaxHighlighter>
+      {/* Área de Código com SyntaxHighlighter */}
+      <div className='relative px-1'>
+        <SyntaxHighlighter
+          language={mapLanguage(language || 'text')}
+          style={darcula}
+          showLineNumbers={false}
+          wrapLines={true}
+          wrapLongLines={true}
+          customStyle={{
+            margin: 0,
+            padding: '1.5rem 1.25rem',
+            width: '100%',
+            backgroundColor: 'transparent',
+            fontSize: '13.5px',
+            lineHeight: '1.7',
+            fontFamily: 'var(--font-mono)',
+            whiteSpace: 'pre-wrap',
+            wordWrap: 'break-word',
+            overflowWrap: 'break-word',
+          }}>
+          {codeText}
+        </SyntaxHighlighter>
+
+        {/* Efeito de brilho sutil no fundo */}
+        <div className='pointer-events-none absolute inset-0 bg-linear-to-tr from-indigo-500/5 via-transparent to-transparent opacity-50' />
+      </div>
+
+      {/* Rodapé Decorativo (Opcional, mas mantém o estilo dos outros cards) */}
+      <div className='flex h-1.5 w-full bg-linear-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20' />
     </div>
   )
 }

@@ -1,3 +1,21 @@
+import { MarkdownHr } from '@/components/markdown-editor/markdown-hr'
+import { MarkdownImage } from '@/components/markdown-editor/markdown-image'
+import { MarkdownInlineCode } from '@/components/markdown-editor/markdown-inline-code'
+import { MarkdownKbd } from '@/components/markdown-editor/markdown-kbd'
+import { MarkdownLink } from '@/components/markdown-editor/markdown-link'
+import {
+  MarkdownListItem,
+  MarkdownOrderedList,
+  MarkdownUnorderedList,
+} from '@/components/markdown-editor/markdown-lists'
+import {
+  MarkdownTable,
+  MarkdownTableBody,
+  MarkdownTableCell,
+  MarkdownTableHead,
+  MarkdownTableHeaderCell,
+  MarkdownTableRow,
+} from '@/components/markdown-editor/markdown-table'
 import { MermaidDiagram } from '@/components/markdown-editor/mermaid-diagram'
 import { PreComponent } from '@/components/markdown-editor/pre-component'
 import { cn } from '@/lib/utils'
@@ -59,16 +77,7 @@ export const getMarkdownComponents = (): Components => ({
 
     // Code inline estilizado
     if (isInline) {
-      return (
-        <code
-          className={cn(
-            'bg-muted/80 text-foreground rounded-md px-1.5 py-0.5 font-mono text-[0.9em]',
-            className,
-          )}
-          {...props}>
-          {children}
-        </code>
-      )
+      return <MarkdownInlineCode {...props}>{children}</MarkdownInlineCode>
     }
 
     // Code block (dentro do pre)
@@ -86,40 +95,68 @@ export const getMarkdownComponents = (): Components => ({
   blockquote: BlockquoteWithAdmonition,
 
   // Tabelas estilizadas
-  table: ({ children, ...props }: any) => (
-    <div className='bg-card my-6 w-full overflow-y-auto rounded-lg border'>
-      <table className='w-full text-sm' {...props}>
-        {children}
-      </table>
-    </div>
-  ),
+  // Tabelas estilizadas e responsivas
+  table: ({ children, ...props }: any) => <MarkdownTable {...props}>{children}</MarkdownTable>,
 
   thead: ({ children, ...props }: any) => (
-    <thead className='bg-muted/50 font-medium' {...props}>
-      {children}
-    </thead>
+    <MarkdownTableHead {...props}>{children}</MarkdownTableHead>
   ),
 
-  th: ({ children, ...props }: any) => (
-    <th className='border-b px-4 py-3 text-left font-semibold' {...props}>
-      {children}
-    </th>
+  tbody: ({ children, ...props }: any) => (
+    <MarkdownTableBody {...props}>{children}</MarkdownTableBody>
   ),
 
-  td: ({ children, ...props }: any) => (
-    <td className='border-b px-4 py-2 last:border-0' {...props}>
-      {children}
-    </td>
+  tr: ({ children, ...props }: any) => <MarkdownTableRow {...props}>{children}</MarkdownTableRow>,
+
+  th: ({ children, style, ...props }: any) => {
+    // Detecta alinhamento do markdown (style.textAlign)
+    const align = style?.textAlign || 'left'
+    return (
+      <MarkdownTableHeaderCell align={align} {...props}>
+        {children}
+      </MarkdownTableHeaderCell>
+    )
+  },
+
+  td: ({ children, style, ...props }: any) => {
+    // Detecta alinhamento do markdown (style.textAlign)
+    const align = style?.textAlign || 'left'
+    return (
+      <MarkdownTableCell align={align} {...props}>
+        {children}
+      </MarkdownTableCell>
+    )
+  },
+
+  // Imagens responsivas e estilizadas
+  img: ({ src, alt, title, ...props }: any) => (
+    <MarkdownImage src={src} alt={alt} title={title} {...props} />
   ),
 
-  // Imagens responsivas
-  img: ({ ...props }: any) => (
-    <img
-      className='mx-auto my-6 h-auto max-w-full rounded-lg border shadow-sm'
-      {...props}
-      alt={props.alt || 'Imagem'}
-    />
+  // Listas não ordenadas
+  ul: ({ children, ...props }: any) => (
+    <MarkdownUnorderedList {...props}>{children}</MarkdownUnorderedList>
   ),
+
+  // Listas ordenadas
+  ol: ({ children, start, ...props }: any) => (
+    <MarkdownOrderedList start={start} {...props}>
+      {children}
+    </MarkdownOrderedList>
+  ),
+
+  // Itens de lista
+  li: ({ children, className, ...props }: any) => {
+    // Detecta task list (checkbox)
+    const isTaskList = className?.includes('task-list-item')
+
+    // Detecta se é lista ordenada ou não ordenada pelo contexto
+    return (
+      <MarkdownListItem className={className} {...props}>
+        {children}
+      </MarkdownListItem>
+    )
+  },
 
   // Headers com IDs automáticos para navegação e TOC
   h1: ({ children, ...props }) => {
@@ -199,4 +236,17 @@ export const getMarkdownComponents = (): Components => ({
       </h6>
     )
   },
+
+  // Links estilizados
+  a: ({ href, children, title, ...props }: any) => (
+    <MarkdownLink href={href} title={title} {...props}>
+      {children}
+    </MarkdownLink>
+  ),
+
+  // Separador horizontal
+  hr: ({ ...props }: any) => <MarkdownHr {...props} />,
+
+  // Kbd para atalhos de teclado
+  kbd: ({ children, ...props }: any) => <MarkdownKbd {...props}>{children}</MarkdownKbd>,
 })

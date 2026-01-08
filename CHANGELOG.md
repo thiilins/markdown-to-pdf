@@ -5,6 +5,122 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto
 adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.9.0] - 2025-01-08
+
+### 🎨 Features - Componentes Markdown Personalizados
+
+#### ✨ Novos Componentes Visuais
+
+**1. MarkdownImage - Imagens Simplificadas**
+- Imagem responsiva com borda e sombra suave
+- Caption opcional (figcaption) para texto alternativo
+- Tratamento de erro (esconde se falhar)
+- Arredondamento e espaçamento adequado
+- Visual limpo e profissional
+
+**2. MarkdownListItem - Listas Estilizadas**
+- **Listas Ordenadas:** Números em círculos azuis com sombra
+- **Listas Não Ordenadas:** Bullets azuis com anel decorativo
+- **Task Lists (Checkboxes):**
+  - Não marcada: Borda cinza, fundo branco, hover interativo
+  - Marcada: Borda e fundo verde esmeralda, ícone de check branco
+  - Texto com line-through quando marcado
+- Contador CSS automático para listas ordenadas
+- Transições suaves (200ms)
+
+**3. MarkdownTable - Tabelas Responsivas**
+- Container com scroll horizontal automático
+- Header com borda inferior dupla e background cinza claro
+- Bordas internas entre linhas (última linha sem borda)
+- Células com padding adequado (px-4 py-2)
+- Alinhamento automático (esquerda, centro, direita)
+- Cores suaves (slate-700 no header, slate-600 no body)
+- Sem bordas externas para visual limpo
+
+**4. MarkdownLink - Links Estilizados por Tipo**
+- **Links Externos (https://):**
+  - Cor: Azul indigo com ícone `ExternalLink`
+  - Abre em nova aba com `target="_blank"`
+  - Segurança: `rel="noopener noreferrer"`
+- **Âncoras Internas (#):**
+  - Cor: Roxo violeta com ícone `LinkIcon`
+  - Navegação interna suave
+- **E-mail (mailto:):**
+  - Cor: Verde esmeralda com ícone `Mail`
+- **Links Internos/Relativos:**
+  - Cor: Slate com hover indigo
+- Sublinhado decorativo no hover (2px, offset 4px)
+- Ícones com animação (opacidade 50% → 100%)
+- Suporte dark mode completo
+
+**5. MarkdownKbd - Atalhos de Teclado**
+- Visual de tecla física com efeito 3D
+- Borda cinza e background claro
+- Sombra inferior para efeito "pressionável"
+- Font mono, texto pequeno e semibold
+- Suporte dark mode
+
+**6. MarkdownInlineCode - Código Inline**
+- Background cinza claro com overlay indigo sutil
+- Padding horizontal e vertical adequado
+- Font mono, tamanho 0.875em
+- Arredondamento suave
+- Suporte dark mode
+
+**7. MarkdownHr - Separador Horizontal**
+- Linha com gradiente (transparente → cinza → transparente)
+- Ícone `Sparkles` no centro em círculo branco
+- Espaçamento vertical generoso (my-8)
+- Visual elegante e minimalista
+- Suporte dark mode
+
+#### 🔧 Melhorias no Sistema
+
+**Integração Completa:**
+- Todos os componentes integrados em `markdown-components.tsx`
+- Componentes de lista (`MarkdownOrderedList`, `MarkdownUnorderedList`) agora usados corretamente
+- Detecção automática de tipo de link (externo, âncora, email, interno)
+- Alinhamento de tabelas detectado via `style.textAlign`
+
+**Markdown Padrão Expandido:**
+- Adicionados exemplos completos para TODOS os componentes
+- Seção "Código Inline" com 4 exemplos práticos
+- Seção "Atalhos de Teclado" com 8 atalhos documentados
+- Seção "Links Estilizados" com exemplos de todos os tipos
+- Seção "Separadores Horizontais" com múltiplos exemplos
+- Seção "Resumo de Componentes" com lista de 10 componentes
+- Citação adicional (Cory House)
+- Guia de "Próximos Passos" expandido com 5 ações
+
+#### 🐛 Bug Fixes
+
+- Corrigido contador CSS em listas ordenadas (agora incrementa corretamente)
+- Removido header desnecessário do componente de tabela
+- Removida borda externa das tabelas
+- Ajustado espaçamento e padding de todos os componentes
+- Corrigido alinhamento de ícones em links (baseline)
+- Lista de resumo corrigida para usar bullets ao invés de checkboxes soltos
+
+#### 📦 Arquivos Criados
+
+- `src/components/markdown-editor/markdown-image.tsx`
+- `src/components/markdown-editor/markdown-lists.tsx`
+- `src/components/markdown-editor/markdown-table.tsx`
+- `src/components/markdown-editor/markdown-link.tsx`
+- `src/components/markdown-editor/markdown-kbd.tsx`
+- `src/components/markdown-editor/markdown-inline-code.tsx`
+- `src/components/markdown-editor/markdown-hr.tsx`
+
+#### 🎯 Impacto
+
+- **Visual:** Markdown agora tem aparência premium e profissional
+- **Consistência:** Todos os elementos seguem o mesmo design system
+- **Usabilidade:** Ícones e cores ajudam a identificar tipos de conteúdo
+- **Acessibilidade:** Contraste adequado e suporte dark mode
+- **Documentação:** Markdown padrão serve como guia completo
+
+---
+
 ## [0.8.0] - 2025-01-08
 
 ### 🎨 Features - Admonitions (Callouts) e Refatoração Completa

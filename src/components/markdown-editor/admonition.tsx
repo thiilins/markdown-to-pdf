@@ -1,105 +1,112 @@
 'use client'
 
-import { AlertCircle, Info, Lightbulb, ShieldAlert, TriangleAlert } from 'lucide-react'
-import { ReactNode } from 'react'
+import React from 'react'
+import {
+  AlertCircle,
+  Info,
+  Lightbulb,
+  ShieldAlert,
+  TriangleAlert,
+  type LucideIcon,
+} from 'lucide-react'
+import { cn } from '@/lib/utils'
+
+type AdmonitionType = 'note' | 'tip' | 'important' | 'warning' | 'caution'
 
 interface AdmonitionProps {
-  type: 'note' | 'tip' | 'important' | 'warning' | 'caution'
-  children: ReactNode
+  type: AdmonitionType
+  children: React.ReactNode
+  className?: string
 }
 
-const admonitionConfig = {
+interface AdmonitionStyle {
+  icon: LucideIcon
+  label: string
+  containerClass: string
+  iconWrapperClass: string
+  iconClass: string
+  titleClass: string
+  contentClass: string
+}
+
+const admonitionStyles: Record<AdmonitionType, AdmonitionStyle> = {
   note: {
     icon: Info,
     label: 'Nota',
-    colors: {
-      border: '#3b82f6',
-      bg: '#eff6ff',
-      text: '#1e40af',
-      iconBg: '#3b82f6',
-    },
+    containerClass: 'bg-blue-50/50 border-blue-500/50 text-blue-900',
+    iconWrapperClass: 'bg-blue-100 text-blue-600',
+    iconClass: 'text-blue-600',
+    titleClass: 'text-blue-800',
+    contentClass: 'text-blue-800/80',
   },
   tip: {
     icon: Lightbulb,
     label: 'Dica',
-    colors: {
-      border: '#10b981',
-      bg: '#f0fdf4',
-      text: '#065f46',
-      iconBg: '#10b981',
-    },
+    containerClass: 'bg-emerald-50/50 border-emerald-500/50 text-emerald-900',
+    iconWrapperClass: 'bg-emerald-100 text-emerald-600',
+    iconClass: 'text-emerald-600',
+    titleClass: 'text-emerald-800',
+    contentClass: 'text-emerald-800/80',
   },
   important: {
     icon: AlertCircle,
     label: 'Importante',
-    colors: {
-      border: '#8b5cf6',
-      bg: '#f5f3ff',
-      text: '#5b21b6',
-      iconBg: '#8b5cf6',
-    },
+    containerClass: 'bg-violet-50/50 border-violet-500/50 text-violet-900',
+    iconWrapperClass: 'bg-violet-100 text-violet-600',
+    iconClass: 'text-violet-600',
+    titleClass: 'text-violet-800',
+    contentClass: 'text-violet-800/80',
   },
   warning: {
     icon: TriangleAlert,
     label: 'Aviso',
-    colors: {
-      border: '#f59e0b',
-      bg: '#fffbeb',
-      text: '#92400e',
-      iconBg: '#f59e0b',
-    },
+    containerClass: 'bg-amber-50/50 border-amber-500/50 text-amber-900',
+    iconWrapperClass: 'bg-amber-100 text-amber-600',
+    iconClass: 'text-amber-600',
+    titleClass: 'text-amber-800',
+    contentClass: 'text-amber-800/80',
   },
   caution: {
     icon: ShieldAlert,
     label: 'Cuidado',
-    colors: {
-      border: '#ef4444',
-      bg: '#fef2f2',
-      text: '#991b1b',
-      iconBg: '#ef4444',
-    },
+    containerClass: 'bg-rose-50/50 border-rose-500/50 text-rose-900',
+    iconWrapperClass: 'bg-rose-100 text-rose-600',
+    iconClass: 'text-rose-600',
+    titleClass: 'text-rose-800',
+    contentClass: 'text-rose-800/80',
   },
 }
 
-export function Admonition({ type, children }: AdmonitionProps) {
-  const config = admonitionConfig[type]
-  const Icon = config.icon
+export function Admonition({ type, children, className }: AdmonitionProps) {
+  const style = admonitionStyles[type]
+  const Icon = style.icon
 
   return (
     <div
-      className='admonition'
-      style={{
-        borderLeft: `4px solid ${config.colors.border}`,
-        backgroundColor: config.colors.bg,
-        padding: '1rem',
-        margin: '1.5rem 0',
-        borderRadius: '0.375rem',
-        display: 'flex',
-        gap: '0.75rem',
-      }}>
+      className={cn(
+        'my-6 flex gap-4 rounded-xl border-l-4 p-4 shadow-sm backdrop-blur-sm transition-all',
+        style.containerClass,
+        className,
+      )}>
+      {/* Icon Wrapper */}
       <div
-        style={{
-          flexShrink: 0,
-          width: '24px',
-          height: '24px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-        <Icon size={20} style={{ color: config.colors.iconBg }} />
+        className={cn(
+          'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg shadow-sm',
+          style.iconWrapperClass,
+        )}>
+        <Icon className='h-5 w-5' />
       </div>
-      <div style={{ flex: 1, color: config.colors.text }}>
-        <div
-          style={{
-            fontWeight: 600,
-            marginBottom: '0.25rem',
-            fontSize: '0.875rem',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-          }}>
-          {config.label}
+
+      <div className='flex flex-col gap-1'>
+        {/* Label/Title */}
+        <span className={cn('text-[11px] font-black tracking-[0.1em] uppercase', style.titleClass)}>
+          {style.label}
+        </span>
+
+        {/* Content */}
+        <div className={cn('text-sm leading-relaxed font-medium', style.contentClass)}>
+          {children}
         </div>
-        <div className='admonition-content'>{children}</div>
       </div>
     </div>
   )
