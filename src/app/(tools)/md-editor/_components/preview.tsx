@@ -6,12 +6,12 @@ import { cn } from '@/lib/utils'
 import { THEME_PRESETS } from '@/shared/constants'
 import { useApp } from '@/shared/contexts/appContext'
 import { useMarkdown } from '@/shared/contexts/markdownContext'
-import '@/shared/utils/clear-toc-cache'
-
 import { PreviewStyle } from '@/shared/styles/preview-styles'
+import '@/shared/utils/clear-toc-cache'
+import { getMarkdownComponents } from '@/shared/utils/markdown-components'
 import { Ruler } from 'lucide-react'
 import { forwardRef, useMemo } from 'react'
-import ReactMarkdown, { Components } from 'react-markdown'
+import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
 
@@ -94,115 +94,8 @@ export const PreviewComponent = forwardRef<HTMLDivElement, PreviewPanelProps>(
       } as React.CSSProperties
     }, [typographyConfig])
 
-    // Markdown Components com IDs automáticos nos headers para bookmarks
-    const markdownComponents: Components = useMemo(
-      () => ({
-        div: ({ node, className, children, ...props }) => {
-          if (className === 'page-break') return <div className='page-break' {...props} />
-          return (
-            <div className={className} {...props}>
-              {children}
-            </div>
-          )
-        },
-        pre: ({ node, children, ...props }) => (
-          <pre {...props} style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
-            {children}
-          </pre>
-        ),
-        code: ({ node, className, children, ...props }: any) => {
-          const isInline = !className || !className.includes('language-')
-          if (isInline)
-            return (
-              <code className={className} {...props}>
-                {children}
-              </code>
-            )
-          return (
-            <code
-              className={className}
-              {...props}
-              style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
-              {children}
-            </code>
-          )
-        },
-        // Adiciona IDs automáticos nos headers para navegação e bookmarks
-        h1: ({ children, ...props }) => {
-          const text = String(children)
-          const id = text
-            .toLowerCase()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/\s+/g, '-')
-          return (
-            <h1 id={id} {...props}>
-              {children}
-            </h1>
-          )
-        },
-        h2: ({ children, ...props }) => {
-          const text = String(children)
-          const id = text
-            .toLowerCase()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/\s+/g, '-')
-          return (
-            <h2 id={id} {...props}>
-              {children}
-            </h2>
-          )
-        },
-        h3: ({ children, ...props }) => {
-          const text = String(children)
-          const id = text
-            .toLowerCase()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/\s+/g, '-')
-          return (
-            <h3 id={id} {...props}>
-              {children}
-            </h3>
-          )
-        },
-        h4: ({ children, ...props }) => {
-          const text = String(children)
-          const id = text
-            .toLowerCase()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/\s+/g, '-')
-          return (
-            <h4 id={id} {...props}>
-              {children}
-            </h4>
-          )
-        },
-        h5: ({ children, ...props }) => {
-          const text = String(children)
-          const id = text
-            .toLowerCase()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/\s+/g, '-')
-          return (
-            <h5 id={id} {...props}>
-              {children}
-            </h5>
-          )
-        },
-        h6: ({ children, ...props }) => {
-          const text = String(children)
-          const id = text
-            .toLowerCase()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/\s+/g, '-')
-          return (
-            <h6 id={id} {...props}>
-              {children}
-            </h6>
-          )
-        },
-      }),
-      [],
-    )
+    // Componentes Markdown centralizados com todas as melhorias
+    const markdownComponents = useMemo(() => getMarkdownComponents(), [])
 
     const previewConfig = config.preview || { showTOC: false, tocPosition: 'left' }
     const tocPosition = previewConfig.tocPosition || 'left'

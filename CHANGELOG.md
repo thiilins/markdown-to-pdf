@@ -5,6 +5,169 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto
 adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.8.0] - 2025-01-08
+
+### 🎨 Features - Admonitions (Callouts) e Refatoração Completa
+
+#### ✨ Admonitions (Callouts GitHub-Style)
+
+- **5 Tipos de Callouts Coloridos:**
+  - `[!NOTE]` - Nota (azul) com ícone Info
+  - `[!TIP]` - Dica (verde) com ícone Lightbulb
+  - `[!IMPORTANT]` - Importante (roxo) com ícone AlertCircle
+  - `[!WARNING]` - Aviso (laranja) com ícone TriangleAlert
+  - `[!CAUTION]` - Cuidado (vermelho) com ícone ShieldAlert
+
+- **Componente Admonition:**
+  - Renderização customizada de blockquotes com `[!TYPE]`
+  - Design premium com bordas coloridas e ícones
+  - Background suave e texto legível
+  - Labels em maiúsculas
+  - Glassmorphism effect
+
+- **Parser Inteligente:**
+  - Detecção automática de blockquotes com marcadores `[!TYPE]`
+  - Remoção do marcador do conteúdo
+  - Fallback para blockquote normal se não for admonition
+
+#### 🔧 Refatoração Completa - Componente Centralizado
+
+- **`markdown-components.tsx` - Componente Único:**
+  - Criado arquivo centralizado com TODAS as melhorias
+  - Redução de ~450 linhas de código duplicado
+  - Manutenção simplificada (alterar uma vez, aplica em todos)
+
+- **Features Centralizadas:**
+  - ✅ Mermaid.js (diagramas interativos)
+  - ✅ Admonitions (5 tipos de callouts)
+  - ✅ PreComponent (blocos de código estilizados)
+  - ✅ IDs automáticos nos headers (para TOC e navegação)
+  - ✅ Page breaks estilizados
+  - ✅ Tabelas responsivas e estilizadas
+  - ✅ Imagens responsivas com bordas e sombras
+  - ✅ Parágrafos como div (evita erros de hidratação)
+  - ✅ Code inline estilizado
+
+- **Previews Refatorados:**
+  - `md-editor` - Agora usa componente centralizado
+  - `md-to-pdf` - Agora usa componente centralizado
+  - `gist-explorer` - Agora usa componente centralizado
+  - Todos com comportamento idêntico e profissional
+
+- **Integração Completa no Gist Explorer:**
+  - TOC Interativo (opcional)
+  - Link Validator
+  - Mermaid.js
+  - Admonitions
+  - Todas as melhorias do md-editor e md-to-pdf
+
+#### 📝 Markdown Padrão Atualizado
+
+- Adicionados exemplos de todos os 5 tipos de Admonitions
+- Exemplos de diagramas Mermaid (fluxograma e sequência)
+- Documento mais completo e demonstrativo
+
+### 🔧 Melhorias Técnicas
+
+- **PreComponent Aprimorado:**
+  - Detecção de Mermaid para evitar renderização como código
+  - Fallback inteligente para blocos não-Mermaid
+
+- **Consistência Total:**
+  - Mesmo comportamento em todos os previews
+  - Mesmas funcionalidades disponíveis
+  - Código limpo e organizado
+
+### 📦 Arquivos Criados
+
+- `src/components/markdown-editor/admonition.tsx`
+- `src/shared/utils/admonition-parser.tsx`
+- `src/shared/utils/markdown-components.tsx` (componente centralizado)
+
+### 📝 Arquivos Modificados
+
+- `src/app/(tools)/md-editor/_components/preview.tsx` - Usa componente centralizado
+- `src/app/(tools)/md-to-pdf/_components/preview.tsx` - Usa componente centralizado
+- `src/app/(tools)/gist-explorer/_components/gist-preview/md-preview/index.tsx` - Usa componente centralizado + TOC + Link Validator
+- `src/components/markdown-editor/pre-component.tsx` - Detecção de Mermaid
+- `src/shared/constants/default-markdown.ts` - Exemplos de Admonitions
+
+### 🐛 Correções
+
+- PreComponent não renderiza mais Mermaid como código
+- Gist Explorer agora tem todas as features do md-editor
+- Código duplicado eliminado (~450 linhas)
+
+---
+
+## [0.7.0] - 2025-01-08
+
+### 🎨 Features - Suporte a Diagramas Mermaid.js
+
+#### ✨ Renderização de Diagramas Interativos
+
+- **Componente MermaidDiagram:**
+  - Renderização client-side de diagramas Mermaid
+  - Inicialização única com configuração otimizada
+  - Tema padrão com fonte customizável
+  - IDs únicos para cada diagrama
+  - Estados de loading e erro com feedback visual
+
+- **Tipos de Diagramas Suportados:**
+  - **Fluxogramas** (`graph TD`, `graph LR`, etc.)
+  - **Diagramas de Sequência** (`sequenceDiagram`)
+  - **Gráficos de Gantt** (`gantt`)
+  - **Diagramas de Classe** (`classDiagram`)
+  - **Diagramas de Estado** (`stateDiagram`)
+  - **Diagramas de Entidade-Relacionamento** (`erDiagram`)
+  - **Gráficos de Pizza** (`pie`)
+  - E todos os outros tipos suportados pelo Mermaid.js
+
+- **Integração com Preview:**
+  - Detecção automática de blocos ` ```mermaid `
+  - Renderização inline no preview do Markdown
+  - Centralização automática dos diagramas
+  - Espaçamento consistente com o restante do conteúdo
+  - Funciona em `md-editor` e `md-to-pdf`
+
+- **Tratamento de Erros:**
+  - Mensagens de erro detalhadas com ícone visual
+  - Borda vermelha para destacar problemas
+  - Não quebra o preview em caso de erro
+  - Console log para debugging
+
+- **Performance:**
+  - Lazy rendering (apenas quando necessário)
+  - Cache de diagramas renderizados
+  - Não bloqueia a renderização do restante do documento
+
+#### 📝 Exemplos no Markdown Padrão
+
+- Adicionado seção "Diagramas Mermaid" no documento padrão
+- Exemplo de fluxograma de processo de autenticação
+- Exemplo de diagrama de sequência para API REST
+- Demonstra sintaxe e possibilidades
+
+### 🔧 Melhorias Técnicas
+
+- **Dependência:** `mermaid@11.12.2` adicionada
+- **Componentes Customizados:** Integração com `react-markdown`
+- **Type Safety:** Tipagem completa para props e estados
+- **Acessibilidade:** Estados de loading e erro acessíveis
+
+### 📦 Arquivos Criados
+
+- `src/components/markdown-editor/mermaid-diagram.tsx`
+
+### 📝 Arquivos Modificados
+
+- `src/app/(tools)/md-editor/_components/preview.tsx` - Integração Mermaid
+- `src/app/(tools)/md-to-pdf/_components/preview.tsx` - Integração Mermaid
+- `src/shared/constants/default-markdown.ts` - Exemplos de diagramas
+- `package.json` - Dependência mermaid
+
+---
+
 ## [0.6.0] - 2025-01-08
 
 ### 🎉 Features Principais - Markdown Editor & PDF Pro

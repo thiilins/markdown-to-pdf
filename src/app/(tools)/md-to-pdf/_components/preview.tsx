@@ -11,9 +11,10 @@ import { useHeaderFooter } from '@/shared/contexts/headerFooterContext'
 import { useMarkdown } from '@/shared/contexts/markdownContext'
 import { PreviewStyle } from '@/shared/styles/preview-styles'
 import '@/shared/utils/clear-toc-cache'
+import { getMarkdownComponents } from '@/shared/utils/markdown-components'
 import { AlignLeft, Layout, Loader2, Ruler } from 'lucide-react'
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
-import ReactMarkdown, { Components } from 'react-markdown'
+import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
@@ -367,84 +368,8 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
     const previewConfig = config.preview || { showTOC: false, tocPosition: 'left' }
     const tocPosition = previewConfig.tocPosition || 'left'
 
-    // Markdown Components com IDs automáticos nos headers para bookmarks
-    const markdownComponents: Components = useMemo(
-      () => ({
-        h1: ({ children, ...props }) => {
-          const text = String(children)
-          const id = text
-            .toLowerCase()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/\s+/g, '-')
-          return (
-            <h1 id={id} {...props}>
-              {children}
-            </h1>
-          )
-        },
-        h2: ({ children, ...props }) => {
-          const text = String(children)
-          const id = text
-            .toLowerCase()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/\s+/g, '-')
-          return (
-            <h2 id={id} {...props}>
-              {children}
-            </h2>
-          )
-        },
-        h3: ({ children, ...props }) => {
-          const text = String(children)
-          const id = text
-            .toLowerCase()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/\s+/g, '-')
-          return (
-            <h3 id={id} {...props}>
-              {children}
-            </h3>
-          )
-        },
-        h4: ({ children, ...props }) => {
-          const text = String(children)
-          const id = text
-            .toLowerCase()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/\s+/g, '-')
-          return (
-            <h4 id={id} {...props}>
-              {children}
-            </h4>
-          )
-        },
-        h5: ({ children, ...props }) => {
-          const text = String(children)
-          const id = text
-            .toLowerCase()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/\s+/g, '-')
-          return (
-            <h5 id={id} {...props}>
-              {children}
-            </h5>
-          )
-        },
-        h6: ({ children, ...props }) => {
-          const text = String(children)
-          const id = text
-            .toLowerCase()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/\s+/g, '-')
-          return (
-            <h6 id={id} {...props}>
-              {children}
-            </h6>
-          )
-        },
-      }),
-      [],
-    )
+    // Componentes Markdown centralizados com todas as melhorias
+    const markdownComponents = useMemo(() => getMarkdownComponents(), [])
 
     return (
       <div className={cn('bg-muted/30 relative h-full w-full', className)}>

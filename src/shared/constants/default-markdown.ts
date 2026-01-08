@@ -12,8 +12,14 @@ O editor suporta blocos de destaque no estilo GitHub Flavored Markdown:
 > [!TIP]
 > **Dica Pro:** Use o atalho \`Ctrl + Space\` (ou o menu de ações) para inserir estes blocos rapidamente.
 
+> [!IMPORTANT]
+> **Importante:** Esta funcionalidade requer atenção especial. Certifique-se de revisar todos os detalhes antes de prosseguir.
+
 > [!WARNING]
 > **Atenção:** Verifique sempre a visualização final antes de exportar para PDF.
+
+> [!CAUTION]
+> **Cuidado:** Esta ação é irreversível. Faça backup dos seus dados antes de continuar.
 
 ## 2. Formatação de Texto
 Você pode combinar estilos para dar ênfase ao conteúdo:
@@ -70,7 +76,39 @@ export function Counter() {
 >
 > — *Leonardo da Vinci*
 
-## 7. Links
+## 7. Diagramas Mermaid
+Crie diagramas interativos diretamente no Markdown:
+
+### Fluxograma de Processo
+\`\`\`mermaid
+graph TD
+    A[Início] --> B{Usuário logado?}
+    B -->|Sim| C[Dashboard]
+    B -->|Não| D[Página de Login]
+    D --> E[Autenticar]
+    E --> F{Credenciais válidas?}
+    F -->|Sim| C
+    F -->|Não| D
+    C --> G[Fim]
+\`\`\`
+
+### Diagrama de Sequência
+\`\`\`mermaid
+sequenceDiagram
+    participant U as Usuário
+    participant F as Frontend
+    participant A as API
+    participant D as Database
+
+    U->>F: Clica em "Salvar"
+    F->>A: POST /api/documents
+    A->>D: INSERT INTO documents
+    D-->>A: ID do documento
+    A-->>F: 201 Created
+    F-->>U: "Documento salvo!"
+\`\`\`
+
+## 8. Links
  Temos validadores de links para você testar.
 
 ### Links Válidos
