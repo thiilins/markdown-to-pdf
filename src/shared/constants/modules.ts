@@ -55,13 +55,7 @@ export const Modules_Front: ModuleItem[] = [
         label: 'Web Extractor',
         href: '/web-extractor',
         icon: Globe,
-        description: 'Transforme artigos de sites em Markdown',
-      },
-      {
-        label: 'Code Snapshot',
-        href: '/code-snapshot',
-        icon: Camera,
-        description: 'Crie imagens estéticas de trechos de código',
+        description: 'Extraia artigos de sites',
       },
     ],
   },
@@ -214,7 +208,7 @@ export const Modules: ModuleItem[] = [
     label: 'Web Extractor',
     href: '/web-extractor',
     icon: Globe,
-    description: 'Site para Markdown',
+    description: 'Extraia artigos de sites',
   },
   {
     label: 'Code Snapshot',

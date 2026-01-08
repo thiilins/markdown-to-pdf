@@ -1,25 +1,28 @@
 'use client'
 
+import { scrapperHtmlV2 } from '@/app/actions/scrapper-html-v2'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
-import { cn } from '@/lib/utils'
-import { scrapperHtmlV2 } from '@/app/actions/scrapper-html-v2'
+import { useWebExtractor } from '@/shared/contexts/webExtractorContext'
+import { saveToHistory } from '@/shared/utils/web-extractor-history'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   AlertCircle,
   CheckCircle,
-  Download,
+  Clock,
   Loader2,
   Plus,
+  Search,
   Trash2,
   X,
   XCircle,
   Zap,
 } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 interface BatchUrl {
@@ -31,11 +34,30 @@ interface BatchUrl {
   error?: string
 }
 
-export function BatchUrlExtractor() {
+interface BatchUrlExtractorProps {
+  onClose?: () => void
+}
+
+export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
+  const { history, loadHistory, setResult, setUrl } = useWebExtractor()
   const [urls, setUrls] = useState<BatchUrl[]>([])
   const [inputUrl, setInputUrl] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
-  const [combinedHtml, setCombinedHtml] = useState('')
+  const [historyOpen, setHistoryOpen] = useState(false)
+
+  // Filtra histórico
+  const filteredHistory = useMemo(() => {
+    if (!searchQuery.trim()) return history
+
+    const query = searchQuery.toLowerCase()
+    return history.filter(
+      (entry) =>
+        entry.url.toLowerCase().includes(query) ||
+        entry.title.toLowerCase().includes(query) ||
+        entry.excerpt?.toLowerCase().includes(query),
+    )
+  }, [history, searchQuery])
 
   const addUrl = useCallback(() => {
     const trimmed = inputUrl.trim()
@@ -64,7 +86,31 @@ export function BatchUrlExtractor() {
       },
     ])
     setInputUrl('')
+    setSearchQuery('')
+    setHistoryOpen(false)
   }, [inputUrl, urls])
+
+  const addFromHistory = useCallback(
+    (url: string) => {
+      if (urls.some((u) => u.url === url)) {
+        toast.error('URL já adicionada')
+        return
+      }
+
+      setUrls((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          url,
+          status: 'pending',
+        },
+      ])
+      setInputUrl('')
+      setSearchQuery('')
+      setHistoryOpen(false)
+    },
+    [urls],
+  )
 
   const removeUrl = useCallback((id: string) => {
     setUrls((prev) => prev.filter((u) => u.id !== id))
@@ -72,7 +118,6 @@ export function BatchUrlExtractor() {
 
   const clearAll = useCallback(() => {
     setUrls([])
-    setCombinedHtml('')
   }, [])
 
   const processUrls = useCallback(async () => {
@@ -82,7 +127,6 @@ export function BatchUrlExtractor() {
     }
 
     setIsProcessing(true)
-    setCombinedHtml('')
 
     const results: string[] = []
 
@@ -110,14 +154,28 @@ export function BatchUrlExtractor() {
             ),
           )
 
-          // Adiciona ao HTML combinado com separador
-          results.push(`
-<!-- ========================================== -->
-<!-- Fonte: ${url.url} -->
-<!-- Título: ${response.title || 'Sem título'} -->
-<!-- ========================================== -->
+          // Salva no histórico
+          await saveToHistory({
+            url: url.url,
+            title: response.title || 'Sem título',
+            excerpt: response.excerpt,
+            timestamp: Date.now(),
+            success: true,
+          })
 
-${response.html}
+          // Adiciona ao HTML combinado com separador visual
+          results.push(`
+<article style="border-top: 4px solid #8b5cf6; padding-top: 2rem; margin-top: 3rem;">
+  <header style="margin-bottom: 2rem; padding: 1rem; background: #f9fafb; border-radius: 8px;">
+    <h2 style="margin: 0 0 0.5rem 0; color: #111827; font-size: 1.5rem;">${response.title || 'Sem título'}</h2>
+    <p style="margin: 0; color: #6b7280; font-size: 0.875rem;">
+      <strong>Fonte:</strong> <a href="${url.url}" target="_blank" style="color: #8b5cf6;">${url.url}</a>
+    </p>
+  </header>
+  <div>
+    ${response.html}
+  </div>
+</article>
 `)
         } else {
           // Erro
@@ -133,6 +191,15 @@ ${response.html}
                 : u,
             ),
           )
+
+          // Salva erro no histórico
+          await saveToHistory({
+            url: url.url,
+            title: 'Falha na extração',
+            excerpt: errorMsg,
+            timestamp: Date.now(),
+            success: false,
+          })
         }
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Erro desconhecido'
@@ -155,32 +222,36 @@ ${response.html}
 
     // Combina todos os HTMLs
     const combined = results.join('\n\n')
-    setCombinedHtml(combined)
+
+    // Recarrega histórico
+    await loadHistory()
 
     setIsProcessing(false)
 
     const successCount = urls.filter((u) => u.status === 'success').length
-    toast.success(`${successCount} de ${urls.length} URLs extraídas com sucesso!`)
-  }, [urls])
 
-  const downloadCombined = useCallback(() => {
-    if (!combinedHtml) {
-      toast.error('Nenhum conteúdo para baixar')
-      return
+    if (successCount > 0) {
+      // Exibe no preview principal
+      setResult({
+        success: true,
+        html: combined,
+        title: `📚 Conteúdo Agregado (${successCount} ${successCount === 1 ? 'artigo' : 'artigos'})`,
+        excerpt: `${successCount} de ${urls.length} URLs extraídas com sucesso`,
+      })
+
+      // Define URL fictícia para o agregado
+      setUrl(`agregado://${Date.now()}`)
+
+      toast.success(`${successCount} de ${urls.length} URLs extraídas com sucesso!`)
+
+      // Fecha o modal
+      if (onClose) {
+        setTimeout(() => onClose(), 500)
+      }
+    } else {
+      toast.error('Nenhuma URL foi extraída com sucesso')
     }
-
-    const blob = new Blob([combinedHtml], { type: 'text/html' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `combined-${Date.now()}.html`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-
-    toast.success('HTML combinado baixado!')
-  }, [combinedHtml])
+  }, [urls, loadHistory, setResult, setUrl, onClose])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -197,7 +268,7 @@ ${response.html}
       {/* Header */}
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-3'>
-          <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-500'>
+          <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-purple-500 to-pink-500'>
             <Zap className='h-5 w-5 text-white' />
           </div>
           <div>
@@ -218,21 +289,82 @@ ${response.html}
 
       <Separator />
 
-      {/* Input de URL */}
-      <div className='flex gap-2'>
-        <Input
-          type='url'
-          placeholder='Cole uma URL e pressione Enter...'
-          value={inputUrl}
-          onChange={(e) => setInputUrl(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={isProcessing}
-          className='flex-1'
-        />
-        <Button onClick={addUrl} disabled={isProcessing || !inputUrl.trim()}>
-          <Plus className='h-4 w-4' />
-        </Button>
-      </div>
+      {/* Input de URL com Histórico */}
+      <Popover open={historyOpen} onOpenChange={setHistoryOpen}>
+        <PopoverTrigger asChild>
+          <div className='flex gap-2'>
+            <div className='relative flex-1'>
+              <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-zinc-400' />
+              <Input
+                type='url'
+                placeholder='Cole uma URL ou busque no histórico...'
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value)
+                  setInputUrl(e.target.value)
+                  if (e.target.value.trim() && history.length > 0) {
+                    setHistoryOpen(true)
+                  }
+                }}
+                onFocus={() => {
+                  if (history.length > 0) setHistoryOpen(true)
+                }}
+                onKeyDown={handleKeyDown}
+                disabled={isProcessing}
+                className='pl-9'
+              />
+            </div>
+            <Button onClick={addUrl} disabled={isProcessing || !inputUrl.trim()}>
+              <Plus className='h-4 w-4' />
+            </Button>
+          </div>
+        </PopoverTrigger>
+
+        {history.length > 0 && (
+          <PopoverContent align='start' sideOffset={8} className='w-[600px] p-0'>
+            <div className='flex items-center justify-between border-b px-4 py-3'>
+              <div className='flex items-center gap-2'>
+                <Clock className='h-4 w-4 text-zinc-400' />
+                <span className='text-sm font-semibold text-zinc-700 dark:text-zinc-300'>
+                  Histórico de Extrações
+                </span>
+              </div>
+            </div>
+
+            <ScrollArea className='max-h-[300px]'>
+              {filteredHistory.length > 0 ? (
+                <div className='p-2'>
+                  {filteredHistory.slice(0, 10).map((entry) => (
+                    <button
+                      key={entry.id}
+                      onClick={() => addFromHistory(entry.url)}
+                      className='group/item flex w-full items-start gap-3 rounded-lg p-3 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50'>
+                      <div className='mt-0.5 shrink-0'>
+                        {entry.success ? (
+                          <CheckCircle className='h-4 w-4 text-green-500' />
+                        ) : (
+                          <XCircle className='h-4 w-4 text-red-500' />
+                        )}
+                      </div>
+                      <div className='min-w-0 flex-1'>
+                        <h4 className='line-clamp-1 text-sm font-semibold text-zinc-700 dark:text-zinc-200'>
+                          {entry.title}
+                        </h4>
+                        <p className='line-clamp-1 text-xs text-zinc-500'>{entry.url}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className='flex flex-col items-center py-8 text-center'>
+                  <Search className='mb-2 h-8 w-8 text-zinc-300' />
+                  <p className='text-sm text-zinc-500'>Nenhum resultado encontrado</p>
+                </div>
+              )}
+            </ScrollArea>
+          </PopoverContent>
+        )}
+      </Popover>
 
       {/* Lista de URLs */}
       {urls.length > 0 && (
@@ -280,7 +412,7 @@ ${response.html}
                       {!isProcessing && (
                         <button
                           onClick={() => removeUrl(url.id)}
-                          className='shrink-0 rounded p-1 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 dark:hover:bg-red-900/20'>
+                          className='shrink-0 rounded p-1 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20'>
                           <X className='h-4 w-4' />
                         </button>
                       )}
@@ -310,7 +442,7 @@ ${response.html}
             <Button
               onClick={processUrls}
               disabled={isProcessing || urls.length === 0}
-              className='flex-1 gap-2'>
+              className='w-full gap-2'>
               {isProcessing ? (
                 <>
                   <Loader2 className='h-4 w-4 animate-spin' />
@@ -319,21 +451,10 @@ ${response.html}
               ) : (
                 <>
                   <Zap className='h-4 w-4' />
-                  Extrair Todas
+                  Extrair e Visualizar
                 </>
               )}
             </Button>
-
-            {combinedHtml && (
-              <Button
-                onClick={downloadCombined}
-                variant='outline'
-                className='gap-2'
-                disabled={isProcessing}>
-                <Download className='h-4 w-4' />
-                Baixar HTML
-              </Button>
-            )}
           </div>
 
           {/* Summary */}

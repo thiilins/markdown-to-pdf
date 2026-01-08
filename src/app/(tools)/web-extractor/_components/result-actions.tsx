@@ -84,11 +84,11 @@ export function ResultActions() {
             <Layers className='h-4 w-4' />
           </button>
         </DialogTrigger>
-        <DialogContent className='max-w-3xl'>
+        <DialogContent className='max-w-3xl max-h-[90vh]'>
           <DialogHeader>
             <DialogTitle>Agregador de URLs</DialogTitle>
           </DialogHeader>
-          <BatchUrlExtractor />
+          <BatchUrlExtractor onClose={() => setBatchDialogOpen(false)} />
         </DialogContent>
       </Dialog>
 

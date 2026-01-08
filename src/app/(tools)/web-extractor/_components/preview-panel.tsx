@@ -101,7 +101,7 @@ export const PreviewResultContent = () => {
         {result.integrity && (
           <div className='mb-6 space-y-3'>
             <IntegrityReportComponent report={result.integrity} />
-            
+
             {/* Aviso de Fallback */}
             {result.integrity.stats.usedFallback && (
               <div className='flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-900/50 dark:bg-blue-950/20'>

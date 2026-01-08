@@ -173,16 +173,16 @@ export async function scrapperHtmlV2(url: string): Promise<ScrapeHtmlResponse> {
       // Remove elementos indesejados do fallback
       $('header, nav, footer, aside, .sidebar, .menu, .navigation, .ads, .advertisement, .social-share, .comments, #comments, .related-posts').remove()
       $('[class*="cookie"], [class*="popup"], [class*="modal"], [id*="cookie"]').remove()
-      
+
       // Tenta encontrar o main content
-      let fallbackHtml = 
-        $('article').html() || 
-        $('main').html() || 
+      let fallbackHtml =
+        $('article').html() ||
+        $('main').html() ||
         $('.content, .post-content, .article-content, .entry-content').first().html() ||
-        $('body').html() || 
-        $('html').html() || 
+        $('body').html() ||
+        $('html').html() ||
         ''
-      
+
       if (!fallbackHtml) {
         errors.push('Nenhum conteúdo encontrado no HTML')
       } else {
@@ -191,11 +191,11 @@ export async function scrapperHtmlV2(url: string): Promise<ScrapeHtmlResponse> {
 
       // Aplica formatação básica ao fallback
       const $fallback = cheerio.load(`<div>${fallbackHtml}</div>`)
-      
+
       // Remove atributos de estilo inline
       $fallback('[style]').removeAttr('style')
       $fallback('[class]').removeAttr('class')
-      
+
       // Limita largura de imagens
       $fallback('img').each((_, img) => {
         const $img = $fallback(img)
@@ -274,8 +274,8 @@ export async function scrapperHtmlV2(url: string): Promise<ScrapeHtmlResponse> {
     }
   } catch (error) {
     console.error('Erro no Scraper:', error)
-    return { 
-      success: false, 
+    return {
+      success: false,
       error: 'Ocorreu um erro ao processar o conteúdo do site.',
       integrity: {
         warnings: [],
