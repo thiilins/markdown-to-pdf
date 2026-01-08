@@ -3,7 +3,7 @@
 import { scrapperHtmlV2 } from '@/app/actions/scrapper-html-v2'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Popover, PopoverContent } from '@/components/ui/popover'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
@@ -232,11 +232,13 @@ export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
     setIsProcessing(false)
 
     const successCount = urls.filter((u) => u.status === 'success').length
-    
+
     if (successCount > 0) {
       // Armazena o HTML combinado
       setCombinedHtml(combined)
-      toast.success(`${successCount} de ${urls.length} URLs extraídas! Clique em "Visualizar" para ver o resultado.`)
+      toast.success(
+        `${successCount} de ${urls.length} URLs extraídas! Clique em "Visualizar" para ver o resultado.`,
+      )
     } else {
       toast.error('Nenhuma URL foi extraída com sucesso')
     }
@@ -254,10 +256,10 @@ export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
       title: `📚 Conteúdo Agregado (${successCount} ${successCount === 1 ? 'artigo' : 'artigos'})`,
       excerpt: `${successCount} de ${urls.length} URLs extraídas com sucesso`,
     })
-    
+
     // Define URL fictícia para o agregado
     setUrl(`agregado://${Date.now()}`)
-    
+
     // Fecha o modal
     if (onClose) {
       onClose()
@@ -301,81 +303,80 @@ export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
       <Separator />
 
       {/* Input de URL com Histórico */}
-      <Popover open={historyOpen} onOpenChange={setHistoryOpen}>
-        <PopoverTrigger asChild>
-          <div className='flex gap-2'>
-            <div className='relative flex-1'>
-              <Search className='absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-zinc-400' />
-              <Input
-                type='url'
-                placeholder='Cole uma URL ou busque no histórico...'
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value)
-                  setInputUrl(e.target.value)
-                  if (e.target.value.trim() && history.length > 0) {
-                    setHistoryOpen(true)
-                  }
-                }}
-                onFocus={() => {
-                  if (history.length > 0) setHistoryOpen(true)
-                }}
-                onKeyDown={handleKeyDown}
-                disabled={isProcessing}
-                className='pl-9'
-              />
-            </div>
-            <Button onClick={addUrl} disabled={isProcessing || !inputUrl.trim()}>
-              <Plus className='h-4 w-4' />
-            </Button>
+      <div className='flex gap-2'>
+        <Popover open={historyOpen} onOpenChange={setHistoryOpen}>
+          <div className='relative flex-1'>
+            <Search className='pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-zinc-400' />
+            <Input
+              type='url'
+              placeholder='Cole uma URL ou busque no histórico...'
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value)
+                setInputUrl(e.target.value)
+                if (e.target.value.trim() && history.length > 0) {
+                  setHistoryOpen(true)
+                }
+              }}
+              onFocus={() => {
+                if (history.length > 0) setHistoryOpen(true)
+              }}
+              onKeyDown={handleKeyDown}
+              disabled={isProcessing}
+              className='pl-9'
+            />
           </div>
-        </PopoverTrigger>
 
-        {history.length > 0 && (
-          <PopoverContent align='start' sideOffset={8} className='w-[600px] p-0'>
-            <div className='flex items-center justify-between border-b px-4 py-3'>
-              <div className='flex items-center gap-2'>
-                <Clock className='h-4 w-4 text-zinc-400' />
-                <span className='text-sm font-semibold text-zinc-700 dark:text-zinc-300'>
-                  Histórico de Extrações
-                </span>
+          {history.length > 0 && (
+            <PopoverContent align='start' sideOffset={8} className='w-[600px] p-0'>
+              <div className='flex items-center justify-between border-b px-4 py-3'>
+                <div className='flex items-center gap-2'>
+                  <Clock className='h-4 w-4 text-zinc-400' />
+                  <span className='text-sm font-semibold text-zinc-700 dark:text-zinc-300'>
+                    Histórico de Extrações
+                  </span>
+                </div>
               </div>
-            </div>
 
-            <ScrollArea className='max-h-[300px]'>
-              {filteredHistory.length > 0 ? (
-                <div className='p-2'>
-                  {filteredHistory.slice(0, 10).map((entry) => (
-                    <button
-                      key={entry.id}
-                      onClick={() => addFromHistory(entry.url)}
-                      className='group/item flex w-full items-start gap-3 rounded-lg p-3 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50'>
-                      <div className='mt-0.5 shrink-0'>
-                        {entry.success ? (
-                          <CheckCircle className='h-4 w-4 text-green-500' />
-                        ) : (
-                          <XCircle className='h-4 w-4 text-red-500' />
-                        )}
-                      </div>
-                      <div className='min-w-0 flex-1'>
-                        <h4 className='line-clamp-1 text-sm font-semibold text-zinc-700 dark:text-zinc-200'>
-                          {entry.title}
-                        </h4>
-                        <p className='line-clamp-1 text-xs text-zinc-500'>{entry.url}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className='flex flex-col items-center py-8 text-center'>
-                  <Search className='mb-2 h-8 w-8 text-zinc-300' />
-                  <p className='text-sm text-zinc-500'>Nenhum resultado encontrado</p>
-                </div>
-              )}
-            </ScrollArea>
-          </PopoverContent>
-        )}
-      </Popover>
+              <ScrollArea className='max-h-[300px]'>
+                {filteredHistory.length > 0 ? (
+                  <div className='p-2'>
+                    {filteredHistory.slice(0, 10).map((entry) => (
+                      <button
+                        key={entry.id}
+                        onClick={() => addFromHistory(entry.url)}
+                        className='group/item flex w-full items-start gap-3 rounded-lg p-3 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50'>
+                        <div className='mt-0.5 shrink-0'>
+                          {entry.success ? (
+                            <CheckCircle className='h-4 w-4 text-green-500' />
+                          ) : (
+                            <XCircle className='h-4 w-4 text-red-500' />
+                          )}
+                        </div>
+                        <div className='min-w-0 flex-1'>
+                          <h4 className='line-clamp-1 text-sm font-semibold text-zinc-700 dark:text-zinc-200'>
+                            {entry.title}
+                          </h4>
+                          <p className='line-clamp-1 text-xs text-zinc-500'>{entry.url}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className='flex flex-col items-center py-8 text-center'>
+                    <Search className='mb-2 h-8 w-8 text-zinc-300' />
+                    <p className='text-sm text-zinc-500'>Nenhum resultado encontrado</p>
+                  </div>
+                )}
+              </ScrollArea>
+            </PopoverContent>
+          )}
+        </Popover>
+
+        <Button onClick={addUrl} disabled={isProcessing || !inputUrl.trim()}>
+          <Plus className='h-4 w-4' />
+        </Button>
+      </div>
 
       {/* Lista de URLs */}
       {urls.length > 0 && (
@@ -428,7 +429,9 @@ export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
                         </button>
                       )}
                     </div>
-                    {idx < urls.length - 1 && <Separator className='my-1' />}
+                    {idx < urls.length - 1 && (
+                      <Separator className='my-2 bg-linear-to-r from-transparent via-zinc-200 to-transparent dark:via-zinc-700' />
+                    )}
                   </motion.div>
                 ))}
               </AnimatePresence>
