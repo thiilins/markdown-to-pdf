@@ -6,7 +6,6 @@ import { FileCode } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import {
-  formatCode,
   minifyCode,
   validateCode,
   type ValidationResult,
@@ -14,6 +13,28 @@ import {
 import { FormatterEditorPanel } from '../../_components/formatter-editor-panel'
 import { FormatterOutputPanel } from '../../_components/formatter-output-panel'
 import { FormatterHeader } from '../../_components/layouts/formatter-header'
+
+/**
+ * Formata JavaScript usando Prettier (lazy loading isolado)
+ */
+async function formatJavaScript(code: string): Promise<string> {
+  if (!code.trim()) return ''
+
+  const { format } = await import('prettier/standalone')
+  const babelPlugin = await import('prettier/plugins/babel')
+  const estreePlugin = await import('prettier/plugins/estree')
+
+  return await format(code, {
+    parser: 'babel',
+    plugins: [babelPlugin.default || babelPlugin, estreePlugin.default || estreePlugin],
+    printWidth: 100,
+    tabWidth: 2,
+    useTabs: false,
+    semi: true,
+    singleQuote: true,
+    trailingComma: 'es5',
+  })
+}
 
 const DEFAULT_JS = `function processUserData(users){const activeUsers=users.filter(u=>u.active&&u.emailVerified);const sortedUsers=activeUsers.sort((a,b)=>new Date(b.lastLogin)-new Date(a.lastLogin));const userStats={total:users.length,active:activeUsers.length,recent:sortedUsers.slice(0,10)};return userStats}async function fetchUserData(userId){try{const response=await fetch(\`/api/users/\${userId}\`);if(!response.ok)throw new Error('Failed to fetch');const data=await response.json();return{success:true,data};}catch(error){console.error('Error:',error);return{success:false,error:error.message};}}const users=[{id:1,name:'João',active:true,emailVerified:true,lastLogin:'2024-01-15'},{id:2,name:'Maria',active:true,emailVerified:false,lastLogin:'2024-01-10'}];const stats=processUserData(users);console.log(stats);`
 
@@ -58,9 +79,7 @@ export default function JavascriptFormatterView() {
       setIsProcessing(true)
       try {
         const result =
-          formatMode === 'minify'
-            ? minifyCode(code, 'javascript')
-            : await formatCode(code, 'javascript')
+          formatMode === 'minify' ? minifyCode(code, 'javascript') : await formatJavaScript(code)
         setFormattedOutput(result)
         const lines = code.split('\n').length
         const chars = code.length

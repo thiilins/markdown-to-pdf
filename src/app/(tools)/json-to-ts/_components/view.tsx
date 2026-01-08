@@ -87,7 +87,6 @@ export default function JsonToTsView() {
         const parsed = parseResult.data
         let result = convertJsonToTypeScriptInterfaces(parsed, interfaceName, useExport)
 
-        // Formatar o TypeScript com Prettier (lazy loading)
         try {
           const { format } = await import('prettier/standalone')
           const typescriptPlugin = await import('prettier/plugins/typescript')
@@ -193,7 +192,7 @@ export default function JsonToTsView() {
   return (
     <div className='bg-background flex h-[calc(100vh-4rem)] flex-col overflow-hidden'>
       {/* Header */}
-      <div className='from-card to-card/95 shrink-0 border-b bg-gradient-to-b shadow-sm'>
+      <div className='from-card to-card/95 shrink-0 border-b bg-linear-to-b shadow-sm'>
         <div className='px-4 py-3 sm:px-6 sm:py-4'>
           <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
             <div className='flex items-center gap-3'>
