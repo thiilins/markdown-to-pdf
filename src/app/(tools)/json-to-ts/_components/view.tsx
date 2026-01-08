@@ -1,23 +1,23 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
 import { Switch } from '@/components/ui/switch'
 import { Copy, Download, FileCode, FileJson, FileType, RotateCcw } from 'lucide-react'
+import { format } from 'prettier/standalone'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { format } from 'prettier/standalone'
-// Imports estáticos dos plugins do Prettier (necessário para Turbopack)
-import * as prettierPluginEstree from 'prettier/plugins/estree'
-import * as prettierPluginTypescript from 'prettier/plugins/typescript'
+// Imports default dos plugins do Prettier
+import estreePlugin from 'prettier/plugins/estree'
+import typescriptPlugin from 'prettier/plugins/typescript'
 import { CodeFormatterEditor } from '../../_components/code-formatter-editor'
 import { FormatterOutputPanel } from '../../_components/formatter-output-panel'
 import { JsonEditorToolbar } from '../../_components/json-editor-toolbar'
 import {
-  validateJson,
   formatJson,
+  validateJson,
   type JsonValidationResult,
 } from '../../_components/json-formatter-utils'
 import { convertJsonToTypeScriptInterfaces } from '../../_components/json-to-ts-utils'
@@ -95,10 +95,7 @@ export default function JsonToTsView() {
         try {
           result = await format(result, {
             parser: 'typescript',
-            plugins: [
-              prettierPluginTypescript.default || prettierPluginTypescript,
-              prettierPluginEstree.default || prettierPluginEstree,
-            ],
+            plugins: [typescriptPlugin, estreePlugin],
             printWidth: 100,
             tabWidth: 2,
             useTabs: false,

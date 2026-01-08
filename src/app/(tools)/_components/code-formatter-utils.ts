@@ -1,15 +1,14 @@
 'use client'
-
 /**
  * Utilitários para formatação e minificação de código
  */
 
 import { format } from 'prettier/standalone'
-// CORREÇÃO: Usar default imports diretos para evitar problemas de referência no Turbopack
-import prettierPluginBabel from 'prettier/plugins/babel'
-import prettierPluginEstree from 'prettier/plugins/estree'
-import prettierPluginHtml from 'prettier/plugins/html'
-import prettierPluginPostcss from 'prettier/plugins/postcss'
+// Imports default dos plugins do Prettier
+import babelPlugin from 'prettier/plugins/babel'
+import estreePlugin from 'prettier/plugins/estree'
+import htmlPlugin from 'prettier/plugins/html'
+import cssPlugin from 'prettier/plugins/postcss'
 import { formatDialect, format as formatSql, mysql, postgresql } from 'sql-formatter'
 
 export type CodeType = 'html' | 'css' | 'javascript' | 'sql'
@@ -36,8 +35,7 @@ export async function formatCode(
       case 'html':
         return await format(code, {
           parser: 'html',
-          // CORREÇÃO: Passar o objeto do plugin diretamente
-          plugins: [prettierPluginHtml],
+          plugins: [htmlPlugin],
           printWidth: 100,
           tabWidth: 2,
           useTabs: false,
@@ -46,7 +44,7 @@ export async function formatCode(
       case 'css':
         return await format(code, {
           parser: 'css',
-          plugins: [prettierPluginPostcss],
+          plugins: [cssPlugin],
           printWidth: 100,
           tabWidth: 2,
           useTabs: false,
@@ -55,8 +53,7 @@ export async function formatCode(
       case 'javascript':
         return await format(code, {
           parser: 'babel',
-          // Nota: O plugin 'estree' deve vir explicitamente junto com o 'babel' no modo standalone
-          plugins: [prettierPluginBabel, prettierPluginEstree],
+          plugins: [babelPlugin, estreePlugin],
           printWidth: 100,
           tabWidth: 2,
           useTabs: false,
