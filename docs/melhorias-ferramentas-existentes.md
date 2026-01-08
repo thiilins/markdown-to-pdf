@@ -19,16 +19,19 @@ Otimizar a qualidade da extração para que o resultado seja "pronto para uso".
 
 - **Extração Seletiva de DOM:** Permitir que o usuário visualize a estrutura do site e selecione
   manualmente apenas os nós/elementos que deseja converter, evitando ruídos como menus e anúncios.
+  **por hora pularemos**
 - **Renderização de Sites Dinâmicos:** Adicionar uma opção de "Deep Scrape" que utiliza um navegador
   (browser-based) para carregar conteúdos gerados por JavaScript (React, Vue, Angular) antes da
-  conversão.
+  conversão. **por hora pularemos**
 - **Relatório de Integridade (Soft-Failure):** Em vez de apenas falhar, a ferramenta deve marcar
   páginas que retornaram em branco ou com erros de bloqueio, permitindo tentar novamente com
   diferentes parâmetros de extração.
 - **Agregador de URLs:** Possibilidade de inserir uma lista de URLs e gerar um único arquivo
   Markdown combinado, mantendo a hierarquia de headers para cada página extraída.
+- **Histórico** - Manter um historico de urls extraidas pelo usuario (salvando no indexeddb e
+  exibindo uma lista ao seleciona o input de url, com opcao de autocomplete ou nova url)
 
-### 3. Code Snapshot (Code to Image)
+### 3. Code Snapshot (Code to Image) [finalizado]
 
 Diferenciar-se do "Carbon.now.sh" focando em precisão e contexto.
 
@@ -42,7 +45,7 @@ Diferenciar-se do "Carbon.now.sh" focando em precisão e contexto.
 - **Modo "Live Edit" no Preview:** Permitir pequenas edições de texto diretamente no painel de
   preview do snapshot para ajustes rápidos de última hora.
 
-### 4. Formatadores (JSON, SQL, JS, CSS)
+### 4. Formatadores (JSON, SQL, JS, CSS) [finalizado]
 
 Sair da simples indentação para utilitários de produtividade.
 

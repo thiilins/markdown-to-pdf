@@ -154,3 +154,10 @@ Uma ferramenta de diagnóstico rápido de segurança.
 3. **Showcase Técnico:** Implementar um otimizador de SVG ou um gerador de JSON Schema demonstra que
    você entende de manipulação de árvores de dados (AST) e buffers, o que é muito bem visto em
    portfólios.
+
+## NOVAS FERRAMENTAS
+
+- 6. Extração de PDFs Usar pdf-parse ou pdfjs-dist Converter PDF → Markdown Esforço: 4-6 horas
+- 7. Extração de Vídeos (Transcrição) YouTube: usar API ou youtube-transcript Gerar Markdown com
+     timestamps Esforço: 6-8 horas
+- 8. Sitemap Crawler Baixar sitemap.xml Extrair todas as URLs Processar em batch Esforço: 4-5 horas

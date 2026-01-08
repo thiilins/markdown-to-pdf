@@ -1,7 +1,13 @@
 'use client'
 
 import { scrapperHtmlV2, type ScrapeHtmlResponse } from '@/app/actions/scrapper-html-v2'
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
+import {
+  getHistory,
+  saveToHistory,
+  searchHistory,
+  type HistoryEntry,
+} from '@/shared/utils/web-extractor-history'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 
 interface WebExtractorContextType {
@@ -19,6 +25,10 @@ interface WebExtractorContextType {
   // Novo estado para o Modo Leitura
   isReaderMode: boolean
   toggleReaderMode: () => void
+  // Histórico
+  history: HistoryEntry[]
+  loadHistory: () => Promise<void>
+  searchHistoryQuery: (query: string) => Promise<HistoryEntry[]>
 }
 
 const WebExtractorContext = createContext<WebExtractorContextType | undefined>(undefined)
@@ -29,6 +39,21 @@ export function WebExtractorProvider({ children }: { children: ReactNode }) {
   const [result, setResult] = useState<ScrapeHtmlResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isReaderMode, setIsReaderMode] = useState(true)
+  const [history, setHistory] = useState<HistoryEntry[]>([])
+
+  // Carrega histórico ao montar
+  useEffect(() => {
+    loadHistory()
+  }, [])
+
+  const loadHistory = useCallback(async () => {
+    const historyData = await getHistory()
+    setHistory(historyData)
+  }, [])
+
+  const searchHistoryQuery = useCallback(async (query: string) => {
+    return await searchHistory(query)
+  }, [])
 
   const handleConvert = useCallback(async () => {
     if (!url.trim()) {
@@ -49,10 +74,33 @@ export function WebExtractorProvider({ children }: { children: ReactNode }) {
       if (response.success && response.html) {
         setResult(response)
         toast.success('Conteúdo extraído com sucesso!')
+
+        // Salva no histórico
+        await saveToHistory({
+          url: url.trim(),
+          title: response.title || 'Sem título',
+          excerpt: response.excerpt,
+          timestamp: Date.now(),
+          success: true,
+        })
+
+        // Recarrega histórico
+        await loadHistory()
       } else {
         const errorMsg = response.error || 'Erro ao extrair conteúdo'
         setError(errorMsg)
         toast.error(errorMsg)
+
+        // Salva falha no histórico também
+        await saveToHistory({
+          url: url.trim(),
+          title: 'Falha na extração',
+          excerpt: errorMsg,
+          timestamp: Date.now(),
+          success: false,
+        })
+
+        await loadHistory()
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido ao processar'
@@ -61,7 +109,7 @@ export function WebExtractorProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false)
     }
-  }, [url])
+  }, [url, loadHistory])
 
   const haveContent = useMemo(() => !!url && !!result && !!result.html, [url, result])
 
@@ -91,6 +139,9 @@ export function WebExtractorProvider({ children }: { children: ReactNode }) {
         handleReset,
         isReaderMode,
         toggleReaderMode,
+        history,
+        loadHistory,
+        searchHistoryQuery,
       }}>
       {children}
     </WebExtractorContext.Provider>

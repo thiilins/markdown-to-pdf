@@ -6,15 +6,37 @@ import { Readability } from '@mozilla/readability'
 import * as cheerio from 'cheerio'
 import { JSDOM } from 'jsdom'
 
+export interface IntegrityReport {
+  warnings: string[]
+  errors: string[]
+  stats: {
+    imagesFound: number
+    imagesRecovered: number
+    linksProcessed: number
+    contentLength: number
+    usedFallback: boolean
+    readabilityScore?: number
+  }
+}
+
 export interface ScrapeHtmlResponse {
   success: boolean
   html?: string
   title?: string
   excerpt?: string
   error?: string
+  integrity?: IntegrityReport
 }
 
 export async function scrapperHtmlV2(url: string): Promise<ScrapeHtmlResponse> {
+  // Inicializa relatório de integridade
+  const warnings: string[] = []
+  const errors: string[] = []
+  let imagesFound = 0
+  let imagesRecovered = 0
+  let linksProcessed = 0
+  let usedFallback = false
+
   try {
     const validation = isValidWebUrl(url)
     if (!validation.valid) {
@@ -52,6 +74,10 @@ export async function scrapperHtmlV2(url: string): Promise<ScrapeHtmlResponse> {
 
     let html = await response.text()
 
+    if (html.length < 500) {
+      warnings.push('Conteúdo muito curto (< 500 caracteres)')
+    }
+
     // === 1. PROCESSAMENTO INICIAL COM CHEERIO (MUITO MAIS LEVE QUE JSDOM) ===
     // Cheerio é ~10x mais rápido e usa menos memória que JSDOM
     // decodeEntities é true por padrão, então não precisa especificar
@@ -73,6 +99,7 @@ export async function scrapperHtmlV2(url: string): Promise<ScrapeHtmlResponse> {
 
     // === 3. RESGATE DE IMAGENS DO CORPO (LAZY LOAD) COM CHEERIO ===
     $('img').each((_, img) => {
+      imagesFound++
       const $img = $(img)
       const potentialSources = [
         $img.attr('data-src'),
@@ -85,6 +112,7 @@ export async function scrapperHtmlV2(url: string): Promise<ScrapeHtmlResponse> {
       const bestSrc = potentialSources.find((src) => src && src.trim() !== '')
       if (bestSrc) {
         $img.attr('src', bestSrc)
+        imagesRecovered++
       }
 
       $img.removeAttr('srcset').removeAttr('loading')
@@ -95,20 +123,27 @@ export async function scrapperHtmlV2(url: string): Promise<ScrapeHtmlResponse> {
           const absoluteUrl = new URL(currentSrc, url).href
           $img.attr('src', absoluteUrl)
         } catch (e) {
-          // Ignora erros de URL inválida
+          warnings.push(`Imagem com URL inválida: ${currentSrc}`)
         }
+      } else {
+        warnings.push('Imagem sem atributo src encontrada')
       }
     })
+
+    if (imagesFound === 0) {
+      warnings.push('Nenhuma imagem encontrada no conteúdo')
+    }
 
     // === 4. PROCESSAMENTO DE LINKS COM CHEERIO ===
     $('a').each((_, link) => {
       const $link = $(link)
       const href = $link.attr('href')
       if (href) {
+        linksProcessed++
         try {
           $link.attr('href', new URL(href, url).href)
         } catch (e) {
-          // Ignora erros de URL inválida
+          warnings.push(`Link com URL inválida: ${href}`)
         }
       }
       $link.removeAttr('target')
@@ -131,13 +166,60 @@ export async function scrapperHtmlV2(url: string): Promise<ScrapeHtmlResponse> {
     const article = reader.parse()
 
     if (!article || !article.content) {
-      // Fallback: usa o body processado pelo Cheerio
-      const bodyHtml = $('body').html() || $('html').html() || ''
+      // Fallback Aprimorado: usa o body processado pelo Cheerio com limpeza adicional
+      usedFallback = true
+      warnings.push('Readability falhou - usando fallback inteligente')
+
+      // Remove elementos indesejados do fallback
+      $('header, nav, footer, aside, .sidebar, .menu, .navigation, .ads, .advertisement, .social-share, .comments, #comments, .related-posts').remove()
+      $('[class*="cookie"], [class*="popup"], [class*="modal"], [id*="cookie"]').remove()
+      
+      // Tenta encontrar o main content
+      let fallbackHtml = 
+        $('article').html() || 
+        $('main').html() || 
+        $('.content, .post-content, .article-content, .entry-content').first().html() ||
+        $('body').html() || 
+        $('html').html() || 
+        ''
+      
+      if (!fallbackHtml) {
+        errors.push('Nenhum conteúdo encontrado no HTML')
+      } else {
+        warnings.push('Conteúdo extraído de fallback pode conter elementos indesejados')
+      }
+
+      // Aplica formatação básica ao fallback
+      const $fallback = cheerio.load(`<div>${fallbackHtml}</div>`)
+      
+      // Remove atributos de estilo inline
+      $fallback('[style]').removeAttr('style')
+      $fallback('[class]').removeAttr('class')
+      
+      // Limita largura de imagens
+      $fallback('img').each((_, img) => {
+        const $img = $fallback(img)
+        $img.attr('style', 'max-width: 100%; height: auto; display: block; margin: 20px auto;')
+      })
+
+      fallbackHtml = $fallback.html() || ''
+
       return {
         success: true,
-        html: `<div class="raw-content-fallback">${bodyHtml}</div>`,
+        html: `<div class="reader-fallback-content">${fallbackHtml}</div>`,
         title: title,
         excerpt: '',
+        integrity: {
+          warnings,
+          errors,
+          stats: {
+            imagesFound,
+            imagesRecovered,
+            linksProcessed,
+            contentLength: fallbackHtml.length,
+            usedFallback,
+          },
+        },
       }
     }
 
@@ -163,14 +245,49 @@ export async function scrapperHtmlV2(url: string): Promise<ScrapeHtmlResponse> {
       }
     }
 
+    // Validações finais
+    if (finalHtml.length < 100) {
+      warnings.push('Conteúdo extraído muito curto (< 100 caracteres)')
+    }
+
+    if (!article.title) {
+      warnings.push('Título não encontrado')
+    }
+
     return {
       success: true,
       html: finalHtml,
       title: article.title || title,
       excerpt: stripHTML(article.excerpt || ''),
+      integrity: {
+        warnings,
+        errors,
+        stats: {
+          imagesFound,
+          imagesRecovered,
+          linksProcessed,
+          contentLength: finalHtml.length,
+          usedFallback,
+          readabilityScore: article.length || 0,
+        },
+      },
     }
   } catch (error) {
     console.error('Erro no Scraper:', error)
-    return { success: false, error: 'Ocorreu um erro ao processar o conteúdo do site.' }
+    return { 
+      success: false, 
+      error: 'Ocorreu um erro ao processar o conteúdo do site.',
+      integrity: {
+        warnings: [],
+        errors: ['Erro crítico durante o processamento'],
+        stats: {
+          imagesFound: 0,
+          imagesRecovered: 0,
+          linksProcessed: 0,
+          contentLength: 0,
+          usedFallback: false,
+        },
+      },
+    }
   }
 }

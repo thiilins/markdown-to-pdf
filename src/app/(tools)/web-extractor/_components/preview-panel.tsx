@@ -4,6 +4,7 @@ import { useWebExtractor } from '@/shared/contexts/webExtractorContext'
 import { motion } from 'framer-motion'
 import { Globe } from 'lucide-react'
 import { useMemo } from 'react'
+import { IntegrityReportComponent } from './integrity-report'
 import { ResultActions } from './result-actions'
 import { WebExtractorSearchComponent } from './view'
 
@@ -96,6 +97,30 @@ export const PreviewResultContent = () => {
       // Se false, usa max-w-none e padding menor (modo full width).
       <div
         className={`animate-in fade-in slide-in-from-bottom-4 mx-auto w-full py-12 duration-500 ${isReaderMode ? 'max-w-4xl px-8' : 'max-w-full px-4'}`}>
+        {/* Relatório de Integridade */}
+        {result.integrity && (
+          <div className='mb-6 space-y-3'>
+            <IntegrityReportComponent report={result.integrity} />
+            
+            {/* Aviso de Fallback */}
+            {result.integrity.stats.usedFallback && (
+              <div className='flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-900/50 dark:bg-blue-950/20'>
+                <div className='mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-500'>
+                  <span className='text-xs font-bold text-white'>!</span>
+                </div>
+                <div className='flex-1 space-y-1'>
+                  <h4 className='text-xs font-semibold text-blue-900 dark:text-blue-100'>
+                    Modo Fallback Ativado
+                  </h4>
+                  <p className='text-xs text-blue-700 dark:text-blue-300'>
+                    O algoritmo Readability não conseguiu processar esta página. Estamos exibindo o conteúdo bruto com limpeza automática. Alguns elementos indesejados podem aparecer.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {result.title && (
           <div className='mb-10 border-b pb-6'>
             <h1 className='text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50'>
