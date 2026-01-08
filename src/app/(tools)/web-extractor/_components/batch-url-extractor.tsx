@@ -14,6 +14,7 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
+  Eye,
   Loader2,
   Plus,
   Search,
@@ -45,6 +46,7 @@ export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [combinedHtml, setCombinedHtml] = useState('')
 
   // Filtra histórico
   const filteredHistory = useMemo(() => {
@@ -118,6 +120,7 @@ export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
 
   const clearAll = useCallback(() => {
     setUrls([])
+    setCombinedHtml('')
   }, [])
 
   const processUrls = useCallback(async () => {
@@ -229,29 +232,37 @@ export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
     setIsProcessing(false)
 
     const successCount = urls.filter((u) => u.status === 'success').length
-
+    
     if (successCount > 0) {
-      // Exibe no preview principal
-      setResult({
-        success: true,
-        html: combined,
-        title: `📚 Conteúdo Agregado (${successCount} ${successCount === 1 ? 'artigo' : 'artigos'})`,
-        excerpt: `${successCount} de ${urls.length} URLs extraídas com sucesso`,
-      })
-
-      // Define URL fictícia para o agregado
-      setUrl(`agregado://${Date.now()}`)
-
-      toast.success(`${successCount} de ${urls.length} URLs extraídas com sucesso!`)
-
-      // Fecha o modal
-      if (onClose) {
-        setTimeout(() => onClose(), 500)
-      }
+      // Armazena o HTML combinado
+      setCombinedHtml(combined)
+      toast.success(`${successCount} de ${urls.length} URLs extraídas! Clique em "Visualizar" para ver o resultado.`)
     } else {
       toast.error('Nenhuma URL foi extraída com sucesso')
     }
-  }, [urls, loadHistory, setResult, setUrl, onClose])
+  }, [urls, loadHistory])
+
+  const handleVisualize = useCallback(() => {
+    if (!combinedHtml) return
+
+    const successCount = urls.filter((u) => u.status === 'success').length
+
+    // Exibe no preview principal
+    setResult({
+      success: true,
+      html: combinedHtml,
+      title: `📚 Conteúdo Agregado (${successCount} ${successCount === 1 ? 'artigo' : 'artigos'})`,
+      excerpt: `${successCount} de ${urls.length} URLs extraídas com sucesso`,
+    })
+    
+    // Define URL fictícia para o agregado
+    setUrl(`agregado://${Date.now()}`)
+    
+    // Fecha o modal
+    if (onClose) {
+      onClose()
+    }
+  }, [combinedHtml, urls, setResult, setUrl, onClose])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -439,22 +450,31 @@ export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
 
           {/* Actions */}
           <div className='flex gap-2'>
-            <Button
-              onClick={processUrls}
-              disabled={isProcessing || urls.length === 0}
-              className='w-full gap-2'>
-              {isProcessing ? (
-                <>
-                  <Loader2 className='h-4 w-4 animate-spin' />
-                  Processando...
-                </>
-              ) : (
-                <>
-                  <Zap className='h-4 w-4' />
-                  Extrair e Visualizar
-                </>
-              )}
-            </Button>
+            {!combinedHtml ? (
+              <Button
+                onClick={processUrls}
+                disabled={isProcessing || urls.length === 0}
+                className='w-full gap-2'>
+                {isProcessing ? (
+                  <>
+                    <Loader2 className='h-4 w-4 animate-spin' />
+                    Processando...
+                  </>
+                ) : (
+                  <>
+                    <Zap className='h-4 w-4' />
+                    Extrair Todas
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button
+                onClick={handleVisualize}
+                className='w-full gap-2 bg-green-600 hover:bg-green-700'>
+                <Eye className='h-4 w-4' />
+                Visualizar Resultado
+              </Button>
+            )}
           </div>
 
           {/* Summary */}
@@ -480,7 +500,7 @@ export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
       {/* Empty State */}
       {urls.length === 0 && (
         <div className='flex flex-col items-center justify-center py-12 text-center'>
-          <div className='mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20'>
+          <div className='mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-linear-to-br from-purple-100 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20'>
             <Zap className='h-8 w-8 text-purple-600 dark:text-purple-400' />
           </div>
           <h4 className='mb-2 text-sm font-semibold text-zinc-700 dark:text-zinc-300'>

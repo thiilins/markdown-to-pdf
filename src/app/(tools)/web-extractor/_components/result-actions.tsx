@@ -1,7 +1,14 @@
 'use client'
 
 import { IconButtonTooltip } from '@/components/custom-ui/tooltip'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { useMarkdown } from '@/shared/contexts/markdownContext'
 import { useWebExtractor } from '@/shared/contexts/webExtractorContext'
 import { Code, Download, FilePenLine, FileText, Layers } from 'lucide-react'
@@ -9,8 +16,8 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { v4 as uuidv4 } from 'uuid'
-import { BatchUrlExtractor } from './batch-url-extractor'
 import { convertHtmlToMarkdown } from './utils'
+import { BatchUrlExtractor } from './batch-url-extractor'
 export function ResultActions() {
   const { result } = useWebExtractor()
   const { onAddMarkdownList, onSelectMarkdown } = useMarkdown()
@@ -75,23 +82,23 @@ export function ResultActions() {
 
   return (
     <div className='flex items-center gap-1 border-l pl-2 dark:border-zinc-800'>
-      {/* Agregador de URLs */}
       <Dialog open={batchDialogOpen} onOpenChange={setBatchDialogOpen}>
         <DialogTrigger asChild>
-          <button
-            className='flex h-8 w-8 items-center justify-center rounded-md text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:hover:bg-zinc-800 dark:hover:text-zinc-100'
+          <Button
+            variant='ghost'
+            size='icon'
+            className='text-primary hover:bg-primary/10 hover:text-primary'
             title='Agregador de URLs'>
             <Layers className='h-4 w-4' />
-          </button>
+          </Button>
         </DialogTrigger>
-        <DialogContent className='max-w-3xl max-h-[90vh]'>
+        <DialogContent className='max-h-[90vh] max-w-[500px]'>
           <DialogHeader>
             <DialogTitle>Agregador de URLs</DialogTitle>
           </DialogHeader>
           <BatchUrlExtractor onClose={() => setBatchDialogOpen(false)} />
         </DialogContent>
       </Dialog>
-
       <IconButtonTooltip
         disabled={disabled}
         content='Copiar Leitura'
