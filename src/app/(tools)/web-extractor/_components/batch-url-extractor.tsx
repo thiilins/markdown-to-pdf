@@ -3,27 +3,14 @@
 import { scrapperHtmlV2 } from '@/app/actions/scrapper-html-v2'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Popover, PopoverContent } from '@/components/ui/popover'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { useWebExtractor } from '@/shared/contexts/webExtractorContext'
 import { saveToHistory } from '@/shared/utils/web-extractor-history'
 import { AnimatePresence, motion } from 'framer-motion'
-import {
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  Eye,
-  Loader2,
-  Plus,
-  Search,
-  Trash2,
-  X,
-  XCircle,
-  Zap,
-} from 'lucide-react'
-import { useCallback, useMemo, useState } from 'react'
+import { AlertCircle, CheckCircle, Eye, Loader2, Plus, Trash2, X, XCircle, Zap } from 'lucide-react'
+import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
 interface BatchUrl {
@@ -40,26 +27,11 @@ interface BatchUrlExtractorProps {
 }
 
 export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
-  const { history, loadHistory, setResult, setUrl } = useWebExtractor()
+  const { loadHistory, setResult, setUrl } = useWebExtractor()
   const [urls, setUrls] = useState<BatchUrl[]>([])
   const [inputUrl, setInputUrl] = useState('')
-  const [searchQuery, setSearchQuery] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
-  const [historyOpen, setHistoryOpen] = useState(false)
   const [combinedHtml, setCombinedHtml] = useState('')
-
-  // Filtra histórico
-  const filteredHistory = useMemo(() => {
-    if (!searchQuery.trim()) return history
-
-    const query = searchQuery.toLowerCase()
-    return history.filter(
-      (entry) =>
-        entry.url.toLowerCase().includes(query) ||
-        entry.title.toLowerCase().includes(query) ||
-        entry.excerpt?.toLowerCase().includes(query),
-    )
-  }, [history, searchQuery])
 
   const addUrl = useCallback(() => {
     const trimmed = inputUrl.trim()
@@ -88,31 +60,7 @@ export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
       },
     ])
     setInputUrl('')
-    setSearchQuery('')
-    setHistoryOpen(false)
   }, [inputUrl, urls])
-
-  const addFromHistory = useCallback(
-    (url: string) => {
-      if (urls.some((u) => u.url === url)) {
-        toast.error('URL já adicionada')
-        return
-      }
-
-      setUrls((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          url,
-          status: 'pending',
-        },
-      ])
-      setInputUrl('')
-      setSearchQuery('')
-      setHistoryOpen(false)
-    },
-    [urls],
-  )
 
   const removeUrl = useCallback((id: string) => {
     setUrls((prev) => prev.filter((u) => u.id !== id))
@@ -302,77 +250,18 @@ export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
 
       <Separator />
 
-      {/* Input de URL com Histórico */}
+      {/* Input de URL - SEM Histórico por enquanto */}
       <div className='flex gap-2'>
-        <Popover open={historyOpen} onOpenChange={setHistoryOpen}>
-          <div className='relative flex-1'>
-            <Search className='pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-zinc-400' />
-            <Input
-              type='url'
-              placeholder='Cole uma URL ou busque no histórico...'
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value)
-                setInputUrl(e.target.value)
-                if (e.target.value.trim() && history.length > 0) {
-                  setHistoryOpen(true)
-                }
-              }}
-              onFocus={() => {
-                if (history.length > 0) setHistoryOpen(true)
-              }}
-              onKeyDown={handleKeyDown}
-              disabled={isProcessing}
-              className='pl-9'
-            />
-          </div>
-
-          {history.length > 0 && (
-            <PopoverContent align='start' sideOffset={8} className='w-[600px] p-0'>
-              <div className='flex items-center justify-between border-b px-4 py-3'>
-                <div className='flex items-center gap-2'>
-                  <Clock className='h-4 w-4 text-zinc-400' />
-                  <span className='text-sm font-semibold text-zinc-700 dark:text-zinc-300'>
-                    Histórico de Extrações
-                  </span>
-                </div>
-              </div>
-
-              <ScrollArea className='max-h-[300px]'>
-                {filteredHistory.length > 0 ? (
-                  <div className='p-2'>
-                    {filteredHistory.slice(0, 10).map((entry) => (
-                      <button
-                        key={entry.id}
-                        onClick={() => addFromHistory(entry.url)}
-                        className='group/item flex w-full items-start gap-3 rounded-lg p-3 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50'>
-                        <div className='mt-0.5 shrink-0'>
-                          {entry.success ? (
-                            <CheckCircle className='h-4 w-4 text-green-500' />
-                          ) : (
-                            <XCircle className='h-4 w-4 text-red-500' />
-                          )}
-                        </div>
-                        <div className='min-w-0 flex-1'>
-                          <h4 className='line-clamp-1 text-sm font-semibold text-zinc-700 dark:text-zinc-200'>
-                            {entry.title}
-                          </h4>
-                          <p className='line-clamp-1 text-xs text-zinc-500'>{entry.url}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className='flex flex-col items-center py-8 text-center'>
-                    <Search className='mb-2 h-8 w-8 text-zinc-300' />
-                    <p className='text-sm text-zinc-500'>Nenhum resultado encontrado</p>
-                  </div>
-                )}
-              </ScrollArea>
-            </PopoverContent>
-          )}
-        </Popover>
-
+        <div className='relative flex-1'>
+          <Input
+            type='url'
+            placeholder='Cole uma URL e pressione Enter...'
+            value={inputUrl}
+            onChange={(e) => setInputUrl(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={isProcessing}
+          />
+        </div>
         <Button onClick={addUrl} disabled={isProcessing || !inputUrl.trim()}>
           <Plus className='h-4 w-4' />
         </Button>
