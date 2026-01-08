@@ -1,3 +1,251 @@
+// 'use client'
+
+// import { Button } from '@/components/ui/button'
+// import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
+// import { FileCode } from 'lucide-react'
+// import { useCallback, useEffect, useState } from 'react'
+// import { toast } from 'sonner'
+// import {
+//   minifyCode,
+//   validateCode,
+//   type ValidationResult,
+// } from '../../_components/code-formatter-utils'
+// import { FormatterEditorPanel } from '../../_components/formatter-editor-panel'
+// import { FormatterOutputPanel } from '../../_components/formatter-output-panel'
+// import { FormatterHeader } from '../../_components/layouts/formatter-header'
+
+// /**
+//  * Formata JavaScript usando Prettier (lazy loading isolado)
+//  */
+// async function formatJavaScript(code: string): Promise<string> {
+//   if (!code.trim()) return ''
+
+//   try {
+//     // Carregamento dinâmico dos módulos
+//     const { format } = await import('prettier/standalone')
+//     const babelPluginImport = await import('prettier/plugins/babel')
+//     const estreePluginImport = await import('prettier/plugins/estree')
+
+//     return await format(code, {
+//       parser: 'babel',
+//       // CORREÇÃO: Acessar .default explicitamente.
+//       // O 'await import' retorna um Module Namespace, e o plugin real está em .default
+//       plugins: [babelPluginImport.default, estreePluginImport.default],
+//       printWidth: 100,
+//       tabWidth: 2,
+//       useTabs: false,
+//       semi: true,
+//       singleQuote: true,
+//       trailingComma: 'es5',
+//     })
+//   } catch (error) {
+//     console.error('Erro interno no Prettier:', error)
+//     throw error
+//   }
+// }
+
+// const DEFAULT_JS = `function processUserData(users){const activeUsers=users.filter(u=>u.active&&u.emailVerified);const sortedUsers=activeUsers.sort((a,b)=>new Date(b.lastLogin)-new Date(a.lastLogin));const userStats={total:users.length,active:activeUsers.length,recent:sortedUsers.slice(0,10)};return userStats}async function fetchUserData(userId){try{const response=await fetch(\`/api/users/\${userId}\`);if(!response.ok)throw new Error('Failed to fetch');const data=await response.json();return{success:true,data};}catch(error){console.error('Error:',error);return{success:false,error:error.message};}}const users=[{id:1,name:'João',active:true,emailVerified:true,lastLogin:'2024-01-15'},{id:2,name:'Maria',active:true,emailVerified:false,lastLogin:'2024-01-10'}];const stats=processUserData(users);console.log(stats);`
+
+// export default function JavascriptFormatterView() {
+//   const [codeInput, setCodeInput] = useState<string>(DEFAULT_JS)
+//   const [formattedOutput, setFormattedOutput] = useState<string>('')
+//   const [formatMode, setFormatMode] = useState<'beautify' | 'minify'>('beautify')
+//   const [validation, setValidation] = useState<ValidationResult>({
+//     isValid: true,
+//     errors: [],
+//     warnings: [],
+//   })
+//   const [isProcessing, setIsProcessing] = useState(false)
+//   const [stats, setStats] = useState({ lines: 0, chars: 0, charsFormatted: 0 })
+//   const [isDesktop, setIsDesktop] = useState(true)
+//   const [mobileTab, setMobileTab] = useState<'input' | 'output'>('input')
+
+//   useEffect(() => {
+//     const checkSize = () => setIsDesktop(window.innerWidth >= 1024)
+//     checkSize()
+//     window.addEventListener('resize', checkSize)
+//     return () => window.removeEventListener('resize', checkSize)
+//   }, [])
+
+//   const validateInput = useCallback((code: string) => {
+//     if (!code.trim()) {
+//       setValidation({ isValid: true, errors: [], warnings: [] })
+//       return
+//     }
+//     const result = validateCode(code, 'javascript')
+//     setValidation(result)
+//   }, [])
+
+//   const processCode = useCallback(
+//     async (code: string) => {
+//       if (!code.trim()) {
+//         setFormattedOutput('')
+//         setStats({ lines: 0, chars: 0, charsFormatted: 0 })
+//         return
+//       }
+
+//       setIsProcessing(true)
+//       try {
+//         const result =
+//           formatMode === 'minify' ? minifyCode(code, 'javascript') : await formatJavaScript(code)
+//         setFormattedOutput(result)
+//         const lines = code.split('\n').length
+//         const chars = code.length
+//         const charsFormatted = result.length
+//         setStats({ lines, chars, charsFormatted })
+//       } catch (error: any) {
+//         console.error('Erro ao processar código:', error)
+//         toast.error(error?.message || 'Erro ao formatar código JavaScript')
+//         setFormattedOutput('')
+//         setStats({ lines: 0, chars: 0, charsFormatted: 0 })
+//       } finally {
+//         setIsProcessing(false)
+//       }
+//     },
+//     [formatMode],
+//   )
+
+//   useEffect(() => {
+//     validateInput(codeInput)
+//     processCode(codeInput)
+//   }, [codeInput, processCode, validateInput])
+
+//   const handleCopy = useCallback(async () => {
+//     if (!formattedOutput) {
+//       toast.error('Nenhum código formatado para copiar')
+//       return
+//     }
+//     try {
+//       await navigator.clipboard.writeText(formattedOutput)
+//       toast.success('Código copiado!')
+//     } catch {
+//       toast.error('Erro ao copiar código')
+//     }
+//   }, [formattedOutput])
+
+//   const handleDownload = useCallback(() => {
+//     if (!formattedOutput) {
+//       toast.error('Nenhum código para baixar')
+//       return
+//     }
+//     const blob = new Blob([formattedOutput], { type: 'text/javascript' })
+//     const url = URL.createObjectURL(blob)
+//     const a = document.createElement('a')
+//     a.href = url
+//     a.download = 'formatted.js'
+//     document.body.appendChild(a)
+//     a.click()
+//     document.body.removeChild(a)
+//     URL.revokeObjectURL(url)
+//     toast.success('Código baixado!')
+//   }, [formattedOutput])
+
+//   const handleClear = useCallback(() => {
+//     setCodeInput('')
+//     setFormattedOutput('')
+//     setStats({ lines: 0, chars: 0, charsFormatted: 0 })
+//     setValidation({ isValid: true, errors: [], warnings: [] })
+//   }, [])
+
+//   return (
+//     <div className='bg-background flex h-[calc(100vh-4rem)] flex-col overflow-hidden'>
+//       <FormatterHeader
+//         icon={FileCode}
+//         title='Formatador JavaScript'
+//         description='Formate, valide e minifique código JavaScript com Prettier'
+//         validation={validation}
+//         stats={stats}
+//         isProcessing={isProcessing}
+//         formatMode={formatMode}
+//         onFormatModeChange={setFormatMode}
+//         onCopy={handleCopy}
+//         onDownload={handleDownload}
+//         onClear={handleClear}
+//         canCopy={!!formattedOutput}
+//         canDownload={!!formattedOutput}
+//       />
+
+//       <div className='flex flex-1 overflow-hidden'>
+//         {!isDesktop ? (
+//           <div className='flex h-full w-full flex-col'>
+//             <div className='bg-muted/30 flex shrink-0 items-center border-b p-1'>
+//               <Button
+//                 variant={mobileTab === 'input' ? 'secondary' : 'ghost'}
+//                 size='sm'
+//                 className='flex-1 gap-2'
+//                 onClick={() => setMobileTab('input')}>
+//                 <FileCode className='h-4 w-4' />
+//                 Código
+//               </Button>
+//               <Button
+//                 variant={mobileTab === 'output' ? 'secondary' : 'ghost'}
+//                 size='sm'
+//                 className='flex-1 gap-2'
+//                 onClick={() => setMobileTab('output')}>
+//                 <FileCode className='h-4 w-4' />
+//                 Formatado
+//               </Button>
+//             </div>
+
+//             {mobileTab === 'input' && (
+//               <div className='flex flex-1 flex-col overflow-hidden'>
+//                 <FormatterEditorPanel
+//                   value={codeInput}
+//                   onChange={setCodeInput}
+//                   language='javascript'
+//                   validation={validation}
+//                   icon={FileCode}
+//                   label='Código JavaScript'
+//                 />
+//               </div>
+//             )}
+
+//             {mobileTab === 'output' && (
+//               <div className='flex flex-1 flex-col overflow-hidden'>
+//                 <FormatterOutputPanel
+//                   code={formattedOutput}
+//                   language='javascript'
+//                   isProcessing={isProcessing}
+//                   onCopy={handleCopy}
+//                   stats={stats}
+//                 />
+//               </div>
+//             )}
+//           </div>
+//         ) : (
+//           <ResizablePanelGroup id='js-formatter-panels' direction='horizontal' className='h-full'>
+//             <ResizablePanel defaultSize={50} minSize={30}>
+//               <FormatterEditorPanel
+//                 value={codeInput}
+//                 onChange={setCodeInput}
+//                 language='javascript'
+//                 validation={validation}
+//                 icon={FileCode}
+//                 label='Código JavaScript'
+//               />
+//             </ResizablePanel>
+
+//             <ResizableHandle withHandle />
+
+//             <ResizablePanel defaultSize={50} minSize={30}>
+//               <FormatterOutputPanel
+//                 code={formattedOutput}
+//                 language='javascript'
+//                 isProcessing={isProcessing}
+//                 onCopy={handleCopy}
+//                 stats={stats}
+//               />
+//             </ResizablePanel>
+//           </ResizablePanelGroup>
+//         )}
+//       </div>
+//     </div>
+//   )
+// }
+
+/**
+ * Usar na vercel versao abaixo
+ */
 'use client'
 
 import { Button } from '@/components/ui/button'
@@ -15,22 +263,42 @@ import { FormatterOutputPanel } from '../../_components/formatter-output-panel'
 import { FormatterHeader } from '../../_components/layouts/formatter-header'
 
 /**
- * Formata JavaScript usando Prettier (lazy loading isolado)
+ * Formata JavaScript usando Prettier via CDN
+ * Isso evita erros de minificação ("Kr is not defined") na Vercel
  */
 async function formatJavaScript(code: string): Promise<string> {
   if (!code.trim()) return ''
 
   try {
-    // Carregamento dinâmico dos módulos
-    const { format } = await import('prettier/standalone')
-    const babelPluginImport = await import('prettier/plugins/babel')
-    const estreePluginImport = await import('prettier/plugins/estree')
+    // Usamos imports diretos de CDN com 'webpackIgnore' para impedir que o Next.js
+    // tente empacotar ou minificar esses arquivos durante o build.
 
-    return await format(code, {
+    // Versão fixa para garantir estabilidade
+    const PRETTIER_VERSION = '3.3.3'
+
+    const prettierModule = await import(
+      /* webpackIgnore: true */
+      `https://unpkg.com/prettier@${PRETTIER_VERSION}/standalone.mjs`
+    )
+
+    const babelPluginModule = await import(
+      /* webpackIgnore: true */
+      `https://unpkg.com/prettier@${PRETTIER_VERSION}/plugins/babel.mjs`
+    )
+
+    const estreePluginModule = await import(
+      /* webpackIgnore: true */
+      `https://unpkg.com/prettier@${PRETTIER_VERSION}/plugins/estree.mjs`
+    )
+
+    // Em módulos ESM via CDN, o export default geralmente é a própria biblioteca/plugin
+    const prettier = prettierModule.default || prettierModule
+    const babelPlugin = babelPluginModule.default || babelPluginModule
+    const estreePlugin = estreePluginModule.default || estreePluginModule
+
+    return await prettier.format(code, {
       parser: 'babel',
-      // CORREÇÃO: Acessar .default explicitamente. 
-      // O 'await import' retorna um Module Namespace, e o plugin real está em .default
-      plugins: [babelPluginImport.default, estreePluginImport.default],
+      plugins: [babelPlugin, estreePlugin],
       printWidth: 100,
       tabWidth: 2,
       useTabs: false,
@@ -38,9 +306,10 @@ async function formatJavaScript(code: string): Promise<string> {
       singleQuote: true,
       trailingComma: 'es5',
     })
-  } catch (error) {
-    console.error('Erro interno no Prettier:', error)
-    throw error
+  } catch (error: any) {
+    console.error('Erro no Prettier (CDN):', error)
+    // Fallback amigável se a CDN falhar ou houver erro de sintaxe
+    throw new Error(error.message || 'Falha ao formatar código')
   }
 }
 
@@ -96,8 +365,7 @@ export default function JavascriptFormatterView() {
       } catch (error: any) {
         console.error('Erro ao processar código:', error)
         toast.error(error?.message || 'Erro ao formatar código JavaScript')
-        setFormattedOutput('')
-        setStats({ lines: 0, chars: 0, charsFormatted: 0 })
+        // Não limpamos o output em caso de erro para não frustrar o usuário
       } finally {
         setIsProcessing(false)
       }
@@ -107,7 +375,11 @@ export default function JavascriptFormatterView() {
 
   useEffect(() => {
     validateInput(codeInput)
-    processCode(codeInput)
+    // Debounce inicial para evitar flash de erro
+    const timer = setTimeout(() => {
+      processCode(codeInput)
+    }, 500)
+    return () => clearTimeout(timer)
   }, [codeInput, processCode, validateInput])
 
   const handleCopy = useCallback(async () => {
