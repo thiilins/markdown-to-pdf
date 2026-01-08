@@ -40,6 +40,8 @@ interface AppContextType {
   getCurrentMargin: () => MarginPreset
   getCurrentTheme: () => ThemePreset
   onDownloadPDF: () => void
+  toggleTOC: () => void
+  updateTOCPosition: (position: 'left' | 'right') => void
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
@@ -247,6 +249,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [setConfig],
   )
 
+  const toggleTOC = useCallback(() => {
+    setConfig((prev) => ({
+      ...prev,
+      preview: {
+        ...prev.preview,
+        showTOC: !prev.preview?.showTOC,
+        tocPosition: prev.preview?.tocPosition || 'left',
+      },
+    }))
+  }, [setConfig])
+
+  const updateTOCPosition = useCallback(
+    (position: 'left' | 'right') => {
+      setConfig((prev) => ({
+        ...prev,
+        preview: {
+          ...prev.preview,
+          showTOC: prev.preview?.showTOC || false,
+          tocPosition: position,
+        },
+      }))
+    },
+    [setConfig],
+  )
+
   const ContextValues = useMemo(
     () => ({
       zoom,
@@ -270,6 +297,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       disabledDownload,
       onPrint: handlePrint,
       onDownloadPDF,
+      toggleTOC,
+      updateTOCPosition,
     }),
     [
       zoom,
@@ -291,6 +320,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       disabledDownload,
       handlePrint,
       onDownloadPDF,
+      toggleTOC,
+      updateTOCPosition,
     ],
   )
 

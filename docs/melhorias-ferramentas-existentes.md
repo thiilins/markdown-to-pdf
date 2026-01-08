@@ -2,7 +2,7 @@
 
 O objetivo aqui é transformar o editor em uma ferramenta de "authoring" profissional.
 
-- **Sumário (TOC) Automático e Interativo:** Gerar automaticamente um índice baseado nos headers (#,
+- **Sumário (TOC) Auomático e Interativo:** Gerar automaticamente um índice baseado nos headers (#,
   ##) que seja clicável tanto no preview quanto no PDF final (bookmarks nativos).
 - **Smart Selection & Navigation:** Implementar comandos para expandir a seleção por blocos
   (parágrafo, lista, bloco de código) e navegação rápida entre headers, similar ao comportamento de
@@ -13,7 +13,7 @@ O objetivo aqui é transformar o editor em uma ferramenta de "authoring" profiss
   variáveis (ex: `{{data}}`, `{{cliente}}`) que são substituídas no corpo do texto e nos
   cabeçalhos/rodapés do PDF.
 
-### 2. Web Extractor (Web to Markdown)
+### 2. Web Extractor (Web to Markdown) [finalizado]
 
 Otimizar a qualidade da extração para que o resultado seja "pronto para uso".
 
@@ -61,7 +61,7 @@ Sair da simples indentação para utilitários de produtividade.
   **funcionalidades de "Power User"** que resolvem problemas de workflow que ferramentas simples não
   tocam.
 
-### 5. Web Extractor (Aprimoramento de Inteligência de Extração)
+### 5. Web Extractor (Aprimoramento de Inteligência de Extração) [finalizado]
 
 - **Selector Picker Visual:** Em vez de extrair a página inteira, permitir que o utilizador forneça
   um seletor CSS específico (ex: `.main-content` ou `#article-body`) para extrair apenas essa parte.
@@ -82,7 +82,7 @@ Sair da simples indentação para utilitários de produtividade.
   pode ser expandida com um "Live Preview" específico para os diagramas, permitindo editar o código
   Mermaid e ver o gráfico atualizar-se isoladamente.
 
-### 7. Code Snapshot (Code to Image)
+### 7. Code Snapshot (Code to Image) [finalizado]
 
 - **Modo "Diff" no Snapshot:** Permitir que o utilizador cole um diff de código e a ferramenta
   formate automaticamente as linhas verdes (adições) e vermelhas (remoções) com o estilo do editor.
@@ -91,7 +91,7 @@ Sair da simples indentação para utilitários de produtividade.
 - **Presets de Mockup de Janela:** Adicionar molduras que simulam o aspeto do macOS (botões de
   semáforo), Windows ou um terminal "Retro", mantendo o design limpo e minimalista.
 
-### 8. Formatadores de Dados (JSON, SQL, JS)
+### 8. Formatadores de Dados (JSON, SQL, JS) [finalizado]
 
 - **JSON Tree Graph:** Para além da visualização em texto, oferecer uma visualização em grafo/árvore
   onde o utilizador pode colapsar nós visualmente e ver a hierarquia de objetos complexos.

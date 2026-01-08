@@ -1,16 +1,19 @@
 'use client'
 
+import { InteractiveTOC } from '@/components/markdown-editor/interactive-toc'
+import { LinkValidatorPanel } from '@/components/markdown-editor/link-validator-panel'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 import { sanitizeHtml } from '@/lib/security-utils'
+import { cn } from '@/lib/utils'
 import { THEME_PRESETS } from '@/shared/constants'
 import { useApp } from '@/shared/contexts/appContext'
 import { useHeaderFooter } from '@/shared/contexts/headerFooterContext'
 import { useMarkdown } from '@/shared/contexts/markdownContext'
 import { PreviewStyle } from '@/shared/styles/preview-styles'
+import '@/shared/utils/clear-toc-cache'
 import { AlignLeft, Layout, Loader2, Ruler } from 'lucide-react'
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
-import ReactMarkdown from 'react-markdown'
+import ReactMarkdown, { Components } from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
@@ -361,8 +364,98 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
       )
     }
 
+    const previewConfig = config.preview || { showTOC: false, tocPosition: 'left' }
+    const tocPosition = previewConfig.tocPosition || 'left'
+
+    // Markdown Components com IDs automáticos nos headers para bookmarks
+    const markdownComponents: Components = useMemo(
+      () => ({
+        h1: ({ children, ...props }) => {
+          const text = String(children)
+          const id = text
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/\s+/g, '-')
+          return (
+            <h1 id={id} {...props}>
+              {children}
+            </h1>
+          )
+        },
+        h2: ({ children, ...props }) => {
+          const text = String(children)
+          const id = text
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/\s+/g, '-')
+          return (
+            <h2 id={id} {...props}>
+              {children}
+            </h2>
+          )
+        },
+        h3: ({ children, ...props }) => {
+          const text = String(children)
+          const id = text
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/\s+/g, '-')
+          return (
+            <h3 id={id} {...props}>
+              {children}
+            </h3>
+          )
+        },
+        h4: ({ children, ...props }) => {
+          const text = String(children)
+          const id = text
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/\s+/g, '-')
+          return (
+            <h4 id={id} {...props}>
+              {children}
+            </h4>
+          )
+        },
+        h5: ({ children, ...props }) => {
+          const text = String(children)
+          const id = text
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/\s+/g, '-')
+          return (
+            <h5 id={id} {...props}>
+              {children}
+            </h5>
+          )
+        },
+        h6: ({ children, ...props }) => {
+          const text = String(children)
+          const id = text
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/\s+/g, '-')
+          return (
+            <h6 id={id} {...props}>
+              {children}
+            </h6>
+          )
+        },
+      }),
+      [],
+    )
+
     return (
       <div className={cn('bg-muted/30 relative h-full w-full', className)}>
+        {/* Interactive TOC */}
+        {previewConfig.showTOC && (
+          <InteractiveTOC markdown={markdown?.content || ''} position={tocPosition} />
+        )}
+
+        {/* Link Validator Panel */}
+        <LinkValidatorPanel markdown={markdown?.content || ''} />
+
         {/* Elemento Ghost (Invisível) para Cálculos */}
         <div
           id='measurement-ghost'
@@ -391,10 +484,17 @@ export const PreviewPanelWithPages = forwardRef<HTMLDivElement, PreviewPanelProp
                     attributes: {
                       ...defaultSchema.attributes,
                       div: [...(defaultSchema.attributes?.div || []), ['className']],
+                      h1: [...(defaultSchema.attributes?.h1 || []), 'id'],
+                      h2: [...(defaultSchema.attributes?.h2 || []), 'id'],
+                      h3: [...(defaultSchema.attributes?.h3 || []), 'id'],
+                      h4: [...(defaultSchema.attributes?.h4 || []), 'id'],
+                      h5: [...(defaultSchema.attributes?.h5 || []), 'id'],
+                      h6: [...(defaultSchema.attributes?.h6 || []), 'id'],
                     },
                   },
                 ],
-              ]}>
+              ]}
+              components={markdownComponents}>
               {markdown?.content || ''}
             </ReactMarkdown>
           </div>

@@ -15,6 +15,7 @@ import {
   Edit,
   FileDown,
   Github,
+  ListTree,
   Loader2,
   Maximize2,
   Plus,
@@ -140,7 +141,8 @@ function ToolbarWithScrollIndicators({ children }: { children: React.ReactNode }
 }
 
 export const ActionToolbar = ({ additional, headerFooter }: EnableTools) => {
-  const { onResetZoom, onPrint, onDownloadPDF, isLoading, disabledDownload } = useApp()
+  const { onResetZoom, onPrint, onDownloadPDF, isLoading, disabledDownload, toggleTOC, config } =
+    useApp()
   const { data: session, status: sessionStatus } = useSession()
   const {
     onResetMarkdown,
@@ -246,6 +248,18 @@ export const ActionToolbar = ({ additional, headerFooter }: EnableTools) => {
             onClick={onResetZoom}
             content='Resetar Zoom'
             className={{ button: btnClass }}
+          />
+          <IconButtonTooltip
+            variant='ghost'
+            icon={ListTree}
+            onClick={toggleTOC}
+            content={config.preview?.showTOC ? 'Ocultar Sumário' : 'Mostrar Sumário'}
+            className={{
+              button: cn(
+                btnClass,
+                config.preview?.showTOC && 'bg-primary/10 text-primary hover:bg-primary/20',
+              ),
+            }}
           />
         </div>
 

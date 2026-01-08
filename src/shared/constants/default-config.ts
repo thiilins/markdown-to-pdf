@@ -26,4 +26,8 @@ export const defaultConfig: AppConfig = {
     lineNumbers: 'on',
   },
   theme: THEME_PRESETS.modern,
+  preview: {
+    showTOC: false,
+    tocPosition: 'left',
+  },
 }

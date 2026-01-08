@@ -70,6 +70,16 @@ export function Counter() {
 >
 > — *Leonardo da Vinci*
 
+## 7. Links
+ Temos validadores de links para você testar.
+
+### Links Válidos
+- [Google](https://google.com)
+- [Seção Abaixo](#links-quebrados)
+
+### Links Quebrados
+- [Link Morto](https://este-site-nao-existe-123456789.com)
+- [Âncora Inválida](#secao-que-nao-existe)
 ---
 
 ### Próximos Passos

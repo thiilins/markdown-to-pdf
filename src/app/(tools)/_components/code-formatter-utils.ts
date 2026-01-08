@@ -73,7 +73,7 @@ export async function formatCode(
           tabWidth: 2,
           useTabs: false,
         })
-      }
+        }
 
       case 'css': {
         const format = await loadPrettierPlugins('css')
@@ -88,17 +88,17 @@ export async function formatCode(
 
       case 'javascript': {
         const format = await loadPrettierPlugins('javascript')
-        return await format(code, {
-          parser: 'babel',
+          return await format(code, {
+            parser: 'babel',
           plugins: [prettierPlugins.babel, prettierPlugins.estree],
-          printWidth: 100,
-          tabWidth: 2,
-          useTabs: false,
-          semi: true,
-          singleQuote: true,
-          trailingComma: 'es5',
-        })
-      }
+            printWidth: 100,
+            tabWidth: 2,
+            useTabs: false,
+            semi: true,
+            singleQuote: true,
+            trailingComma: 'es5',
+          })
+        }
 
       case 'sql':
         if (sqlDialect === 'postgresql') {

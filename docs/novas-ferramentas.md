@@ -65,14 +65,6 @@ Uma ferramenta utilitária para DevOps e desenvolvedores backend.
 - `cronstrue`: Para converter a expressão cron em uma frase legível (suporta Português).
 - `cron-parser`: Para calcular e listar as próximas datas de execução baseadas no fuso horário.
 
----
-
-### Resumo Técnico para Implementação
-
-Para manter a consistência com o que você já construiu, todas essas ferramentas podem herdar o
-`ToolShell` e utilizar o sistema de persistência no `IndexedDB` que você já implementou para salvar
-rascunhos de documentação ou diagramas.
-
 ### 6. Gerador de Tabelas Markdown (Excel/CSV para MD)
 
 Escrever tabelas no Markdown manualmente é uma das tarefas mais odiadas pelos devs.

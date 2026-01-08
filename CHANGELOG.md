@@ -5,6 +5,128 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto
 adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.6.0] - 2025-01-08
+
+### 🎉 Features Principais - Markdown Editor & PDF Pro
+
+#### ✨ TOC Interativo (Table of Contents)
+
+- **Toggle Opcional no Toolbar:**
+  - Botão com ícone `ListTree` no ActionToolbar
+  - Estado persistido em localStorage
+  - Indicador visual quando ativo (fundo azul)
+  - Configuração `preview.showTOC` e `preview.tocPosition`
+
+- **Painel Flutuante Interativo:**
+  - Posicionamento absoluto dentro do preview (esquerda ou direita)
+  - Design premium com glassmorphism e backdrop-blur
+  - Expansível/retrátil com animações suaves (500ms)
+  - Extração automática de headers (`#` até `######`)
+  - Indentação visual por nível de header
+  - Linha vertical de guia para subníveis
+  - Ícone `Hash` para H1, `ChevronRight` rotacionável para demais
+  - ScrollArea para listas longas
+
+- **Navegação e Highlight:**
+  - Click para scroll suave até o header
+  - Detecção automática do header ativo durante scroll
+  - Barra lateral colorida (`bg-primary`) no item ativo
+  - Animações de fade-in e slide-in
+  - Truncate de títulos longos
+
+- **IDs Automáticos nos Headers:**
+  - Geração de slugs para todos os headers (H1-H6)
+  - Formato: `texto-do-header` (lowercase, sem caracteres especiais)
+  - Preparado para bookmarks nativos no PDF (futuro)
+  - Implementado em `md-editor` e `md-to-pdf`
+
+#### 🔗 Validação de Links em Tempo Real
+
+- **Extração Inteligente de Links:**
+  - Detecta `[texto](url)` - Links Markdown
+  - Detecta `![alt](url)` - Imagens
+  - Detecta `<url>` - URLs diretas
+  - Ignora `mailto:` automaticamente
+  - Identifica tipo: `anchor`, `internal`, `external`
+  - Captura linha e coluna de cada link
+
+- **Validação via Server Action (Sem CORS):**
+  - Server Action em `src/app/actions/validate-links.ts`
+  - Validação de segurança (protocolos, hosts bloqueados, IPs privados)
+  - User-Agent customizado: `Mozilla/5.0 (LinkValidator/1.0)`
+  - Timeout de 5 segundos por link
+  - Fallback inteligente: HEAD → GET se necessário
+  - Batch validation: até 50 links por vez
+  - Concorrência limitada: 5 requests simultâneos
+  - Deduplicação de URLs antes de validar
+
+- **Validação Local de Âncoras:**
+  - Valida âncoras (`#header`) localmente (rápido)
+  - Cache de IDs disponíveis no documento
+  - Usa mesma lógica de slugify do TOC
+
+- **Painel de Validação:**
+  - Posicionado no canto inferior direito
+  - Design glassmorphism consistente com TOC
+  - Expansível/retrátil com animações
+  - Badge com contador de links quebrados
+
+- **Estatísticas e Relatório:**
+  - Grid com 3 cards: Total, Válidos (verde), Quebrados (vermelho)
+  - Progress bar durante validação
+  - Lista detalhada de links quebrados:
+    - Ícones por tipo (âncora, externo)
+    - Texto do link + URL
+    - Mensagem de erro específica (HTTP 404, Timeout, etc)
+    - Linha e coluna do link no markdown
+  - ScrollArea para listas longas
+  - Mensagem de sucesso quando todos válidos
+
+- **Segurança:**
+  - Máximo de 50 links por batch
+  - Bloqueio de localhost, 127.0.0.1, 0.0.0.0
+  - Bloqueio de IPs privados (10.x, 192.168.x, 172.16-31.x)
+  - Apenas protocolos http: e https:
+  - Validação de URL antes de fazer request
+
+### 🐛 Correções
+
+- **TOC:**
+  - Posicionamento corrigido de `fixed` para `absolute` (dentro do preview)
+  - Altura adaptável com `max-h-[calc(100vh-12rem)]`
+  - Transição suave sem quebra de layout (300ms)
+  - Ícone `ListTree` espelhado quando à esquerda
+  - Scroll suave com offset correto para o container
+
+- **Link Validator:**
+  - Correção na detecção de links externos (regex melhorada)
+  - Fallback GET quando HEAD retorna 405
+  - Tratamento de erros de timeout e rede
+  - Mapeamento correto de resultados em batch
+
+### 📝 Arquivos Criados
+
+- `src/components/markdown-editor/interactive-toc.tsx` - Componente do TOC
+- `src/components/markdown-editor/link-validator-panel.tsx` - Painel de validação
+- `src/shared/utils/link-validator.ts` - Lógica de validação client-side
+- `src/shared/utils/clear-toc-cache.ts` - Utilitário de limpeza de cache
+- `src/app/actions/validate-links.ts` - Server Action para validação
+
+### 🔧 Arquivos Modificados
+
+- `src/shared/@types/global.d.ts` - Adicionado `PreviewConfig`
+- `src/shared/constants/default-config.ts` - Config padrão do TOC
+- `src/shared/contexts/appContext.tsx` - Funções `toggleTOC` e `updateTOCPosition`
+- `src/app/(tools)/_components/action-toolbar.tsx` - Botão de toggle do TOC
+- `src/app/(tools)/md-editor/_components/preview.tsx` - Integração TOC + Link Validator
+- `src/app/(tools)/md-to-pdf/_components/preview.tsx` - Integração TOC + Link Validator
+
+### 📊 Versão
+
+- **0.5.6 → 0.6.0** (Minor version bump - novas features)
+
+---
+
 ## [0.5.6] - 2025-01-08
 
 ### 🚀 Adicionado

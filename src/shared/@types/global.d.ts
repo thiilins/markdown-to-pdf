@@ -67,6 +67,12 @@ interface AppConfig {
   editor: EditorConfig
   theme?: ThemeConfig
   headerFooter?: HeaderFooterConfig
+  preview?: PreviewConfig
+}
+
+interface PreviewConfig {
+  showTOC: boolean
+  tocPosition: 'left' | 'right'
 }
 
 interface ThemeConfig {
@@ -139,3 +145,12 @@ interface EnableTools {
 }
 
 type IChildren = React.ReactNode | React.ReactNode[]
+interface LinkInfo {
+  text: string
+  url: string
+  line: number
+  column: number
+  type: 'internal' | 'external' | 'anchor'
+  isValid: boolean | null
+  error?: string
+}
