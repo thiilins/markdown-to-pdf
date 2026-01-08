@@ -20,20 +20,28 @@ import { FormatterHeader } from '../../_components/layouts/formatter-header'
 async function formatJavaScript(code: string): Promise<string> {
   if (!code.trim()) return ''
 
-  const { format } = await import('prettier/standalone')
-  const babelPlugin = await import('prettier/plugins/babel')
-  const estreePlugin = await import('prettier/plugins/estree')
+  try {
+    // Carregamento dinâmico dos módulos
+    const { format } = await import('prettier/standalone')
+    const babelPluginImport = await import('prettier/plugins/babel')
+    const estreePluginImport = await import('prettier/plugins/estree')
 
-  return await format(code, {
-    parser: 'babel',
-    plugins: [babelPlugin.default || babelPlugin, estreePlugin.default || estreePlugin],
-    printWidth: 100,
-    tabWidth: 2,
-    useTabs: false,
-    semi: true,
-    singleQuote: true,
-    trailingComma: 'es5',
-  })
+    return await format(code, {
+      parser: 'babel',
+      // CORREÇÃO: Acessar .default explicitamente. 
+      // O 'await import' retorna um Module Namespace, e o plugin real está em .default
+      plugins: [babelPluginImport.default, estreePluginImport.default],
+      printWidth: 100,
+      tabWidth: 2,
+      useTabs: false,
+      semi: true,
+      singleQuote: true,
+      trailingComma: 'es5',
+    })
+  } catch (error) {
+    console.error('Erro interno no Prettier:', error)
+    throw error
+  }
 }
 
 const DEFAULT_JS = `function processUserData(users){const activeUsers=users.filter(u=>u.active&&u.emailVerified);const sortedUsers=activeUsers.sort((a,b)=>new Date(b.lastLogin)-new Date(a.lastLogin));const userStats={total:users.length,active:activeUsers.length,recent:sortedUsers.slice(0,10)};return userStats}async function fetchUserData(userId){try{const response=await fetch(\`/api/users/\${userId}\`);if(!response.ok)throw new Error('Failed to fetch');const data=await response.json();return{success:true,data};}catch(error){console.error('Error:',error);return{success:false,error:error.message};}}const users=[{id:1,name:'João',active:true,emailVerified:true,lastLogin:'2024-01-15'},{id:2,name:'Maria',active:true,emailVerified:false,lastLogin:'2024-01-10'}];const stats=processUserData(users);console.log(stats);`
@@ -86,6 +94,7 @@ export default function JavascriptFormatterView() {
         const charsFormatted = result.length
         setStats({ lines, chars, charsFormatted })
       } catch (error: any) {
+        console.error('Erro ao processar código:', error)
         toast.error(error?.message || 'Erro ao formatar código JavaScript')
         setFormattedOutput('')
         setStats({ lines: 0, chars: 0, charsFormatted: 0 })
