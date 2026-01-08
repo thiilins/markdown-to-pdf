@@ -5,6 +5,70 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/), e este projeto
 adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.5.6] - 2025-01-08
+
+### 🚀 Adicionado
+
+#### Web Extractor - 4 Features Avançadas
+
+- **Histórico de URLs com IndexedDB:**
+  - Armazenamento persistente de até 100 URLs extraídas
+  - Autocomplete inteligente no input principal
+  - Busca em tempo real por URL, título ou excerpt
+  - Indicadores visuais de sucesso/falha
+  - Tempo relativo de extração (ex: "2h atrás")
+  - Botão para limpar histórico completo
+
+- **Agregador de URLs (Batch Extractor):**
+  - Adicionar múltiplas URLs para extração em lote
+  - Input com autocomplete do histórico
+  - Processamento sequencial com progress bar
+  - Combina todos os HTMLs em um único documento
+  - Preview integrado no painel principal
+  - Separadores visuais entre artigos:
+    - Header com gradiente e borda roxa
+    - Link da fonte com emoji 🔗
+    - Linha tracejada entre conteúdos
+  - Botão "Visualizar Resultado" após processamento
+  - Cada URL processada é salva no histórico automaticamente
+
+- **Relatório de Integridade (Soft-Failure):**
+  - Coleta de métricas durante extração:
+    - Imagens encontradas vs recuperadas (com % de recuperação)
+    - Links processados
+    - Tamanho do conteúdo (em KB)
+    - Modo usado (Readability ou Fallback)
+  - Warnings não-bloqueantes (ex: "Imagem sem src")
+  - Erros críticos reportados separadamente
+  - Componente colapsável com badge de contagem
+  - Grid de stats com ícones e progress bars
+  - Cores por severidade (verde/amarelo/vermelho)
+
+- **Modo Reader de Backup Aprimorado:**
+  - Fallback inteligente quando Readability falha
+  - Limpeza automática de elementos indesejados:
+    - Headers, navs, footers, sidebars, menus
+    - Ads, popups, cookies, modals
+  - Busca inteligente por main content (`article`, `main`, `.content`)
+  - Formatação básica de imagens no fallback
+  - Aviso visual quando fallback é usado
+  - Remove estilos inline e classes para conteúdo limpo
+
+### 🔧 Melhorado
+
+- **Web Extractor:** Foco em HTML (não Markdown) - conversão é opcional
+- **Web Extractor:** Todas as features com soft-failure (não bloqueiam extração)
+- **Agregador:** Separadores visuais elegantes com gradiente entre URLs
+- **Agregador:** Contagem correta de sucessos durante processamento
+- **Agregador:** Botão mostra quantidade de URLs: "Extrair Todas (X)"
+
+### 🐛 Corrigido
+
+- **Agregador:** Corrigido bug onde primeira extração falhava (contagem assíncrona)
+- **Agregador:** Input totalmente funcional (removido conflito com Popover)
+- **Agregador:** Histórico com dropdown nativo (sem bloqueios)
+- **Web Extractor:** Corrigido fluxo de processamento e visualização
+
 ## [0.5.5] - 2025-01-07
 
 ### 🚀 Adicionado

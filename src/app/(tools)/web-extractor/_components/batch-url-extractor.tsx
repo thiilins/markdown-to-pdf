@@ -9,8 +9,21 @@ import { Separator } from '@/components/ui/separator'
 import { useWebExtractor } from '@/shared/contexts/webExtractorContext'
 import { saveToHistory } from '@/shared/utils/web-extractor-history'
 import { AnimatePresence, motion } from 'framer-motion'
-import { AlertCircle, CheckCircle, Eye, Loader2, Plus, Trash2, X, XCircle, Zap } from 'lucide-react'
-import { useCallback, useState } from 'react'
+import {
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  Eye,
+  History as HistoryIcon,
+  Loader2,
+  Plus,
+  Search,
+  Trash2,
+  X,
+  XCircle,
+  Zap,
+} from 'lucide-react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 interface BatchUrl {
@@ -27,11 +40,29 @@ interface BatchUrlExtractorProps {
 }
 
 export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
-  const { loadHistory, setResult, setUrl } = useWebExtractor()
+  const { history, loadHistory, setResult, setUrl } = useWebExtractor()
   const [urls, setUrls] = useState<BatchUrl[]>([])
   const [inputUrl, setInputUrl] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
   const [combinedHtml, setCombinedHtml] = useState('')
+  const [showHistory, setShowHistory] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Filtra histórico
+  const filteredHistory = useMemo(() => {
+    if (!searchQuery.trim()) return history.slice(0, 10)
+
+    const query = searchQuery.toLowerCase()
+    return history
+      .filter(
+        (entry) =>
+          entry.url.toLowerCase().includes(query) ||
+          entry.title.toLowerCase().includes(query) ||
+          entry.excerpt?.toLowerCase().includes(query),
+      )
+      .slice(0, 10)
+  }, [history, searchQuery])
 
   const addUrl = useCallback(() => {
     const trimmed = inputUrl.trim()
@@ -60,7 +91,32 @@ export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
       },
     ])
     setInputUrl('')
+    setSearchQuery('')
+    setShowHistory(false)
   }, [inputUrl, urls])
+
+  const addFromHistory = useCallback(
+    (url: string) => {
+      if (urls.some((u) => u.url === url)) {
+        toast.error('URL já adicionada')
+        return
+      }
+
+      setUrls((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          url,
+          status: 'pending',
+        },
+      ])
+      setInputUrl('')
+      setSearchQuery('')
+      setShowHistory(false)
+      inputRef.current?.focus()
+    },
+    [urls],
+  )
 
   const removeUrl = useCallback((id: string) => {
     setUrls((prev) => prev.filter((u) => u.id !== id))
@@ -80,6 +136,7 @@ export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
     setIsProcessing(true)
 
     const results: string[] = []
+    let successCount = 0
 
     for (const url of urls) {
       // Atualiza status para loading
@@ -92,6 +149,8 @@ export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
 
         if (response.success && response.html) {
           // Sucesso
+          successCount++
+
           setUrls((prev) =>
             prev.map((u) =>
               u.id === url.id
@@ -114,18 +173,20 @@ export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
             success: true,
           })
 
-          // Adiciona ao HTML combinado com separador visual
+          // Adiciona ao HTML combinado com separador visual melhorado
           results.push(`
-<article style="border-top: 4px solid #8b5cf6; padding-top: 2rem; margin-top: 3rem;">
-  <header style="margin-bottom: 2rem; padding: 1rem; background: #f9fafb; border-radius: 8px;">
-    <h2 style="margin: 0 0 0.5rem 0; color: #111827; font-size: 1.5rem;">${response.title || 'Sem título'}</h2>
-    <p style="margin: 0; color: #6b7280; font-size: 0.875rem;">
-      <strong>Fonte:</strong> <a href="${url.url}" target="_blank" style="color: #8b5cf6;">${url.url}</a>
+<article style="border-top: 4px solid #8b5cf6; padding-top: 2rem; margin-top: 3rem; margin-bottom: 3rem;">
+  <header style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%); border-radius: 12px; border-left: 4px solid #8b5cf6;">
+    <h2 style="margin: 0 0 0.75rem 0; color: #111827; font-size: 1.75rem; font-weight: 700;">${response.title || 'Sem título'}</h2>
+    <p style="margin: 0; color: #6b7280; font-size: 0.875rem; display: flex; align-items: center; gap: 0.5rem;">
+      <strong style="color: #8b5cf6;">🔗 Fonte:</strong>
+      <a href="${url.url}" target="_blank" style="color: #8b5cf6; text-decoration: none; border-bottom: 1px solid #8b5cf6;">${url.url}</a>
     </p>
   </header>
-  <div>
+  <div style="line-height: 1.8;">
     ${response.html}
   </div>
+  <hr style="margin-top: 3rem; border: none; border-top: 2px dashed #e5e7eb;" />
 </article>
 `)
         } else {
@@ -178,8 +239,6 @@ export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
     await loadHistory()
 
     setIsProcessing(false)
-
-    const successCount = urls.filter((u) => u.status === 'success').length
 
     if (successCount > 0) {
       // Armazena o HTML combinado
@@ -250,18 +309,83 @@ export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
 
       <Separator />
 
-      {/* Input de URL - SEM Histórico por enquanto */}
-      <div className='flex gap-2'>
+      {/* Input de URL com Histórico */}
+      <div className='relative flex gap-2'>
         <div className='relative flex-1'>
-          <Input
-            type='url'
-            placeholder='Cole uma URL e pressione Enter...'
-            value={inputUrl}
-            onChange={(e) => setInputUrl(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={isProcessing}
-          />
+          <div className='relative'>
+            <Search className='pointer-events-none absolute top-1/2 left-3 z-10 h-4 w-4 -translate-y-1/2 text-zinc-400' />
+            <Input
+              ref={inputRef}
+              type='url'
+              placeholder='Cole uma URL ou busque no histórico...'
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value)
+                setInputUrl(e.target.value)
+                setShowHistory(e.target.value.length > 0 && history.length > 0)
+              }}
+              onFocus={() => {
+                if (history.length > 0) setShowHistory(true)
+              }}
+              onBlur={() => {
+                // Delay para permitir clique no histórico
+                setTimeout(() => setShowHistory(false), 200)
+              }}
+              onKeyDown={handleKeyDown}
+              disabled={isProcessing}
+              className='pr-10 pl-9'
+            />
+            {history.length > 0 && (
+              <button
+                type='button'
+                onClick={() => setShowHistory(!showHistory)}
+                className='absolute top-1/2 right-3 z-10 -translate-y-1/2 text-zinc-400 transition-colors hover:text-zinc-600'>
+                <HistoryIcon className='h-4 w-4' />
+              </button>
+            )}
+          </div>
+
+          {/* Dropdown de Histórico */}
+          {showHistory && filteredHistory.length > 0 && (
+            <div className='absolute top-full left-0 z-50 mt-2 w-full rounded-lg border border-zinc-200 bg-white shadow-lg dark:border-zinc-800 dark:bg-zinc-900'>
+              <div className='flex items-center gap-2 border-b border-zinc-200 px-3 py-2 dark:border-zinc-800'>
+                <Clock className='h-3.5 w-3.5 text-zinc-400' />
+                <span className='text-xs font-semibold text-zinc-600 dark:text-zinc-400'>
+                  Histórico de Extrações
+                </span>
+              </div>
+              <ScrollArea className='max-h-[300px]'>
+                <div className='p-1'>
+                  {filteredHistory.map((entry) => (
+                    <button
+                      key={entry.id}
+                      type='button'
+                      onMouseDown={(e) => {
+                        e.preventDefault()
+                        addFromHistory(entry.url)
+                      }}
+                      className='flex w-full items-start gap-2 rounded-md p-2 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/50'>
+                      <div className='mt-0.5 shrink-0'>
+                        {entry.success ? (
+                          <CheckCircle className='h-3.5 w-3.5 text-green-500' />
+                        ) : (
+                          <XCircle className='h-3.5 w-3.5 text-red-500' />
+                        )}
+                      </div>
+                      <div className='min-w-0 flex-1'>
+                        <h4 className='line-clamp-1 text-xs font-semibold text-zinc-700 dark:text-zinc-200'>
+                          {entry.title}
+                        </h4>
+                        <p className='line-clamp-1 text-[10px] text-zinc-500'>{entry.url}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+          )}
         </div>
+
         <Button onClick={addUrl} disabled={isProcessing || !inputUrl.trim()}>
           <Plus className='h-4 w-4' />
         </Button>
@@ -342,7 +466,7 @@ export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
 
           {/* Actions */}
           <div className='flex gap-2'>
-            {!combinedHtml ? (
+            {!combinedHtml || isProcessing ? (
               <Button
                 onClick={processUrls}
                 disabled={isProcessing || urls.length === 0}
@@ -355,14 +479,14 @@ export function BatchUrlExtractor({ onClose }: BatchUrlExtractorProps) {
                 ) : (
                   <>
                     <Zap className='h-4 w-4' />
-                    Extrair Todas
+                    Extrair Todas ({urls.length})
                   </>
                 )}
               </Button>
             ) : (
               <Button
                 onClick={handleVisualize}
-                className='w-full gap-2 bg-green-600 hover:bg-green-700'>
+                className='w-full gap-2 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700'>
                 <Eye className='h-4 w-4' />
                 Visualizar Resultado
               </Button>
