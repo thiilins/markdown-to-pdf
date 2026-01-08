@@ -6,12 +6,8 @@ import { Label } from '@/components/ui/label'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
 import { Switch } from '@/components/ui/switch'
 import { Copy, Download, FileCode, FileJson, FileType, RotateCcw } from 'lucide-react'
-import { format } from 'prettier/standalone'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-// Imports default dos plugins do Prettier
-import estreePlugin from 'prettier/plugins/estree'
-import typescriptPlugin from 'prettier/plugins/typescript'
 import { CodeFormatterEditor } from '../../_components/code-formatter-editor'
 import { FormatterOutputPanel } from '../../_components/formatter-output-panel'
 import { JsonEditorToolbar } from '../../_components/json-editor-toolbar'
@@ -91,11 +87,18 @@ export default function JsonToTsView() {
         const parsed = parseResult.data
         let result = convertJsonToTypeScriptInterfaces(parsed, interfaceName, useExport)
 
-        // Formatar o TypeScript com Prettier
+        // Formatar o TypeScript com Prettier (lazy loading)
         try {
+          const { format } = await import('prettier/standalone')
+          const typescriptPlugin = await import('prettier/plugins/typescript')
+          const estreePlugin = await import('prettier/plugins/estree')
+
           result = await format(result, {
             parser: 'typescript',
-            plugins: [typescriptPlugin, estreePlugin],
+            plugins: [
+              typescriptPlugin.default || typescriptPlugin,
+              estreePlugin.default || estreePlugin,
+            ],
             printWidth: 100,
             tabWidth: 2,
             useTabs: false,

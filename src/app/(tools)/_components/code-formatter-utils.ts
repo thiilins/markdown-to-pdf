@@ -3,12 +3,6 @@
  * Utilitários para formatação e minificação de código
  */
 
-import { format } from 'prettier/standalone'
-// Imports default dos plugins do Prettier
-import babelPlugin from 'prettier/plugins/babel'
-import estreePlugin from 'prettier/plugins/estree'
-import htmlPlugin from 'prettier/plugins/html'
-import cssPlugin from 'prettier/plugins/postcss'
 import { formatDialect, format as formatSql, mysql, postgresql } from 'sql-formatter'
 
 export type CodeType = 'html' | 'css' | 'javascript' | 'sql'
@@ -18,6 +12,44 @@ export interface ValidationResult {
   isValid: boolean
   errors: string[]
   warnings: string[]
+}
+
+// Cache para plugins carregados
+let prettierPlugins: {
+  html?: any
+  css?: any
+  babel?: any
+  estree?: any
+} = {}
+
+/**
+ * Carrega os plugins do Prettier de forma lazy (apenas no cliente)
+ */
+async function loadPrettierPlugins(type: 'html' | 'css' | 'javascript') {
+  const { format } = await import('prettier/standalone')
+
+  if (type === 'html' && !prettierPlugins.html) {
+    const htmlPlugin = await import('prettier/plugins/html')
+    prettierPlugins.html = htmlPlugin.default || htmlPlugin
+  }
+
+  if (type === 'css' && !prettierPlugins.css) {
+    const cssPlugin = await import('prettier/plugins/postcss')
+    prettierPlugins.css = cssPlugin.default || cssPlugin
+  }
+
+  if (type === 'javascript') {
+    if (!prettierPlugins.babel) {
+      const babelPlugin = await import('prettier/plugins/babel')
+      prettierPlugins.babel = babelPlugin.default || babelPlugin
+    }
+    if (!prettierPlugins.estree) {
+      const estreePlugin = await import('prettier/plugins/estree')
+      prettierPlugins.estree = estreePlugin.default || estreePlugin
+    }
+  }
+
+  return format
 }
 
 /**
@@ -32,28 +64,33 @@ export async function formatCode(
 
   try {
     switch (codeType) {
-      case 'html':
+      case 'html': {
+        const format = await loadPrettierPlugins('html')
         return await format(code, {
           parser: 'html',
-          plugins: [htmlPlugin],
+          plugins: [prettierPlugins.html],
           printWidth: 100,
           tabWidth: 2,
           useTabs: false,
         })
+      }
 
-      case 'css':
+      case 'css': {
+        const format = await loadPrettierPlugins('css')
         return await format(code, {
           parser: 'css',
-          plugins: [cssPlugin],
+          plugins: [prettierPlugins.css],
           printWidth: 100,
           tabWidth: 2,
           useTabs: false,
         })
+      }
 
-      case 'javascript':
+      case 'javascript': {
+        const format = await loadPrettierPlugins('javascript')
         return await format(code, {
           parser: 'babel',
-          plugins: [babelPlugin, estreePlugin],
+          plugins: [prettierPlugins.babel, prettierPlugins.estree],
           printWidth: 100,
           tabWidth: 2,
           useTabs: false,
@@ -61,6 +98,7 @@ export async function formatCode(
           singleQuote: true,
           trailingComma: 'es5',
         })
+      }
 
       case 'sql':
         if (sqlDialect === 'postgresql') {

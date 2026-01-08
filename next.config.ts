@@ -3,8 +3,8 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
-  // Transpilar pacotes que podem ter problemas com o bundler
-  transpilePackages: ['prettier'],
+  // Pacotes que devem ser externos no servidor (não bundlados)
+  serverExternalPackages: ['prettier'],
 
   turbopack: {},
 }
