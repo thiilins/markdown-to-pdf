@@ -22,7 +22,6 @@ import { cn } from '@/lib/utils'
 import { diffLines, diffWords, type Change } from 'diff'
 import {
   ArrowLeftRight,
-  Check,
   CheckCircle2,
   ChevronDown,
   ClipboardPaste,
@@ -34,7 +33,6 @@ import {
   Info,
   Minus,
   Plus,
-  RotateCcw,
   Settings,
   Sparkles,
   X,
@@ -413,10 +411,13 @@ ${filteredChanges.map((c) => (c.added ? `+${c.value}` : c.removed ? `-${c.value}
             onReset={handleReset}
           />
         ) : (
-          <ResizablePanelGroup direction='vertical' className='h-full'>
+          <ResizablePanelGroup id='diff-checker-main' direction='vertical' className='h-full'>
             {/* Painel Superior: Editores */}
             <ResizablePanel defaultSize={45} minSize={25} maxSize={70} className='bg-background'>
-              <ResizablePanelGroup direction='horizontal' className='h-full'>
+              <ResizablePanelGroup
+                id='diff-checker-editors'
+                direction='horizontal'
+                className='h-full'>
                 <ResizablePanel defaultSize={50} minSize={20}>
                   <EditorPanel
                     title='Original'
@@ -593,29 +594,41 @@ function DiffOutputPanel({
         )}
       </CardHeader>
 
-      <CardContent className='flex-1 overflow-auto p-0'>
+      <CardContent className='flex-1 overflow-auto p-0' style={{ backgroundColor: '#282a36' }}>
         {!hasChanges ? (
-          <div className='text-muted-foreground flex h-full flex-col items-center justify-center p-8'>
-            <div className='mb-4 rounded-full bg-green-500/10 p-6'>
-              <CheckCircle2 className='h-12 w-12 text-green-600' />
+          <div
+            className='flex h-full flex-col items-center justify-center p-8'
+            style={{ color: '#f8f8f2' }}>
+            <div
+              className='mb-4 rounded-full p-6'
+              style={{ backgroundColor: 'rgba(80, 250, 123, 0.15)' }}>
+              <CheckCircle2 className='h-12 w-12' style={{ color: '#50fa7b' }} />
             </div>
-            <h3 className='mb-2 text-lg font-semibold'>Textos Idênticos</h3>
-            <p className='text-center text-sm'>Nenhuma diferença encontrada entre os textos</p>
+            <h3 className='mb-2 text-lg font-semibold' style={{ color: '#f8f8f2' }}>
+              Textos Idênticos
+            </h3>
+            <p className='text-center text-sm' style={{ color: '#6272a4' }}>
+              Nenhuma diferença encontrada entre os textos
+            </p>
             <div className='mt-4 w-64'>
               <Progress value={100} className='h-2' />
-              <p className='mt-2 text-center text-xs'>100% de similaridade</p>
+              <p className='mt-2 text-center text-xs' style={{ color: '#6272a4' }}>
+                100% de similaridade
+              </p>
             </div>
           </div>
         ) : (
           <div className='font-mono text-sm'>
             {mode === 'lines' ? (
-              <div className='divide-border/30 divide-y'>
+              <div>
                 {changes.map((change, idx) => (
                   <LineDiffRow key={idx} change={change} />
                 ))}
               </div>
             ) : (
-              <div className='p-4 leading-relaxed break-words whitespace-pre-wrap'>
+              <div
+                className='p-4 leading-relaxed break-words whitespace-pre-wrap'
+                style={{ color: '#f8f8f2' }}>
                 {changes.map((change, idx) => (
                   <WordDiffSpan key={idx} change={change} />
                 ))}
@@ -629,13 +642,25 @@ function DiffOutputPanel({
 }
 
 function LineDiffRow({ change }: { change: Change }) {
+  // Tema Dracula
   if (change.added) {
     return (
-      <div className='group flex border-l-4 border-green-500 bg-green-500/10 transition-colors hover:bg-green-500/15 dark:bg-green-500/5'>
-        <div className='flex w-12 shrink-0 items-center justify-center border-r border-green-500/30 bg-green-500/20 py-2 text-xs font-bold text-green-700 dark:text-green-400'>
+      <div
+        className='group flex border-l-4 transition-colors'
+        style={{
+          borderLeftColor: '#50fa7b',
+          backgroundColor: 'rgba(80, 250, 123, 0.1)',
+        }}>
+        <div
+          className='flex w-12 shrink-0 items-center justify-center border-r py-2 text-xs font-bold'
+          style={{
+            borderRightColor: 'rgba(80, 250, 123, 0.3)',
+            backgroundColor: 'rgba(80, 250, 123, 0.2)',
+            color: '#50fa7b',
+          }}>
           +
         </div>
-        <div className='flex-1 py-2 pl-4 font-medium break-all text-green-900 dark:text-green-100'>
+        <div className='flex-1 py-2 pl-4 font-medium break-all' style={{ color: '#50fa7b' }}>
           {change.value}
         </div>
       </div>
@@ -643,42 +668,74 @@ function LineDiffRow({ change }: { change: Change }) {
   }
   if (change.removed) {
     return (
-      <div className='group flex border-l-4 border-red-500 bg-red-500/10 transition-colors hover:bg-red-500/15 dark:bg-red-500/5'>
-        <div className='flex w-12 shrink-0 items-center justify-center border-r border-red-500/30 bg-red-500/20 py-2 text-xs font-bold text-red-700 dark:text-red-400'>
+      <div
+        className='group flex border-l-4 transition-colors'
+        style={{
+          borderLeftColor: '#ff5555',
+          backgroundColor: 'rgba(255, 85, 85, 0.1)',
+        }}>
+        <div
+          className='flex w-12 shrink-0 items-center justify-center border-r py-2 text-xs font-bold'
+          style={{
+            borderRightColor: 'rgba(255, 85, 85, 0.3)',
+            backgroundColor: 'rgba(255, 85, 85, 0.2)',
+            color: '#ff5555',
+          }}>
           −
         </div>
-        <div className='flex-1 py-2 pl-4 font-medium break-all text-red-900 line-through decoration-red-600/50 dark:text-red-100'>
+        <div
+          className='flex-1 py-2 pl-4 font-medium break-all line-through'
+          style={{ color: '#ff5555', textDecorationColor: 'rgba(255, 85, 85, 0.5)' }}>
           {change.value}
         </div>
       </div>
     )
   }
   return (
-    <div className='hover:bg-muted/20 group flex border-l-4 border-transparent transition-colors'>
-      <div className='text-muted-foreground/40 flex w-12 shrink-0 items-center justify-center border-r py-2 text-xs'>
+    <div
+      className='group flex border-l-4 border-transparent transition-colors'
+      style={{ backgroundColor: 'transparent' }}>
+      <div
+        className='flex w-12 shrink-0 items-center justify-center border-r py-2 text-xs'
+        style={{ borderRightColor: '#44475a', color: '#6272a4' }}>
         <span className='opacity-0 group-hover:opacity-100'>·</span>
       </div>
-      <div className='text-foreground/70 flex-1 py-2 pl-4 break-all'>{change.value}</div>
+      <div className='flex-1 py-2 pl-4 break-all' style={{ color: '#f8f8f2' }}>
+        {change.value}
+      </div>
     </div>
   )
 }
 
 function WordDiffSpan({ change }: { change: Change }) {
+  // Tema Dracula
   if (change.added) {
     return (
-      <span className='mx-0.5 rounded bg-green-500/20 px-1 py-0.5 font-semibold text-green-800 underline decoration-green-600 decoration-2 underline-offset-2 dark:bg-green-500/30 dark:text-green-200'>
+      <span
+        className='mx-0.5 rounded px-1 py-0.5 font-semibold underline decoration-2 underline-offset-2'
+        style={{
+          backgroundColor: 'rgba(80, 250, 123, 0.25)',
+          color: '#50fa7b',
+          textDecorationColor: '#50fa7b',
+        }}>
         {change.value}
       </span>
     )
   }
   if (change.removed) {
     return (
-      <span className='mx-0.5 rounded bg-red-500/20 px-1 py-0.5 font-semibold text-red-800 line-through decoration-red-600/60 dark:bg-red-500/30 dark:text-red-200'>
+      <span
+        className='mx-0.5 rounded px-1 py-0.5 font-semibold line-through'
+        style={{
+          backgroundColor: 'rgba(255, 85, 85, 0.25)',
+          color: '#ff5555',
+          textDecorationColor: 'rgba(255, 85, 85, 0.6)',
+        }}>
         {change.value}
       </span>
     )
   }
-  return <span className='text-foreground/80'>{change.value}</span>
+  return <span style={{ color: '#f8f8f2' }}>{change.value}</span>
 }
 
 function DiffMobileView({

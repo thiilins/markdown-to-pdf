@@ -1,5 +1,6 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
 import {
@@ -9,19 +10,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
 import { Database, FileCode } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { FormatterHeader } from '../../_components/formatter-header'
-import { FormatterEditorPanel } from '../../_components/formatter-editor-panel'
-import { FormatterOutputPanel } from '../../_components/formatter-output-panel'
 import {
   formatCode,
   minifyCode,
   validateCode,
   type ValidationResult,
 } from '../../_components/code-formatter-utils'
+import { FormatterEditorPanel } from '../../_components/formatter-editor-panel'
+import { FormatterOutputPanel } from '../../_components/formatter-output-panel'
+import { FormatterHeader } from '../../_components/layouts/formatter-header'
 
 const DEFAULT_SQL = `SELECT u.id,u.name,u.email,COUNT(o.id) as order_count,SUM(o.total) as total_spent FROM users u LEFT JOIN orders o ON u.id=o.user_id WHERE u.active=1 AND u.created_at>='2024-01-01' GROUP BY u.id,u.name,u.email HAVING COUNT(o.id)>0 ORDER BY total_spent DESC LIMIT 20`
 
@@ -211,7 +211,7 @@ export default function SqlFormatterView() {
             )}
           </div>
         ) : (
-          <ResizablePanelGroup direction='horizontal' className='h-full'>
+          <ResizablePanelGroup id='sql-formatter-panels' direction='horizontal' className='h-full'>
             <ResizablePanel defaultSize={50} minSize={30}>
               <FormatterEditorPanel
                 value={codeInput}

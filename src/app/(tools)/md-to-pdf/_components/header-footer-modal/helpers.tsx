@@ -182,7 +182,6 @@ export const SlotConfigForm = ({ slotType }: { slotType: 'header' | 'footer' }) 
   )
   const disableSimpleMode = useMemo(() => {
     const result = hasHTMLTags(slot?.left || '')
-    console.log('result', result)
     return result?.contemHTML
   }, [slot.left])
   const [mode, setMode] = useState<'simple' | 'advanced'>(disableSimpleMode ? 'advanced' : 'simple')

@@ -372,7 +372,7 @@ export default function JsonToTsView() {
             )}
           </div>
         ) : (
-          <ResizablePanelGroup direction='horizontal' className='h-full'>
+          <ResizablePanelGroup id='json-to-ts-panels' direction='horizontal' className='h-full'>
             <ResizablePanel defaultSize={50} minSize={30}>
               <div className='bg-background flex h-full flex-col'>
                 <div className='bg-muted/30 flex shrink-0 items-center justify-between border-b px-4 py-2.5'>

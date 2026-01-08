@@ -8,7 +8,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { convertFormat } from '../../_components/format-converter-utils'
 import { FormatterEditorPanel } from '../../_components/formatter-editor-panel'
-import { FormatterHeader } from '../../_components/formatter-header'
 import { FormatterOutputPanel } from '../../_components/formatter-output-panel'
 import {
   formatJson,
@@ -17,6 +16,7 @@ import {
   type JsonValidationResult,
 } from '../../_components/json-formatter-utils'
 import { JsonTreeView } from '../../_components/json-tree-view'
+import { FormatterHeader } from '../../_components/layouts/formatter-header'
 
 const DEFAULT_JSON = `{"users":[{"id":1,"name":"João","email":"joao@example.com","active":true,"roles":["admin","user"],"metadata":{"createdAt":"2024-01-15","lastLogin":"2024-01-20"}},{"id":2,"name":"Maria","email":"maria@example.com","active":false,"roles":["user"],"metadata":{"createdAt":"2024-01-10","lastLogin":null}}],"total":2,"page":1,"limit":10}`
 
@@ -275,7 +275,7 @@ export default function JsonFormatterView() {
             )}
           </div>
         ) : (
-          <ResizablePanelGroup direction='horizontal' className='h-full'>
+          <ResizablePanelGroup id='json-formatter-panels' direction='horizontal' className='h-full'>
             <ResizablePanel defaultSize={50} minSize={30}>
               <FormatterEditorPanel
                 value={codeInput}

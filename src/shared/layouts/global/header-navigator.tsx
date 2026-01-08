@@ -1,129 +1,283 @@
 'use client'
 
+import { Badge } from '@/components/ui/badge'
+import { PlaceholdersAndVanishInput } from '@/components/ui/placeholders-and-vanish-input'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { cn } from '@/lib/utils'
+import { Modules, Modules_Front } from '@/shared/constants'
+import { urlIsActive } from '@/shared/utils'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Command, Search, X } from 'lucide-react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import * as React from 'react'
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { cn } from '@/lib/utils'
-import { Modules } from '@/shared/constants'
-import { urlIsActive } from '@/shared/utils'
-import { ChevronDownIcon, Toolbox } from 'lucide-react'
-import { usePathname } from 'next/navigation'
-
 export function HeaderNavigator() {
-  const pathname = usePathname()
   const [open, setOpen] = React.useState(false)
+  const [search, setSearch] = React.useState('')
+  const inputRef = React.useRef<HTMLInputElement>(null)
 
-  const toolsIsActive =
-    Modules.filter((module) => urlIsActive(pathname, module.href ?? '')).length > 0
+  // Filtra módulos baseado na busca
+  const filteredModules = React.useMemo(() => {
+    if (!search.trim()) return Modules_Front
+
+    const query = search.toLowerCase()
+    return Modules_Front.map((category) => ({
+      ...category,
+      submenu: category.submenu?.filter(
+        (item) =>
+          item.label.toLowerCase().includes(query) ||
+          item.description?.toLowerCase().includes(query),
+      ),
+    })).filter((category) => category.submenu && category.submenu.length > 0)
+  }, [search])
+
+  // Total de ferramentas
+  const totalTools = React.useMemo(
+    () => filteredModules.reduce((acc, cat) => acc + (cat.submenu?.length || 0), 0),
+    [filteredModules],
+  )
+
+  // Limpa busca ao fechar
+  React.useEffect(() => {
+    if (!open) setSearch('')
+  }, [open])
+
+  // Atalho Cmd+K
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setOpen(true)
+        inputRef.current?.focus()
+      }
+      if (e.key === 'Escape' && open) {
+        setOpen(false)
+        inputRef.current?.blur()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [open])
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger
-        className={cn(
-          'inline-flex h-9 cursor-pointer items-center justify-center rounded-md px-3 py-2 text-sm font-medium transition-all duration-300',
-          'md:px-4',
-          'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-          'disabled:pointer-events-none disabled:opacity-50',
-          toolsIsActive
-            ? 'bg-primary hover:bg-primary/90 text-white'
-            : 'bg-background text-primary hover:bg-primary/10',
-        )}>
-        <Toolbox className='h-4 w-4 md:mr-2' />
-        <span className='hidden sm:inline'>Ferramentas</span>
-        <ChevronDownIcon
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <div
           className={cn(
-            'h-3 w-3 transition-transform duration-300',
-            'ml-1 hidden sm:block',
-            open && 'rotate-180',
+            'relative flex h-9 w-full max-w-sm items-center rounded-lg border transition-all',
+            'border-zinc-200 bg-zinc-50/80',
+            'hover:border-primary/40 hover:bg-white',
+            'dark:border-zinc-800 dark:bg-zinc-900/80 dark:hover:bg-zinc-800',
+            open && 'border-primary/50 ring-primary/10 bg-white ring-2',
+          )}>
+          <Search className='ml-3 h-4 w-4 shrink-0 text-zinc-400' />
+
+          <PlaceholdersAndVanishInput
+            placeholders={['Buscar ferramentas...', ...Modules.map((module: any) => module.label)]}
+            onChange={(e) => setSearch(e.target.value)}
+            className='h-full flex-1 bg-transparent px-2.5 text-sm text-zinc-700 placeholder-zinc-400 outline-none dark:text-zinc-200'
+          />
+          {search ? (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setSearch('')
+                inputRef.current?.focus()
+              }}
+              className='mr-2 rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-700'>
+              <X className='h-3.5 w-3.5' />
+            </button>
+          ) : (
+            <kbd className='mr-2.5 hidden rounded border border-zinc-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-zinc-400 sm:flex dark:border-zinc-700 dark:bg-zinc-800'>
+              <Command className='mr-0.5 h-2.5 w-2.5' />K
+            </kbd>
           )}
-        />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
+        </div>
+      </PopoverTrigger>
+
+      <PopoverContent
         align='start'
         sideOffset={8}
-        collisionPadding={16}
-        className={cn('w-[calc(100vw-2rem)] max-w-[420px] p-3', 'md:p-3')}
-        style={{
-          maxWidth: 'min(420px, calc(100vw - 2rem))',
-        }}>
-        <div className='grid gap-1.5'>
-          {Modules.map((module) => {
-            const Icon = module.icon
-            return (
-              <MenuItem
-                key={module.label}
-                title={module.label}
-                href={module.href || ''}
-                icon={Icon}
-                description={module.description}
-                onSelect={() => setOpen(false)}
-              />
-            )
-          })}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        className='w-[680px] overflow-hidden rounded-xl border-zinc-200 p-0 shadow-xl dark:border-zinc-800'>
+        {/* Header */}
+        <div className='flex items-center justify-between border-b border-zinc-100 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900'>
+          <div className='flex items-center gap-2'>
+            <Search className='text-primary h-4 w-4' />
+            <span className='text-xs font-semibold text-zinc-600 dark:text-zinc-300'>
+              {search ? `Resultados para "${search}"` : 'Explorar Ferramentas'}
+            </span>
+          </div>
+          <Badge variant='secondary' className='h-5 px-2 text-[10px]'>
+            {totalTools} disponíveis
+          </Badge>
         </div>
-      </DropdownMenuContent>
-    </DropdownMenu>
+
+        {/* Grid de Categorias */}
+        <div className='custom-scrollbar max-h-[420px] overflow-y-auto'>
+          <AnimatePresence mode='wait'>
+            {filteredModules.length > 0 ? (
+              <motion.div
+                key='results'
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className='grid grid-cols-2'>
+                {filteredModules.map((category, idx) => (
+                  <CategorySection
+                    key={category.label}
+                    category={category}
+                    onSelect={() => {
+                      setOpen(false)
+                      setSearch('')
+                    }}
+                    search={search}
+                    isLast={idx === filteredModules.length - 1}
+                    isOdd={idx % 2 === 0}
+                  />
+                ))}
+              </motion.div>
+            ) : (
+              <motion.div
+                key='empty'
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className='flex flex-col items-center py-12 text-center'>
+                <div className='mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800'>
+                  <Search className='h-5 w-5 text-zinc-400' />
+                </div>
+                <p className='text-sm font-semibold text-zinc-600 dark:text-zinc-300'>
+                  Nenhuma ferramenta encontrada
+                </p>
+                <p className='mt-1 text-xs text-zinc-400'>Tente buscar com outros termos</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </PopoverContent>
+    </Popover>
   )
 }
 
-function MenuItem({
-  title,
-  description,
-  href,
-  icon: Icon,
+function CategorySection({
+  category,
   onSelect,
+  search,
+  isLast,
+  isOdd,
 }: {
-  href: string
-  icon?: React.ElementType
-  description?: string
-  title: string
+  category: ModuleItem
   onSelect: () => void
+  search: string
+  isLast: boolean
+  isOdd: boolean
 }) {
-  const pathname = usePathname()
-  const isActive = urlIsActive(pathname, href)
+  const Icon = category.icon
 
   return (
-    <DropdownMenuItem asChild>
+    <div
+      className={cn(
+        'border-b border-zinc-100 p-4 dark:border-zinc-800',
+        isOdd && 'border-r',
+        isLast && 'border-b-0',
+      )}>
+      {/* Category Header */}
+      <div className='mb-3 flex items-center justify-between'>
+        <div className='flex items-center gap-2'>
+          <div className='flex h-7 w-7 items-center justify-center rounded-lg bg-zinc-100 text-zinc-500 dark:bg-zinc-800'>
+            <Icon className='h-4 w-4' />
+          </div>
+          <h3 className='text-[10px] font-black tracking-widest text-zinc-400 uppercase'>
+            {category.label}
+          </h3>
+        </div>
+        <Badge variant='outline' className='h-5 px-1.5 text-[9px]'>
+          {category.submenu?.length}
+        </Badge>
+      </div>
+
+      {/* Tools */}
+      <ul className='space-y-1'>
+        {category.submenu?.map((item, idx) => (
+          <ToolItem key={item.label} item={item} onSelect={onSelect} index={idx} search={search} />
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+function ToolItem({
+  item,
+  onSelect,
+  index,
+  search,
+}: {
+  item: ModuleItem
+  onSelect: () => void
+  index: number
+  search: string
+}) {
+  const pathname = usePathname()
+  const active = urlIsActive(pathname, item.href || '')
+  const Icon = item.icon
+
+  const highlightText = (text: string) => {
+    if (!search.trim()) return text
+    const regex = new RegExp(`(${search})`, 'gi')
+    const parts = text.split(regex)
+    return parts.map((part, i) =>
+      regex.test(part) ? (
+        <mark key={i} className='rounded bg-yellow-200 px-0.5 dark:bg-yellow-500/30'>
+          {part}
+        </mark>
+      ) : (
+        part
+      ),
+    )
+  }
+
+  return (
+    <motion.li
+      initial={{ opacity: 0, x: -5 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.02 }}>
       <Link
-        href={href}
+        href={item.href || '#'}
         onClick={onSelect}
         className={cn(
-          'group flex items-start gap-2 rounded-lg p-2.5 transition-all',
-          'md:gap-3 md:p-3',
-          'hover:bg-accent hover:text-accent-foreground',
-          'focus:bg-accent focus:text-accent-foreground',
-          'active:bg-accent/80',
-          'cursor-pointer outline-none',
-          isActive && 'bg-accent text-accent-foreground',
+          'group flex items-center gap-3 rounded-xl p-2.5 transition-all',
+          active ? 'bg-primary text-white shadow-sm' : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50',
         )}>
-        {Icon && (
-          <Icon
+        <div
+          className={cn(
+            'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all',
+            active
+              ? 'bg-white/20'
+              : 'group-hover:border-primary/30 group-hover:text-primary border border-zinc-200 bg-white text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800',
+          )}>
+          <Icon className='h-4 w-4' />
+        </div>
+        <div className='min-w-0 flex-1'>
+          <span
             className={cn(
-              'mt-0.5 h-4 w-4 shrink-0 transition-colors',
-              'md:h-5 md:w-5',
-              isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground',
-            )}
-          />
-        )}
-        <div className='min-w-0 flex-1 space-y-0.5'>
-          <div
-            className={cn(
-              'text-sm leading-none font-medium',
-              isActive ? 'text-primary' : 'text-foreground',
+              'block truncate text-[12px] font-bold',
+              active ? 'text-white' : 'text-zinc-700 dark:text-zinc-200',
             )}>
-            {title}
-          </div>
-          {description && (
-            <p className='text-muted-foreground line-clamp-2 text-xs leading-snug'>{description}</p>
+            {highlightText(item.label)}
+          </span>
+          {item.description && (
+            <span
+              className={cn(
+                'block truncate text-[10px]',
+                active ? 'text-white/70' : 'text-zinc-400',
+              )}>
+              {highlightText(item.description)}
+            </span>
           )}
         </div>
+        {active && <div className='h-2 w-2 rounded-full bg-white' />}
       </Link>
-    </DropdownMenuItem>
+    </motion.li>
   )
 }

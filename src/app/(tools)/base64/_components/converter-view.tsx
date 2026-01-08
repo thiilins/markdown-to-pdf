@@ -203,7 +203,7 @@ export default function Base64ConverterView() {
             </TabsContent>
           </Tabs>
         ) : (
-          <ResizablePanelGroup direction='horizontal' className='h-full'>
+          <ResizablePanelGroup id='base64-panels' direction='horizontal' className='h-full'>
             <ResizablePanel defaultSize={50} minSize={30}>
               <Tabs
                 value={activeTab}

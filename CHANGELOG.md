@@ -22,7 +22,7 @@ adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 - **Escolha de ícones para anotações:**
   - 10 ícones disponíveis: Nota, Info, Alerta, Check, Estrela, Coração, Ideia, Bug, Código, Rápido
-  
+
 - **Drag and drop para reposicionar:**
   - Clique e arraste na anotação para mover livremente
   - Animação suave com Framer Motion

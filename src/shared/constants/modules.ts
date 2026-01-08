@@ -173,7 +173,6 @@ export const Modules_Front: ModuleItem[] = [
 // ----------------------------------------------------------------------
 
 export const Modules: ModuleItem[] = [
-  // --- Formatadores ---
   {
     label: 'JSON Formatter',
     href: '/json-formatter',
@@ -205,7 +204,6 @@ export const Modules: ModuleItem[] = [
     description: 'Formatar CSS',
   },
 
-  // --- Markdown ---
   {
     label: 'MD Editor',
     href: '/md-editor',

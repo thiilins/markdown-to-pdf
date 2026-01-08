@@ -11,8 +11,8 @@ import { BrushCleaning, LogIn, LogOut } from 'lucide-react'
 import { signOut, useSession } from 'next-auth/react' // Importa tudo do react
 import { useRouter } from 'next/navigation'
 import { useCallback } from 'react'
-import { INVALID_AUTH_STATUS } from './_components/constants'
-import { UserAvatar } from './_components/user-avatar'
+import { INVALID_AUTH_STATUS } from '../auth/_components/constants'
+import { UserAvatar } from '../auth/_components/user-avatar'
 
 export default function UserNav() {
   const { status } = useSession() // Hook mágico

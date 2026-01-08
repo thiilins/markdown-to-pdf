@@ -12,8 +12,8 @@ import {
   type ValidationResult,
 } from '../../_components/code-formatter-utils'
 import { FormatterEditorPanel } from '../../_components/formatter-editor-panel'
-import { FormatterHeader } from '../../_components/formatter-header'
 import { FormatterOutputPanel } from '../../_components/formatter-output-panel'
+import { FormatterHeader } from '../../_components/layouts/formatter-header'
 import { DEFAULT_CSS } from './constants'
 
 export const CssFormatterView = () => {
@@ -182,7 +182,7 @@ export const CssFormatterView = () => {
             )}
           </div>
         ) : (
-          <ResizablePanelGroup direction='horizontal' className='h-full'>
+          <ResizablePanelGroup id='css-formatter-panels' direction='horizontal' className='h-full'>
             <ResizablePanel defaultSize={50} minSize={30}>
               <FormatterEditorPanel
                 value={codeInput}

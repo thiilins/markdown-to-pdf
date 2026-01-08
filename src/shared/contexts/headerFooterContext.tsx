@@ -61,7 +61,6 @@ export function HeaderFooterProvider({ children }: { children: ReactNode }) {
   )
 
   const handleOpenModal = useCallback(() => {
-    console.log('config.headerFooter', config.headerFooter)
     setHeaderFooterTemp(config.headerFooter || DEFAULT_HEADER_FOOTER)
     setModalOpen(true)
   }, [config.headerFooter])

@@ -12,8 +12,8 @@ import {
   type ValidationResult,
 } from '../../_components/code-formatter-utils'
 import { FormatterEditorPanel } from '../../_components/formatter-editor-panel'
-import { FormatterHeader } from '../../_components/formatter-header'
 import { FormatterOutputPanel } from '../../_components/formatter-output-panel'
+import { FormatterHeader } from '../../_components/layouts/formatter-header'
 
 const DEFAULT_JS = `function processUserData(users){const activeUsers=users.filter(u=>u.active&&u.emailVerified);const sortedUsers=activeUsers.sort((a,b)=>new Date(b.lastLogin)-new Date(a.lastLogin));const userStats={total:users.length,active:activeUsers.length,recent:sortedUsers.slice(0,10)};return userStats}async function fetchUserData(userId){try{const response=await fetch(\`/api/users/\${userId}\`);if(!response.ok)throw new Error('Failed to fetch');const data=await response.json();return{success:true,data};}catch(error){console.error('Error:',error);return{success:false,error:error.message};}}const users=[{id:1,name:'João',active:true,emailVerified:true,lastLogin:'2024-01-15'},{id:2,name:'Maria',active:true,emailVerified:false,lastLogin:'2024-01-10'}];const stats=processUserData(users);console.log(stats);`
 
@@ -185,7 +185,7 @@ export default function JavascriptFormatterView() {
             )}
           </div>
         ) : (
-          <ResizablePanelGroup direction='horizontal' className='h-full'>
+          <ResizablePanelGroup id='js-formatter-panels' direction='horizontal' className='h-full'>
             <ResizablePanel defaultSize={50} minSize={30}>
               <FormatterEditorPanel
                 value={codeInput}
