@@ -97,7 +97,7 @@ function ThemeToggle() {
     <button
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
       className={cn(
-        'group relative flex h-9 w-9 items-center justify-center rounded-xl transition-all',
+        'group relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl transition-all',
         'text-zinc-400',
         isDark
           ? 'hover:bg-amber-500/10 hover:text-amber-500'

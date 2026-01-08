@@ -1,29 +1,15 @@
 'use client'
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import { Modules_Front } from '@/shared/constants/modules'
-import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion'
-import { ArrowRight, CloudLightning, Layers, Lock, Sparkles, Zap } from 'lucide-react'
-import Link from 'next/link'
-import { useMemo, useState } from 'react'
-import {
-  HERO_VIDEO,
-  IMG_AUTOMACAO,
-  IMG_DESIGN,
-  IMG_PROCESSAMENTO,
-  IMG_SEGURANCA,
-} from './constants'
-import { FooterCtaComponent } from './footer-cta'
-import {  GlowCard, SectionWrapper } from './global'
-import { scrollToSection } from './utils'
 import { BentoCardComponent } from '@/components/custom-ui/bento-card'
+import { motion } from 'framer-motion'
+import { CloudLightning, Layers, Lock, Zap } from 'lucide-react'
+import { IMG_AUTOMACAO, IMG_DESIGN, IMG_PROCESSAMENTO, IMG_SEGURANCA } from './constants'
+import { SectionWrapper } from './global'
 
 export const FeaturesSectionComponent = () => {
   return (
-    <SectionWrapper id='features' className='relative py-32'>
-      <div className='relative z-20 container px-4 md:px-6'>
+    <SectionWrapper id='tools' className='relative overflow-hidden py-32'>
+      <div className='relative z-10 container mx-auto px-4'>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -74,4 +60,3 @@ export const FeaturesSectionComponent = () => {
     </SectionWrapper>
   )
 }
-

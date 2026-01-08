@@ -71,12 +71,10 @@ export function HeaderNavigator() {
             'dark:border-zinc-800 dark:bg-zinc-900/80 dark:hover:bg-zinc-800',
             open && 'border-primary/50 ring-primary/10 bg-white ring-2',
           )}>
-          <Search className='ml-3 h-4 w-4 shrink-0 text-zinc-400' />
-
           <PlaceholdersAndVanishInput
             placeholders={['Buscar ferramentas...', ...Modules.map((module: any) => module.label)]}
             onChange={(e) => setSearch(e.target.value)}
-            className='h-full flex-1 bg-transparent px-2.5 text-sm text-zinc-700 placeholder-zinc-400 outline-none dark:text-zinc-200'
+            className='h-full flex-1 bg-transparent px-2.5 pr-3 text-sm text-zinc-700 placeholder-zinc-400 outline-none dark:text-zinc-200'
           />
           {search ? (
             <button
@@ -97,10 +95,10 @@ export function HeaderNavigator() {
       </PopoverTrigger>
 
       <PopoverContent
-        align='start'
+        align='center'
         sideOffset={8}
         onOpenAutoFocus={(e) => e.preventDefault()}
-        className='w-[680px] overflow-hidden rounded-xl border-zinc-200 p-0 shadow-xl dark:border-zinc-800'>
+        className='w-[calc(100vw-2rem)] overflow-hidden rounded-xl border-zinc-200 p-0 shadow-xl sm:w-[680px] dark:border-zinc-800'>
         {/* Header */}
         <div className='flex items-center justify-between border-b border-zinc-100 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900'>
           <div className='flex items-center gap-2'>
@@ -123,7 +121,7 @@ export function HeaderNavigator() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className='grid grid-cols-2'>
+                className='grid grid-cols-1 sm:grid-cols-2'>
                 {filteredModules.map((category, idx) => (
                   <CategorySection
                     key={category.label}
@@ -179,7 +177,7 @@ function CategorySection({
     <div
       className={cn(
         'border-b border-zinc-100 p-4 dark:border-zinc-800',
-        isOdd && 'border-r',
+        isOdd && 'sm:border-r',
         isLast && 'border-b-0',
       )}>
       {/* Category Header */}

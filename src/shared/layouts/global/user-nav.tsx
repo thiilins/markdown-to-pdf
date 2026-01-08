@@ -7,10 +7,11 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenuLabel } from '@/components/ui/dropdown-menu'
 import { clearAllDatabases } from '@/shared/utils'
 import { formatDateWithTime } from '@/shared/utils/format-date'
-import { BrushCleaning, LogIn, LogOut } from 'lucide-react'
+import { BrushCleaning, LogOut } from 'lucide-react'
 import { signOut, useSession } from 'next-auth/react' // Importa tudo do react
 import { useRouter } from 'next/navigation'
 import { useCallback } from 'react'
+import { FaGithub } from 'react-icons/fa'
 import { INVALID_AUTH_STATUS } from '../auth/_components/constants'
 import { UserAvatar } from '../auth/_components/user-avatar'
 
@@ -49,7 +50,7 @@ export const LoggedInUserNav = () => {
 export const LoggedOutUserNav = () => {
   return (
     <Button variant='outline' size='sm' onClick={handleSignInWithGitHub}>
-      <LogIn className='h-4 w-4' /> Entrar com GitHub
+      <FaGithub className='h-4 w-4' /> Login
     </Button>
   )
 }
