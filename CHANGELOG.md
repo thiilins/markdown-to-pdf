@@ -5,6 +5,55 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), e este projeto
 adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.12.0] - 2025-01-08
+
+### Modificado
+
+- **OpenAPI to PDF:** Melhorias significativas na interface e visualização.
+  - **Editor Monaco:** Substituído textarea simples por editor Monaco com syntax highlighting,
+    autocomplete e formatação automática.
+  - **Preview de Markdown Aprimorado:** Preview de markdown agora usa os mesmos componentes
+    customizados do md-editor, com tabelas estilizadas, listas, código inline, links e imagens
+    renderizados de forma profissional.
+  - **Layout Visual Melhorado:** Cards de endpoints e schemas com melhor espaçamento, cores e
+    hierarquia visual.
+  - **Componentes Customizados:** Integração completa com `getMarkdownComponents()` para renderização
+    consistente e profissional do markdown gerado.
+  - **Informações Contextuais:** Adicionado texto informativo sobre suporte OpenAPI 3.0+ e resolução
+    automática de referências.
+
+## [0.11.0] - 2025-01-08
+
+### Adicionado
+
+- **OpenAPI to PDF:** Nova ferramenta para converter especificações OpenAPI/Swagger em documentação
+  profissional em PDF.
+  - **Validação Automática:** Parsing e validação de especificações OpenAPI 3.0 em JSON ou YAML
+    usando `@apidevtools/swagger-parser`.
+  - **Resolução de Referências:** Resolve automaticamente todas as referências `$ref` na
+    especificação.
+  - **Geração de Markdown:** Converte a especificação em Markdown estruturado com seções
+    organizadas (Servidores, Autenticação, Endpoints, Schemas).
+  - **Preview Interativo:** Visualização em tempo real da documentação gerada com syntax
+    highlighting.
+  - **Agrupamento por Tags:** Endpoints organizados automaticamente por tags para melhor
+    navegação.
+  - **Tabelas de Parâmetros:** Parâmetros, request body e responses formatados em tabelas limpas.
+  - **Schemas Detalhados:** Documentação completa de todos os schemas com propriedades, tipos e
+    exemplos.
+  - **Badges de Métodos HTTP:** Identificação visual de métodos (GET, POST, PUT, DELETE, etc.) com
+    cores específicas.
+  - **Exportação Múltipla:** Download direto em Markdown ou integração com MD to PDF para gerar
+    PDF profissional.
+  - **2 Exemplos Inclusos:** Pet Store API (completo) e API Simples (YAML minimalista).
+  - **Layout com Tabs:** Interface organizada com abas para Editor/Exemplos e Preview/Markdown.
+  - **Stats em Tempo Real:** Contadores de endpoints, schemas e versão da API.
+
+### Documentado
+
+- Adicionada documentação completa da ferramenta OpenAPI to PDF no CHANGELOG.
+- Incluídos metadados SEO para a página `/open-api-pdf`.
+
 ## [0.10.0] - 2025-01-08
 
 ### Adicionado

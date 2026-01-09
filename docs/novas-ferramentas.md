@@ -53,18 +53,6 @@ Focada em desenvolvedores frontend que usam o seu stack (Next.js/React).
 - `@svgr/core`: O motor principal de conversão de SVG para JSX.
 - `prettier`: (Você já tem no `package.json`) para formatar o código gerado.
 
-### 5. Cron Expression Visualizer & Descriptor
-
-Uma ferramenta utilitária para DevOps e desenvolvedores backend.
-
-- **O que faz:** O usuário digita uma expressão Cron (ex: `0 0 * * *`) e a ferramenta explica em
-  linguagem humana o que ela faz e mostra as próximas 5 datas/horas de execução.
-- **Valor Agregado:** Evita erros comuns em agendamentos de tarefas no servidor, fornecendo uma
-  validação visual imediata.
-- **Bibliotecas Sugeridas:**
-- `cronstrue`: Para converter a expressão cron em uma frase legível (suporta Português).
-- `cron-parser`: Para calcular e listar as próximas datas de execução baseadas no fuso horário.
-
 ### 6. Gerador de Tabelas Markdown (Excel/CSV para MD)
 
 Escrever tabelas no Markdown manualmente é uma das tarefas mais odiadas pelos devs.

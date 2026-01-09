@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   Wand2,
 } from 'lucide-react'
+import { SiOpenapiinitiative } from 'react-icons/si'
 
 // ----------------------------------------------------------------------
 // 1. MODULES FRONT (Landing Page / Cards)
@@ -57,6 +58,12 @@ export const Modules_Front: ModuleItem[] = [
         href: '/web-extractor',
         icon: Globe,
         description: 'Extraia artigos de sites',
+      },
+      {
+        label: 'OpenAPI to MD',
+        href: '/open-api-md',
+        icon: SiOpenapiinitiative,
+        description: 'Converta especificações OpenAPI/Swagger em documentação Markdown',
       },
     ],
   },
@@ -216,6 +223,12 @@ export const Modules: ModuleItem[] = [
     href: '/web-extractor',
     icon: Globe,
     description: 'Extraia artigos de sites',
+  },
+  {
+    label: 'OpenAPI to MD',
+    href: '/open-api-md',
+    icon: SiOpenapiinitiative,
+    description: 'Converta especificações OpenAPI/Swagger em documentação Markdown',
   },
   {
     label: 'Code Snapshot',

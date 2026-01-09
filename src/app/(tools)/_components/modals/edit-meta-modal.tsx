@@ -35,7 +35,7 @@ export function EditMetaModal() {
     <Dialog open={openEditMeta} onOpenChange={setOpenEditMeta}>
       <DialogContent className='gap-0 overflow-hidden border-none p-0 shadow-2xl sm:max-w-[440px]'>
         {/* Header com Gradiente de "Informação/Edição" */}
-        <div className='from-primary/10 flex flex-col items-center justify-center bg-gradient-to-b to-transparent pt-8 pb-4'>
+        <div className='from-primary/10 flex flex-col items-center justify-center bg-linear-to-b to-transparent pt-8 pb-4'>
           <div className='bg-primary/10 ring-primary/5 mb-4 flex h-14 w-14 items-center justify-center rounded-full ring-8'>
             <FileEdit className='text-primary h-7 w-7' />
           </div>
