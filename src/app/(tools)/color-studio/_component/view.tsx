@@ -14,18 +14,17 @@ export function PalleteGeneratorViewComponent() {
   const [baseColor, setBaseColor] = useState(DEFAULT_COLOR)
   const [paletteType, setPaletteType] = useState<PaletteType>('monochromatic')
   const [mood, setMood] = useState<MoodType | null>(null)
-  
+
   // Cores geradas (padrão) e cores editadas (customizadas pelo usuário)
   const [generatedColors, setGeneratedColors] = useState<ColorInfo[]>([])
-  const [editedColors, setEditedColors, editedColorsLoaded] = usePersistedStateInDB<ColorInfo[] | null>(
-    'color-studio-edited-palette',
-    null,
-  )
-  
+  const [editedColors, setEditedColors, editedColorsLoaded] = usePersistedStateInDB<
+    ColorInfo[] | null
+  >('color-studio-edited-palette', null)
+
   // Cores finais (editadas ou geradas)
   const colors = editedColors || generatedColors
   const isPaletteEdited = editedColors !== null && editedColors.length > 0
-  
+
   // Ref para rastrear mudanças na cor base
   const previousBaseColor = useRef(baseColor)
 
@@ -99,13 +98,13 @@ export function PalleteGeneratorViewComponent() {
     (index: number, newHex: string) => {
       const currentColors = editedColors || generatedColors
       const updatedColors = [...currentColors]
-      
+
       // Atualizar a cor mantendo outras propriedades
       updatedColors[index] = {
         ...updatedColors[index],
         hex: newHex,
       }
-      
+
       setEditedColors(updatedColors)
       toast.success('Cor atualizada!')
     },
@@ -129,8 +128,8 @@ export function PalleteGeneratorViewComponent() {
     [writeToURL, setEditedColors],
   )
 
-  // Compartilha paleta
-  const handleSharePalette = useCallback(
+  // Compartilha paleta do histórico
+  const handleSharePaletteFromHistory = useCallback(
     (item: { colors: ColorInfo[]; type: PaletteType; baseColor: string }) => {
       const link = getShareableLink(item.colors, item.type, item.baseColor)
       navigator.clipboard.writeText(link)
@@ -138,13 +137,20 @@ export function PalleteGeneratorViewComponent() {
     [getShareableLink],
   )
 
+  // Compartilha paleta atual
+  const handleShareCurrentPalette = useCallback(() => {
+    const link = getShareableLink(colors, paletteType, baseColor)
+    navigator.clipboard.writeText(link)
+    toast.success('Link copiado para a área de transferência!')
+  }, [colors, paletteType, baseColor, getShareableLink])
+
   return (
     <div className='min-h-screen overflow-auto bg-slate-50/50 font-sans antialiased dark:bg-slate-950/50'>
       {/* Header Minimalista */}
       <header className='bg-background/80 sticky top-0 z-30 border-b px-6 py-3 backdrop-blur-md'>
         <div className='flex items-center gap-2'>
           <div className='h-6 w-6 rounded-lg bg-linear-to-br from-blue-500 to-violet-500 shadow-sm' />
-          <h1 className='text-sm font-semibold tracking-wide'>PALETTE STUDIO</h1>
+          <h1 className='text-sm font-semibold tracking-wide'>COLOR STUDIO</h1>
         </div>
       </header>
 
@@ -166,15 +172,16 @@ export function PalleteGeneratorViewComponent() {
               onRemoveFromHistory={removeFromHistory}
               onClearHistory={clearHistory}
               onRestorePalette={handleRestorePalette}
-              onSharePalette={handleSharePalette}
+              onSharePalette={handleSharePaletteFromHistory}
             />
           </aside>
 
           {/* Área Principal (Canvas) */}
-          <PaletteOutput 
-            colors={colors} 
+          <PaletteOutput
+            colors={colors}
             onColorEdit={handleColorEdit}
             onResetPalette={handleResetPalette}
+            onSharePalette={handleShareCurrentPalette}
             isPaletteEdited={isPaletteEdited}
           />
         </div>

@@ -3,7 +3,9 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Blend, Eye, FileCode, Grid, Palette, RefreshCw, ShieldCheck, Sparkles } from 'lucide-react'
+import { Blend, Check, Copy, Eye, FileCode, Grid, Palette, RefreshCw, Share2, ShieldCheck, Sparkles } from 'lucide-react'
+import { useState } from 'react'
+import { toast } from 'sonner'
 
 import { BlindnessSimulator } from './blindness-simulator'
 import { ColorCard } from './color-card'
@@ -17,10 +19,20 @@ interface PaletteOutputProps {
   colors: ColorInfo[]
   onColorEdit?: (index: number, newHex: string) => void
   onResetPalette?: () => void
+  onSharePalette?: () => void
   isPaletteEdited?: boolean
 }
 
-export function PaletteOutput({ colors, onColorEdit, onResetPalette, isPaletteEdited }: PaletteOutputProps) {
+export function PaletteOutput({ colors, onColorEdit, onResetPalette, onSharePalette, isPaletteEdited }: PaletteOutputProps) {
+  const [copied, setCopied] = useState(false)
+
+  const handleShare = () => {
+    if (onSharePalette) {
+      onSharePalette()
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
   if (colors.length === 0) {
     return (
       <div className='flex h-[500px] w-full items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/20'>
@@ -34,17 +46,36 @@ export function PaletteOutput({ colors, onColorEdit, onResetPalette, isPaletteEd
 
   return (
     <div className='my-12 h-full space-y-6'>
-      {/* Header com Badge e Botão Reset */}
-      {isPaletteEdited && (
-        <div className='flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50/50 px-4 py-2 dark:border-blue-800 dark:bg-blue-950/20'>
-          <div className='flex items-center gap-2'>
-            <Badge variant='outline' className='border-blue-300 bg-blue-100 text-blue-700 dark:border-blue-700 dark:bg-blue-900 dark:text-blue-300'>
-              <Sparkles className='mr-1 h-3 w-3' />
-              Paleta Customizada
-            </Badge>
-            <span className='text-muted-foreground text-xs'>Você editou esta paleta</span>
-          </div>
-          {onResetPalette && (
+      {/* Header com Badge e Botões de Ação */}
+      <div className='flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50/50 px-4 py-2 dark:border-slate-800 dark:bg-slate-900/20'>
+        <div className='flex items-center gap-2'>
+          {isPaletteEdited && (
+            <>
+              <Badge variant='outline' className='border-blue-300 bg-blue-100 text-blue-700 dark:border-blue-700 dark:bg-blue-900 dark:text-blue-300'>
+                <Sparkles className='mr-1 h-3 w-3' />
+                Paleta Customizada
+              </Badge>
+              <span className='text-muted-foreground text-xs'>Você editou esta paleta</span>
+            </>
+          )}
+          {!isPaletteEdited && (
+            <span className='text-muted-foreground text-sm'>Paleta gerada automaticamente</span>
+          )}
+        </div>
+        <div className='flex gap-2'>
+          {onSharePalette && (
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={handleShare}
+              className='gap-2 text-xs'
+              title='Copiar link para compartilhar'
+            >
+              {copied ? <Check className='h-3 w-3' /> : <Share2 className='h-3 w-3' />}
+              {copied ? 'Copiado!' : 'Compartilhar'}
+            </Button>
+          )}
+          {isPaletteEdited && onResetPalette && (
             <Button
               variant='outline'
               size='sm'
@@ -56,7 +87,7 @@ export function PaletteOutput({ colors, onColorEdit, onResetPalette, isPaletteEd
             </Button>
           )}
         </div>
-      )}
+      </div>
 
       {/* Faixa de Visualização Rápida (Hero) */}
       <div className='group relative h-24 w-full overflow-hidden rounded-xl border border-slate-200 shadow-sm dark:border-slate-800'>
@@ -128,9 +159,9 @@ export function PaletteOutput({ colors, onColorEdit, onResetPalette, isPaletteEd
             className='animate-in fade-in mt-0 duration-500 outline-none'>
             <div className='grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5'>
               {colors.map((color, index) => (
-                <ColorCard 
-                  key={index} 
-                  color={color} 
+                <ColorCard
+                  key={index}
+                  color={color}
                   index={index}
                   onColorEdit={onColorEdit}
                 />

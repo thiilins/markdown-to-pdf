@@ -1,100 +1,198 @@
-### 2. Arquiteto de Banco de Dados (SQL DDL to ER Diagram)
+Esta é uma evolução fantástica para o projeto. Analisando o seu repositório atual, você já tem a
+"fundação" técnica (Next.js 16, Tailwind v4, Monaco Editor, Shadcn UI) para suportar essa expansão
+sem precisar reescrever o núcleo.
 
-Uma ferramenta visual onde o usuário cola scripts SQL `CREATE TABLE` e visualiza o diagrama de
-Entidade-Relacionamento (ERD).
+Você está basicamente migrando de um "Utilitário de Arquivo Único" (MD to PDF) para uma
+**"Plataforma de Developer Experience (DX)"**.
 
-- **O que faz:** Converte o código SQL bruto em sintaxe Mermaid.js (que está no seu roadmap) para
-  renderizar o diagrama.
-- **Valor Agregado:** Auxilia no planejamento de banco de dados e na criação de documentação técnica
-  visual sem precisar de ferramentas pesadas como MySQL Workbench.
-- **Bibliotecas Sugeridas:**
-- `sql-ddl-to-json-schema`: Converte o SQL para um formato JSON estruturado, facilitando o
-  mapeamento para diagramas.
-- `mermaid`: Para a renderização visual (aproveitando a integração que você já planejou).
+Aqui está a minha análise técnica e validação das suas ideias, considerando o que já existe no seu
+`package.json` e `TOOLS.md`:
 
-### 3. GitHub Repository Documenter (Repo to Single MD/PDF)
+### 1. 🏗️ Arquitetura de "Studios" (Hub & Spoke)
 
-Uma ferramenta de "resumo de projeto" que consome a API do GitHub.
+Sua ideia de separar em "Páginas Mães" (Studios) é necessária. Com 22 ferramentas atuais e mais 10
+planejadas, um menu lateral simples vai ficar caótico.
 
-- **O que faz:** O usuário insere a URL de um repositório público. A ferramenta busca o `README.md`,
-  a árvore de arquivos e os principais arquivos de documentação (`docs/`), unindo tudo em um único
-  documento estruturado.
-- **Valor Agregado:** Útil para criar manuais de integração de bibliotecas ou para que
-  desenvolvedores tenham uma versão offline/impressa de um repositório para estudo.
-- **Bibliotecas Sugeridas:**
-- `octokit`: Cliente oficial para interagir com a API do GitHub.
-- `tree-node-cli`: Você pode adaptar a lógica para gerar a visualização da árvore de diretórios em
-  texto/markdown.
+**Sugestão de Estrutura de Rotas (Next.js App Router):** Como você já usa Route Groups como
+`(tools)`, sugiro organizar assim:
 
-### 4. SVGR Studio (SVG to React/Next.js Component)
+```text
+src/app/
+├── (home)/              -> Landing Page Principal (O "Canivete Suíço")
+├── (studios)/
+│   ├── design-studio/   -> Landing do Color/Shadcn/SVG (Estilo Coolors/TweakCN)
+│   │   ├── palette/     -> Rota da tool específica
+│   │   └── theme/       -> Rota da tool específica
+│   ├── data-studio/     -> Landing do SQL/JSON/Excel
+│   └── dev-studio/      -> Landing do Repo Doc/Env/Security
 
-Focada em desenvolvedores frontend que usam o seu stack (Next.js/React).
+```
 
-- **O que faz:** O usuário solta um arquivo SVG e a ferramenta gera o código de um componente React
-  funcional, higienizado e tipado em TypeScript.
-- **Valor Agregado:** Automatiza uma tarefa repetitiva de frontend, garantindo que o código gerado
-  siga as melhores práticas (acessibilidade, remoção de atributos inúteis).
-- **Bibliotecas Sugeridas:**
-- `@svgr/core`: O motor principal de conversão de SVG para JSX.
-- `prettier`: (Você já tem no `package.json`) para formatar o código gerado.
-
-### 7. JSON Schema Studio (Gerador e Validador)
-
-Diferente do `json-to-ts` que você já possui, esta ferramenta foca na estrutura de validação.
-
-- **O que faz:** Gera automaticamente um **JSON Schema** a partir de um JSON de exemplo e permite
-  validar outros objetos JSON contra esse esquema.
-- **Valor Agregado:** Essencial para devs backend que precisam definir contratos de API ou validar
-  configurações complexas.
-- **Bibliotecas Sugeridas:**
-- `ajv`: O validador de JSON Schema mais rápido para JavaScript.
-- `json-schema-generator`: Para a geração automática a partir do input.
-
-### 8. SVG Optimizer & Health Check (SVGO Web)
-
-Focada em performance web e limpeza de código frontend.
-
-- **O que faz:** O usuário sobe um SVG e a ferramenta remove metadados inúteis (do
-  Illustrator/Figma), simplifica paths e minifica o código sem perder qualidade visual.
-- **Valor Agregado:** Reduz o peso das páginas web. É o "TinyPNG" para vetores.
-- **Bibliotecas Sugeridas:**
-- `svgo`: O padrão da indústria para otimização de SVGs. Funciona bem no browser via Web Workers
-  para não travar a UI.
-
-### 10. .env Architect (Manager & Template Generator)
-
-Gerenciar variáveis de ambiente pode ser perigoso se feito errado.
-
-- **O que faz:** O usuário cola um arquivo `.env` e a ferramenta gera automaticamente um
-  `.env.example` (removendo os valores sensíveis mas mantendo as chaves e comentários). Também
-  valida se há chaves duplicadas.
-- **Valor Agregado:** Segurança e organização de repositórios. Evita que segredos sejam commitados
-  por engano.
-- **Bibliotecas Sugeridas:**
-- `dotenv`: Para o parse correto das regras de escape e quebras de linha.
-
-### 11. Security Header & CSP Auditor
-
-Uma ferramenta de diagnóstico rápido de segurança.
-
-- **O que faz:** O usuário cola as URLs ou os headers de resposta de um site, e a ferramenta analisa
-  a presença e configuração de headers como `Content-Security-Policy`, `HSTS`, `X-Frame-Options`,
-  etc.
-- **Valor Agregado:** Útil para auditorias rápidas de segurança em aplicações web.
-- **Bibliotecas Sugeridas:** \* Lógica customizada baseada nas recomendações da **OWASP**.
+**Dica de UX:** Implemente uma **Command Palette** global (`Cmd+K`). Você já tem o `cmdk` instalado
+nas dependências. Com tantas ferramentas, a busca rápida será mais importante que o menu.
 
 ---
 
-### Por que essas ferramentas agregam valor ao seu stack atual?
+### 2. 🎨 Design Studio (Color + Shadcn)
 
-1. **Aproveitam sua UI:** Todas podem usar o seu componente `ToolShell` e os editores Monaco que
-   você já configurou.
-2. **Baixo Custo de Servidor:** A maioria dessas lógicas (como CSV parse, SVG optimization e Color
-   math) pode ser executada 100% no **lado do cliente**, evitando os problemas de timeout que você
-   enfrenta no Scraper na Vercel.
-3. **Showcase Técnico:** Implementar um otimizador de SVG ou um gerador de JSON Schema demonstra que
-   você entende de manipulação de árvores de dados (AST) e buffers, o que é muito bem visto em
-   portfólios.
+Você quer chegar no nível do _Coolors_ e _TweakCN_.
+
+- **Color Studio (Estilo Coolors):**
+- **O que você já tem:** Gerador de paletas, validação WCAG e APCA.
+- **O que falta:** A UX de "Tela Cheia" e atalhos rápidos (Barra de Espaço para gerar).
+- **Dica Técnica:** O `coolors` funciona muito bem porque é rápido. Mantenha toda a lógica de
+  geração de cores no _Client Side_ (use o `chroma-js` e `colorthief` que você já tem). Evite Server
+  Actions para gerar cores aleatórias para não ter latência.
+
+- **Shadcn Theme Creator (Estilo TweakCN):**
+- **Validação:** Extremamente útil. O `tweakcn` é ótimo, mas falta integração direta com _preview_
+  de componentes reais.
+- **Sua Vantagem:** Você já tem o Shadcn instalado. Você pode criar uma área de "Playground" onde,
+  ao mexer nos sliders de cor, você atualiza as variáveis CSS (`--primary`, `--radius`) no `:root`
+  do navegador em tempo real.
+- **Stack:** Tailwind v4 (que você já usa) é nativamente baseada em variáveis CSS, o que torna isso
+  trivial de implementar.
+
+---
+
+### 3. 🛠️ Análise das Novas Ferramentas Propostas
+
+Aqui está a minha validação técnica item a item:
+
+#### ✅ Aprovadas (Baixo Risco / Alto Valor)
+
+- **2. Arquiteto de Banco de Dados (SQL to ERD):**
+- **Veredito:** Excelente.
+- **Stack:** Você já tem o `mermaid` instalado. O desafio será o _parser_ do SQL. Regex é frágil
+  para SQL complexo.
+- **Dica:** Considere usar uma lib leve de parser SQL no front-end para gerar a sintaxe do Mermaid,
+  em vez de depender apenas de Regex.
+
+- **4. SVGR Studio (SVG to React) & 8. SVG Optimizer:**
+- **Veredito:** "Easy wins". Todo dev frontend precisa.
+- **Stack:** O `svgo` roda bem no browser. Para o SVGR (SVG to Component), você pode precisar de um
+  bundler leve ou usar a API deles se o pacote for muito pesado para o browser.
+
+- **7. JSON Schema Studio:**
+- **Veredito:** Muito útil para Backend.
+- **Sinergia:** Complementa o seu `JSON to TS` existente.
+
+- **10. .env Architect:**
+- **Veredito:** Simples e útil.
+- **Dica:** Adicione um botão de "Sync" que permite colar o `.env` antigo e o novo, e ele mostra
+  quais chaves estão faltando (similar ao seu `Diff Checker`).
+
+#### ⚠️ Atenção (Médio/Alto Risco Técnico)
+
+- **3. GitHub Repository Documenter:**
+- **O Risco:** Você mencionou problemas de timeout na Vercel com o Scraper. Baixar um repositório
+  inteiro, processar a árvore e gerar um PDF/MD único é pesado.
+- **Solução:**
+
+1. Usar a API do GitHub para pegar _apenas_ a árvore de arquivos (é leve).
+2. Deixar o usuário _selecionar_ quais pastas quer incluir (para evitar baixar `node_modules` ou
+   assets gigantes).
+3. Fazer o fetch do conteúdo dos arquivos no _Client Side_ (navegador do usuário faz as requisições)
+   para não estourar o limite da sua Vercel Function, ou usar `stream` na resposta.
+
+- **11. Security Header Auditor:**
+- **O Risco:** CORS. O navegador bloqueia requisições de um site (seu) para outro (do usuário) para
+  ler headers.
+- **Solução:** Isso **precisa** ser uma Server Action ou Route Handler (Node.js) que faz o `fetch`
+  real. Como é apenas uma requisição HEAD/GET, é rápido e não deve dar timeout.
+
+#### 🛑 Deixar para depois (Complexidade Alta)
+
+- **7. Extração de Vídeos (Youtube):**
+- Isso exige proxy, lidar com bloqueios do YouTube ou pagar APIs caras. Pode desviar muito o foco do
+  projeto agora.
+
+- **8. Sitemap Crawler:**
+- Crawlers são notórios por serem lentos e bloqueados por WAFs. Fazer "batch process" na Vercel
+  (Hobby) é pedir para ter timeout de 10/60 segundos. Perfeito! Se a gente ignora as limitações da
+  Vercel (assumindo que você pode rodar em um VPS, Docker ou simplesmente não se importa com os 10s
+  de timeout para certas features), o céu é o limite.
+
+Para tornar o produto "vendável" (ou seja, um SaaS que as pessoas pagariam ou usariam diariamente
+para substituir outros pagos), você precisa atacar **dores agudas** que tomam tempo.
+
+Aqui estão ferramentas de alto valor agregado ("High Ticket Tools") organizadas por Studio, para
+consolidar sua visão de "Canivete Suíço Definitivo":
+
+### 1. 🚀 SEO & Marketing Studio (Novo)
+
+_Foco: Desenvolvedores Indie e Criadores de Conteúdo que precisam divulgar seus apps._
+
+- **Open Graph (OG) Image Generator:**
+- **A Dor:** Criar aquelas imagens de preview para Twitter/LinkedIn/WhatsApp (`og:image`) é chato. O
+  Figma é overkill, CSS manual é lento.
+- **A Solução:** Um editor visual drag-and-drop (usando `vercel/og` ou canvas) onde o usuário
+  escolhe templates, altera textos e ícones, e baixa a imagem PNG otimizada ou gera a URL dinâmica.
+- **Diferencial:** Templates prontos para "Lançamento de Produto", "Artigo de Blog", "Snippet de
+  Código".
+
+- **App Icon & Favicon Generator:**
+- **A Dor:** Gerar os 20 tamanhos diferentes para iOS, Android, PWA e Favicons.
+- **A Solução:** O usuário sobe UMA imagem (1024x1024) e você cospe um `.zip` com tudo organizado
+  nas pastas corretas e o `manifest.json` pronto.
+
+### 2. ⚡ API & Backend Studio
+
+_Foco: Backend Devs e QA._
+
+- **HTTP Request Client (Mini-Postman):**
+- **A Dor:** O Postman ficou pesado, lento e cheio de login.
+- **A Solução:** Um cliente HTTP leve e rodando no browser. Salva as requests no LocalStorage.
+  Suporta GET, POST, Auth Bearer e visualização de JSON.
+- **Vendável:** Privacidade. "Seus dados de API nunca saem do seu navegador".
+
+- **Mock Data Generator (Fake API):**
+- **A Dor:** "Preciso de 1000 usuários fake em JSON ou SQL para testar minha tabela".
+- **A Solução:** Interface para definir schema (Nome, Email, Data, Avatar) e gerar datasets gigantes
+  em JSON, CSV ou SQL `INSERT`.
+- **Tech:** Use a lib `faker` (agora `@faker-js/faker`).
+
+### 3. 🐧 SysAdmin & Infra Studio
+
+_Foco: DevOps e Fullcycle Devs._
+
+- **Nginx/Caddy Config Generator:**
+- **A Dor:** Ninguém decora a sintaxe de configuração de Proxy Reverso, SSL, Gzip e Cache do Nginx.
+- **A Solução:** UI com checkboxes ("Enable HTTPS", "Redirect www to non-www", "Reverse Proxy to
+  localhost:3000") que gera o arquivo `nginx.conf` pronto para copiar e colar.
+
+- **Docker Compose Builder:**
+- **A Dor:** Montar um `docker-compose.yml` para uma stack comum (Node + Postgres + Redis) do zero
+  sempre gera erro de indentação.
+- **A Solução:** Arrastar e soltar "Cartões de Serviço" (Postgres, Mongo, Redis, Node), configurar
+  portas e volumes visualmente, e baixar o YAML.
+
+### 4. 📄 Document & Media Studio (Evolução do MD to PDF)
+
+_Foco: Escritórios e Administrativo._
+
+- **PDF Toolbox (O "SmallPDF" Killer):**
+- **A Dor:** Pagar Adobe ou subir documentos sigilosos em sites duvidosos.
+- **Ferramentas:**
+- **Merge PDF:** Juntar vários arquivos.
+- **Split PDF:** Separar páginas.
+- **Sign PDF:** Adicionar uma assinatura visual (desenho ou imagem) sobre o PDF.
+
+- **Tech:** `pdf-lib` roda 100% no cliente. Segurança total.
+
+- **Image Optimizer (Wasm):**
+- **A Dor:** Imagens pesadas matam o SEO.
+- **A Solução:** Conversor de JPG/PNG para **WebP** e **AVIF** com controle de qualidade, rodando
+  via WebAssembly no browser (sem upload para servidor).
+
+### 5. 🧪 Regex & Parsers Studio
+
+_Foco: Hardcore Devs._
+
+- **Regex Tester & Visualizer:**
+- **A Dor:** Regex é ilegível.
+- **A Solução:** Uma ferramenta estilo _Regex101_ integrada. Você digita o regex e ele explica
+  visualmente o que cada parte faz e testa contra um texto em tempo real.
 
 ## NOVAS FERRAMENTAS
 

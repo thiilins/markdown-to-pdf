@@ -9,7 +9,24 @@ adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ### Adicionado
 
-- **Palette Studio - Edição de Cores da Paleta:**
+- **Color Studio - Botão de Compartilhamento na Paleta Atual:**
+  - **Botão "Compartilhar" Visível**:
+    - Localizado no header da área de output (ao lado do botão Reset)
+    - Sempre visível, independente da paleta estar editada ou não
+    - Ícone Share2 com feedback visual (Check quando copiado)
+    - Toast de confirmação: "Link copiado para a área de transferência!"
+  - **Funcionalidade**:
+    - Copia URL completa com estado da paleta atual
+    - Inclui cores, tipo de paleta e cor base
+    - Permite compartilhar paletas customizadas (editadas)
+    - Sincronizado com o sistema de URL state existente
+  - **UI Melhorada**:
+    - Header sempre visível com informações contextuais
+    - Badge "Paleta Customizada" quando editada
+    - Texto "Paleta gerada automaticamente" quando padrão
+    - Layout responsivo com botões de ação agrupados
+
+- **Color Studio - Edição de Cores da Paleta:**
   - **Edição Individual de Cores**:
     - Botão de edição (ícone paleta) em cada ColorCard
     - Input de cor visual (color picker nativo)
