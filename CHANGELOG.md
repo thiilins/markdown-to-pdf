@@ -9,6 +9,51 @@ adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ### Adicionado
 
+- **Color Studio v2 - Funcionalidades Avançadas do Generator:**
+  - **Nomes Reais das Cores**:
+    - Integração com biblioteca `ntc` (Name That Color)
+    - Exibe nome descritivo abaixo do HEX (ex: "Peach Fuzz", "Ocean Blue")
+    - Atualização automática ao gerar ou trocar cores
+  - **Modal de Informações Completo**:
+    - Todos os formatos de cor: HEX, RGB, HSL, HSV, CMYK, LAB
+    - Botão de copiar para cada formato
+    - Psicologia da cor (Soothing, Calming, etc)
+    - Significados (Gentleness, Warmth, etc)
+    - Aplicações sugeridas (Weddings, Cosmetics, etc)
+    - Preview grande da cor
+  - **Shades Picker Melhorado**:
+    - 21 variações da cor (10 mais claras + base + 10 mais escuras)
+    - Modo OKLCH para variações perceptualmente uniformes
+    - Overlay fullscreen sobre a coluna
+    - Indicador visual da cor atual
+    - Hover mostra HEX de cada shade
+    - Aplicação instantânea com feedback
+  - **Drag & Drop Funcional**:
+    - Reordenação de cores com `Framer Motion Reorder`
+    - Sincronização automática com URL
+    - Indicador visual de arrasto (ícone grip)
+    - Funciona em desktop (eixo X) e mobile (eixo Y)
+    - Preserva locks durante reordenação
+  - **Adicionar/Remover Cores**:
+    - Botão "+" entre colunas (hover)
+    - Máximo de 10 cores, mínimo de 2
+    - Botão de remover no topo de cada coluna
+    - Feedback com toasts
+  - **Menu de Ações por Cor**:
+    - Botão Info (abre modal completo)
+    - Botão Shades (abre picker de variações)
+    - Botão Lock/Unlock (preserva cor)
+    - Botão Copy (copia HEX)
+    - Botão Remove (mínimo 2 cores)
+    - Botão Drag (reordenar)
+  - **UX Melhorada**:
+    - Hover effects suaves em todos os botões
+    - Animações de entrada/saída (AnimatePresence)
+    - Feedback visual para todas as ações
+    - Cores adaptativas (texto preto/branco baseado em luminância)
+    - Toolbar inferior aparece no hover
+    - Floating toolbar sempre visível
+
 - **Color Studio v2 - Novo Estúdio de Cores:**
   - **Arquitetura Hub-and-Spoke**:
     - Home page como hub central (inspirada em Coolors.co)
@@ -58,7 +103,8 @@ adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
   - Suporte TypeScript completo para `ntc` module
 - **Algoritmos de Cores**:
   - Migrados e otimizados de v1 para v2
-  - Suporte a múltiplos algoritmos (random, monochromatic, analogous, complementary, triadic, tetradic, shades)
+  - Suporte a múltiplos algoritmos (random, monochromatic, analogous, complementary, triadic,
+    tetradic, shades)
   - Integração com chroma.js e OKLCH
 - **Performance**:
   - Suspense boundaries para SSR

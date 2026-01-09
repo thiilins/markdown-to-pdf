@@ -1,10 +1,15 @@
+import { Suspense } from 'react'
+import { ImagePickerView } from './_components/view'
+
 export default function ImagePickerPage() {
   return (
-    <div className='flex h-[calc(100vh-4rem)] items-center justify-center'>
-      <div className='text-center'>
-        <h1 className='mb-4 text-4xl font-bold'>Image Picker</h1>
-        <p className='text-muted-foreground'>Coming soon...</p>
-      </div>
-    </div>
+    <Suspense
+      fallback={
+        <div className='flex h-screen items-center justify-center'>
+          <div className='text-muted-foreground'>Loading...</div>
+        </div>
+      }>
+      <ImagePickerView />
+    </Suspense>
   )
 }
