@@ -2,6 +2,7 @@ import {
   Binary,
   Braces,
   Camera,
+  Clock,
   Code2,
   Database,
   FileCode,
@@ -138,6 +139,12 @@ export const Modules_Front: ModuleItem[] = [
         icon: GitBranch,
         description: 'Busque e visualize Gists do GitHub',
       },
+      {
+        label: 'Cron Tools',
+        href: '/cron-tools',
+        icon: Clock,
+        description: 'Valide e visualize expressões cron',
+      },
     ],
   },
   {
@@ -267,6 +274,12 @@ export const Modules: ModuleItem[] = [
     href: '/gist-explorer',
     icon: GitBranch,
     description: 'Explorar Gists',
+  },
+  {
+    label: 'Cron Tools',
+    href: '/cron-tools',
+    icon: Clock,
+    description: 'Validar Cron',
   },
 
   // --- Segurança ---

@@ -138,7 +138,7 @@ export function ChangelogView() {
 
       {/* Header */}
       <header className='relative z-10'>
-        <div className='mx-auto max-w-5xl px-6 pt-24 pb-16 text-center'>
+        <div className='mx-auto max-w-7xl! px-6 pt-24 pb-16 text-center'>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -159,7 +159,7 @@ export function ChangelogView() {
             </motion.div>
 
             <h1 className='mb-6 text-5xl font-black tracking-tight text-white md:text-7xl'>
-              <span className='bg-gradient-to-b from-white via-white to-slate-400 bg-clip-text text-transparent'>
+              <span className='bg-linear-to-b from-white via-white to-slate-400 bg-clip-text text-transparent'>
                 Changelog
               </span>
             </h1>
@@ -198,7 +198,7 @@ export function ChangelogView() {
       </header>
 
       {/* Conteúdo Principal */}
-      <main className='relative z-10 mx-auto max-w-4xl px-4 pb-32'>
+      <main className='relative z-10 mx-auto max-w-6xl px-4 pb-32'>
         <AnimatePresence mode='wait'>
           {loading ? (
             <motion.div key='loading' exit={{ opacity: 0 }}>
@@ -213,17 +213,12 @@ export function ChangelogView() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: 'easeOut' }}>
               <GlowCard className='p-8 md:p-12'>
-                {/* Linha vertical contínua da timeline (Desktop) */}
-                <div className='absolute top-0 bottom-0 left-[47px] hidden w-px bg-gradient-to-b from-transparent via-white/10 to-transparent md:block' />
-
-                <article className='prose prose-invert max-w-none'>
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeRaw, rehypeSlug]}
-                    components={getChangelogComponents()}>
-                    {changelog}
-                  </ReactMarkdown>
-                </article>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeRaw, rehypeSlug]}
+                  components={getChangelogComponents()}>
+                  {changelog}
+                </ReactMarkdown>
               </GlowCard>
             </motion.div>
           )}
