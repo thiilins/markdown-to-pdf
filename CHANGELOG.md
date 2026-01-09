@@ -5,6 +5,67 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), e este projeto
 adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.17.0] - 2025-01-09
+
+### Adicionado
+
+- **Palette Studio - Edição de Cores da Paleta:**
+  - **Edição Individual de Cores**:
+    - Botão de edição (ícone paleta) em cada ColorCard
+    - Input de cor visual (color picker nativo)
+    - Input de texto para HEX manual
+    - Validação automática de cores válidas
+    - Atualização em tempo real da paleta
+  - **Indicador de Paleta Customizada**:
+    - Badge "Paleta Customizada" quando há edições
+    - Mensagem informativa "Você editou esta paleta"
+    - Destaque visual com bordas azuis
+  - **Botão Reset**:
+    - Restaura paleta para o padrão gerado
+    - Aparece apenas quando há edições
+    - Feedback visual com toast
+  - **Reset Automático ao Mudar Cor Base**:
+    - Detecta mudança na cor base
+    - Reseta automaticamente a paleta editada
+    - Toast informativo sobre o reset
+  - **Persistência no IndexDB**:
+    - Paleta editada salva automaticamente
+    - Sobrevive ao fechamento do navegador
+    - Hook `usePersistedStateInDB` para gerenciamento
+    - Key: `color-studio-edited-palette`
+
+### Alterado
+
+- **Palette Studio - Migração de Persistência:**
+  - **Histórico migrado de localStorage para IndexDB**:
+    - Melhor performance para grandes volumes de dados
+    - Sem limite de 5-10MB do localStorage
+    - Operações assíncronas (não bloqueia UI)
+    - Compatibilidade com padrão do projeto
+  - **Hook `usePaletteHistory` refatorado**:
+    - Usa `getData` e `saveData` do IndexDB
+    - Todas as operações são assíncronas
+    - Flag `isLoaded` para evitar operações antes do carregamento
+    - Keys: `@MD_TOOLS_PRO:palette-history` e `@MD_TOOLS_PRO:palette-favorites`
+  - **Estrutura de dados mantida**:
+    - Interface `PaletteHistoryItem` inalterada
+    - Favoritos continuam como `Set<string>`
+    - Limite de 20 paletas mantido
+
+### Técnico
+
+- **Componentes Atualizados**:
+  - `view.tsx`: Gerenciamento de cores geradas vs editadas, reset automático
+  - `output/index.tsx`: Props `onColorEdit`, `onResetPalette`, `isPaletteEdited`
+  - `output/color-card.tsx`: Input de edição, validação, UI condicional
+  - `hooks/use-palette-history.ts`: Migração completa para IndexDB
+- **Novos Estados**:
+  - `generatedColors`: Cores geradas pelo algoritmo
+  - `editedColors`: Cores customizadas pelo usuário (persistidas)
+  - `isPaletteEdited`: Flag para UI condicional
+- **Refs**:
+  - `previousBaseColor`: Rastreia mudanças na cor base para reset automático
+
 ## [0.16.0] - 2025-01-09
 
 ### Adicionado

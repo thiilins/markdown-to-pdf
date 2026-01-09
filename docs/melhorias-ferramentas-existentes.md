@@ -208,3 +208,9 @@ modelo de tema:
 
 exemplo de ferramenta que faz isso: tweakcn-main (https://tweakcn.com/editor/theme) - código aberto
 disponível na pasta (old/tweakcn-main - na raiz do projeto)
+
+---
+
+✅ Adicionar link para TOOLS.md no README.md ✅ Criar versão HTML do TOOLS.md para o site ✅
+Adicionar screenshots das ferramentas ✅ Criar vídeos tutoriais ✅ Traduzir para inglês
+(TOOLS.en.md)

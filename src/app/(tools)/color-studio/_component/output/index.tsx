@@ -1,7 +1,9 @@
 'use client'
 
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Blend, Eye, FileCode, Grid, Palette, ShieldCheck, Sparkles } from 'lucide-react'
+import { Blend, Eye, FileCode, Grid, Palette, RefreshCw, ShieldCheck, Sparkles } from 'lucide-react'
 
 import { BlindnessSimulator } from './blindness-simulator'
 import { ColorCard } from './color-card'
@@ -13,9 +15,12 @@ import { WCAGChecker } from './wcag-checker'
 
 interface PaletteOutputProps {
   colors: ColorInfo[]
+  onColorEdit?: (index: number, newHex: string) => void
+  onResetPalette?: () => void
+  isPaletteEdited?: boolean
 }
 
-export function PaletteOutput({ colors }: PaletteOutputProps) {
+export function PaletteOutput({ colors, onColorEdit, onResetPalette, isPaletteEdited }: PaletteOutputProps) {
   if (colors.length === 0) {
     return (
       <div className='flex h-[500px] w-full items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/20'>
@@ -29,6 +34,30 @@ export function PaletteOutput({ colors }: PaletteOutputProps) {
 
   return (
     <div className='my-12 h-full space-y-6'>
+      {/* Header com Badge e Botão Reset */}
+      {isPaletteEdited && (
+        <div className='flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50/50 px-4 py-2 dark:border-blue-800 dark:bg-blue-950/20'>
+          <div className='flex items-center gap-2'>
+            <Badge variant='outline' className='border-blue-300 bg-blue-100 text-blue-700 dark:border-blue-700 dark:bg-blue-900 dark:text-blue-300'>
+              <Sparkles className='mr-1 h-3 w-3' />
+              Paleta Customizada
+            </Badge>
+            <span className='text-muted-foreground text-xs'>Você editou esta paleta</span>
+          </div>
+          {onResetPalette && (
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={onResetPalette}
+              className='gap-2 text-xs'
+            >
+              <RefreshCw className='h-3 w-3' />
+              Resetar
+            </Button>
+          )}
+        </div>
+      )}
+
       {/* Faixa de Visualização Rápida (Hero) */}
       <div className='group relative h-24 w-full overflow-hidden rounded-xl border border-slate-200 shadow-sm dark:border-slate-800'>
         <div className='flex h-full w-full'>
@@ -99,7 +128,12 @@ export function PaletteOutput({ colors }: PaletteOutputProps) {
             className='animate-in fade-in mt-0 duration-500 outline-none'>
             <div className='grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5'>
               {colors.map((color, index) => (
-                <ColorCard key={index} color={color} index={index} />
+                <ColorCard 
+                  key={index} 
+                  color={color} 
+                  index={index}
+                  onColorEdit={onColorEdit}
+                />
               ))}
             </div>
           </TabsContent>

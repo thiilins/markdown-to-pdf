@@ -1,22 +1,35 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import usePersistedStateInDB from '@/hooks/use-persisted-in-db'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { DEFAULT_COLOR, MOOD_TYPES, type MoodType, type PaletteType } from './constants'
 import { usePaletteHistory } from './hooks/use-palette-history'
 import { usePaletteURL } from './hooks/use-palette-url'
 import { PaletteInput } from './input'
-import { PaletteOutput } from './output' // Agora importamos o Output real
-
+import { PaletteOutput } from './output'
 import { applyMoodToPalette, generatePalette, isValidColor } from './palette-utils'
 
 export function PalleteGeneratorViewComponent() {
   const [baseColor, setBaseColor] = useState(DEFAULT_COLOR)
   const [paletteType, setPaletteType] = useState<PaletteType>('monochromatic')
   const [mood, setMood] = useState<MoodType | null>(null)
-  const [colors, setColors] = useState<ColorInfo[]>([])
+  
+  // Cores geradas (padrão) e cores editadas (customizadas pelo usuário)
+  const [generatedColors, setGeneratedColors] = useState<ColorInfo[]>([])
+  const [editedColors, setEditedColors, editedColorsLoaded] = usePersistedStateInDB<ColorInfo[] | null>(
+    'color-studio-edited-palette',
+    null,
+  )
+  
+  // Cores finais (editadas ou geradas)
+  const colors = editedColors || generatedColors
+  const isPaletteEdited = editedColors !== null && editedColors.length > 0
+  
+  // Ref para rastrear mudanças na cor base
+  const previousBaseColor = useRef(baseColor)
 
-  // Hooks de histórico e URL
+  // Hooks de histórico e URL (agora com IndexDB)
   const { history, favorites, addToHistory, toggleFavorite, removeFromHistory, clearHistory } =
     usePaletteHistory()
 
@@ -38,7 +51,19 @@ export function PalleteGeneratorViewComponent() {
     }
   }, [isReady, readFromURL])
 
-  // Lógica de geração
+  // Reset automático quando a cor base muda
+  useEffect(() => {
+    if (previousBaseColor.current !== baseColor && editedColorsLoaded) {
+      // Cor base mudou, resetar paleta editada
+      if (isPaletteEdited) {
+        setEditedColors(null)
+        toast.info('Paleta resetada para a nova cor base')
+      }
+      previousBaseColor.current = baseColor
+    }
+  }, [baseColor, isPaletteEdited, setEditedColors, editedColorsLoaded])
+
+  // Lógica de geração (apenas gera, não sobrescreve editadas)
   useEffect(() => {
     if (isValidColor(baseColor)) {
       let result = generatePalette(baseColor, paletteType)
@@ -51,7 +76,7 @@ export function PalleteGeneratorViewComponent() {
         }
       }
 
-      setColors(result.colors)
+      setGeneratedColors(result.colors)
 
       // Adiciona ao histórico (apenas se tiver cores)
       if (result.colors.length > 0) {
@@ -69,15 +94,39 @@ export function PalleteGeneratorViewComponent() {
     }
   }, [])
 
+  // Editar cor individual da paleta
+  const handleColorEdit = useCallback(
+    (index: number, newHex: string) => {
+      const currentColors = editedColors || generatedColors
+      const updatedColors = [...currentColors]
+      
+      // Atualizar a cor mantendo outras propriedades
+      updatedColors[index] = {
+        ...updatedColors[index],
+        hex: newHex,
+      }
+      
+      setEditedColors(updatedColors)
+      toast.success('Cor atualizada!')
+    },
+    [editedColors, generatedColors, setEditedColors],
+  )
+
+  // Resetar paleta para o padrão gerado
+  const handleResetPalette = useCallback(() => {
+    setEditedColors(null)
+    toast.success('Paleta resetada para o padrão!')
+  }, [setEditedColors])
+
   // Restaura paleta do histórico
   const handleRestorePalette = useCallback(
     (restoredColors: ColorInfo[], type: PaletteType, base: string) => {
       setBaseColor(base)
       setPaletteType(type)
-      setColors(restoredColors)
+      setEditedColors(restoredColors) // Restaura como editada
       writeToURL(restoredColors, type, base)
     },
-    [writeToURL],
+    [writeToURL, setEditedColors],
   )
 
   // Compartilha paleta
@@ -122,7 +171,12 @@ export function PalleteGeneratorViewComponent() {
           </aside>
 
           {/* Área Principal (Canvas) */}
-          <PaletteOutput colors={colors} />
+          <PaletteOutput 
+            colors={colors} 
+            onColorEdit={handleColorEdit}
+            onResetPalette={handleResetPalette}
+            isPaletteEdited={isPaletteEdited}
+          />
         </div>
       </main>
     </div>

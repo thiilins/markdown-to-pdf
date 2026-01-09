@@ -1,18 +1,21 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import chroma from 'chroma-js'
-import { Check, Copy } from 'lucide-react'
+import { Check, Copy, Palette } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
 interface ColorCardProps {
   color: ColorInfo
   index: number
+  onColorEdit?: (index: number, newHex: string) => void
 }
 
-export function ColorCard({ color, index }: ColorCardProps) {
+export function ColorCard({ color, index, onColorEdit }: ColorCardProps) {
   const [copied, setCopied] = useState(false)
+  const [isEditingColor, setIsEditingColor] = useState(false)
 
   // Cálculo de contraste para o badge
   const bestTextColor = chroma.contrast(color.hex, 'white') > 4.5 ? 'white' : 'black'
@@ -32,6 +35,16 @@ export function ColorCard({ color, index }: ColorCardProps) {
       toast.error('Erro ao copiar')
     }
   }, [])
+
+  const handleColorChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newColor = e.target.value
+      if (onColorEdit && chroma.valid(newColor)) {
+        onColorEdit(index, newColor)
+      }
+    },
+    [index, onColorEdit],
+  )
 
   return (
     <div className='group relative flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200 transition-all hover:-translate-y-1 hover:shadow-md dark:bg-slate-900 dark:ring-slate-800'>
@@ -70,7 +83,36 @@ export function ColorCard({ color, index }: ColorCardProps) {
           <span className='flex-1 text-sm font-semibold text-slate-700 dark:text-slate-300'>
             {color.name}
           </span>
+          {onColorEdit && (
+            <Button
+              variant='ghost'
+              size='sm'
+              className='h-6 w-6 p-0'
+              onClick={() => setIsEditingColor(!isEditingColor)}
+              title='Editar cor'>
+              <Palette className='h-3.5 w-3.5' />
+            </Button>
+          )}
         </div>
+
+        {/* Input de Edição de Cor */}
+        {isEditingColor && onColorEdit && (
+          <div className='flex items-center gap-2'>
+            <Input
+              type='color'
+              value={color.hex}
+              onChange={handleColorChange}
+              className='h-8 w-full cursor-pointer'
+            />
+            <Input
+              type='text'
+              value={color.hex}
+              onChange={handleColorChange}
+              className='h-8 flex-1 font-mono text-xs'
+              placeholder='#000000'
+            />
+          </div>
+        )}
 
         <div className='flex items-baseline justify-between'>
           <span className='font-mono text-xs font-bold tracking-wider text-slate-900 uppercase dark:text-slate-100'>

@@ -1,7 +1,7 @@
 # 🛠️ MD to PDF Pro - Documentação Completa de Ferramentas
 
-> **Versão:** 0.16.0  
-> **Última Atualização:** Janeiro 2026  
+> **Versão:** 0.16.0
+> **Última Atualização:** Janeiro 2026
 > **Total de Ferramentas:** 17
 
 ---
@@ -44,7 +44,7 @@
 
 ### 1. MD Editor
 
-**Rota:** `/md-editor`  
+**Rota:** `/md-editor`
 **Descrição:** Editor Markdown profissional com preview em tempo real
 
 #### ✨ Funcionalidades Principais
@@ -64,7 +64,7 @@
   - Italic (`*texto*`)
   - Strikethrough (`~~texto~~`)
   - Inline Code (`` `código` ``)
-  
+
 - **Headings:**
   - H1 até H6 (`# Título`)
   - Menu dropdown para seleção rápida
@@ -137,7 +137,7 @@
 
 ### 2. MD to PDF
 
-**Rota:** `/md-to-pdf`  
+**Rota:** `/md-to-pdf`
 **Descrição:** Converta Markdown em PDFs profissionais com paginação e estilos
 
 #### ✨ Funcionalidades Principais
@@ -264,7 +264,7 @@
 
 ### 3. MD to HTML
 
-**Rota:** `/md-to-html`  
+**Rota:** `/md-to-html`
 **Descrição:** Converta Markdown em HTML semântico e otimizado
 
 #### ✨ Funcionalidades Principais
@@ -340,7 +340,7 @@
 
 ### 4. Web Extractor
 
-**Rota:** `/web-extractor`  
+**Rota:** `/web-extractor`
 **Descrição:** Extraia conteúdo limpo de qualquer URL
 
 #### ✨ Funcionalidades Principais
@@ -412,7 +412,7 @@
 
 ### 5. OpenAPI to MD
 
-**Rota:** `/open-api-md`  
+**Rota:** `/open-api-md`
 **Descrição:** Gere documentação Markdown a partir de especificações OpenAPI/Swagger
 
 #### ✨ Funcionalidades Principais
@@ -529,7 +529,7 @@
 
 ### 6. Code Snapshot
 
-**Rota:** `/code-snapshot`  
+**Rota:** `/code-snapshot`
 **Descrição:** Crie imagens profissionais de código para redes sociais e documentação
 
 #### ✨ Funcionalidades Principais
@@ -724,7 +724,7 @@
 
 ### 7. JSON Formatter
 
-**Rota:** `/json-formatter`  
+**Rota:** `/json-formatter`
 **Descrição:** Valide, formate e converta JSON com ferramentas avançadas
 
 #### ✨ Funcionalidades Principais
@@ -813,7 +813,7 @@
 
 ### 8. SQL Formatter
 
-**Rota:** `/sql-formatter`  
+**Rota:** `/sql-formatter`
 **Descrição:** Formate e organize queries SQL de qualquer dialeto
 
 #### ✨ Funcionalidades Principais
@@ -913,7 +913,7 @@
 
 ### 9. HTML Formatter
 
-**Rota:** `/html-formatter`  
+**Rota:** `/html-formatter`
 **Descrição:** Formate, valide e limpe código HTML
 
 #### ✨ Funcionalidades Principais
@@ -980,7 +980,7 @@
 
 ### 10. CSS Formatter
 
-**Rota:** `/css-formatter`  
+**Rota:** `/css-formatter`
 **Descrição:** Organize e otimize folhas de estilo CSS/SCSS
 
 #### ✨ Funcionalidades Principais
@@ -1045,7 +1045,7 @@
 
 ### 11. JavaScript Formatter
 
-**Rota:** `/javascript-formatter`  
+**Rota:** `/javascript-formatter`
 **Descrição:** Formate JavaScript/TypeScript com Prettier
 
 #### ✨ Funcionalidades Principais
@@ -1111,7 +1111,7 @@
 
 ### 12. JSON to TypeScript
 
-**Rota:** `/json-to-ts`  
+**Rota:** `/json-to-ts`
 **Descrição:** Gere interfaces TypeScript a partir de JSON
 
 #### ✨ Funcionalidades Principais
@@ -1217,7 +1217,7 @@ interface UserMetadata {
 
 ### 13. Diff Checker
 
-**Rota:** `/diff-checker`  
+**Rota:** `/diff-checker`
 **Descrição:** Compare textos e encontre diferenças
 
 #### ✨ Funcionalidades Principais
@@ -1285,7 +1285,7 @@ interface UserMetadata {
 
 ### 14. Base64 Converter
 
-**Rota:** `/base64`  
+**Rota:** `/base64`
 **Descrição:** Codifique e decodifique Base64
 
 #### ✨ Funcionalidades Principais
@@ -1350,7 +1350,7 @@ interface UserMetadata {
 
 ### 15. HTML to Text
 
-**Rota:** `/html-to-text`  
+**Rota:** `/html-to-text`
 **Descrição:** Extraia texto puro de HTML
 
 #### ✨ Funcionalidades Principais
@@ -1410,7 +1410,7 @@ interface UserMetadata {
 
 ### 16. Extrator de Dados
 
-**Rota:** `/data-extractor`  
+**Rota:** `/data-extractor`
 **Descrição:** Extraia dados estruturados com regex
 
 #### ✨ Funcionalidades Principais
@@ -1486,7 +1486,7 @@ interface UserMetadata {
 
 ### 17. Gist Explorer
 
-**Rota:** `/gist-explorer`  
+**Rota:** `/gist-explorer`
 **Descrição:** Busque e visualize GitHub Gists
 
 #### ✨ Funcionalidades Principais
@@ -1561,7 +1561,7 @@ interface UserMetadata {
 
 ### 18. Cron Tools
 
-**Rota:** `/cron-tools`  
+**Rota:** `/cron-tools`
 **Descrição:** Valide e visualize expressões cron
 
 #### ✨ Funcionalidades Principais
@@ -1642,7 +1642,7 @@ interface UserMetadata {
 
 ### 19. Excel/CSV to Markdown
 
-**Rota:** `/xls-md`  
+**Rota:** `/xls-md`
 **Descrição:** Converta planilhas em tabelas Markdown
 
 #### ✨ Funcionalidades Principais
@@ -1809,7 +1809,7 @@ Pedro,28,Belo Horizonte
 
 ### 20. Color Studio
 
-**Rota:** `/color-studio`  
+**Rota:** `/color-studio`
 **Descrição:** Gerador profissional de paletas de cores com validação WCAG
 
 #### ✨ Funcionalidades Principais
@@ -2171,7 +2171,7 @@ extension UIColor {
 
 ### 21. Gerador de Senhas
 
-**Rota:** `/password-gen`  
+**Rota:** `/password-gen`
 **Descrição:** Gere senhas seguras e aleatórias
 
 #### ✨ Funcionalidades Principais
@@ -2226,7 +2226,7 @@ extension UIColor {
 
 ### 22. JWT Debugger
 
-**Rota:** `/jwt-decoder`  
+**Rota:** `/jwt-decoder`
 **Descrição:** Decodifique e valide tokens JWT
 
 #### ✨ Funcionalidades Principais
@@ -2334,15 +2334,15 @@ extension UIColor {
 
 ### Diferenciais
 
-✅ **Interface Profissional:** Design moderno e responsivo  
-✅ **Preview em Tempo Real:** Todas as ferramentas com feedback instantâneo  
-✅ **Validação Robusta:** Detecção de erros e sugestões  
-✅ **Múltiplos Formatos:** Conversão entre diversos formatos  
-✅ **Acessibilidade:** WCAG 2.1 + APCA (WCAG 3.0)  
-✅ **Client-Side:** Processamento local, sem envio de dados  
-✅ **Open Source:** Código aberto e extensível  
-✅ **Sem Cadastro:** Uso imediato sem login  
-✅ **Gratuito:** Todas as funcionalidades sem custo  
+✅ **Interface Profissional:** Design moderno e responsivo
+✅ **Preview em Tempo Real:** Todas as ferramentas com feedback instantâneo
+✅ **Validação Robusta:** Detecção de erros e sugestões
+✅ **Múltiplos Formatos:** Conversão entre diversos formatos
+✅ **Acessibilidade:** WCAG 2.1 + APCA (WCAG 3.0)
+✅ **Client-Side:** Processamento local, sem envio de dados
+✅ **Open Source:** Código aberto e extensível
+✅ **Sem Cadastro:** Uso imediato sem login
+✅ **Gratuito:** Todas as funcionalidades sem custo
 
 ---
 
@@ -2381,5 +2381,5 @@ Para dúvidas, sugestões ou reportar bugs, abra uma issue no GitHub.
 
 ---
 
-**MD to PDF Pro** - Ferramentas profissionais para desenvolvedores  
+**MD to PDF Pro** - Ferramentas profissionais para desenvolvedores
 Versão 0.16.0 - Janeiro 2026
