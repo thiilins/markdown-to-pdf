@@ -24,7 +24,7 @@ export function MarkdownUnorderedList({ children, className }: MarkdownListProps
   return (
     <ul
       className={cn(
-        'my-6 space-y-3 rounded-2xl border border-slate-200 bg-white/50 p-6 shadow-sm backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/50',
+        'space-y-1 bg-white/50 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/50',
         className,
       )}>
       {children}
@@ -41,7 +41,7 @@ export function MarkdownOrderedList({ children, className, start = 1 }: Markdown
       start={start}
       style={{ counterReset: `list-counter ${start - 1}` } as React.CSSProperties}
       className={cn(
-        'my-6 list-none space-y-4 rounded-2xl border border-slate-200 bg-white/50 p-6 shadow-sm backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/50',
+        'list-none space-y-1 bg-white/50 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/50',
         className,
       )}>
       {children}
@@ -64,7 +64,7 @@ export function MarkdownListItem({ children, className, checked }: MarkdownListI
       }
       className={cn(
         // Base comum
-        'relative flex items-start gap-3 text-sm leading-relaxed font-medium transition-all duration-200',
+        'relative flex items-start gap-2 text-sm leading-relaxed font-medium transition-all duration-200',
 
         // CORES DO TEXTO
         checked ? 'text-slate-400' : 'text-slate-700 dark:text-slate-300',

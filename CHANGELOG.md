@@ -5,6 +5,70 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), e este projeto
 adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.18.0] - 2025-01-09
+
+### Adicionado
+
+- **Color Studio v2 - Novo Estúdio de Cores:**
+  - **Arquitetura Hub-and-Spoke**:
+    - Home page como hub central (inspirada em Coolors.co)
+    - Landing pages específicas para cada ferramenta
+    - Navegação intuitiva com mega menu
+  - **Home Page Redesenhada**:
+    - Layout 50/50 (texto + grid animado de cores)
+    - Tipografia gigante e minimalista
+    - Grid de cores animado (rotação automática a cada 3s)
+    - Seção "Trusted by" com logos de empresas
+    - Design extremamente limpo e profissional
+  - **Header com Mega Menu**:
+    - Logo "Palettes" customizado
+    - Mega menu 2 colunas para "Tools"
+    - 6 ferramentas com ícones coloridos e descrições
+    - Botão "Go Pro" destacado
+    - Hover effects suaves e profissionais
+  - **Palette Generator (Tela Cheia)**:
+    - Layout fullscreen com 5 colunas verticais de cores
+    - Geração com Spacebar (igual Coolors.co)
+    - Sistema de Lock/Unlock por cor
+    - Hover effects com expansão de coluna (flex-[1.2])
+    - Animações Framer Motion (fade in sequencial)
+    - Copy HEX com feedback visual
+    - Sincronização automática com URL
+    - Floating toolbar com botão "Generate"
+    - Responsivo: colunas verticais (desktop) → linhas horizontais (mobile)
+  - **Estrutura Modular**:
+    - Rota group `(studios)` para organização
+    - Context API para estado global (ColorStudioContext)
+    - Utilities compartilhados (color-algorithms.ts)
+    - Tipos TypeScript centralizados
+    - Padrão SSR: `page.tsx` + `_components/view.tsx`
+  - **Rotas Preparadas**:
+    - `/color-studio-v2` - Home do estúdio
+    - `/color-studio-v2/generate` - Palette Generator (implementado)
+    - `/color-studio-v2/image-picker` - Extração de cores de imagens (placeholder)
+    - `/color-studio-v2/visualizer` - Preview em designs reais (placeholder)
+    - `/color-studio-v2/tailwind-colors` - Escalas de cores Tailwind (placeholder)
+    - `/color-studio-v2/contrast-checker` - Verificador de contraste (placeholder)
+    - `/color-studio-v2/color-picker` - Informações detalhadas de cores (placeholder)
+
+### Técnico
+
+- **Declarações de Tipos**:
+  - Adicionado `src/types/ntc.d.ts` para biblioteca Name That Color
+  - Suporte TypeScript completo para `ntc` module
+- **Algoritmos de Cores**:
+  - Migrados e otimizados de v1 para v2
+  - Suporte a múltiplos algoritmos (random, monochromatic, analogous, complementary, triadic, tetradic, shades)
+  - Integração com chroma.js e OKLCH
+- **Performance**:
+  - Suspense boundaries para SSR
+  - Dynamic imports preparados para lazy loading
+  - Animações otimizadas com Framer Motion
+- **Responsividade**:
+  - Mobile-first approach
+  - Breakpoints Tailwind (md: 768px)
+  - Layout adaptativo para todas as telas
+
 ## [0.17.0] - 2025-01-09
 
 ### Adicionado
@@ -107,7 +171,8 @@ adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
     - Ações rápidas: Restaurar, Favoritar, Compartilhar, Remover
     - Botão "Limpar Histórico" (preserva favoritos)
   - **Compartilhamento via URL (State in URL)**:
-    - Codificação da paleta na URL (ex: `?colors=ffffff-000000-ff0000&type=monochromatic&base=3b82f6`)
+    - Codificação da paleta na URL (ex:
+      `?colors=ffffff-000000-ff0000&type=monochromatic&base=3b82f6`)
     - Atualização automática da URL ao gerar paleta
     - Carregamento automático da paleta ao abrir link compartilhado
     - Botão "Compartilhar" copia link para clipboard
@@ -116,7 +181,8 @@ adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
   - **Hooks Customizados**:
     - `usePaletteHistory`: Gerencia histórico e favoritos
     - `usePaletteURL`: Sincroniza estado com URL
-    - Funções: addToHistory, toggleFavorite, removeFromHistory, clearHistory, writeToURL, readFromURL, getShareableLink
+    - Funções: addToHistory, toggleFavorite, removeFromHistory, clearHistory, writeToURL,
+      readFromURL, getShareableLink
 
 - **Palette Studio - APCA Contrast Checker (WCAG 3.0):**
   - **Algoritmo APCA (Advanced Perceptual Contrast Algorithm)**:
@@ -140,7 +206,8 @@ adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - **Palette Studio - Mesh Gradients (Gradientes Modernos):**
   - **Tipo Mesh** adicionado ao gerador de gradientes
   - **Efeito de manchas de cor suaves e orgânicas** usando múltiplos radial-gradients sobrepostos
-  - **Interface adaptativa**: Oculta controles irrelevantes (direção, posição) quando Mesh está selecionado
+  - **Interface adaptativa**: Oculta controles irrelevantes (direção, posição) quando Mesh está
+    selecionado
   - **Variação Mesh** nas sugestões rápidas com preview clicável
   - **Preview em tempo real** do efeito Mesh
   - **CSS automático** para copiar (`background-image`)
