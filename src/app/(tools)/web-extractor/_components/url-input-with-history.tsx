@@ -7,7 +7,11 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { useWebExtractor } from '@/shared/contexts/webExtractorContext'
-import { clearHistory, removeFromHistory, type HistoryEntry } from '@/shared/utils/web-extractor-history'
+import {
+  clearHistory,
+  removeFromHistory,
+  type HistoryEntry,
+} from '@/shared/utils/web-extractor-history'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   AlertCircle,
@@ -224,7 +228,7 @@ export function UrlInputWithHistory() {
                           {/* Remove Button */}
                           <button
                             onClick={(e) => handleRemoveEntry(e, entry.id)}
-                            className='mt-0.5 shrink-0 rounded p-1 opacity-0 transition-opacity hover:bg-red-50 hover:text-red-600 group-hover/item:opacity-100 dark:hover:bg-red-900/20'>
+                            className='mt-0.5 shrink-0 rounded p-1 opacity-0 transition-opacity group-hover/item:opacity-100 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20'>
                             <X className='h-3.5 w-3.5' />
                           </button>
                         </button>
@@ -264,7 +268,11 @@ export function UrlInputWithHistory() {
               }}
               disabled={isLoading}
               className='h-6 rounded-md bg-zinc-900 px-3 text-xs text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900'>
-              {isLoading ? <Loader2 className='h-3 w-3 animate-spin' /> : <ArrowRight className='h-3 w-3' />}
+              {isLoading ? (
+                <Loader2 className='h-3 w-3 animate-spin' />
+              ) : (
+                <ArrowRight className='h-3 w-3' />
+              )}
             </Button>
           )}
         </div>

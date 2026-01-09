@@ -28,7 +28,8 @@ export function IntegrityReportComponent({ report }: IntegrityReportProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   const hasIssues = report.warnings.length > 0 || report.errors.length > 0
-  const severity = report.errors.length > 0 ? 'error' : report.warnings.length > 0 ? 'warning' : 'success'
+  const severity =
+    report.errors.length > 0 ? 'error' : report.warnings.length > 0 ? 'warning' : 'success'
 
   const imageRecoveryRate =
     report.stats.imagesFound > 0
@@ -43,14 +44,23 @@ export function IntegrityReportComponent({ report }: IntegrityReportProps) {
           size='sm'
           className={cn(
             'group flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 transition-all',
-            severity === 'error' && 'border-red-200 bg-red-50 hover:bg-red-100 dark:border-red-900/50 dark:bg-red-950/20',
-            severity === 'warning' && 'border-yellow-200 bg-yellow-50 hover:bg-yellow-100 dark:border-yellow-900/50 dark:bg-yellow-950/20',
-            severity === 'success' && 'border-green-200 bg-green-50 hover:bg-green-100 dark:border-green-900/50 dark:bg-green-950/20',
+            severity === 'error' &&
+              'border-red-200 bg-red-50 hover:bg-red-100 dark:border-red-900/50 dark:bg-red-950/20',
+            severity === 'warning' &&
+              'border-yellow-200 bg-yellow-50 hover:bg-yellow-100 dark:border-yellow-900/50 dark:bg-yellow-950/20',
+            severity === 'success' &&
+              'border-green-200 bg-green-50 hover:bg-green-100 dark:border-green-900/50 dark:bg-green-950/20',
           )}>
           <div className='flex items-center gap-2'>
-            {severity === 'error' && <AlertCircle className='h-4 w-4 text-red-600 dark:text-red-400' />}
-            {severity === 'warning' && <AlertTriangle className='h-4 w-4 text-yellow-600 dark:text-yellow-400' />}
-            {severity === 'success' && <CheckCircle className='h-4 w-4 text-green-600 dark:text-green-400' />}
+            {severity === 'error' && (
+              <AlertCircle className='h-4 w-4 text-red-600 dark:text-red-400' />
+            )}
+            {severity === 'warning' && (
+              <AlertTriangle className='h-4 w-4 text-yellow-600 dark:text-yellow-400' />
+            )}
+            {severity === 'success' && (
+              <CheckCircle className='h-4 w-4 text-green-600 dark:text-green-400' />
+            )}
             <span className='text-xs font-semibold'>
               {severity === 'error' && 'Extração com Erros'}
               {severity === 'warning' && 'Extração com Avisos'}
@@ -63,10 +73,7 @@ export function IntegrityReportComponent({ report }: IntegrityReportProps) {
             )}
           </div>
           <ChevronDown
-            className={cn(
-              'h-4 w-4 transition-transform duration-200',
-              isOpen && 'rotate-180',
-            )}
+            className={cn('h-4 w-4 transition-transform duration-200', isOpen && 'rotate-180')}
           />
         </Button>
       </CollapsibleTrigger>
@@ -167,7 +174,7 @@ export function IntegrityReportComponent({ report }: IntegrityReportProps) {
                           </li>
                         ))}
                         {report.warnings.length > 5 && (
-                          <li className='text-xs italic text-zinc-500'>
+                          <li className='text-xs text-zinc-500 italic'>
                             +{report.warnings.length - 5} avisos adicionais
                           </li>
                         )}

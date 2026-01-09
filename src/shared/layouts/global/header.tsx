@@ -38,7 +38,7 @@ const GlobalLogoComponent = () => {
         className={cn(
           'relative flex h-9 w-9 items-center justify-center rounded-lg',
           'bg-primary text-white',
-          'shadow-md shadow-primary/30',
+          'shadow-primary/30 shadow-md',
           'transition-transform duration-200',
           'group-hover:scale-105 group-active:scale-95',
         )}>
@@ -46,7 +46,7 @@ const GlobalLogoComponent = () => {
       </div>
 
       {/* Texto */}
-      <div className='hidden select-none flex-col sm:flex'>
+      <div className='hidden flex-col select-none sm:flex'>
         <span className='text-sm leading-none font-black tracking-tight text-zinc-900 dark:text-white'>
           Super<span className='text-primary'>TOOLS</span>
         </span>

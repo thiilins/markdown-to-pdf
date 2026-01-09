@@ -171,7 +171,9 @@ export async function scrapperHtmlV2(url: string): Promise<ScrapeHtmlResponse> {
       warnings.push('Readability falhou - usando fallback inteligente')
 
       // Remove elementos indesejados do fallback
-      $('header, nav, footer, aside, .sidebar, .menu, .navigation, .ads, .advertisement, .social-share, .comments, #comments, .related-posts').remove()
+      $(
+        'header, nav, footer, aside, .sidebar, .menu, .navigation, .ads, .advertisement, .social-share, .comments, #comments, .related-posts',
+      ).remove()
       $('[class*="cookie"], [class*="popup"], [class*="modal"], [id*="cookie"]').remove()
 
       // Tenta encontrar o main content

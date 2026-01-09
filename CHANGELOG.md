@@ -5,6 +5,238 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), e este projeto
 adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.16.0] - 2025-01-09
+
+### Adicionado
+
+- **Palette Studio - Histórico & Compartilhamento:**
+  - **Histórico Local com localStorage**:
+    - Armazena automaticamente até 20 paletas recentes
+    - Persistência entre sessões do navegador
+    - Remove duplicatas (mesma cor base + tipo)
+    - Timestamp e metadados para cada paleta
+  - **Sistema de Favoritos**:
+    - Botão de "coração" para marcar paletas favoritas
+    - Favoritos nunca são removidos ao limpar histórico
+    - Filtro dedicado para visualizar apenas favoritos
+    - Sincronização com localStorage
+  - **Drawer/Sidebar de Histórico**:
+    - Botão "Histórico" com badge de contagem
+    - Sheet lateral responsivo (mobile-friendly)
+    - Filtros: "Todas" e "Favoritas"
+    - Preview visual de cada paleta (faixa de cores)
+    - Informações: tipo, cor base, tempo decorrido
+    - Ações rápidas: Restaurar, Favoritar, Compartilhar, Remover
+    - Botão "Limpar Histórico" (preserva favoritos)
+  - **Compartilhamento via URL (State in URL)**:
+    - Codificação da paleta na URL (ex: `?colors=ffffff-000000-ff0000&type=monochromatic&base=3b82f6`)
+    - Atualização automática da URL ao gerar paleta
+    - Carregamento automático da paleta ao abrir link compartilhado
+    - Botão "Compartilhar" copia link para clipboard
+    - Permite enviar paleta exata para colegas/clientes
+    - Histórico do navegador preservado (replaceState)
+  - **Hooks Customizados**:
+    - `usePaletteHistory`: Gerencia histórico e favoritos
+    - `usePaletteURL`: Sincroniza estado com URL
+    - Funções: addToHistory, toggleFavorite, removeFromHistory, clearHistory, writeToURL, readFromURL, getShareableLink
+
+- **Palette Studio - APCA Contrast Checker (WCAG 3.0):**
+  - **Algoritmo APCA (Advanced Perceptual Contrast Algorithm)**:
+    - Implementação do futuro padrão WCAG 3.0
+    - Cálculo de contraste perceptualmente mais preciso
+    - Considera direção do contraste (texto claro em fundo escuro vs inverso)
+    - Recomendações específicas de tamanho e peso de fonte
+    - 5 níveis de qualidade: Excellent, Good, Acceptable, Poor, Fail
+    - Valor Lc (Lightness contrast) com precisão superior ao WCAG 2.1
+  - **Interface Dual com Tabs**:
+    - Tab WCAG 2.1: Padrão atual com razões de contraste
+    - Tab APCA (3.0): Novo algoritmo com recomendações detalhadas
+    - Badge indicando suporte a ambos os padrões
+    - Comparação lado a lado dos resultados
+  - **Recomendações Inteligentes**:
+    - Tamanho mínimo de fonte baseado no contraste
+    - Peso mínimo de fonte recomendado
+    - Descrições contextuais da legibilidade
+    - Alertas visuais por nível de qualidade
+
+- **Palette Studio - Mesh Gradients (Gradientes Modernos):**
+  - **Tipo Mesh** adicionado ao gerador de gradientes
+  - **Efeito de manchas de cor suaves e orgânicas** usando múltiplos radial-gradients sobrepostos
+  - **Interface adaptativa**: Oculta controles irrelevantes (direção, posição) quando Mesh está selecionado
+  - **Variação Mesh** nas sugestões rápidas com preview clicável
+  - **Preview em tempo real** do efeito Mesh
+  - **CSS automático** para copiar (`background-image`)
+
+### Modificado
+
+- **Palette Studio - Gradientes Customizáveis:**
+  - Atualizado de 3 para **4 tipos**: Linear, Radial, Cônico e **Mesh (Moderno)**
+  - Interface adaptativa que oculta controles de direção e posição quando não aplicáveis
+  - 6 variações sugeridas agora incluem Mesh
+
+### Estatísticas Finais - Palette Studio v0.16.0
+
+- **7 tabs** no output: Paleta, WCAG, Simulador, Mixer, Gradientes, Shadcn, Exportar
+- **6 tipos** de paleta: Monocromática, Análoga, Complementar, Tríade, Tétrade, Tons
+- **6 moods** de atmosfera com ajustes automáticos
+- **8 formatos** de exportação com nomes personalizados
+- **34 variáveis** Shadcn UI (todas editáveis)
+- **Color Mixer** com até 15 passos intermediários
+- **Nomes automáticos** para todas as cores
+- **Nomes semânticos** editáveis para export
+- **OKLCH** em todos os cards
+- **APCA (WCAG 3.0)** + WCAG 2.1 para contraste
+- **4 tipos de gradientes** incluindo Mesh moderno
+- **Histórico local** com até 20 paletas
+- **Sistema de favoritos** persistente
+- **Compartilhamento via URL** para colaboração
+
+## [0.15.0] - 2025-01-09
+
+### Adicionado
+
+- **Palette Studio - Histórico & Compartilhamento:**
+  - **Histórico Local com localStorage**:
+    - Armazena automaticamente até 20 paletas recentes
+    - Persistência entre sessões do navegador
+    - Remove duplicatas (mesma cor base + tipo)
+    - Timestamp e metadados para cada paleta
+  - **Sistema de Favoritos**:
+    - Botão de "coração" para marcar paletas favoritas
+    - Favoritos nunca são removidos ao limpar histórico
+    - Filtro dedicado para visualizar apenas favoritos
+    - Sincronização com localStorage
+  - **Drawer/Sidebar de Histórico**:
+    - Botão "Histórico" com badge de contagem
+    - Sheet lateral responsivo (mobile-friendly)
+    - Filtros: "Todas" e "Favoritas"
+    - Preview visual de cada paleta (faixa de cores)
+    - Informações: tipo, cor base, tempo decorrido
+    - Ações rápidas: Restaurar, Favoritar, Compartilhar, Remover
+    - Botão "Limpar Histórico" (preserva favoritos)
+  - **Compartilhamento via URL (State in URL)**:
+    - Codificação da paleta na URL (ex:
+      `?colors=ffffff-000000-ff0000&type=monochromatic&base=3b82f6`)
+    - Atualização automática da URL ao gerar paleta
+    - Carregamento automático da paleta ao abrir link compartilhado
+    - Botão "Compartilhar" copia link para clipboard
+    - Permite enviar paleta exata para colegas/clientes
+    - Histórico do navegador preservado (replaceState)
+  - **Hooks Customizados**:
+    - `usePaletteHistory`: Gerencia histórico e favoritos
+    - `usePaletteURL`: Sincroniza estado com URL
+    - Funções: addToHistory, toggleFavorite, removeFromHistory, clearHistory, writeToURL,
+      readFromURL, getShareableLink
+
+- **Palette Studio - APCA Contrast Checker (WCAG 3.0):**
+  - **Algoritmo APCA (Advanced Perceptual Contrast Algorithm)**:
+    - Implementação do futuro padrão WCAG 3.0
+    - Cálculo de contraste perceptualmente mais preciso
+    - Considera direção do contraste (texto claro em fundo escuro vs inverso)
+    - Recomendações específicas de tamanho e peso de fonte
+    - 5 níveis de qualidade: Excellent, Good, Acceptable, Poor, Fail
+    - Valor Lc (Lightness contrast) com precisão superior ao WCAG 2.1
+  - **Interface Dual com Tabs**:
+    - Tab WCAG 2.1: Padrão atual com razões de contraste
+    - Tab APCA (3.0): Novo algoritmo com recomendações detalhadas
+    - Badge indicando suporte a ambos os padrões
+    - Comparação lado a lado dos resultados
+  - **Recomendações Inteligentes**:
+    - Tamanho mínimo de fonte baseado no contraste
+    - Peso mínimo de fonte recomendado
+    - Descrições contextuais da legibilidade
+    - Alertas visuais por nível de qualidade
+
+- **Palette Studio - Funcionalidades Avançadas:**
+  - **Color Mixer (Misturador de Cores):**
+    - Seleção de duas cores da paleta (Cor A e Cor B)
+    - Controle de passos intermediários (3-15 cores)
+    - Algoritmo LCH para blend perceptualmente uniforme
+    - Preview visual em faixa e cards individuais
+    - Copiar cor individual ou CSS completo
+    - Botão de reset para voltar às cores originais
+    - Nova tab "Mixer" no output
+
+  - **Mood Selector (Seletor de Atmosfera):**
+    - 6 moods disponíveis com ajustes automáticos:
+      - **Corporativo**: Profissional, confiável (↓ saturação, ↓ brilho)
+      - **Enérgico**: Vibrante, dinâmico (↑ saturação, ↑ brilho)
+      - **Calmo**: Sereno, relaxante (↓↓ saturação, ↑ brilho)
+      - **Luxuoso**: Elegante, sofisticado (↑ saturação, ↓↓ brilho)
+      - **Divertido**: Alegre, criativo (↑↑ saturação, ↑ brilho)
+      - **Minimalista**: Limpo, neutro (↓↓ saturação, neutro)
+    - Interface visual com ícones e gradientes personalizados
+    - Descrição detalhada de cada mood
+    - Aplicação automática à paleta gerada
+    - Ajustes matemáticos de saturação e luminosidade
+
+  - **Nomes de Cores Automáticos:**
+    - Biblioteca `ntc` para gerar nomes descritivos reais
+    - Fallback inteligente baseado em HSL
+    - Exibição apenas visual (não editável nos cards)
+
+  - **Nomes Semânticos Editáveis no Export:**
+    - Editor dedicado acima do preview de código
+    - Nomes padrão: primary, secondary, accent, muted, destructive
+    - Edição inline com inputs para cada cor
+    - Botão reset para voltar aos nomes padrão
+    - Validação automática (conversão para kebab-case)
+    - Preview em tempo real do código exportado
+    - Todos os 8 formatos usam os nomes personalizados
+
+  - **Tema Shadcn UI Totalmente Editável:**
+    - 34 cores editáveis (Light + Dark mode)
+    - Click no quadrado de cor para editar com color picker
+    - Botão reset para voltar ao tema gerado automaticamente
+    - Indicador visual quando o tema foi editado
+    - Preview em tempo real das alterações
+    - Organizado por categorias:
+      - Cores Principais (6 variáveis)
+      - Cores de Ação (8 variáveis)
+      - Elementos UI (5 variáveis)
+      - Charts (5 variáveis)
+      - Sidebar (8 variáveis)
+
+  - **Gradientes Customizáveis com Mesh:**
+    - Edição completa de cada cor do gradiente
+    - Posições ajustáveis (0-100%) para gradientes tradicionais
+    - Adicionar/remover cores dinamicamente
+    - **4 tipos**: Linear, Radial, Cônico e **Mesh (Moderno)**
+    - **Mesh Gradients**: Manchas de cor suaves e orgânicas usando múltiplos radial-gradients
+      sobrepostos
+    - 8 direções diferentes (exceto Mesh)
+    - 6 variações sugeridas incluindo Mesh
+    - Interface adaptativa: oculta controles irrelevantes por tipo
+    - Botão reset
+    - Cópia automática do CSS do `background-image`
+
+  - **Exportação Multi-Formato com Nomes Personalizados:**
+    - CSS Variables (com nomes semânticos)
+    - SCSS Variables (com nomes semânticos)
+    - Tailwind Config (com nomes semânticos)
+    - JSON (estruturado com nomes semânticos)
+    - Figma Tokens (com nomes semânticos e metadados OKLCH)
+    - Swift (iOS) (com nomes semânticos)
+    - XML (Android) (com nomes semânticos)
+    - Shadcn Theme (OKLCH completo)
+
+### Estatísticas Finais - Palette Studio
+
+- **7 tabs** no output: Paleta, WCAG, Simulador, Mixer, Gradientes, Shadcn, Exportar
+- **6 tipos** de paleta: Monocromática, Análoga, Complementar, Tríade, Tétrade, Tons
+- **6 moods** de atmosfera com ajustes automáticos
+- **8 formatos** de exportação com nomes personalizados
+- **34 variáveis** Shadcn UI (todas editáveis)
+- **Color Mixer** com até 15 passos intermediários
+- **Nomes automáticos** para todas as cores
+- **Nomes semânticos** editáveis para export
+- **OKLCH** em todos os cards
+- **APCA (WCAG 3.0)** + WCAG 2.1 para contraste
+- **4 tipos de gradientes** incluindo Mesh moderno
+- **Histórico local** com até 20 paletas
+- **Sistema de favoritos** persistente
+- **Compartilhamento via URL** para colaboração
+
 ## [0.14.0] - 2025-01-09
 
 ### Adicionado

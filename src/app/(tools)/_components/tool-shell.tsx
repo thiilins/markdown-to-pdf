@@ -95,7 +95,7 @@ export function ToolShell({
   icon: Icon,
   layout = 'split',
   orientation = 'horizontal',
-  defaultPanelSizes = [50, 50],
+  defaultPanelSizes = [33, 67],
   inputLabel = 'Input',
   outputLabel = 'Output',
   inputPlaceholder,

@@ -13,25 +13,29 @@ import { GlobalHeaderComponent } from './header'
 
 export const GlobalLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <ThemeProvider attribute='class' defaultTheme='light' enableSystem={false} disableTransitionOnChange>
-    <SessionProvider>
-      <MarkdownProvider>
-        <AppProvider>
-          <CodeSnapshotProvider>
-            <HeaderFooterProvider>
-              <GistProvider>
+    <ThemeProvider
+      attribute='class'
+      defaultTheme='light'
+      enableSystem={false}
+      disableTransitionOnChange>
+      <SessionProvider>
+        <MarkdownProvider>
+          <AppProvider>
+            <CodeSnapshotProvider>
+              <HeaderFooterProvider>
+                <GistProvider>
                   <main className='bg-background flex h-screen w-screen flex-1 flex-col font-sans'>
-                  <GlobalHeaderComponent />
-                  <Toaster />
-                  <SettingsDialog />
-                  {children}
-                </main>
-              </GistProvider>
-            </HeaderFooterProvider>
-          </CodeSnapshotProvider>
-        </AppProvider>
-      </MarkdownProvider>
-    </SessionProvider>
+                    <GlobalHeaderComponent />
+                    <Toaster />
+                    <SettingsDialog />
+                    {children}
+                  </main>
+                </GistProvider>
+              </HeaderFooterProvider>
+            </CodeSnapshotProvider>
+          </AppProvider>
+        </MarkdownProvider>
+      </SessionProvider>
     </ThemeProvider>
   )
 }

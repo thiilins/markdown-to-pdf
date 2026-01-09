@@ -149,43 +149,43 @@ export function CronOutput({ result, expression }: CronOutputProps) {
                       </h3>
                     </div>
 
-                     <div className='relative pl-4'>
-                       {/* Linha Vertical da Timeline - Gradiente Roxo Neon */}
-                       <div className='absolute top-2 bottom-6 left-[19px] w-px bg-linear-to-b from-purple-500/50 via-white/10 to-transparent' />
+                    <div className='relative pl-4'>
+                      {/* Linha Vertical da Timeline - Gradiente Roxo Neon */}
+                      <div className='absolute top-2 bottom-6 left-[19px] w-px bg-linear-to-b from-purple-500/50 via-white/10 to-transparent' />
 
-                       <div className='space-y-6'>
-                         {nextExecutions.map((execution, index) => (
-                           <motion.div
-                             key={index}
-                             initial={{ opacity: 0, x: -10 }}
-                             animate={{ opacity: 1, x: 0 }}
-                             transition={{ delay: index * 0.05 }}
-                             className='group relative flex items-center gap-6'>
-                             {/* Marcador da Timeline - Estilo "Planeta" com Brilho */}
-                             <div className='relative z-10 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#0B0C15] ring-2 ring-purple-500/50 shadow-[0_0_10px_rgba(168,85,247,0.5)] transition-all duration-300 group-hover:scale-110 group-hover:ring-purple-400'>
-                               <div className='h-1.5 w-1.5 rounded-full bg-purple-400 shadow-[0_0_5px_rgba(168,85,247,0.8)]' />
-                             </div>
+                      <div className='space-y-6'>
+                        {nextExecutions.map((execution, index) => (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            className='group relative flex items-center gap-6'>
+                            {/* Marcador da Timeline - Estilo "Planeta" com Brilho */}
+                            <div className='relative z-10 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#0B0C15] shadow-[0_0_10px_rgba(168,85,247,0.5)] ring-2 ring-purple-500/50 transition-all duration-300 group-hover:scale-110 group-hover:ring-purple-400'>
+                              <div className='h-1.5 w-1.5 rounded-full bg-purple-400 shadow-[0_0_5px_rgba(168,85,247,0.8)]' />
+                            </div>
 
-                             {/* Card da Execução - Glassmorphism Escuro */}
-                             <div className='group/card flex flex-1 items-center justify-between rounded-lg border border-white/5 bg-white/[0.02] p-3 backdrop-blur-md transition-all hover:border-purple-500/30 hover:bg-white/[0.05] hover:shadow-[0_4px_20px_-10px_rgba(168,85,247,0.2)]'>
-                               <div className='flex flex-col'>
-                                 <span className='font-mono text-sm font-semibold text-slate-200 transition-colors group-hover/card:text-white'>
-                                   {execution.formatted.split(',')[0]} {/* Data */}
-                                 </span>
-                                 <span className='text-xs text-slate-500 transition-colors group-hover/card:text-purple-300'>
-                                   {execution.formatted.split(',')[1]} {/* Hora */}
-                                 </span>
-                               </div>
-                               <Badge
-                                 variant='secondary'
-                                 className='border-purple-500/20 bg-purple-500/10 font-mono text-[10px] text-purple-300'>
-                                 {execution.relative}
-                               </Badge>
-                             </div>
-                           </motion.div>
-                         ))}
-                       </div>
-                     </div>
+                            {/* Card da Execução - Glassmorphism Escuro */}
+                            <div className='group/card flex flex-1 items-center justify-between rounded-lg border border-white/5 bg-white/[0.02] p-3 backdrop-blur-md transition-all hover:border-purple-500/30 hover:bg-white/[0.05] hover:shadow-[0_4px_20px_-10px_rgba(168,85,247,0.2)]'>
+                              <div className='flex flex-col'>
+                                <span className='font-mono text-sm font-semibold text-slate-200 transition-colors group-hover/card:text-white'>
+                                  {execution.formatted.split(',')[0]} {/* Data */}
+                                </span>
+                                <span className='text-xs text-slate-500 transition-colors group-hover/card:text-purple-300'>
+                                  {execution.formatted.split(',')[1]} {/* Hora */}
+                                </span>
+                              </div>
+                              <Badge
+                                variant='secondary'
+                                className='border-purple-500/20 bg-purple-500/10 font-mono text-[10px] text-purple-300'>
+                                {execution.relative}
+                              </Badge>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
                   </Card>
 
                   {/* Footer Link */}

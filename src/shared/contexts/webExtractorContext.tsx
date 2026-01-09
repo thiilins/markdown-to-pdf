@@ -7,7 +7,15 @@ import {
   searchHistory,
   type HistoryEntry,
 } from '@/shared/utils/web-extractor-history'
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react'
 import { toast } from 'sonner'
 
 interface WebExtractorContextType {

@@ -113,7 +113,9 @@ export const PreviewResultContent = () => {
                     Modo Fallback Ativado
                   </h4>
                   <p className='text-xs text-blue-700 dark:text-blue-300'>
-                    O algoritmo Readability não conseguiu processar esta página. Estamos exibindo o conteúdo bruto com limpeza automática. Alguns elementos indesejados podem aparecer.
+                    O algoritmo Readability não conseguiu processar esta página. Estamos exibindo o
+                    conteúdo bruto com limpeza automática. Alguns elementos indesejados podem
+                    aparecer.
                   </p>
                 </div>
               </div>

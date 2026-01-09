@@ -159,6 +159,12 @@ export const Modules_Front: ModuleItem[] = [
         icon: Table,
         description: 'Converta planilhas em tabelas Markdown',
       },
+      {
+        label: 'Palette Studio',
+        href: '/pallete-generator',
+        icon: Palette,
+        description: 'Gere paletas de cores e valide acessibilidade WCAG',
+      },
     ],
   },
   {
@@ -306,6 +312,12 @@ export const Modules: ModuleItem[] = [
     href: '/xls-md',
     icon: Table,
     description: 'Planilhas para Markdown',
+  },
+  {
+    label: 'Palette Studio',
+    href: '/pallete-generator',
+    icon: Palette,
+    description: 'Paletas e WCAG',
   },
 
   // --- Segurança ---
