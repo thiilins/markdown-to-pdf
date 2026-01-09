@@ -20,6 +20,7 @@ import {
   Palette,
   ScanText,
   ShieldCheck,
+  Table,
   Wand2,
 } from 'lucide-react'
 import { SiOpenapiinitiative } from 'react-icons/si'
@@ -151,6 +152,12 @@ export const Modules_Front: ModuleItem[] = [
         href: '/cron-tools',
         icon: Clock,
         description: 'Valide e visualize expressões cron',
+      },
+      {
+        label: 'Excel/CSV to MD',
+        href: '/xls-md',
+        icon: Table,
+        description: 'Converta planilhas em tabelas Markdown',
       },
     ],
   },
@@ -293,6 +300,12 @@ export const Modules: ModuleItem[] = [
     href: '/cron-tools',
     icon: Clock,
     description: 'Validar Cron',
+  },
+  {
+    label: 'Excel/CSV to MD',
+    href: '/xls-md',
+    icon: Table,
+    description: 'Planilhas para Markdown',
   },
 
   // --- Segurança ---

@@ -472,7 +472,7 @@ export function ToolShell({
           {/* Sidebar (se fornecido) */}
           {sidebarSlot && (
             <>
-              <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className='bg-muted/20'>
+              <ResizablePanel defaultSize={10} minSize={10} maxSize={30} className='bg-muted/20'>
                 {sidebarSlot}
               </ResizablePanel>
               <ResizableHandle />

@@ -1,18 +1,3 @@
-### 1. Documentador de API (OpenAPI/Swagger to Professional PDF)
-
-Esta ferramenta permitiria que desenvolvedores colassem um JSON/YAML de especificação OpenAPI
-(Swagger) para gerar um manual de API completo e formatado.
-
-- **O que faz:** Realiza o parse da especificação e gera um documento Markdown estruturado
-  (Endpoints, Parâmetros, Schemas de Resposta) que depois é convertido para PDF usando seus temas
-  existentes.
-- **Valor Agregado:** Resolve a dor de cabeça de formatar documentação técnica para clientes ou
-  stakeholders que preferem PDFs a links do Swagger.
-- **Bibliotecas Sugeridas:**
-- `@apidevtools/swagger-parser`: Para validar e resolver referências (`$ref`) no arquivo OpenAPI.
-- `json-schema-to-markdown-table`: Útil para transformar as definições de objetos em tabelas limpas
-  no Markdown.
-
 ### 2. Arquiteto de Banco de Dados (SQL DDL to ER Diagram)
 
 Uma ferramenta visual onde o usuário cola scripts SQL `CREATE TABLE` e visualiza o diagrama de
@@ -53,23 +38,12 @@ Focada em desenvolvedores frontend que usam o seu stack (Next.js/React).
 - `@svgr/core`: O motor principal de conversão de SVG para JSX.
 - `prettier`: (Você já tem no `package.json`) para formatar o código gerado.
 
-### 6. Gerador de Tabelas Markdown (Excel/CSV para MD)
-
-Escrever tabelas no Markdown manualmente é uma das tarefas mais odiadas pelos devs.
-
-- **O que faz:** Permite colar dados do Excel/Google Sheets ou fazer upload de um arquivo CSV e
-  convertê-los instantaneamente em uma tabela Markdown formatada.
-- **Valor Agregado:** Agiliza a criação de documentação técnica e relatórios.
-- **Bibliotecas Sugeridas:** \* `papaparse`: Para o parse robusto de CSV no cliente.
-- `xlsx`: Se quiser suporte direto para arquivos `.xlsx`.
-- `turndown`: (Você já tem no `package.json`) pode ser usado para converter HTML colado em MD.
-
 ### 7. JSON Schema Studio (Gerador e Validador)
 
 Diferente do `json-to-ts` que você já possui, esta ferramenta foca na estrutura de validação.
 
-- **O que faz:** Gera automaticamente um **JSON Schema** (Draft 7/2020-12) a partir de um JSON de
-  exemplo e permite validar outros objetos JSON contra esse esquema.
+- **O que faz:** Gera automaticamente um **JSON Schema** a partir de um JSON de exemplo e permite
+  validar outros objetos JSON contra esse esquema.
 - **Valor Agregado:** Essencial para devs backend que precisam definir contratos de API ou validar
   configurações complexas.
 - **Bibliotecas Sugeridas:**

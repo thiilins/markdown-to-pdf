@@ -2,6 +2,7 @@
 
 import { ToolShell } from '@/app/(tools)/_components/tool-shell'
 import { useMarkdown } from '@/shared/contexts/markdownContext'
+import { downloadMarkdownFile } from '@/shared/utils'
 import { FileCode2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
@@ -86,22 +87,14 @@ export function OpenApiPdfViewComponent() {
     toast.success('Exemplo carregado')
   }, [])
 
-  const handleDownloadMarkdown = useCallback(() => {
-    if (!markdown) {
-      toast.error('Nenhuma documentação gerada')
-      return
-    }
-    const blob = new Blob([markdown], { type: 'text/markdown' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${result?.title.toLowerCase().replace(/\s+/g, '-') || 'api-docs'}.md`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-    toast.success('Arquivo Markdown baixado!')
-  }, [markdown, result])
+  const handleDownloadMarkdown = useCallback(
+    () =>
+      downloadMarkdownFile(
+        markdown,
+        `${result?.title.toLowerCase().replace(/\s+/g, '-') || 'api-docs'}.md`,
+      ),
+    [markdown, result],
+  )
 
   const handleEditInMdEditor = useCallback(() => {
     if (!markdown) {

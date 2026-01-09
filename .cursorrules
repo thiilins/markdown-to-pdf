@@ -1,0 +1,322 @@
+# Regras de Desenvolvimento - MD to PDF Pro
+
+## 🏗️ Arquitetura e Estrutura de Pastas
+
+### Estrutura de Ferramentas (Tools)
+
+Cada ferramenta em `src/app/(tools)/[tool-name]` deve seguir esta estrutura modular:
+
+```
+[tool-name]/
+├── page.tsx                    # Página SSR (apenas metadata + dynamic import)
+├── _components/
+│   ├── constants.ts           # Constantes, exemplos, configurações
+│   ├── [tool]-utils.ts        # Lógica de negócio (parsing, conversão, validação)
+│   ├── input/                 # Componentes de entrada
+│   │   ├── index.tsx         # Orquestrador principal
+│   │   ├── [type]-tab.tsx    # Tabs específicas (csv, json, upload, etc)
+│   │   └── [feature].tsx     # Features específicas (drag-drop, file-picker)
+│   ├── output/                # Componentes de saída
+│   │   ├── index.tsx         # Orquestrador principal
+│   │   ├── preview.tsx       # Preview visual
+│   │   ├── markdown.tsx      # Código fonte
+│   │   └── analytics.tsx     # Estatísticas/análises
+│   ├── options/               # Componentes de configuração
+│   │   ├── index.tsx         # Menu principal (desktop/mobile)
+│   │   ├── format.tsx        # Opções de formato
+│   │   ├── align.tsx         # Alinhamento
+│   │   └── transform.tsx     # Transformações
+│   └── view/                  # Views de layout
+│       ├── desktop.tsx       # Layout desktop (ToolShell)
+│       └── mobile.tsx        # Layout mobile customizado
+```
+
+### Princípios de Organização
+
+1. **Separação por Domínio**: Cada pasta representa uma responsabilidade clara (input, output, options, view)
+2. **Index como Orquestrador**: Arquivos `index.tsx` compõem e exportam sub-componentes
+3. **Componentes Atômicos**: Cada feature/tab é um arquivo separado e focado
+4. **Utils Isolados**: Lógica de negócio em arquivos `*-utils.ts` separados
+5. **Views Separadas**: Desktop e Mobile em arquivos distintos quando necessário
+
+## 📝 Convenções de Código
+
+### Nomenclatura
+
+- **Componentes**: PascalCase (`ExcelInput`, `MarkdownPreview`)
+- **Arquivos de Componentes**: kebab-case (`csv-tab.tsx`, `format-options.tsx`)
+- **Utils**: kebab-case com sufixo `-utils` (`excel-utils.ts`, `markdown-utils.ts`)
+- **Constantes**: kebab-case (`constants.ts`, `default-values.ts`)
+- **Tipos**: PascalCase com sufixo quando apropriado (`ConversionResult`, `ColumnStats`)
+
+### Estrutura de Componentes
+
+```typescript
+'use client' // Quando necessário
+
+// 1. Imports externos (libs)
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+
+// 2. Imports internos (utils, types)
+import type { ConversionOptions } from '../[tool]-utils'
+import { parseData } from '../[tool]-utils'
+
+// 3. Imports de componentes locais
+import { SubComponent } from './sub-component'
+
+// 4. Tipos/Interfaces
+interface ComponentProps {
+  value: string
+  onChange: (value: string) => void
+}
+
+// 5. Componente
+export function Component({ value, onChange }: ComponentProps) {
+  // Estados
+  const [state, setState] = useState()
+
+  // Callbacks
+  const handleAction = useCallback(() => {
+    // lógica
+  }, [dependencies])
+
+  // Effects
+  useEffect(() => {
+    // side effects
+  }, [dependencies])
+
+  // Render
+  return (
+    <div>
+      {/* JSX */}
+    </div>
+  )
+}
+```
+
+## 🎨 Padrões de UI
+
+### Uso do ToolShell
+
+- **Desktop**: Sempre use `ToolShell` para layout responsivo automático
+- **Mobile**: Use `ToolShell` com `mobileTabs` OU crie layout customizado quando necessário
+- **Opções no Mobile**: Use `Sheet` (drawer) ou terceira tab, nunca esconda funcionalidades
+
+### Tabs e Navegação
+
+- **Input**: Múltiplas tabs para diferentes tipos de entrada (CSV, JSON, Upload)
+- **Output**: Tabs para diferentes visualizações (Preview, Markdown, Analytics)
+- **Options**: Collapsible sections ou tabs para organizar configurações
+
+### Drag & Drop
+
+- Sempre em tab/área dedicada, não como overlay global
+- Validações claras (tipo de arquivo, quantidade)
+- Feedback visual robusto (overlay animado, estados)
+
+## 🔧 Boas Práticas
+
+### Performance
+
+- Use `useCallback` para funções passadas como props
+- Use `useMemo` para cálculos pesados
+- Lazy load de componentes pesados quando apropriado
+- Debounce em inputs que disparam conversões (500ms padrão)
+
+### State Management
+
+- Estado local com `useState` para UI
+- Lift state apenas quando necessário
+- Evite prop drilling excessivo (máx 2-3 níveis)
+
+### Validação
+
+- Sempre valide inputs antes de processar
+- Use `toast` para feedback de erros/sucesso
+- Validações em `*-utils.ts`, não em componentes
+
+### Acessibilidade
+
+- Use componentes shadcn/ui que já têm acessibilidade
+- Labels claros em todos os inputs
+- Feedback visual E textual para ações
+
+## 🎯 Componentização
+
+### Quando Criar um Novo Componente
+
+- ✅ Componente reutilizado 2+ vezes
+- ✅ Lógica complexa que pode ser isolada
+- ✅ Responsabilidade clara e única
+- ✅ Facilita testes
+
+### Quando NÃO Criar um Novo Componente
+
+- ❌ Usado apenas uma vez e simples
+- ❌ Apenas para reduzir linhas (sem ganho de clareza)
+- ❌ Abstração prematura
+
+## 📦 Gerenciamento de Dependências
+
+- **Package Manager**: SEMPRE use `pnpm` (nunca npm/yarn)
+- **Instalação**: `pnpm add [package]`
+- **Dev Dependencies**: `pnpm add -D [package]`
+
+## 🌍 Internacionalização
+
+- **Idioma Padrão**: Português Brasil
+- **UI**: Todos os textos em português
+- **Código**: Variáveis e funções em inglês
+- **Comentários**: Português quando necessário
+
+## 🚫 Anti-Padrões (Evitar)
+
+1. **Arquivos Gigantes**: Máximo ~300 linhas por componente
+2. **Lógica em Componentes**: Mova para `*-utils.ts`
+3. **Inline Styles**: Use Tailwind CSS
+4. **Props Drilling**: Máximo 2-3 níveis
+5. **Estado Global Desnecessário**: Prefira estado local
+6. **Imports Relativos Profundos**: Use aliases `@/`
+7. **Componentes Monolíticos**: Quebre em sub-componentes
+8. **Duplicação de Código**: Extraia para utils ou componentes
+
+## 📚 Bibliotecas Principais
+
+### UI Components
+
+- **shadcn/ui**: Componentes base (Button, Input, Card, etc)
+- **Tailwind CSS**: Estilização
+- **Framer Motion**: Animações
+- **Lucide React**: Ícones
+
+### Funcionalidades
+
+- **Monaco Editor**: Editor de código
+- **React Markdown**: Renderização de Markdown
+- **Prettier**: Formatação de código
+- **Mermaid**: Diagramas
+- **Sonner**: Toasts/Notificações
+
+## 🔄 Fluxo de Desenvolvimento
+
+1. **Planejamento**: Defina estrutura de pastas antes de codificar
+2. **Componentização**: Crie componentes atômicos primeiro
+3. **Composição**: Monte componentes maiores a partir dos atômicos
+4. **Integração**: Conecte com `*-utils.ts` e state management
+5. **Refinamento**: Ajuste responsividade e acessibilidade
+6. **Documentação**: Atualize CHANGELOG.md
+
+## 📝 Commits e Versionamento
+
+### Formato de Commit
+
+```
+<tipo>(<escopo>): <descrição curta>
+
+<descrição detalhada opcional>
+```
+
+**Tipos:**
+
+- `feat`: Nova funcionalidade
+- `fix`: Correção de bug
+- `refactor`: Refatoração sem mudança de funcionalidade
+- `style`: Mudanças de estilo/formatação
+- `docs`: Documentação
+- `perf`: Melhorias de performance
+- `test`: Testes
+
+**Exemplos:**
+
+```
+feat(xls-md): adicionar aba de upload com drag & drop
+fix(excel-output): corrigir estatísticas não aparecendo no mobile
+refactor(xls-md): reorganizar estrutura em pastas modulares
+```
+
+## 🎨 Design System
+
+### Cores e Temas
+
+- Suporte a dark/light mode via `next-themes`
+- Use variáveis CSS do tema (`bg-background`, `text-foreground`)
+- Gradientes: `bg-linear-to-r` (não `bg-gradient-to-r`)
+
+### Espaçamento
+
+- Use escala Tailwind (4px base): `p-4`, `gap-2`, `mb-6`
+- Consistência: mesmos espaçamentos em componentes similares
+
+### Tipografia
+
+- Títulos: `text-xl font-bold` ou `text-2xl font-bold`
+- Corpo: `text-sm` ou `text-base`
+- Muted: `text-muted-foreground text-xs`
+
+## 🧪 Qualidade de Código
+
+### Linting
+
+- Execute linter antes de commit
+- Corrija todos os erros (não apenas warnings)
+- Use `pnpm lint` para verificar
+
+### TypeScript
+
+- Sempre use tipos explícitos em interfaces públicas
+- Evite `any` (use `unknown` se necessário)
+- Prefira `interface` para props de componentes
+- Use `type` para unions e utilitários
+
+## 🚀 Performance e Otimização
+
+### Bundle Size
+
+- Lazy load de componentes pesados
+- Dynamic imports para ferramentas individuais
+- Tree-shaking: importe apenas o necessário
+
+### Rendering
+
+- Evite re-renders desnecessários
+- Use `React.memo` para componentes puros e pesados
+- Otimize listas com `key` apropriada
+
+## 📱 Responsividade
+
+### Breakpoints Tailwind
+
+- `sm`: 640px
+- `md`: 768px
+- `lg`: 1024px (Desktop)
+- `xl`: 1280px
+- `2xl`: 1536px
+
+### Estratégia Mobile-First
+
+- Design para mobile primeiro
+- Progressive enhancement para desktop
+- Teste em múltiplos tamanhos de tela
+
+## 🎯 Checklist para Nova Ferramenta
+
+- [ ] Estrutura de pastas seguindo padrão modular
+- [ ] `page.tsx` com metadata e dynamic import
+- [ ] `constants.ts` com exemplos e configurações
+- [ ] `*-utils.ts` com lógica de negócio e tipos
+- [ ] Componentes `input/`, `output/`, `options/` organizados
+- [ ] Views `desktop.tsx` e `mobile.tsx` (se necessário)
+- [ ] Responsividade testada (mobile e desktop)
+- [ ] Acessibilidade verificada
+- [ ] Validações implementadas
+- [ ] Feedback visual (toasts, loading states)
+- [ ] Documentação no código quando necessário
+- [ ] CHANGELOG.md atualizado
+- [ ] Versão incrementada em `package.json`
+- [ ] Testes manuais completos
+- [ ] Commit com mensagem descritiva
+
+---
+
+**Lembre-se**: Código limpo, modular e bem organizado é mais importante que código "inteligente". Priorize legibilidade e manutenibilidade.

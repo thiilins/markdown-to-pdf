@@ -5,6 +5,101 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), e este projeto
 adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.14.0] - 2025-01-09
+
+### Adicionado
+
+- **Regras do Cursor (.cursorrules):** Documentação completa de padrões de desenvolvimento.
+  - Arquitetura e estrutura de pastas modular
+  - Convenções de código e nomenclatura
+  - Padrões de UI e componentização
+  - Boas práticas de performance e acessibilidade
+  - Fluxo de desenvolvimento e versionamento
+  - Checklist para novas ferramentas
+
+### Modificado
+
+- **Excel/CSV to Markdown - Refatoração Arquitetural Completa:**
+  - **Estrutura Modular por Responsabilidade:**
+    - `input/`: Componentes de entrada organizados (csv.tsx, json.tsx, upload.tsx)
+    - `output/`: Componentes de saída (preview.tsx, markdown.tsx, analytics.tsx)
+    - `options/`: Componentes de configuração (format.tsx, align.tsx, transform.tsx)
+    - `view/`: Layouts separados (desktop.tsx, mobile.tsx)
+  - **Aba de Upload Dedicada:** Terceira aba no input com drag & drop melhorado
+    - Área visual dedicada para upload de arquivos
+    - Overlay animado com feedback visual robusto
+    - Validação de múltiplos arquivos
+    - Suporte a .xlsx, .xls e .csv
+  - **Estatísticas no Output:** Movidas para terceira aba no painel de saída
+    - Layout em grid responsivo (1-3 colunas)
+    - Cards individuais por coluna com métricas detalhadas
+    - Estado vazio elegante quando não há dados
+  - **Menu de Opções Otimizado:** Removida aba de estatísticas, foco em configurações
+    - Collapsible sections para melhor organização
+    - Formato, Alinhamento e Transformações em seções separadas
+  - **Responsividade Mobile Aprimorada:**
+    - Layout customizado com 3 tabs (Entrada, Saída, Opções)
+    - Sheet lateral para opções no mobile (via headerSlot)
+    - Estatísticas funcionando corretamente no mobile
+  - **Arquitetura Limpa:**
+    - Index.tsx como orquestradores em cada pasta
+    - Componentes atômicos e focados
+    - Separação clara entre lógica e apresentação
+    - Reutilização de código maximizada
+
+### Corrigido
+
+- **Excel/CSV to Markdown:** Estatísticas não aparecendo no mobile
+- **Drag & Drop:** Melhorias na detecção de eventos e validações
+- **CodeFormatterEditor:** Correção de tipo de linguagem (markdown → plaintext)
+- **Gradientes:** Correção de classes Tailwind (bg-gradient-to-r → bg-linear-to-r)
+
+## [0.13.0] - 2025-01-08
+
+### Adicionado
+
+- **Excel/CSV to Markdown - Features Avançadas:** Expansão massiva da ferramenta com 8 novas
+  funcionalidades profissionais.
+  - **Alinhamento de Colunas:** Controle individual de alinhamento por coluna (esquerda, centro,
+    direita) com suporte nativo Markdown (`:---`, `:---:`, `---:`).
+  - **Transposição de Tabela:** Botão para inverter linhas e colunas instantaneamente, útil para
+    dados organizados horizontalmente.
+  - **Ordenação por Coluna:** Ordenação crescente/decrescente por qualquer coluna, com detecção
+    automática de tipo (numérico/alfabético).
+  - **Formatação Avançada:**
+    - Escape automático de caracteres especiais Markdown (`|`, `\`).
+    - Remoção automática de colunas vazias.
+  - **Exportação Multi-Formato:**
+    - **Markdown:** Formato padrão com suporte a alinhamento.
+    - **HTML Table:** Tabelas HTML completas com `<thead>` e `<tbody>`.
+    - **LaTeX Table:** Tabelas LaTeX prontas para documentos acadêmicos.
+    - **ASCII Table:** Tabelas em texto puro com bordas ASCII para documentação.
+  - **Estatísticas e Análise de Dados:**
+    - Detecção automática de tipo de dados (string, number, boolean, mixed).
+    - Contagem de valores únicos e células vazias por coluna.
+    - Estatísticas numéricas (mín, máx, média) para colunas numéricas.
+    - Interface visual com badges e cards informativos.
+  - **Interface com 3 Painéis:**
+    - **Painel de Entrada:** Editor Monaco com syntax highlighting para CSV/JSON.
+    - **Painel de Saída:** Preview da tabela gerada com syntax highlighting.
+    - **Painel de Opções:** Tabs organizadas (Formato, Alinhamento, Transformar, Estatísticas).
+  - **Componente TableOptions:** Interface completa para controlar todas as opções avançadas.
+  - **Persistência de Opções:** Opções mantidas ao reconverter, permitindo ajustes iterativos.
+  - **Feedback Visual:** Toasts informativos para todas as operações (transpor, ordenar, exportar).
+
+### Modificado
+
+- **Excel/CSV to Markdown - Refatoração Completa:**
+  - Arquitetura modular com separação de responsabilidades (utils, input, output, options).
+  - Arquivo `constants.ts` para exemplos reutilizáveis.
+  - Funções auxiliares exportadas para uso externo (`transposeTable`, `sortByColumn`,
+    `filterByColumn`, `getAllColumnStats`).
+  - Interface `ConversionOptions` para tipagem forte de todas as opções.
+  - Interface `ColumnStats` para estatísticas estruturadas.
+  - Suporte a `ConversionOptions` em todas as funções de conversão (`csvToMarkdown`,
+    `jsonToMarkdown`, `excelToMarkdown`).
+  - Layout responsivo com 3 painéis redimensionáveis (35%-40%-25%).
+
 ## [0.12.0] - 2025-01-08
 
 ### Modificado
@@ -17,8 +112,8 @@ adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
     renderizados de forma profissional.
   - **Layout Visual Melhorado:** Cards de endpoints e schemas com melhor espaçamento, cores e
     hierarquia visual.
-  - **Componentes Customizados:** Integração completa com `getMarkdownComponents()` para renderização
-    consistente e profissional do markdown gerado.
+  - **Componentes Customizados:** Integração completa com `getMarkdownComponents()` para
+    renderização consistente e profissional do markdown gerado.
   - **Informações Contextuais:** Adicionado texto informativo sobre suporte OpenAPI 3.0+ e resolução
     automática de referências.
 
@@ -32,19 +127,18 @@ adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
     usando `@apidevtools/swagger-parser`.
   - **Resolução de Referências:** Resolve automaticamente todas as referências `$ref` na
     especificação.
-  - **Geração de Markdown:** Converte a especificação em Markdown estruturado com seções
-    organizadas (Servidores, Autenticação, Endpoints, Schemas).
+  - **Geração de Markdown:** Converte a especificação em Markdown estruturado com seções organizadas
+    (Servidores, Autenticação, Endpoints, Schemas).
   - **Preview Interativo:** Visualização em tempo real da documentação gerada com syntax
     highlighting.
-  - **Agrupamento por Tags:** Endpoints organizados automaticamente por tags para melhor
-    navegação.
+  - **Agrupamento por Tags:** Endpoints organizados automaticamente por tags para melhor navegação.
   - **Tabelas de Parâmetros:** Parâmetros, request body e responses formatados em tabelas limpas.
   - **Schemas Detalhados:** Documentação completa de todos os schemas com propriedades, tipos e
     exemplos.
   - **Badges de Métodos HTTP:** Identificação visual de métodos (GET, POST, PUT, DELETE, etc.) com
     cores específicas.
-  - **Exportação Múltipla:** Download direto em Markdown ou integração com MD to PDF para gerar
-    PDF profissional.
+  - **Exportação Múltipla:** Download direto em Markdown ou integração com MD to PDF para gerar PDF
+    profissional.
   - **2 Exemplos Inclusos:** Pet Store API (completo) e API Simples (YAML minimalista).
   - **Layout com Tabs:** Interface organizada com abas para Editor/Exemplos e Preview/Markdown.
   - **Stats em Tempo Real:** Contadores de endpoints, schemas e versão da API.
