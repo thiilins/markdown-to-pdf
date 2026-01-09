@@ -5,9 +5,9 @@ import { CONFIG_MODAL_SHOW_OPTIONS } from '@/components/settings-modal/constants
 import { cn } from '@/lib/utils'
 import { useApp } from '@/shared/contexts/appContext'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Github, Moon, Settings, Sun } from 'lucide-react'
+import { Github, History, Moon, Settings, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import * as React from 'react'
 import UserNav from './user-nav'
 
@@ -22,6 +22,8 @@ export const GlobalHeaderMenu = () => {
       window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
     )
   }, [])
+
+  const router = useRouter()
 
   return (
     <div className='flex items-center gap-1'>
@@ -64,6 +66,21 @@ export const GlobalHeaderMenu = () => {
             }}
           />
         )}
+
+        <IconButtonTooltip
+          variant='ghost'
+          icon={History}
+          onClick={() => router.push('/changelog')}
+          content='Changelog'
+          className={{
+            button: cn(
+              'h-9 w-9 rounded-xl text-zinc-400',
+              'hover:bg-primary/10 hover:text-primary',
+              'transition-all duration-300 hover:rotate-90',
+            ),
+            icon: 'h-[18px] w-[18px]',
+          }}
+        />
       </div>
 
       {/* Separador */}

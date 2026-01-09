@@ -2,7 +2,8 @@
 
 import { Button } from '@/components/ui/button'
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { Sparkles, Zap } from 'lucide-react'
+import { History, Sparkles, Zap } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { HERO_VIDEO } from './constants'
 import { scrollToSection } from './utils'
 
@@ -11,7 +12,7 @@ export const HeroSectionComponent = () => {
   const yContent = useTransform(scrollY, [0, 500], [0, 150])
   const opacityContent = useTransform(scrollY, [0, 300], [1, 0])
   const scaleVideo = useTransform(scrollY, [0, 1000], [1, 1.2])
-
+  const router = useRouter()
   return (
     <section className='relative h-screen w-full overflow-hidden bg-slate-950'>
       {/* Background Video Layer */}
@@ -62,10 +63,21 @@ export const HeroSectionComponent = () => {
           <div className='mt-12 flex flex-col items-center gap-6 sm:flex-row'>
             <Button
               onClick={() => scrollToSection('tools')}
-              className='group relative h-14 w-full min-w-[200px] overflow-hidden rounded-full bg-white px-8 text-black transition-all hover:scale-105 hover:bg-slate-200 sm:w-auto'>
-              <div className='absolute inset-0 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-0 transition-opacity group-hover:opacity-10' />
-              <span className='relative flex items-center justify-center gap-2 text-base font-bold tracking-wide uppercase'>
-                <Zap fill='currentColor' className='h-4 w-4' /> Acessar Ferramentas
+              className='group relative h-14 w-full overflow-hidden rounded-full bg-white px-8 text-black shadow-lg transition-all hover:scale-105 hover:bg-purple-600 hover:text-white hover:shadow-[0_0_30px_-5px_rgba(168,85,247,0.6)] sm:w-[240px]'>
+              <div className='absolute inset-0 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-0 transition-opacity group-hover:opacity-100' />
+              <span className='relative flex items-center justify-center gap-2 text-base font-bold tracking-wide transition-colors'>
+                <Zap fill='currentColor' className='h-5 w-5 transition-all group-hover:scale-110' />{' '}
+                Explorar Ferramentas
+              </span>
+            </Button>
+            <Button
+              onClick={() => router.push('/changelog')}
+              variant='outline'
+              className='group relative h-14 w-full overflow-hidden rounded-full border-2 border-purple-500/30 bg-transparent px-8 text-purple-300 transition-all hover:scale-105 hover:border-purple-400 hover:bg-purple-500/10 hover:text-purple-200 sm:w-[240px]'>
+              <div className='absolute inset-0 bg-linear-to-r from-purple-500 via-indigo-500 to-blue-500 opacity-0 transition-opacity group-hover:opacity-20' />
+              <span className='relative flex items-center justify-center gap-2 text-base font-bold tracking-wide transition-colors'>
+                <History className='h-5 w-5 transition-all group-hover:rotate-12 group-hover:text-purple-200' />
+                Ver Changelog
               </span>
             </Button>
           </div>
