@@ -29,16 +29,7 @@
 - Permita que o usuário teste suas cores em textos reais com fontes diferentes (Serif, Sans, Mono) e
   pesos diferentes (Thin a Black), sobre fundos claros e escuros da paleta.
 
-### 3. Workflow & Produtividade
-
-- **Histórico Local & "Likes":**
-- Uma sidebar ou drawer com "Paletas Recentes". O usuário testou uma cor, mudou, se arrependeu? Ele
-  pode clicar no histórico e voltar.
-- Opção de "Favoritar" uma paleta para que ela não suma.
-
-- **Compartilhamento via URL (State in URL):**
-- Codifique a paleta na URL (ex: `?colors=ffffff-000000-ff0000`). Assim, se eu criar uma paleta,
-  posso mandar o link pro meu chefe ou desenvolvedor e eles veem exatamente a mesma coisa.
+#
 
 ### 5. Integração Específica (Seu Diferencial)
 
