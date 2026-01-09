@@ -42,7 +42,7 @@ export const Modules_Front: ModuleItem[] = [
         icon: FileEdit,
         description: 'Editor Markdown com visualização em tempo real',
         long_description:
-          'Editor Markdown profissional com preview ao vivo, syntax highlighting, suporte a tabelas GFM, emojis, mermaid diagrams, math equations (LaTeX), code blocks com 50+ linguagens, auto-save, modo escuro/claro, exportação para HTML/PDF, e interface split-screen responsiva. Perfeito para documentação técnica, READMEs, e artigos.',
+          'Editor Markdown profissional baseado em Monaco Editor com preview ao vivo sincronizado, toolbar completa (bold, italic, strikethrough, headings H1-H6, listas ordenadas/não-ordenadas, checkboxes, blockquotes, links, imagens, code blocks, inline code, tabelas dinâmicas com gerador visual, callouts/admonitions em 5 tipos: NOTE, TIP, IMPORTANT, WARNING, CAUTION), gerador automático de TOC (Table of Contents), busca/substituição (Ctrl+F), undo/redo, formatação automática com Prettier, syntax highlighting para Markdown, minimap, line numbers, word wrap, scroll sincronizado entre editor e preview, suporte a GFM (GitHub Flavored Markdown), emojis, task lists, horizontal rules, page breaks, múltiplos temas (light/dark/auto), status bar com contagem de palavras/caracteres/linhas, salvar/carregar Gists do GitHub com tags e metadados, histórico de documentos, e interface responsiva com tabs mobile. Ideal para documentação técnica, READMEs, artigos, e notas.',
       },
       {
         label: 'MD to PDF',
@@ -50,7 +50,7 @@ export const Modules_Front: ModuleItem[] = [
         icon: FileDown,
         description: 'Exporte documentação Markdown para PDF',
         long_description:
-          'Converta arquivos Markdown em PDFs profissionais com formatação preservada, suporte a tabelas, code blocks com syntax highlighting, imagens, links, listas, headings, e estilos customizados. Ideal para gerar relatórios, documentação técnica, ebooks, e apresentações a partir de Markdown.',
+          'Converta Markdown em PDFs profissionais com paginação automática, preview realista em tempo real, editor Monaco integrado, configuração de página (A4, Letter, Legal, tamanhos customizados), margens ajustáveis, header/footer personalizáveis com variáveis dinâmicas ({{page}}, {{totalPages}}, {{title}}, {{date}}), posicionamento flexível (left/center/right), múltiplos temas de estilo (GitHub, GitLab, VS Code, Academic, Minimal, Modern, Classic), tipografia customizável (fonte, tamanho, espaçamento), suporte completo a GFM (tabelas, task lists, code blocks com syntax highlighting, emojis, blockquotes), quebras de página manuais, geração automática de TOC, validação de links, sanitização de HTML, exportação direta para PDF via navegador, scroll sincronizado editor-preview, e interface responsiva. Perfeito para documentação técnica, relatórios, ebooks, artigos acadêmicos, e apresentações.',
       },
       {
         label: 'MD to HTML',
@@ -75,6 +75,14 @@ export const Modules_Front: ModuleItem[] = [
         description: 'Converta especificações OpenAPI/Swagger em documentação Markdown',
         long_description:
           'Gere documentação Markdown profissional a partir de especificações OpenAPI 3.0/Swagger 2.0. Cria tabelas de endpoints, parâmetros, schemas, exemplos de request/response, códigos de status HTTP, e autenticação. Suporta validação de spec, resolução de $ref, syntax highlighting, e organização por tags. Perfeito para READMEs de API e documentação técnica.',
+      },
+      {
+        label: 'Code Snapshot',
+        href: '/code-snapshot',
+        icon: Camera,
+        description: 'Crie snapshots profissionais de código',
+        long_description:
+          'Gere imagens profissionais de código com editor Monaco integrado, 50+ temas de sintaxe (VS Code Dark+, Dracula, One Dark, GitHub, Monokai, Solarized, Nord, etc.), 20+ fontes monospace (Fira Code, JetBrains Mono, Cascadia Code, Source Code Pro, Hack, etc.), 3 window themes (macOS, Windows, Linux) com controles realistas, backgrounds customizáveis (cores sólidas, 20+ gradientes preset, upload de imagens), line numbers configuráveis, header customizável (título, linguagem, posição), footer com até 3 informações (linhas, caracteres, linguagem, texto custom), modo diff (comparação lado a lado com highlight de mudanças), highlight de linhas específicas (cor e opacidade ajustáveis), anotações flutuantes com setas e notas explicativas, tamanhos preset (Twitter 1200x675, Instagram 1080x1080, GitHub 1280x640, LinkedIn, Custom), zoom (50%-200%), padding ajustável, border radius, shadow intensity, word wrap, font ligatures, alinhamento vertical do conteúdo, importação de Gists do GitHub, compartilhamento via URL com estado completo, exportação em PNG de alta qualidade ou clipboard, e preview em tempo real. Ideal para tutoriais, documentação, posts técnicos, apresentações, e redes sociais.',
       },
     ],
   },
@@ -193,7 +201,7 @@ export const Modules_Front: ModuleItem[] = [
         icon: Table,
         description: 'Converta planilhas em tabelas Markdown',
         long_description:
-          'Converta Excel (.xlsx, .xls) e CSV em tabelas Markdown com alinhamento de colunas (esquerda, centro, direita), transposição, ordenação, filtros, remoção de colunas vazias, e estatísticas (tipos, valores únicos, min/max/média). Suporta upload de arquivos, paste de dados, e exportação para HTML/LaTeX/ASCII. Preview em tempo real com syntax highlighting.',
+          'Converta Excel (.xlsx, .xls), CSV e JSON em tabelas Markdown com 3 modos de entrada (paste CSV, paste JSON, upload de arquivos com drag & drop), alinhamento individual por coluna (esquerda :---, centro :---:, direita ---:), transposição de tabela (inverter linhas/colunas), ordenação por coluna (crescente/decrescente, numérica/alfabética), filtros por coluna, escape automático de caracteres especiais Markdown (|, \\), remoção de colunas vazias, exportação multi-formato (Markdown, HTML com <thead>/<tbody>, LaTeX para documentos acadêmicos, ASCII para terminal), estatísticas detalhadas por coluna (tipo de dados: string/number/boolean/mixed, valores únicos, células vazias, min/max/média para números), preview em tempo real com syntax highlighting, editor Monaco para código fonte, tabs organizadas (Entrada, Saída com preview/código/estatísticas, Opções), interface responsiva com ToolShell, e validações robustas. Ideal para documentação de APIs, tabelas de dados, relatórios, e conversão de planilhas.',
       },
       {
         label: 'Color Studio',
