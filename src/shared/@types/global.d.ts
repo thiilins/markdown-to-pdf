@@ -126,12 +126,14 @@ interface Modules {
   label: string
   href: string
   description: string
+  long_description?: string
   icon: React.ElementType
 }
 interface ModuleItem {
   label: string
   href?: string
   description?: string
+  long_description?: string
   icon: React.ElementType
   submenu?: Modules[]
 }

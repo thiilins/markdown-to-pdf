@@ -61,19 +61,6 @@ Focada em performance web e limpeza de código frontend.
 - `svgo`: O padrão da indústria para otimização de SVGs. Funciona bem no browser via Web Workers
   para não travar a UI.
 
-### 9. Palette Studio & WCAG Checker (Design para Devs)
-
-Alinhado com sua preocupação em não parecer "feito por IA", esta ferramenta foca em dados
-matemáticos de design.
-
-- **O que faz:** Gera paletas de cores a partir de uma cor base ou imagem, mas o diferencial é o
-  **validador de contraste WCAG 2.1** (AA/AAA) integrado.
-- **Valor Agregado:** Ajuda devs a criarem interfaces acessíveis. Garante que o texto seja legível
-  sobre o fundo.
-- **Bibliotecas Sugeridas:**
-- `chroma-js`: Para manipulação de cores e cálculos de contraste.
-- `color-thief`: Para extrair cores dominantes de imagens.
-
 ### 10. .env Architect (Manager & Template Generator)
 
 Gerenciar variáveis de ambiente pode ser perigoso se feito errado.
