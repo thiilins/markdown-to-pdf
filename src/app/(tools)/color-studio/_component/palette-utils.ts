@@ -5,7 +5,7 @@
 
 import { APCAcontrast, sRGBtoY } from 'apca-w3'
 import chroma, { type Color } from 'chroma-js'
-import type { ExportFormat, PaletteType } from './constants'
+import type { PaletteType } from './constants'
 import { WCAG_LEVELS } from './constants'
 
 /**
@@ -373,11 +373,7 @@ export async function extractColorsFromImage(imageFile: File): Promise<string[]>
 /**
  * Exporta paleta em diferentes formatos
  */
-export function exportPalette(
-  colors: ColorInfo[],
-  format: ExportFormat,
-  semanticNames?: string[],
-): string {
+export function exportPalette(colors: ColorInfo[], format: any, semanticNames?: string[]): string {
   switch (format) {
     case 'shadcn':
       return exportShadcn(colors, 'palette')

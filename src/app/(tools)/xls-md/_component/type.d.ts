@@ -1,5 +1,5 @@
-type ColumnAlignment = 'left' | 'center' | 'right'
-type ExportFormat = 'markdown' | 'html' | 'latex' | 'ascii'
+type XlsMDColumnAlignment = 'left' | 'center' | 'right'
+type XlsMDExportFormat = 'markdown' | 'html' | 'latex' | 'ascii'
 
 interface ConversionResult {
   markdown: string

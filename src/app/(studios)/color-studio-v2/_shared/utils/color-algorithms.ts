@@ -4,7 +4,6 @@
 
 import chroma, { type Color } from 'chroma-js'
 import ntc from 'ntc'
-import type { ColorData, PaletteAlgorithm } from '../types'
 
 /**
  * Converte Color do chroma.js para ColorData
@@ -24,6 +23,9 @@ export function colorToData(color: Color, locked = false): ColorData {
     hex,
     rgb,
     hsl,
+    lab: color.lab().toString(),
+    cmyk: color.cmyk().toString(),
+    rgba: color.rgba().toString(),
     oklch: oklchString,
     name: colorName,
     locked,

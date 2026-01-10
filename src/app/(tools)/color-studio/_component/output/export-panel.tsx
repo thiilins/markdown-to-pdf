@@ -15,7 +15,7 @@ import {
 import { Copy, Download, Edit2, RotateCcw, Terminal } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { EXPORT_FORMATS, type ExportFormat } from '../constants'
+import { EXPORT_FORMATS, type ColorStudioExportFormat } from '../constants'
 
 import { exportPalette } from '../palette-utils'
 
@@ -26,7 +26,7 @@ interface ExportPanelProps {
 const DEFAULT_SEMANTIC_NAMES = ['primary', 'secondary', 'accent', 'muted', 'destructive']
 
 export function ExportPanel({ colors }: ExportPanelProps) {
-  const [format, setFormat] = useState<ExportFormat>('css')
+  const [format, setFormat] = useState<ColorStudioExportFormat>('css')
   const [code, setCode] = useState('')
   const [semanticNames, setSemanticNames] = useState<string[]>([])
   const [isEditingNames, setIsEditingNames] = useState(false)
@@ -155,7 +155,7 @@ export function ExportPanel({ colors }: ExportPanelProps) {
             <span className='text-muted-foreground text-xs font-medium'>Export Preview</span>
           </div>
           <div className='flex items-center gap-2'>
-            <Select value={format} onValueChange={(v) => setFormat(v as ExportFormat)}>
+            <Select value={format} onValueChange={(v) => setFormat(v as ColorStudioExportFormat)}>
               <SelectTrigger className='h-8 w-[140px] text-xs'>
                 <SelectValue />
               </SelectTrigger>

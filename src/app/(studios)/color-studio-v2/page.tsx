@@ -216,7 +216,7 @@ export default function ColorStudioV2Page() {
 
                 {/* Linha 4 - Cores maiores */}
                 <motion.div
-                  className='aspect-2/1 col-span-2 rounded-2xl shadow-lg'
+                  className='col-span-2 aspect-2/1 rounded-2xl shadow-lg'
                   style={{ backgroundColor: heroPalettes[currentPalette][0] }}
                   animate={{
                     backgroundColor: heroPalettes[currentPalette][0],

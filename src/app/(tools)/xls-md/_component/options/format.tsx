@@ -23,7 +23,7 @@ export function ExcelOptionsFormat({
   options: ConversionOptions
   onOptionsChange: (options: ConversionOptions) => void
   openSections: Record<string, boolean>
-  handleFormatChange: (format: ExportFormat) => void
+  handleFormatChange: (format: XlsMDExportFormat) => void
   toggleSection: (section: string) => void
 }) {
   return (
@@ -42,7 +42,7 @@ export function ExcelOptionsFormat({
           <Label className='text-xs'>Formato de Exportação</Label>
           <Select
             value={options.format || 'markdown'}
-            onValueChange={(value) => handleFormatChange(value as ExportFormat)}>
+            onValueChange={(value) => handleFormatChange(value as XlsMDExportFormat)}>
             <SelectTrigger className='h-9'>
               <SelectValue />
             </SelectTrigger>

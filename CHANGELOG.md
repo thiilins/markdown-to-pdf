@@ -9,6 +9,116 @@ adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ### Adicionado
 
+- **Color Studio v2 - Color Picker Personalizado:**
+  - **Componente Reutilizável**:
+    - Criado em `_shared/components/ColorPicker.tsx`
+    - Pode ser usado em todo o Color Studio v2
+    - Design profissional inspirado em Coolors.co
+  - **Canvas Interativo de Saturação/Luminosidade**:
+    - Clique ou arraste para escolher a cor
+    - Gradiente 2D (saturação horizontal, luminosidade vertical)
+    - Indicador visual de posição (círculo branco)
+    - Atualização em tempo real
+  - **Barra de Matiz (Hue)**:
+    - Espectro completo de cores (0-360°)
+    - Clique ou arraste para mudar a cor base
+    - Indicador visual de posição (linha branca)
+  - **Input HEX Manual**:
+    - Digite diretamente o código da cor
+    - Validação automática de HEX válido
+    - Formatação automática (uppercase)
+    - Botão de copiar com feedback visual
+  - **Formatos Adicionais**:
+    - RGB exibido automaticamente
+    - HSL exibido automaticamente
+    - Todos os valores atualizados em tempo real
+  - **UX Aprimorada**:
+    - Preview grande da cor selecionada
+    - Fecha ao clicar fora (click outside)
+    - Suporte a dark mode
+    - Animações suaves
+    - Sombras e bordas elegantes
+  - **Integração no Generator**:
+    - Abre ao clicar no HEX da cor
+    - Atualiza a cor em tempo real
+    - Posicionado abaixo do HEX (centralizado)
+
+- **Color Studio v2 - Algoritmos Harmônicos de Cores:**
+  - **Validação de Distância entre Cores**:
+    - Usa `deltaE` (diferença perceptual CIE)
+    - Threshold de 25-30 para cores distintas
+    - Garante que não haja cores muito similares na paleta
+    - Tenta até 50 vezes gerar uma cor diferente
+  - **Algoritmo Análogo (Padrão)**:
+    - Cores adjacentes no círculo cromático (±20° e ±40°)
+    - Variação de saturação (80%-120%)
+    - Variação de luminosidade (80%-120%)
+    - Resultado: Paleta suave e harmoniosa
+  - **Algoritmo Complementar**:
+    - Cores opostas (180°) com variações de brilho
+    - Contraste alto entre cores
+    - Resultado: Vibrante e dinâmico
+  - **Algoritmo Tríade**:
+    - 3 cores espaçadas 120° + variações
+    - Distribuição equilibrada no círculo cromático
+    - Resultado: Equilibrado e versátil
+  - **Algoritmo Random**:
+    - Completamente aleatório
+    - Garantia de distância mínima entre cores
+    - Resultado: Imprevisível e criativo
+  - **Base Color Otimizada**:
+    - Saturação: 50-90% (evita cores apagadas/vibrantes demais)
+    - Luminosidade: 40-70% (evita cores muito escuras/claras)
+    - Hue: Totalmente aleatório (0-360°)
+
+- **Color Studio v2 - Melhorias de Layout e UX:**
+  - **Botões de Ações em Linha Horizontal**:
+    - Info, Shades e Lock ficam lado a lado
+    - Centralizados abaixo do nome da cor
+    - Melhor aproveitamento do espaço
+    - Mais intuitivo e fácil de usar
+  - **Layout Centralizado e Balanceado**:
+    - Conteúdo verticalmente centralizado
+    - Espaçamento equilibrado (top/center/bottom)
+    - Remove/Drag no topo
+    - HEX e Nome no centro
+    - Ações na parte inferior
+  - **Shades Picker Otimizado**:
+    - Cores ocupam toda a largura da coluna
+    - Hover com `brightness-110` (não sai da coluna)
+    - Indicador "Atual" para a cor selecionada
+    - 21 variações em OKLCH
+  - **Sistema de Cores Mantém 5 Cores**:
+    - Ao remover uma cor, adiciona automaticamente outra
+    - Sempre mantém 5 cores na paleta
+    - Feedback com toasts
+  - **Layout Responsivo Sem Scroll**:
+    - Desktop: colunas verticais ocupam 100% da altura
+    - Mobile: colunas horizontais com scroll vertical
+    - Sem scroll horizontal na web
+  - **Traduções Completas para Português**:
+    - Todos os textos do modal de info
+    - Botões e labels
+    - Mensagens de feedback (toasts)
+    - Formatos de cor
+    - Propriedades da cor
+
+- **Color Studio v2 - Psicologia das Cores:**
+  - **Utilitário `color-psychology.ts`**:
+    - Base de conhecimento em Português do Brasil
+    - Análise automática baseada em HSL
+    - 11 famílias de cores mapeadas
+  - **Dados por Família de Cor**:
+    - Nome da família (ex: "Família Vermelha")
+    - Tags descritivas (ex: "Intenso", "Quente", "Urgente")
+    - Psicologia (ex: "Paixão", "Energia", "Perigo")
+    - Significado detalhado
+    - Aplicações práticas (ex: "Fast Food", "Botões de Ação")
+  - **Integração no Modal de Info**:
+    - Exibe automaticamente ao abrir o modal
+    - Atualiza conforme a cor muda
+    - Layout organizado por seções
+
 - **Color Studio v2 - Funcionalidades Avançadas do Generator:**
   - **Nomes Reais das Cores**:
     - Integração com biblioteca `ntc` (Name That Color)

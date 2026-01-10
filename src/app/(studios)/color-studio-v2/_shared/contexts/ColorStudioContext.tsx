@@ -1,16 +1,17 @@
 'use client'
 
-import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useRef, type ReactNode } from 'react'
 import { toast } from 'sonner'
-import type {
-  ColorData,
-  ColorStudioContextType,
-  ExportFormat,
-  PaletteAlgorithm,
-  PaletteHistory,
-  PaletteState,
-} from '../types'
-import { generatePaletteByAlgorithm, generateRandomColor } from '../utils/color-algorithms'
+
+import usePersistedStateInDB from '@/hooks/use-persisted-in-db'
+import { useRouter } from 'next/navigation'
+import {
+  addRandomColorFn,
+  generateNewPaletteFn,
+  removeColorFn,
+  shuffleColorsFn,
+  toogleColorLockFn,
+} from '../utils'
 
 const ColorStudioContext = createContext<ColorStudioContextType | undefined>(undefined)
 
@@ -19,206 +20,222 @@ interface ColorStudioProviderProps {
 }
 
 export function ColorStudioProvider({ children }: ColorStudioProviderProps) {
-  // Estado principal da paleta
-  const [palette, setPalette] = useState<PaletteState>({
-    colors: [],
-    algorithm: 'random',
+  const router = useRouter()
+  const [pallete, setPallete] = usePersistedStateInDB<{
+    color: GeneratorColor[]
+    algorithm: PaletteAlgorithm
+  }>('color-studio-v2-pallete', {
+    color: [],
+    algorithm: 'complementary',
   })
-
-  // Histórico (undo/redo)
-  const [historyStack, setHistoryStack] = useState<PaletteState[]>([])
-  const [historyIndex, setHistoryIndex] = useState(-1)
-
-  // Histórico salvo
-  const [history, setHistory] = useState<PaletteHistory[]>([])
-
-  // Gerar nova paleta
-  const generatePalette = useCallback(
-    (algorithm?: PaletteAlgorithm) => {
-      const algo = algorithm || palette.algorithm || 'random'
-      const baseColor = palette.colors[0]?.hex
-
-      const newColors = generatePaletteByAlgorithm(algo, baseColor, palette.colors)
-
-      const newPalette: PaletteState = {
-        colors: newColors,
-        algorithm: algo,
-        baseColor,
+  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const [historyState, setHistoryState] = usePersistedStateInDB<{
+    history: PaletteHistory[]
+    historyIndex: number
+  }>('color-studio-v2-history', {
+    history: [],
+    historyIndex: -1,
+  })
+  const onAddToHistory = useCallback(
+    (colors: GeneratorColor[], algorithm: PaletteAlgorithm) => {
+      const newHistoryItem: PaletteHistory = {
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        colors: colors,
+        algorithm: algorithm,
+        timestamp: Date.now(),
+        isFavorite: false,
       }
 
-      setPalette(newPalette)
-
-      // Adiciona ao histórico de undo/redo
-      setHistoryStack((prev) => [...prev.slice(0, historyIndex + 1), newPalette])
-      setHistoryIndex((prev) => prev + 1)
+      setHistoryState({
+        history: [newHistoryItem, ...historyState.history].slice(0, 50),
+        historyIndex: historyState.historyIndex + 1,
+      })
     },
-    [palette, historyIndex],
+    [historyState, setHistoryState],
   )
 
-  // Toggle lock de uma cor
-  const toggleLock = useCallback((colorId: string) => {
-    setPalette((prev) => ({
-      ...prev,
-      colors: prev.colors.map((c) => (c.id === colorId ? { ...c, locked: !c.locked } : c)),
-    }))
-  }, [])
-
-  // Adicionar cor
-  const addColor = useCallback((color?: ColorData) => {
-    const newColor = color || generateRandomColor()
-    setPalette((prev) => ({
-      ...prev,
-      colors: [...prev.colors, newColor],
-    }))
-  }, [])
-
-  // Remover cor
-  const removeColor = useCallback((colorId: string) => {
-    setPalette((prev) => ({
-      ...prev,
-      colors: prev.colors.filter((c) => c.id !== colorId),
-    }))
-  }, [])
-
-  // Reordenar cores (drag & drop)
-  const reorderColors = useCallback((startIndex: number, endIndex: number) => {
-    setPalette((prev) => {
-      const newColors = [...prev.colors]
-      const [removed] = newColors.splice(startIndex, 1)
-      newColors.splice(endIndex, 0, removed)
-      return { ...prev, colors: newColors }
-    })
-  }, [])
-
-  // Adicionar ao histórico salvo
-  const addToHistory = useCallback(() => {
-    const newHistoryItem: PaletteHistory = {
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      colors: palette.colors,
-      algorithm: palette.algorithm,
-      timestamp: Date.now(),
-      isFavorite: false,
-    }
-
-    setHistory((prev) => [newHistoryItem, ...prev].slice(0, 50)) // Máximo 50
-    toast.success('Paleta salva no histórico!')
-  }, [palette])
-
   // Restaurar do histórico
-  const restoreFromHistory = useCallback(
+  const onRestoreFromHistory = useCallback(
     (historyId: string) => {
-      const item = history.find((h) => h.id === historyId)
-      if (item) {
-        setPalette({
-          colors: item.colors,
-          algorithm: item.algorithm,
-        })
-        toast.success('Paleta restaurada!')
+      const item = historyState.history.find((h) => h.id === historyId)
+      if (!item) {
+        return pallete.color
       }
+      setPallete({
+        color: item.colors,
+        algorithm: item.algorithm,
+      })
+      toast.success('Paleta restaurada!')
+      return item.colors
     },
-    [history],
+    [historyState.history, pallete.color, setPallete],
   )
 
   // Toggle favorito
-  const toggleFavorite = useCallback((historyId: string) => {
-    setHistory((prev) =>
-      prev.map((h) => (h.id === historyId ? { ...h, isFavorite: !h.isFavorite } : h)),
-    )
-  }, [])
-
-  // Limpar histórico
-  const clearHistory = useCallback(() => {
-    setHistory((prev) => prev.filter((h) => h.isFavorite))
-    toast.success('Histórico limpo! (Favoritos mantidos)')
-  }, [])
-
-  // Export paleta
-  const exportPalette = useCallback(
-    (format: ExportFormat): string => {
-      const colors = palette.colors
-
-      switch (format) {
-        case 'css':
-          return colors.map((c, i) => `--color-${i + 1}: ${c.hex};`).join('\n')
-
-        case 'scss':
-          return colors.map((c, i) => `$color-${i + 1}: ${c.hex};`).join('\n')
-
-        case 'tailwind':
-          return `colors: {\n${colors.map((c, i) => `  'brand-${i + 1}': '${c.hex}',`).join('\n')}\n}`
-
-        case 'json':
-          return JSON.stringify(
-            colors.map((c) => c.hex),
-            null,
-            2,
-          )
-
-        case 'figma':
-          return JSON.stringify(
-            colors.map((c, i) => ({
-              name: `Color ${i + 1}`,
-              value: c.hex,
-            })),
-            null,
-            2,
-          )
-
-        default:
-          return colors.map((c) => c.hex).join(', ')
-      }
+  const onToggleFavorite = useCallback(
+    (historyId: string) => {
+      const newState = historyState.history.map((h) =>
+        h.id === historyId ? { ...h, isFavorite: !h.isFavorite } : h,
+      )
+      setHistoryState({
+        ...historyState,
+        history: newState,
+      })
     },
-    [palette],
+    [historyState, setHistoryState],
   )
 
-  // Sincronizar com URL (cada página implementa como quiser)
-  const syncToURL = useCallback(() => {
-    // Implementado por cada página individualmente
-  }, [])
-
-  // Carregar da URL (cada página implementa como quiser)
-  const loadFromURL = useCallback(() => {
-    // Implementado por cada página individualmente
-  }, [])
+  const onShuffleColors = useCallback(() => {
+    const shuffledColors = shuffleColorsFn(pallete.color)
+    setPallete({
+      color: shuffledColors,
+      algorithm: pallete.algorithm,
+    })
+    return shuffledColors
+  }, [pallete, setPallete])
+  const onClearHistory = useCallback(() => {
+    setHistoryState({
+      history: [],
+      historyIndex: 0,
+    })
+    toast.success('Histórico limpo! ')
+  }, [setHistoryState])
 
   // Undo
-  const undo = useCallback(() => {
-    if (historyIndex > 0) {
-      setHistoryIndex((prev) => prev - 1)
-      setPalette(historyStack[historyIndex - 1])
+  const onUndo = useCallback(() => {
+    if (historyState.historyIndex && historyState.historyIndex > 0) {
+      setHistoryState({
+        ...historyState,
+        historyIndex: historyState.historyIndex - 1,
+      })
+      return historyState.history[historyState.historyIndex - 1]?.colors
     }
-  }, [historyIndex, historyStack])
+  }, [historyState, setHistoryState])
 
   // Redo
-  const redo = useCallback(() => {
-    if (historyIndex < historyStack.length - 1) {
-      setHistoryIndex((prev) => prev + 1)
-      setPalette(historyStack[historyIndex + 1])
+  const onRedo = useCallback(() => {
+    if (historyState.historyIndex && historyState.historyIndex < historyState.history.length - 1) {
+      setHistoryState({
+        ...historyState,
+        historyIndex: historyState.historyIndex + 1,
+      })
+      return historyState.history[historyState.historyIndex + 1]?.colors
     }
-  }, [historyIndex, historyStack])
+  }, [historyState, setHistoryState])
 
+  const syncColorsToURL = useCallback(
+    (colorsToSync: GeneratorColor[], immediate = false) => {
+      //  o timeout anterior se existir
+      if (syncTimeoutRef.current) {
+        clearTimeout(syncTimeoutRef.current)
+      }
+
+      const updateURL = () => {
+        const hexColors = colorsToSync.map((c) => c.hex.replace('#', '')).join('-')
+        router.replace(`?colors=${hexColors}`, { scroll: false })
+      }
+      // Se for imediato (ex: gerar nova paleta, adicionar/remover cor), executa agora
+      if (immediate) {
+        updateURL()
+      } else {
+        syncTimeoutRef.current = setTimeout(updateURL, 300)
+      }
+    },
+    [router],
+  )
+  const onGenerateNewPalette = useCallback(() => {
+    const newPallete = generateNewPaletteFn(pallete.color, pallete.algorithm)
+    setPallete({
+      color: newPallete,
+      algorithm: pallete.algorithm,
+    })
+    return newPallete
+  }, [pallete, setPallete])
+
+  const onRemoveColor = useCallback(
+    (id: string) => {
+      const newColors = removeColorFn(pallete.color, id)
+      setPallete({
+        color: newColors,
+        algorithm: pallete.algorithm,
+      })
+      return newColors
+    },
+    [pallete, setPallete],
+  )
+  const onAddColor = useCallback(
+    (index?: number) => {
+      const indexToAdd = index ?? pallete.color.length
+      const newColors = addRandomColorFn(pallete.color, pallete.algorithm, indexToAdd)
+      setPallete({
+        color: newColors,
+        algorithm: pallete.algorithm,
+      })
+      return newColors
+    },
+    [pallete, setPallete],
+  )
+  const onUpdateColor = useCallback(
+    (id: string, hex: string) => {
+      const newColors = pallete.color.map((c) => (c.id === id ? { ...c, hex } : c))
+      setPallete({
+        color: newColors,
+        algorithm: pallete.algorithm,
+      })
+      return newColors
+    },
+    [pallete, setPallete],
+  )
+  const onToggleLock = useCallback(
+    (id: string) => {
+      setPallete({
+        color: toogleColorLockFn(pallete.color, id),
+        algorithm: pallete.algorithm,
+      })
+    },
+    [pallete, setPallete],
+  )
+  const onSetAlgorithm = useCallback(
+    (algorithm: PaletteAlgorithm) => {
+      setPallete({
+        color: pallete.color,
+        algorithm: algorithm,
+      })
+    },
+    [pallete, setPallete],
+  )
+  const onSetColors = useCallback(
+    (colors: GeneratorColor[]) => {
+      setPallete({
+        color: colors,
+        algorithm: pallete.algorithm,
+      })
+    },
+    [pallete, setPallete],
+  )
   const value: ColorStudioContextType = {
-    palette,
-    setPalette,
-    generatePalette,
-    toggleLock,
-    addColor,
-    removeColor,
-    reorderColors,
-    history,
-    addToHistory,
-    restoreFromHistory,
-    toggleFavorite,
-    clearHistory,
-    exportPalette,
-    syncToURL,
-    loadFromURL,
-    undo,
-    redo,
-    canUndo: historyIndex > 0,
-    canRedo: historyIndex < historyStack.length - 1,
+    history: historyState.history,
+    onToggleLock,
+    onUpdateColor,
+    onAddColor,
+    onRemoveColor,
+    onGenerateNewPalette,
+    onAddToHistory,
+    onRestoreFromHistory,
+    onToggleFavorite,
+    onClearHistory,
+    onUndo,
+    onRedo,
+    canUndo: historyState.historyIndex > 0,
+    canRedo: historyState.historyIndex < historyState.history.length - 1,
+    algorithm: pallete.algorithm,
+    onSetAlgorithm,
+    colors: pallete.color,
+    onSetColors,
+    syncColorsToURL,
+    syncTimeoutRef,
+    onShuffleColors,
   }
-
   return <ColorStudioContext.Provider value={value}>{children}</ColorStudioContext.Provider>
 }
 

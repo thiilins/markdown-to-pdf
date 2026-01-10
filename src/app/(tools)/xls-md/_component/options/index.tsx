@@ -29,15 +29,15 @@ export function ExcelOptionsComponent({
   const toggleSection = (section: string) => {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }))
   }
-  const handleAlignmentChange = (columnIndex: number, alignment: ColumnAlignment) => {
+  const handleAlignmentChange = (columnIndex: number, alignment: XlsMDColumnAlignment) => {
     const newAlignments = [...(options.alignments || Array(headers.length).fill('left'))]
     newAlignments[columnIndex] = alignment
     onOptionsChange({ ...options, alignments: newAlignments })
   }
-  const handleFormatChange = (format: ExportFormat) => {
+  const handleFormatChange = (format: XlsMDExportFormat) => {
     onOptionsChange({ ...options, format })
   }
-  const getAlignmentIcon = (align: ColumnAlignment) => {
+  const getAlignmentIcon = (align: XlsMDColumnAlignment) => {
     switch (align) {
       case 'center':
         return AlignCenter

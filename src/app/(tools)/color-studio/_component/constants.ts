@@ -102,7 +102,7 @@ export const EXPORT_FORMATS = [
 ] as const
 
 export type PaletteType = (typeof PALETTE_TYPES)[number]['value']
-export type ExportFormat = (typeof EXPORT_FORMATS)[number]['value']
+export type ColorStudioExportFormat = (typeof EXPORT_FORMATS)[number]['value']
 
 export const MOOD_COLORS = {
   corporate: 'from-blue-500 to-slate-700',

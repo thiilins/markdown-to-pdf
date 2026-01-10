@@ -8,9 +8,9 @@ interface Props {
   enable: boolean
   options: ConversionOptions
   headers: string[]
-  currentAlignments: ColumnAlignment[]
-  getAlignmentIcon: (align: ColumnAlignment) => React.ElementType
-  handleAlignmentChange: (columnIndex: number, alignment: ColumnAlignment) => void
+  currentAlignments: XlsMDColumnAlignment[]
+  getAlignmentIcon: (align: XlsMDColumnAlignment) => React.ElementType
+  handleAlignmentChange: (columnIndex: number, alignment: XlsMDColumnAlignment) => void
   openSections: Record<string, boolean>
   toggleSection: (section: string) => void
   onOptionsChange: (options: ConversionOptions) => void

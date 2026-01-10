@@ -289,7 +289,7 @@ function generateTable(headers: string[], rows: string[][], options?: Conversion
 function generateMarkdownTableWithAlignment(
   headers: string[],
   rows: string[][],
-  alignments?: ColumnAlignment[],
+  alignments?: XlsMDColumnAlignment[],
   escapeChars?: boolean,
   compact?: boolean,
 ): string {
