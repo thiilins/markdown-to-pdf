@@ -54,7 +54,7 @@ interface ColorStudioContextType {
   onRemoveColor: (id: string) => GeneratorColor[]
   onAddColor: (index?: number) => GeneratorColor[]
   onUpdateColor: (id: string, hex: string) => GeneratorColor[]
-  onToggleLock: (id: string) => void
+  onToggleLock: (id: string) => GeneratorColor[]
   onGenerateNewPalette: () => GeneratorColor[]
   syncTimeoutRef: React.RefObject<NodeJS.Timeout | null>
   onShuffleColors: () => GeneratorColor[]

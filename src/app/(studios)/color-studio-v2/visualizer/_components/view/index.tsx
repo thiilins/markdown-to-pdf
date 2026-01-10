@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { useColorStudio } from '../../../_shared/contexts/ColorStudioContext'
-import { generateColorObjectByHex } from '../../../_shared/utils'
 import { useSVGTemplates } from '../svg-loader'
 import { VisualizerFooter } from './footer'
 import { FullscreenPreviewVisualizer } from './fullscreen-preview'
@@ -32,21 +31,11 @@ export function VisualizerView() {
     onToggleLock,
     syncTimeoutRef,
   } = useColorStudio()
-  const defaultColors: GeneratorColor[] = generateColorObjectByHex([
-    '#880D1E',
-    '#DD2D4A',
-    '#F26A8D',
-    '#F49CBB',
-    '#E9FFF9',
-  ])
+
   const [activeCategory, setActiveCategory] = useState('all')
   const [fullscreenId, setFullscreenId] = useState<string | null>(null)
-  const [isClient, setIsClient] = useState(false)
   const [hoverData, setHoverData] = useState<{ color: string; x: number; y: number } | null>(null)
-
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
+  const [isInitialized, setIsInitialized] = useState(false)
 
   // Carrega SVGs dinamicamente
   const { templates, isLoading } = useSVGTemplates()
@@ -101,44 +90,22 @@ export function VisualizerView() {
 
   const toggleLock = useCallback(
     (id: string) => {
-      const newColors = onToggleLock(id)
+      return onToggleLock(id)
     },
     [onToggleLock],
   )
 
   useEffect(() => {
-    if (!isClient) return
-
-    const urlColors = searchParams.get('colors')
-
-    if (urlColors) {
-      const hexColors = urlColors.split('-').map((hex) => `#${hex}`)
-      onSetColors(generateColorObjectByHex(hexColors))
-    } else {
-      // Se não tem cores na URL, sincroniza as cores padrão
-      const defaultColors = generateColorObjectByHex([
-        '#880D1E',
-        '#DD2D4A',
-        '#F26A8D',
-        '#F49CBB',
-        '#E9FFF9',
-      ])
-      syncColorsToURL(defaultColors, true)
-      return onSetColors(defaultColors)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isClient, searchParams]) // Não inclui syncToURL/colors/locked para evitar loop infinito
-
-  // Cleanup do timeout ao desmontar
-  useEffect(() => {
-    return () => {
-      if (syncTimeoutRef.current) {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        clearTimeout(syncTimeoutRef.current)
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement) return
+      if (e.code === 'Space') {
+        e.preventDefault()
+        generateNewPalette()
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [generateNewPalette])
 
   return (
     <div className='relative flex h-[calc(100vh-4rem)] w-full flex-col'>

@@ -1,12 +1,22 @@
 'use client'
 
-import { createContext, useCallback, useContext, useRef, type ReactNode } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
 import { toast } from 'sonner'
 
 import usePersistedStateInDB from '@/hooks/use-persisted-in-db'
-import { useRouter } from 'next/navigation'
+import usePersistedState from '@/hooks/use-persisted-state'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   addRandomColorFn,
+  generateColorObjectByHex,
   generateNewPaletteFn,
   removeColorFn,
   shuffleColorsFn,
@@ -21,14 +31,18 @@ interface ColorStudioProviderProps {
 
 export function ColorStudioProvider({ children }: ColorStudioProviderProps) {
   const router = useRouter()
-  const [pallete, setPallete] = usePersistedStateInDB<{
+  const searchParams = useSearchParams()
+  const [pallete, setPallete] = usePersistedState<{
     color: GeneratorColor[]
     algorithm: PaletteAlgorithm
   }>('color-studio-v2-pallete', {
-    color: [],
+    color: generateNewPaletteFn([], 'complementary'),
     algorithm: 'complementary',
   })
+
+  const [isInitialized, setIsInitialized] = useState(false)
   const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const [isClient, setIsClient] = useState(false)
   const [historyState, setHistoryState] = usePersistedStateInDB<{
     history: PaletteHistory[]
     historyIndex: number
@@ -36,6 +50,9 @@ export function ColorStudioProvider({ children }: ColorStudioProviderProps) {
     history: [],
     historyIndex: -1,
   })
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
   const onAddToHistory = useCallback(
     (colors: GeneratorColor[], algorithm: PaletteAlgorithm) => {
       const newHistoryItem: PaletteHistory = {
@@ -144,10 +161,12 @@ export function ColorStudioProvider({ children }: ColorStudioProviderProps) {
     [router],
   )
   const onGenerateNewPalette = useCallback(() => {
+    console.log('onGenerateNewPalette', pallete)
     const newPallete = generateNewPaletteFn(pallete.color, pallete.algorithm)
+    console.log('newPallete', newPallete)
     setPallete({
+      ...pallete,
       color: newPallete,
-      algorithm: pallete.algorithm,
     })
     return newPallete
   }, [pallete, setPallete])
@@ -188,10 +207,13 @@ export function ColorStudioProvider({ children }: ColorStudioProviderProps) {
   )
   const onToggleLock = useCallback(
     (id: string) => {
+      const updatedColors = toogleColorLockFn(pallete.color, id)
+      console.log('🔒 Toggle Lock:', { id, before: pallete.color, after: updatedColors })
       setPallete({
-        color: toogleColorLockFn(pallete.color, id),
+        color: updatedColors,
         algorithm: pallete.algorithm,
       })
+      return updatedColors
     },
     [pallete, setPallete],
   )
@@ -213,6 +235,26 @@ export function ColorStudioProvider({ children }: ColorStudioProviderProps) {
     },
     [pallete, setPallete],
   )
+  useEffect(() => {
+    console.log('pallete', pallete)
+  }, [pallete])
+
+  useEffect(() => {
+    if (!isClient) return
+    const urlColors = searchParams.get('colors')
+    if (urlColors && !isInitialized) {
+      const hexColors = urlColors.split('-').map((hex) => `#${hex}`)
+      onSetColors(generateColorObjectByHex(hexColors))
+      setIsInitialized(true)
+    } else if (!urlColors && !isInitialized) {
+      const defaultColors = generateNewPaletteFn([], pallete.algorithm)
+      syncColorsToURL(defaultColors, true)
+      onSetColors(defaultColors)
+      setIsInitialized(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isClient, searchParams]) // Não inclui syncToURL/colors/locked para evitar loop infinito
+
   const value: ColorStudioContextType = {
     history: historyState.history,
     onToggleLock,

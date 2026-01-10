@@ -20,7 +20,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { ColorPicker } from '../../_shared/components/ColorPicker'
 import { useColorStudio } from '../../_shared/contexts/ColorStudioContext'
-import { generateColorObjectByHex } from '../../_shared/utils'
 import { getBestTextColor } from '../../_shared/utils/color-algorithms'
 import { ColorInfoModal } from './color-info-modal'
 import { ExportModal } from './export-modal'
@@ -29,6 +28,7 @@ export function GeneratorView() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isClient, setIsClient] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
   const {
     algorithm,
     onSetAlgorithm,
@@ -77,20 +77,6 @@ export function GeneratorView() {
     },
     [onUpdateColor, syncColorsToURL],
   )
-
-  useEffect(() => {
-    const colorsParam = searchParams.get('colors')
-    if (colorsParam) {
-      const hexList = colorsParam.split('-')
-      const initialColors = generateColorObjectByHex(hexList)
-      onSetColors(initialColors)
-      syncColorsToURL(initialColors, true)
-    } else {
-      const initialColors = onGenerateNewPalette()
-      syncColorsToURL(initialColors, true)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {

@@ -83,7 +83,6 @@ export const generateColorObjectByHex = (colors: string[], prev?: GeneratorColor
 
 export const shuffleColorsFn = (prevColors: GeneratorColor[]) => {
   const shuffled = prevColors.map((c) => c.hex)
-  // Cria cópia e embaralha usando Fisher-Yates
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
     ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
